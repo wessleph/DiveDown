@@ -49,6 +49,17 @@ git remote -v
 
 `git remote -v` muss **zwei** `(push)`-Zeilen zeigen: GitHub und P:.
 
+Git vertraut Netzlaufwerken standardmäßig nicht („dubious ownership“), weil das NAS keine Besitzer speichert. Deshalb trägst du den NAS-Ordner einmalig als vertrauenswürdig ein:
+
+```powershell
+git config --global --add safe.directory "P:/IT Projekte/DiveDown"
+git config --global --add safe.directory "P:/IT Projekte/DiveDown/.git"
+git config --global --add safe.directory "%(prefix)///192.168.178.89/philipp/IT Projekte/DiveDown"
+git config --global --add safe.directory "%(prefix)///192.168.178.89/philipp/IT Projekte/DiveDown/.git"
+```
+
+Hinweis: Das NAS ist bei vielen kleinen Dateien langsam. Ein Push zum NAS kann deshalb einige Sekunden bis Minuten dauern.
+
 Referenz-Code von Submersion daneben legen (nicht im Repo, siehe README):
 
 ```powershell
