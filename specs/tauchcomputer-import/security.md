@@ -124,6 +124,7 @@ Hinweis für später (Karte): Die **Kachel-Richtlinie von OpenStreetMap verbiete
   Durchsetzen könnten das nur die **Rechteinhaber**: wir für unseren Code, die Submersion-Contributors für übernommenen Code und die Autoren von libdivecomputer.
 - Für **unseren eigenen Code** erlauben wir den Vertrieb über Apple ausdrücklich, per Zusatzerlaubnis nach GPL-3 §7 in `LICENSE`/`README`.
 - Für **Submersion-Code**: Submersion selbst vertreibt über den App Store und TestFlight. **Empfehlung:** einmal bei den Maintainern nachfragen (GitHub-Issue oder Diskussion), ob sie das für Ableger wie DiveDown ebenfalls erlauben. **Das muss der Projektinhaber selbst tun.**
+  **Entscheidung des Projektinhabers (2026-11-18): keine Anfrage.** Der Projektinhaber sieht kein relevantes Risiko. R5 bleibt bewusst akzeptiert.
 - Das Restrisiko für ein privates Familienprojekt ohne Einnahmen ist gering (R5).
 
 ## 8. Akzeptierte Restrisiken (bewusst entschieden, Abnahme erforderlich)
@@ -133,7 +134,7 @@ Hinweis für später (Karte): Die **Kachel-Richtlinie von OpenStreetMap verbiete
 | R2 | Die BLE-Funkstrecke ist nicht verschlüsselt. | Übertragen werden nur Tauchprofile, das Gerät legt das Protokoll fest. |
 | R3 | `fit_tool` wird nicht mehr gepflegt. | Es ist reines Dart, also gibt es keine Speicherfehler, und Abstürze fängt das Isolate ab. Bei Problemen wird geforkt. |
 | R4 | Keine zusätzliche Verschlüsselung der Datenbank | Die Geräteverschlüsselung reicht, und es sind keine Hochrisiko-Daten. Das spart Komplexität beim Schlüsselmanagement. Wird bei Sync bzw. NAS neu bewertet. |
-| R5 | Die GPL-3 ist mit den Apple-Bedingungen umstritten. | Privat, nicht kommerziell, Rechteinhaber werden gefragt, Zusatzerlaubnis für eigenen Code |
+| R5 | Die GPL-3 ist mit den Apple-Bedingungen umstritten. | Privat und nicht kommerziell. Submersion vertreibt selbst über App Store und TestFlight. Für den eigenen Code gibt es die Zusatzerlaubnis. **Eine Anfrage bei den Rechteinhabern gibt es bewusst nicht (Entscheidung vom 2026-11-18).** Folge im schlimmsten Fall: Apple entfernt die App aus TestFlight, Android ist nicht betroffen. |
 
 ## 9. Ergebnis des Angreifer-Reviews (frischer Agent, 2026-11-18)
 Die Code-Stellen habe ich im Referenz-Checkout selbst nachgeprüft (✔ = bestätigt).
