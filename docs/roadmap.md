@@ -45,6 +45,7 @@
 ### Nach Weihnachten
 12. **Teilen und Sync über den NAS** (PocketBase, Tailscale). Bewusst nach hinten gestellt, weil hier das größte Sicherheitsrisiko liegt (Heimnetz, fremde Daten).
 13. Nicht gelistete App im App Store statt TestFlight
+13a. **Vor der Verlängerung des Apple-Kontos (ca. Nov. 2027):** prüfen, ob eine Web-App für die iPhones reicht (ADR 0005, Nachtrag)
 14. Suunto Ocean per BLE, sobald libdivecomputer den Treiber hat
 
 ## Vorgehen unter Zeitdruck

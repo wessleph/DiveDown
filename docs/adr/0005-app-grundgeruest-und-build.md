@@ -52,3 +52,14 @@ Die Grundbausteine sollen zu Submersion passen, damit sich übernommener Code le
   Zusätzlich braucht der iOS-Build einen eingebauten Export für Diagnose-Logs (z. B. „Logs teilen“ per Mail oder Messenger). Das Plugin liefert über `onLogEvent` bereits Logs.
 - **Android (ich):** signierte APK über GitHub Releases. Automatische Updates sind z. B. mit **Obtainium** möglich, das neue GitHub-Releases erkennt und installiert.
 - Ein Apple-Entwicklerkonto (ca. 99 €/Jahr) ist für alle sinnvollen iOS-Wege **zwingend**. Wir brauchen es erst, wenn der erste iOS-Build an Tester gehen soll.
+
+## Nachtrag 2026-11-18: Apple-Entwicklerkonto zunächst für ein Jahr
+- **Entscheidung:** Das Apple-Entwicklerkonto (99 USD/Jahr) wird für das **erste Jahr** bezahlt. Damit sind alle iPhone-Funktionen verfügbar (BLE, Apple Health), und der Weihnachtstermin ist sicher.
+- **Geprüfte Alternativen ohne Konto** (verworfen für v1.0):
+  - Sideloading mit kostenloser Apple-ID: Ablauf nach 7 Tagen, Neusignieren am PC jede Woche
+  - alternative App-Marktplätze: nur EU, nicht in der Schweiz, und auch dort Entwicklerkonto nötig
+  - Gebührenbefreiung: nur für Organisationen
+- **Nach Weihnachten zu prüfen, vor der ersten Verlängerung:** eine **Web-App** (Flutter Web, PWA über GitHub Pages) für die iPhones.
+  Sie reicht für FIT-Import (Schwester), manuelle Eingabe (Bruder) und Diagramme. Sie reicht **nicht** für BLE und Apple Health auf dem iPhone. Für den Apple-Watch-Nutzer bräuchte sie einen UDDF-Import über eine Export-App.
+  Risiko: Safari kann die Speicherdaten einer Web-App löschen.
+  Wichtig: Läuft das Konto aus, funktionieren TestFlight-Builds nicht mehr. Ein Umstieg muss also **vor Ablauf** fertig sein.
