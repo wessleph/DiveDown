@@ -1,7 +1,7 @@
 # Datenschutzerklärung für die App DiveDown
 
-> **ENTWURF**, Stand 2026-11-18. Vor der Veröffentlichung: Platzhalter in [eckigen Klammern] ausfüllen und Inhalt gegen die fertige App 1.0 prüfen (Phase 60).
-> Ziel: öffentliche URL für App Store Connect bzw. TestFlight (security.md §9.2). Hinweis: GitHub Pages funktioniert bei **privaten** Repos nur mit einem kostenpflichtigen Konto. Alternativen: die Seite in einem kleinen öffentlichen Repo veröffentlichen oder warten, bis DiveDown öffentlich ist.
+> **ENTWURF**, Stand 2026-11-18, Recht: **Schweiz (DSG)**, ergänzend DSGVO für EU-Nutzer. Vor der Veröffentlichung: Platzhalter in [eckigen Klammern] ausfüllen (Name und eigene Projekt-Mail, keine Postadresse; Entscheidung vom 2026-11-18) und Inhalt gegen die fertige App 1.0 prüfen (Phase 60).
+> Veröffentlicht wird über das öffentliche Repo `wessleph/divedown-datenschutz` (GitHub Pages) unter `https://wessleph.github.io/divedown-datenschutz/`. **Diese Datei ist die Quelle.** Änderungen erst hier machen, dann `index.md` im öffentlichen Repo aktualisieren.
 > Keine Rechtsberatung. Der Text ist für eine private, kostenlose App ohne Server formuliert.
 
 **Stand:** [DATUM DER VERÖFFENTLICHUNG] · **App-Version:** 1.0
@@ -13,9 +13,8 @@
 - Daten verlassen dein Gerät nur, wenn **du selbst** eine Sicherung oder ein Diagnose-Protokoll teilst.
 
 ## 2. Verantwortlich
-[VOR- UND NACHNAME]
-[ADRESSE]
-E-Mail: [KONTAKT-E-MAIL]
+[VOR- UND NACHNAME], Schweiz
+E-Mail: [PROJEKT-E-MAIL]
 
 DiveDown ist ein privates, nicht kommerzielles Open-Source-Projekt (Lizenz GPL-3.0).
 
@@ -38,7 +37,8 @@ Die Logbuch-Datenbank wird **nicht** in iCloud- bzw. Google-Backups aufgenommen,
    Die Datei ist **nicht verschlüsselt** und kann Gesundheitsdaten (Puls) enthalten. Für den gewählten Speicherort gilt die Datenschutzerklärung des jeweiligen Anbieters.
 2. **Diagnose-Logs teilen:** Du siehst vor dem Senden, was im Protokoll steht, und schickst es selbst, z. B. per Mail.
    Ich (Abschnitt 2) erhalte dann deine Nachricht samt Absender und Protokoll. Ich nutze das ausschließlich zur Fehlersuche und lösche es, sobald der Fehler behoben ist, spätestens nach 6 Monaten.
-   Rechtsgrundlage: deine Einwilligung durch das aktive Senden (Art. 6 Abs. 1 lit. a DSGVO).
+   Das geschieht freiwillig und auf deine Initiative. Für Nutzerinnen und Nutzer in der EU gilt als Rechtsgrundlage deine Einwilligung durch das aktive Senden (Art. 6 Abs. 1 lit. a DSGVO).
+   Die Nachricht liegt beim Anbieter meines E-Mail-Postfachs, der seinen Sitz auch außerhalb der Schweiz haben kann.
 
 ## 5. Verteilung der App
 - **iPhone (TestFlight):** Die App wird über Apples TestFlight verteilt. Apple verarbeitet dabei Daten nach den eigenen Bedingungen ([Apple-Datenschutzrichtlinie](https://www.apple.com/legal/privacy/)).
@@ -46,9 +46,10 @@ Die Logbuch-Datenbank wird **nicht** in iCloud- bzw. Google-Backups aufgenommen,
 - **Android (APK über GitHub):** Beim Herunterladen verarbeitet GitHub technische Daten wie deine IP-Adresse ([GitHub Privacy Statement](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement)). Ich erhalte davon nichts.
 
 ## 6. Deine Rechte
-Da ich außer freiwillig gesendeten Diagnose-Nachrichten keine Daten über dich habe, betreffen deine Rechte vor allem diese Nachrichten.
-Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung, Datenübertragbarkeit und Widerspruch. Außerdem kannst du dich bei einer Datenschutz-Aufsichtsbehörde beschweren.
-[Falls Wohnsitz in der Schweiz: zusätzlich Verweis auf das Schweizer Datenschutzgesetz (DSG) und den EDÖB, edoeb.admin.ch.]
+Da ich außer freiwillig gesendeten Diagnose-Nachrichten und TestFlight-Feedback keine Daten über dich habe, betreffen deine Rechte vor allem diese Nachrichten.
+Nach dem Schweizer Datenschutzgesetz (DSG) hast du das Recht auf **Auskunft** (Art. 25 DSG), **Berichtigung** und **Löschung** (Art. 32 DSG) sowie auf **Herausgabe bzw. Übertragung** deiner Daten (Art. 28 DSG). Schreib dafür einfach an die E-Mail-Adresse in Abschnitt 2.
+Du kannst dich außerdem an den Eidgenössischen Datenschutz- und Öffentlichkeitsbeauftragten (EDÖB) wenden: [edoeb.admin.ch](https://www.edoeb.admin.ch).
+Nutzerinnen und Nutzer in der EU haben zusätzlich die Rechte nach der DSGVO (u. a. Einschränkung und Widerspruch) und können sich bei der Aufsichtsbehörde ihres Landes beschweren.
 
 Alle Daten in der App löschst du selbst: einzelne Tauchgänge, ganze Taucherprofile, oder alles durch Deinstallieren der App.
 
