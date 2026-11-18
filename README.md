@@ -20,6 +20,10 @@ Der Referenz-Checkout von Submersion (`submersion-referenz/`) ist **nicht** Teil
 git clone --depth 1 --recurse-submodules --shallow-submodules https://github.com/submersion-app/submersion.git submersion-referenz
 ```
 
+## Datenschutz
+Die Datenschutzerklärung ist `docs/datenschutz.md` und erscheint über GitHub Pages unter **https://wessleph.github.io/DiveDown/datenschutz/** (Pages-Quelle: Branch `main`, Ordner `/docs`).
+Vor jedem Release, das etwas am Umgang mit Daten ändert, wird sie geprüft und angepasst (Phase 60 bzw. 80). Recht: Schweizer DSG, ergänzend DSGVO.
+
 ## Lizenz
 DiveDown steht unter der **GNU General Public License v3.0 oder später** (siehe `LICENSE`).
 Teile stammen aus [Submersion](https://github.com/submersion-app/submersion) (GPL-3.0), siehe `THIRD_PARTY.md`.

@@ -17,3 +17,7 @@ build/
 *.mobileprovision
 key.properties
 .env
+
+# Python
+__pycache__/
+*.pyc

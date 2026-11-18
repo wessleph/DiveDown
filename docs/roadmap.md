@@ -11,6 +11,7 @@
 | bis **07.12.** | Erster iOS-Build auf TestFlight, intern | GitHub-Actions-Pipeline und Zertifikate einrichten, Testfreund mit iPhone einladen |
 | bis **14.12.** | Erstes „Beta App Review“ einreichen | Externe Tester per Link brauchen eine einmalige Freigabe durch Apple, meist 1–2 Tage. |
 | bis **19.12.** | Weihnachts-Build auf TestFlight freigegeben | Apple prüft rund um die Feiertage erfahrungsgemäß langsamer oder gar nicht. |
+| bis **19.12.** | Datenschutzerklärung gegen die fertige App 1.0 prüfen (Berechtigungen, TestFlight-Daten) | Phase 60, URL: https://wessleph.github.io/DiveDown/datenschutz/ |
 | **24.12.** | Link verschenken 🎁 | |
 
 ## Umfang
@@ -55,3 +56,6 @@
   - **KW 50:** Test durch den Freund mit iPhone, Fehler beheben, Beta-Review einreichen, ggf. Ausrüstung und Tauchplätze
   - **KW 51:** nur noch Fehler beheben, Weihnachts-Build bis 19.12.
 - Bleibt etwas aus dem Muss-Block hängen, fällt zuerst der Soll-Block weg, nicht die Tests.
+
+## Änderungen
+- **2026-11-18:** Das Repo `wessleph/DiveDown` ist **öffentlich** (früher als in research.md 8.3 geplant). Damit gelten ab sofort die CI-Regeln aus security.md G6/A3 für jeden neuen Workflow. Die Datenschutzerklärung erscheint über GitHub Pages aus `/docs`.

@@ -1,10 +1,12 @@
+---
+title: Datenschutzerklärung
+permalink: /datenschutz/
+lang: de
+---
+
 # Datenschutzerklärung für die App DiveDown
 
-> **ENTWURF**, Stand 2026-11-18, Recht: **Schweiz (DSG)**, ergänzend DSGVO für EU-Nutzer. Vor der Veröffentlichung: Platzhalter in [eckigen Klammern] ausfüllen (Name und eigene Projekt-Mail, keine Postadresse; Entscheidung vom 2026-11-18) und Inhalt gegen die fertige App 1.0 prüfen (Phase 60).
-> Veröffentlicht wird über das öffentliche Repo `wessleph/divedown-datenschutz` (GitHub Pages) unter `https://wessleph.github.io/divedown-datenschutz/`. **Diese Datei ist die Quelle.** Änderungen erst hier machen, dann `index.md` im öffentlichen Repo aktualisieren.
-> Keine Rechtsberatung. Der Text ist für eine private, kostenlose App ohne Server formuliert.
-
-**Stand:** [DATUM DER VERÖFFENTLICHUNG] · **App-Version:** 1.0
+**Stand:** 18. November 2026 · **App-Version:** 1.0
 
 ## 1. Kurz gesagt
 - DiveDown speichert alle Daten **nur auf deinem Gerät**.
@@ -13,8 +15,8 @@
 - Daten verlassen dein Gerät nur, wenn **du selbst** eine Sicherung oder ein Diagnose-Protokoll teilst.
 
 ## 2. Verantwortlich
-[VOR- UND NACHNAME], Schweiz
-E-Mail: [PROJEKT-E-MAIL]
+Philipp Wessler, Schweiz
+E-Mail: [divedown-app@proton.ch](mailto:divedown-app@proton.ch)
 
 DiveDown ist ein privates, nicht kommerzielles Open-Source-Projekt (Lizenz GPL-3.0).
 
