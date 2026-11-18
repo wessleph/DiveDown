@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- DiveDown app icon, variant A "Tiefenkurve" (chosen 2026-11-18, ui-spec.md §1). GPL-3.0-or-later.
+       Master for iOS and for sizes >= 60 px. Full square without corner radius: iOS applies its own mask.
+       Bubbles and curve ends lie outside Android's adaptive-icon safe zone (central circle, 66 % diameter);
+       for Android use divedown_icon_android_foreground.svg (motif scaled to 66 %) on background #0B1620. -->
+  <defs>
+    <linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3FA3E0" stop-opacity="0.05"/>
+      <stop offset="1" stop-color="#3FA3E0" stop-opacity="0.55"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="#0B1620"/>
+  <path d="M170 330 C 270 330, 300 730, 430 750 S 650 720, 720 590 S 800 330, 860 330 Z" fill="url(#fill)"/>
+  <path d="M150 330 H874" stroke="#2A3B4A" stroke-width="20" stroke-linecap="round"/>
+  <path d="M170 330 C 270 330, 300 730, 430 750 S 650 720, 720 590 S 800 330, 860 330" fill="none" stroke="#3FA3E0" stroke-width="60" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="770" cy="230" r="30" fill="#5CB8E8"/>
+  <circle cx="830" cy="160" r="18" fill="#5CB8E8"/>
+</svg>

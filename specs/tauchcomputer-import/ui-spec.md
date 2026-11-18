@@ -28,6 +28,12 @@ Der Tiefenverlauf ist das zentrale Motiv, Farbe trägt Bedeutung und ist keine D
 - **Schrift:** Systemschrift (SF Pro bzw. Roboto). Ziffern mit **gleicher Breite** (`FontFeature.tabularFigures`), damit Werte beim Scrollen nicht springen.
   Kennzahlen groß: 28–34 sp für Tiefe und Dauer.
 - **Icons:** Material Symbols Rounded. Das App-Icon ist eigenes Design: eine stilisierte, abfallende Tiefenkurve in `depth` auf `surface` (dunkel).
+  **Gewählt am 2026-11-18: Variante A „Tiefenkurve“** (Mockup-Fläche, Board 7). Vorlagen in `assets/icon/`:
+  - `divedown_icon.svg`: iOS und Größen ab 60 px
+  - `divedown_icon_small.svg`: unter 60 px, mit dickerer Kurve und nur einer Blase
+  - `divedown_icon_android_foreground.svg`: Vordergrund des adaptiven Android-Icons, Motiv auf 66 % verkleinert, Hintergrund `#0B1620`
+
+  Die PNG-Größen werden in Phase 50 erzeugt (z. B. mit `flutter_launcher_icons`).
 - **Ecken** 12 dp, **Abstände** im 8-dp-Raster, **Touch-Ziele mindestens 48 dp**. Hauptaktionen bekommen 56 dp, damit man sie auch mit nassen Fingern trifft.
 - **Bedeutung nie nur durch Farbe:** Jede Kurve hat zusätzlich ein Icon bzw. Label in der Legende, Fehler zusätzlich ein Icon und Text.
 
