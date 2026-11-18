@@ -1,0 +1,19 @@
+# Referenz-Code (Submersion, GPL-3) - nicht Teil des DiveDown-Repos
+submersion-referenz/
+
+# Flutter / Dart
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.iml
+.idea/
+
+# Signing / secrets (security.md G6)
+*.jks
+*.keystore
+*.p8
+*.p12
+*.mobileprovision
+key.properties
+.env

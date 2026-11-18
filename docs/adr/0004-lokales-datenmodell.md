@@ -1,0 +1,45 @@
+# ADR 0004: Lokales Datenmodell (Drift/SQLite)
+
+- Status: **angenommen** (2026-11-18)
+- Datum: 2026-11-18
+
+## Kontext
+Die lokale Datenbank ist die Quelle der Wahrheit (Constitution: offline-first).
+Submersion hat über 200 Tabellen. Für DiveDown reicht ein kleiner Kern, der später um Tauchplätze, Ausrüstung und Teilen erweitert wird.
+Der Sync mit dem NAS kommt später, die IDs müssen aber jetzt schon geräteübergreifend eindeutig sein.
+
+## Optionen für Profil-Samples
+- **Eine Zeile pro Sample:** einfach abzufragen, gut zu testen. Ein Tauchgang von einer Stunde bei 2 bis 10 Sekunden Intervall ergibt etwa 360 bis 1.800 Zeilen.
+- **Samples als Blob pro Tauchgang:** kompakt, aber schlecht abzufragen und schwer zu migrieren.
+
+## Entscheidung
+- **Drift** über SQLite, wie bei Submersion. So lässt sich übernommener Code leicht anpassen.
+- **IDs sind UUIDs** (Text), keine Autoincrement-IDs. Das ist Voraussetzung für den späteren Sync.
+- Jede Tabelle hat `created_at`, `updated_at` und `deleted_at`. Gelöschte Einträge werden nur markiert (Soft Delete), auch das ist Voraussetzung für den Sync.
+- **Eine Zeile pro Sample.**
+- Alle Werte werden **in SI-Einheiten gespeichert** (Meter, bar, °C, Sekunden, Liter). Umgerechnet wird nur in der Oberfläche.
+
+### Kern-Tabellen (erste Ausbaustufe)
+| Tabelle | Inhalt |
+|---|---|
+| `divers` | Taucher (ich, Schwester, Bruder, Freund), eigenes Profil, `first_dive_number` (Startwert der Nummerierung) |
+| `dive_computers` | Gerät: Hersteller, Modell, Seriennummer, Firmware, **letzter Fingerprint** |
+| `dives` | Tauchgang: Taucher, **Nummer** (`dive_number`, pro Taucher), **Tauchplatz-Name** (`site_name`, Freitext), Gerät (optional), Quelle + `source_id`, Start, Dauer, max./mittlere Tiefe, Temperaturen, Wassertyp, Notizen, Bewertung |
+| `dive_samples` | Zeit, Tiefe, Temperatur, Druck pro Flasche (über `tank_index`), Puls, NDL/Deko, Gas-Index |
+| `dive_tanks` | Flasche: Volumen, Start- und Enddruck, Gasgemisch (O₂/He), Index |
+| `dive_events` | Ereignisse: Gaswechsel, Warnungen, Aufstieg zu schnell … |
+
+**Luftverbrauch (SAC/RMV)** wird **nicht gespeichert**, sondern aus Samples und Flaschen berechnet (`lib/domain/metrics/`).
+So bleibt die Berechnung austauschbar und testbar.
+
+## Konsequenzen
+- Migrationen über Drift-`schemaVersion`. Jede Änderung am Schema bekommt einen Migrationstest.
+- Tauchplätze, Ausrüstung und Teilen kommen als eigene Features mit eigenem ADR dazu.
+- Ob die Datenbank verschlüsselt wird (Submersion nutzt SQLCipher), entscheidet Phase 20.
+
+## Nachtrag 2026-11-18 (Mockup-Review): Nummer und Tauchplatz
+- `dives.dive_number`: Die Nummer wird beim Speichern **automatisch** vergeben (höchste Nummer des Tauchers + 1, Start bei `divers.first_dive_number`). Der Nutzer kann sie ändern. Sie ist **nicht** eindeutig erzwungen: Bei doppelter Nummer zeigt die App einen Hinweis, blockiert aber nicht.
+  Importiert man ältere Tauchgänge nachträglich, ändern sich die Nummern bestehender Tauchgänge **nicht** automatisch. Eine Funktion „Neu durchnummerieren“ kommt später.
+- `dives.site_name`: In v1.0 ist das **Freitext**. Kommt später das Feature Tauchplätze mit Karte, wird daraus ein Verweis auf die Tabelle `dive_sites`. Die Migration legt pro eindeutigem Namen einen Tauchplatz an.
+- Datenschutz: `site_name` gilt als persönliche Angabe und wird **nie geloggt** (security.md §3, „Tauchplatz-Namen“).
+- **Ergänzung (ADR 0006):** `dives.site_catalogue_id`, `dives.site_lat` und `dives.site_lon` sind optional und werden gesetzt, wenn ein Katalog-Vorschlag gewählt wird. Dazu kommt die nur lesbare Tabelle `catalogue_sites`. Sie gehört **nicht** zur Sicherung und nicht zum Sync.
