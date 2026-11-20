@@ -7,6 +7,8 @@
 // Files land in <Application Support>/capture/, per dive:
 //   <start>_<fingerprint>.bin            raw dive data from libdivecomputer
 //   <start>_<fingerprint>.expected.json  device and parsed summary for the test
+// „Prüfen“ parses every .bin in capture/verify/ again (e.g. after the serial
+// number was blanked) and compares it with its .expected.json.
 // The serial number is deliberately not written (security.md §3).
 // German texts are inline on purpose: this screen is never shipped.
 
@@ -38,7 +40,8 @@ class CaptureScreen extends StatefulWidget {
 }
 
 class _CaptureScreenState extends State<CaptureScreen> {
-  final _service = DiveComputerService();
+  final _hostApi = DiveComputerHostApi();
+  late final _service = DiveComputerService(hostApi: _hostApi);
   final _devices = <String, DiscoveredDevice>{};
   final _log = <String>[];
   final _subscriptions = <StreamSubscription<Object?>>[];
@@ -195,6 +198,52 @@ class _CaptureScreenState extends State<CaptureScreen> {
     );
   }
 
+  /// Parses capture/verify/*.bin and compares with the expected summary.
+  Future<void> _verify() async {
+    final folder = Directory(p.join(_folder!.path, 'verify'));
+    if (!folder.existsSync()) {
+      _add('Ordner verify/ fehlt.');
+      return;
+    }
+    final files = folder.listSync().whereType<File>().where(
+      (f) => f.path.endsWith('.bin'),
+    );
+    for (final bin in files) {
+      final name = p.basename(bin.path);
+      final expected = jsonDecode(
+        await File(bin.path.replaceFirst(RegExp(r'\.bin$'), '.expected.json'))
+            .readAsString(),
+      ) as Map<String, Object?>;
+      try {
+        final dive = await _hostApi.parseRawDiveData(
+          expected['vendor']! as String,
+          expected['product']! as String,
+          expected['model']! as int,
+          await bin.readAsBytes(),
+        );
+        final actual = {
+          'max_depth_m': dive.maxDepthMeters,
+          'duration_s': dive.durationSeconds,
+          'sample_count': dive.samples.length,
+          'event_count': dive.events.length,
+          'tank_count': dive.tanks.length,
+        };
+        final diffs = [
+          for (final MapEntry(:key, :value) in actual.entries)
+            if (expected[key] != value) '$key ${expected[key]} ≠ $value',
+        ];
+        _add(
+          diffs.isEmpty
+              ? 'OK: $name'
+              : 'ABWEICHUNG: $name: ${diffs.join(', ')}',
+        );
+      } on Exception catch (e) {
+        _add('FEHLER: $name: $e');
+      }
+    }
+    _add('Prüfung fertig.');
+  }
+
   Future<void> _askPin() async {
     final controller = TextEditingController();
     final pin = await showDialog<String>(
@@ -242,6 +291,13 @@ class _CaptureScreenState extends State<CaptureScreen> {
                   onPressed: _scanning || _downloading ? null : _scan,
                   icon: const Icon(Icons.bluetooth_searching),
                   label: Text(_scanning ? 'Suche läuft …' : 'Suchen'),
+                ),
+                const SizedBox(width: 8),
+                OutlinedButton(
+                  onPressed: _scanning || _downloading || _folder == null
+                      ? null
+                      : _verify,
+                  child: const Text('Prüfen'),
                 ),
                 const SizedBox(width: 8),
                 if (_downloading)

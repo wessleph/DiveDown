@@ -73,7 +73,7 @@ Nachweis: `flutter test test/app`, `flutter analyze`, `flutter build apk --debug
 | T4.2 | `ParsedDive` ohne TZ-Offset | übersetzt | `startTime` = Gerätezeit, `startInstant` = null | |
 | T4.3 | Sample mit `tankPressuresBar = [200.0, null, 180.0]` | übersetzt | 2 Druckwerte mit `tankIndex` 0 und 2 | |
 | T4.4 | Gasgemisch O₂ 0,32 / He 0 | übersetzt | Gas „EAN32“ | |
-| T4.5 | **Fixture** `test/fixtures/divecomputer/eon_core_dump.bin` (echter EON-Core-Dump, auf dem PC aufzuzeichnen) | über `parseRawDiveData` geparst | erwartete Tiefe, Dauer und Sample-Anzahl laut `…expected.json` | |
+| T4.5 | **Fixtures** `test/fixtures/divecomputer/eon_core/*.bin` (3 echte EON-Core-Tauchgänge, aufgenommen am 2026-11-20 per BLE, Seriennummer genullt, siehe README dort) | über `parseRawDiveData` geparst | erwartete Tiefe, Dauer und Sample-Anzahl laut `…expected.json` | |
 
 ## T5: FIT-Import (`data/import/fit/`, security A2/R3)
 | ID | A | W | D | Rot gesehen |

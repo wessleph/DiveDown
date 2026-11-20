@@ -1,0 +1,17 @@
+{
+  "vendor": "Suunto",
+  "product": "EON Core",
+  "model": 1,
+  "fingerprint": "8da7f66a",
+  "start": "2026-11-13T060045",
+  "utc_offset_s": null,
+  "max_depth_m": 22.95400047302246,
+  "avg_depth_m": 0.0,
+  "duration_s": 3281,
+  "min_temperature_c": null,
+  "sample_count": 358,
+  "tank_count": 1,
+  "gas_mix_count": 1,
+  "event_count": 6,
+  "raw_bytes": 16169
+}
