@@ -17,6 +17,8 @@ dependencies:
   flutter_riverpod: ^3.4.2 # MIT
   go_router: ^17.0.1 # BSD-3-Clause
   intl: any # BSD-3-Clause, version pinned by flutter_localizations
+  libdivecomputer_plugin: # GPL-3.0, taken over from Submersion (ADR 0002)
+    path: packages/libdivecomputer_plugin
 
 dev_dependencies:
   flutter_test:

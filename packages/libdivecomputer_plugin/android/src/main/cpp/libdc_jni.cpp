@@ -1,0 +1,1390 @@
+// Derived from Submersion (https://github.com/submersion-app/submersion), commit e78a87cb, GPL-3.0. Modified for DiveDown.
+
+// JNI bridge between Kotlin and the libdivecomputer C wrapper.
+// Exposes libdc_wrapper functions to Kotlin via JNI.
+
+#include <jni.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <android/log.h>
+
+extern "C" {
+#include "libdc_wrapper.h"
+}
+
+#define TAG "libdc_jni"
+
+static bool clear_jni_exception(JNIEnv *env, const char *context) {
+    if (!env->ExceptionCheck()) return false;
+
+    __android_log_print(ANDROID_LOG_ERROR, TAG,
+        "JNI exception while %s", context);
+    env->ExceptionDescribe();
+    env->ExceptionClear();
+    return true;
+}
+
+static bool set_descriptor_info(JNIEnv *env, jobject infoObj,
+                                const libdc_descriptor_info_t &info) {
+    if (infoObj == nullptr) {
+        __android_log_print(ANDROID_LOG_ERROR, TAG,
+            "DescriptorInfo target was null");
+        return false;
+    }
+
+    jclass cls = env->GetObjectClass(infoObj);
+    if (cls == nullptr) {
+        clear_jni_exception(env, "resolving DescriptorInfo class");
+        return false;
+    }
+    if (clear_jni_exception(env, "resolving DescriptorInfo class")) {
+        return false;
+    }
+
+    jfieldID vendorField = env->GetFieldID(cls, "vendor", "Ljava/lang/String;");
+    if (vendorField == nullptr) {
+        clear_jni_exception(env, "resolving DescriptorInfo.vendor");
+        return false;
+    }
+    if (clear_jni_exception(env, "resolving DescriptorInfo.vendor")) {
+        return false;
+    }
+
+    jfieldID productField = env->GetFieldID(cls, "product", "Ljava/lang/String;");
+    if (productField == nullptr) {
+        clear_jni_exception(env, "resolving DescriptorInfo.product");
+        return false;
+    }
+    if (clear_jni_exception(env, "resolving DescriptorInfo.product")) {
+        return false;
+    }
+
+    jfieldID modelField = env->GetFieldID(cls, "model", "I");
+    if (modelField == nullptr) {
+        clear_jni_exception(env, "resolving DescriptorInfo.model");
+        return false;
+    }
+    if (clear_jni_exception(env, "resolving DescriptorInfo.model")) {
+        return false;
+    }
+
+    jfieldID transportsField = env->GetFieldID(cls, "transports", "I");
+    if (transportsField == nullptr) {
+        clear_jni_exception(env, "resolving DescriptorInfo.transports");
+        return false;
+    }
+    if (clear_jni_exception(env, "resolving DescriptorInfo.transports")) {
+        return false;
+    }
+
+    jfieldID oldestFirstField =
+        env->GetFieldID(cls, "deliversOldestFirst", "Z");
+    if (oldestFirstField == nullptr) {
+        clear_jni_exception(env, "resolving DescriptorInfo.deliversOldestFirst");
+        return false;
+    }
+    if (clear_jni_exception(env,
+                            "resolving DescriptorInfo.deliversOldestFirst")) {
+        return false;
+    }
+
+    jstring vendor = env->NewStringUTF(info.vendor ? info.vendor : "");
+    if (vendor == nullptr) {
+        clear_jni_exception(env, "creating vendor string");
+        return false;
+    }
+    if (clear_jni_exception(env, "creating vendor string")) {
+        return false;
+    }
+
+    jstring product = env->NewStringUTF(info.product ? info.product : "");
+    if (product == nullptr) {
+        clear_jni_exception(env, "creating product string");
+        env->DeleteLocalRef(vendor);
+        return false;
+    }
+    if (clear_jni_exception(env, "creating product string")) {
+        env->DeleteLocalRef(vendor);
+        return false;
+    }
+
+    env->SetObjectField(infoObj, vendorField, vendor);
+    if (clear_jni_exception(env, "writing DescriptorInfo.vendor")) {
+        env->DeleteLocalRef(vendor);
+        env->DeleteLocalRef(product);
+        return false;
+    }
+
+    env->SetObjectField(infoObj, productField, product);
+    if (clear_jni_exception(env, "writing DescriptorInfo.product")) {
+        env->DeleteLocalRef(vendor);
+        env->DeleteLocalRef(product);
+        return false;
+    }
+
+    env->SetIntField(infoObj, modelField, static_cast<jint>(info.model));
+    if (clear_jni_exception(env, "writing DescriptorInfo.model")) {
+        env->DeleteLocalRef(vendor);
+        env->DeleteLocalRef(product);
+        return false;
+    }
+
+    env->SetIntField(infoObj, transportsField, static_cast<jint>(info.transports));
+    if (clear_jni_exception(env, "writing DescriptorInfo.transports")) {
+        env->DeleteLocalRef(vendor);
+        env->DeleteLocalRef(product);
+        return false;
+    }
+
+    env->SetBooleanField(infoObj, oldestFirstField,
+                         info.delivers_oldest_first ? JNI_TRUE : JNI_FALSE);
+    if (clear_jni_exception(env, "writing DescriptorInfo.deliversOldestFirst")) {
+        env->DeleteLocalRef(vendor);
+        env->DeleteLocalRef(product);
+        return false;
+    }
+
+    env->DeleteLocalRef(vendor);
+    env->DeleteLocalRef(product);
+    return true;
+}
+
+// ============================================================
+// Version
+// ============================================================
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetVersion(
+    JNIEnv *env, jclass) {
+    const char *version = libdc_get_version();
+    return env->NewStringUTF(version ? version : "unknown");
+}
+
+// ============================================================
+// Descriptor Iterator
+// ============================================================
+
+extern "C" JNIEXPORT jlong JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeDescriptorIteratorNew(
+    JNIEnv *, jclass) {
+    return reinterpret_cast<jlong>(libdc_descriptor_iterator_new());
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeDescriptorIteratorNext(
+    JNIEnv *env, jclass, jlong iterPtr, jobject infoObj) {
+    auto *iter = reinterpret_cast<libdc_descriptor_iterator_t *>(iterPtr);
+    libdc_descriptor_info_t info;
+    int result = libdc_descriptor_iterator_next(iter, &info);
+    if (result != 0) return result;
+    if (!set_descriptor_info(env, infoObj, info)) return -1;
+
+    return 0;
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeDescriptorIteratorFree(
+    JNIEnv *, jclass, jlong iterPtr) {
+    auto *iter = reinterpret_cast<libdc_descriptor_iterator_t *>(iterPtr);
+    libdc_descriptor_iterator_free(iter);
+}
+
+// ============================================================
+// BLE Discovery Helper
+// ============================================================
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeDescriptorMatch(
+    JNIEnv *env, jclass, jstring name, jint transport, jobject infoObj) {
+    const char *nameStr = env->GetStringUTFChars(name, nullptr);
+    libdc_descriptor_info_t info;
+    int matched = libdc_descriptor_match(nameStr, static_cast<unsigned int>(transport), &info);
+    env->ReleaseStringUTFChars(name, nameStr);
+
+    if (!matched) return JNI_FALSE;
+
+    if (!set_descriptor_info(env, infoObj, info)) return JNI_FALSE;
+
+    return JNI_TRUE;
+}
+
+// ============================================================
+// Download Session
+// ============================================================
+
+extern "C" JNIEXPORT jlong JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeDownloadSessionNew(
+    JNIEnv *, jclass) {
+    return reinterpret_cast<jlong>(libdc_download_session_new());
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeDownloadCancel(
+    JNIEnv *, jclass, jlong sessionPtr) {
+    auto *session = reinterpret_cast<libdc_download_session_t *>(sessionPtr);
+    libdc_download_cancel(session);
+}
+
+// The product and model code the device reported about itself during the
+// last run, as [product, model], or null when there is nothing to relabel
+// (issue #422).
+extern "C" JNIEXPORT jobjectArray JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeDownloadSessionReportedDevice(
+    JNIEnv *env, jclass, jlong sessionPtr) {
+    auto *session = reinterpret_cast<libdc_download_session_t *>(sessionPtr);
+    char product[64];
+    unsigned int model = 0;
+    if (!libdc_download_session_reported_device(session, product,
+                                                sizeof(product), &model)) {
+        return nullptr;
+    }
+    char modelText[16];
+    snprintf(modelText, sizeof(modelText), "%u", model);
+    jclass stringClass = env->FindClass("java/lang/String");
+    if (stringClass == nullptr) return nullptr;  // exception pending
+    jobjectArray result = env->NewObjectArray(2, stringClass, nullptr);
+    env->DeleteLocalRef(stringClass);
+    if (result == nullptr) return nullptr;  // OutOfMemoryError pending
+    jstring jProduct = env->NewStringUTF(product);
+    jstring jModel = env->NewStringUTF(modelText);
+    if (jProduct == nullptr || jModel == nullptr) {
+        // A relabel is optional: drop it rather than fail the download.
+        env->ExceptionClear();
+        return nullptr;
+    }
+    env->SetObjectArrayElement(result, 0, jProduct);
+    env->SetObjectArrayElement(result, 1, jModel);
+    env->DeleteLocalRef(jProduct);
+    env->DeleteLocalRef(jModel);
+    return result;
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeDownloadSessionFree(
+    JNIEnv *, jclass, jlong sessionPtr) {
+    auto *session = reinterpret_cast<libdc_download_session_t *>(sessionPtr);
+    libdc_download_session_free(session);
+}
+
+// Debug-only: deliberately raise SIGSEGV in the current process to prove the
+// :dc download-service process isolation (issue #318). Reached only via
+// DiveDownloadService's __crash_test__ path; never in normal operation.
+extern "C" JNIEXPORT void JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeDebugCrash(JNIEnv *, jclass) {
+    volatile int *p = nullptr;
+    *p = 42;
+}
+
+// Structs for passing callback context through JNI.
+struct JniDownloadContext {
+    JavaVM *jvm;
+    jobject callback;  // Global ref to Kotlin callback object
+};
+
+static void jni_on_progress(unsigned int current, unsigned int maximum, void *userdata) {
+    auto *ctx = static_cast<JniDownloadContext *>(userdata);
+    JNIEnv *env;
+    bool attached = false;
+    if (ctx->jvm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        ctx->jvm->AttachCurrentThread(&env, nullptr);
+        attached = true;
+    }
+
+    jclass cls = env->GetObjectClass(ctx->callback);
+    jmethodID method = env->GetMethodID(cls, "onProgress", "(II)V");
+    env->DeleteLocalRef(cls);
+    if (method) {
+        env->CallVoidMethod(ctx->callback, method,
+            static_cast<jint>(current), static_cast<jint>(maximum));
+    } else {
+        env->ExceptionClear();
+    }
+
+    if (attached) ctx->jvm->DetachCurrentThread();
+}
+
+static void jni_on_dive(const libdc_parsed_dive_t *dive, void *userdata) {
+    auto *ctx = static_cast<JniDownloadContext *>(userdata);
+    JNIEnv *env;
+    bool attached = false;
+    if (ctx->jvm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        ctx->jvm->AttachCurrentThread(&env, nullptr);
+        attached = true;
+    }
+
+    jclass cls = env->GetObjectClass(ctx->callback);
+    jmethodID method = env->GetMethodID(cls, "onDive", "(J)V");
+    env->DeleteLocalRef(cls);
+    if (method) {
+        // Pass the dive pointer so Kotlin can read fields via additional JNI calls.
+        env->CallVoidMethod(ctx->callback, method,
+            reinterpret_cast<jlong>(dive));
+    } else {
+        env->ExceptionClear();
+    }
+
+    if (attached) ctx->jvm->DetachCurrentThread();
+}
+
+// I/O callback bridge from C to Kotlin (for BLE).
+struct JniIoContext {
+    JavaVM *jvm;
+    jobject ioHandler;  // Global ref to Kotlin BleIoHandler
+    int timeout_ms;
+    char ble_name[128];  // BLE device name for DC_IOCTL_BLE_GET_NAME
+};
+
+static int jni_io_set_timeout(void *userdata, int timeout) {
+    auto *ctx = static_cast<JniIoContext *>(userdata);
+    ctx->timeout_ms = timeout < 0 ? -1 : timeout;
+    return LIBDC_STATUS_SUCCESS;
+}
+
+static int jni_io_read(void *userdata, void *data, size_t size, size_t *actual) {
+    auto *ctx = static_cast<JniIoContext *>(userdata);
+    JNIEnv *env;
+    bool attached = false;
+    if (ctx->jvm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        ctx->jvm->AttachCurrentThread(&env, nullptr);
+        attached = true;
+    }
+
+    jclass cls = env->GetObjectClass(ctx->ioHandler);
+    jmethodID method = env->GetMethodID(cls, "read", "(II)[B");
+    env->DeleteLocalRef(cls);
+    if (!method) {
+        env->ExceptionClear();
+        if (attached) ctx->jvm->DetachCurrentThread();
+        return LIBDC_STATUS_IO;
+    }
+
+    auto result = static_cast<jbyteArray>(
+        env->CallObjectMethod(ctx->ioHandler, method,
+            static_cast<jint>(size), static_cast<jint>(ctx->timeout_ms)));
+
+    // A pending Java exception (e.g. an IOException from a serial read on an
+    // unplugged device or after a revoked USB permission) is a real I/O
+    // failure: report LIBDC_STATUS_IO so the driver fails fast instead of
+    // retrying a dead port. Clearing it is also mandatory -- a left-pending
+    // exception would corrupt the next JNI call. (BLE reads don't throw in
+    // normal operation, so this path is serial-specific in practice while the
+    // partial-read SUCCESS semantics below stay intact for BLE.)
+    if (env->ExceptionCheck()) {
+        env->ExceptionDescribe();
+        env->ExceptionClear();
+        *actual = 0;
+        if (attached) ctx->jvm->DetachCurrentThread();
+        return LIBDC_STATUS_IO;
+    }
+
+    if (!result) {
+        *actual = 0;
+        if (attached) ctx->jvm->DetachCurrentThread();
+        return LIBDC_STATUS_TIMEOUT;
+    }
+
+    jsize len = env->GetArrayLength(result);
+    env->GetByteArrayRegion(result, 0, len, static_cast<jbyte *>(data));
+    env->DeleteLocalRef(result);
+    *actual = static_cast<size_t>(len);
+
+    if (attached) ctx->jvm->DetachCurrentThread();
+    return LIBDC_STATUS_SUCCESS;
+}
+
+static int jni_io_write(void *userdata, const void *data, size_t size, size_t *actual) {
+    auto *ctx = static_cast<JniIoContext *>(userdata);
+    JNIEnv *env;
+    bool attached = false;
+    if (ctx->jvm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        ctx->jvm->AttachCurrentThread(&env, nullptr);
+        attached = true;
+    }
+
+    jclass cls = env->GetObjectClass(ctx->ioHandler);
+    jmethodID method = env->GetMethodID(cls, "write", "([BI)I");
+    env->DeleteLocalRef(cls);
+    if (!method) {
+        env->ExceptionClear();
+        if (attached) ctx->jvm->DetachCurrentThread();
+        return LIBDC_STATUS_IO;
+    }
+
+    jbyteArray arr = env->NewByteArray(static_cast<jint>(size));
+    env->SetByteArrayRegion(arr, 0, static_cast<jint>(size),
+        static_cast<const jbyte *>(data));
+
+    jint result = env->CallIntMethod(ctx->ioHandler, method, arr,
+        static_cast<jint>(ctx->timeout_ms));
+    env->DeleteLocalRef(arr);
+
+    if (result < 0) {
+        *actual = 0;
+        if (attached) ctx->jvm->DetachCurrentThread();
+        return LIBDC_STATUS_IO;
+    }
+
+    *actual = size;
+    if (attached) ctx->jvm->DetachCurrentThread();
+    return LIBDC_STATUS_SUCCESS;
+}
+
+// Serial line-control callbacks. These bridge to the Kotlin SerialIoHandler
+// (configure/setDtr/setRts) and are only wired in nativeDownloadRun when the
+// handler implements them, so BLE handlers are unaffected. The Kotlin methods
+// return 0 on success and non-zero on failure.
+static int jni_io_configure(void *userdata, unsigned int baudrate,
+                            unsigned int databits, unsigned int parity,
+                            unsigned int stopbits, unsigned int flowcontrol) {
+    auto *ctx = static_cast<JniIoContext *>(userdata);
+    JNIEnv *env;
+    bool attached = false;
+    if (ctx->jvm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        ctx->jvm->AttachCurrentThread(&env, nullptr);
+        attached = true;
+    }
+
+    jclass cls = env->GetObjectClass(ctx->ioHandler);
+    jmethodID method = env->GetMethodID(cls, "configure", "(IIIII)I");
+    env->DeleteLocalRef(cls);
+    int status = LIBDC_STATUS_UNSUPPORTED;
+    if (method != nullptr) {
+        jint r = env->CallIntMethod(ctx->ioHandler, method,
+            static_cast<jint>(baudrate), static_cast<jint>(databits),
+            static_cast<jint>(parity), static_cast<jint>(stopbits),
+            static_cast<jint>(flowcontrol));
+        status = (r == 0) ? LIBDC_STATUS_SUCCESS : LIBDC_STATUS_IO;
+    } else {
+        env->ExceptionClear();
+    }
+
+    if (attached) ctx->jvm->DetachCurrentThread();
+    return status;
+}
+
+static int jni_io_set_modem_line(JniIoContext *ctx, const char *methodName,
+                                 unsigned int value) {
+    JNIEnv *env;
+    bool attached = false;
+    if (ctx->jvm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        ctx->jvm->AttachCurrentThread(&env, nullptr);
+        attached = true;
+    }
+
+    jclass cls = env->GetObjectClass(ctx->ioHandler);
+    jmethodID method = env->GetMethodID(cls, methodName, "(I)I");
+    env->DeleteLocalRef(cls);
+    int status = LIBDC_STATUS_UNSUPPORTED;
+    if (method != nullptr) {
+        jint r = env->CallIntMethod(ctx->ioHandler, method, static_cast<jint>(value));
+        status = (r == 0) ? LIBDC_STATUS_SUCCESS : LIBDC_STATUS_IO;
+    } else {
+        env->ExceptionClear();
+    }
+
+    if (attached) ctx->jvm->DetachCurrentThread();
+    return status;
+}
+
+static int jni_io_set_dtr(void *userdata, unsigned int value) {
+    return jni_io_set_modem_line(static_cast<JniIoContext *>(userdata), "setDtr", value);
+}
+
+static int jni_io_set_rts(void *userdata, unsigned int value) {
+    return jni_io_set_modem_line(static_cast<JniIoContext *>(userdata), "setRts", value);
+}
+
+// BLE ioctl constants matching libdivecomputer's encoding.
+// DC_IOCTL('b', 0) = (0x62 << 8) | 0 = 0x6200
+#define BLE_IOCTL_GET_NAME 0x6200
+#define BLE_IOCTL_GET_PINCODE_NR 1
+#define BLE_IOCTL_ACCESSCODE_NR 2
+
+static int jni_io_ioctl(void *userdata, unsigned int request,
+                         void *data, size_t size) {
+    auto *ctx = static_cast<JniIoContext *>(userdata);
+
+    unsigned int ioctl_type = (request >> 8) & 0xFF;
+    unsigned int ioctl_nr = request & 0xFF;
+    __android_log_print(ANDROID_LOG_DEBUG, TAG,
+        "ioctl: request=0x%x type=0x%x nr=%u size=%zu name='%s'",
+        request, ioctl_type, ioctl_nr, size, ctx->ble_name);
+
+    // Handle BLE_GET_NAME: return the BLE device name.
+    if (ioctl_type == 0x62 && ioctl_nr == 0) {
+        if (data == nullptr || size == 0) {
+            return LIBDC_STATUS_INVALIDARGS;
+        }
+        size_t name_len = strlen(ctx->ble_name);
+        if (name_len == 0) {
+            return LIBDC_STATUS_UNSUPPORTED;
+        }
+        size_t copy_len = name_len + 1;  // include null terminator
+        if (copy_len > size) {
+            copy_len = size;
+        }
+        memcpy(data, ctx->ble_name, copy_len);
+        // Ensure null termination.
+        static_cast<char *>(data)[size - 1] = '\0';
+        return LIBDC_STATUS_SUCCESS;
+    }
+
+    // Handle BLE_GET_PINCODE: request PIN from user via Kotlin.
+    if (ioctl_type == 0x62 && ioctl_nr == BLE_IOCTL_GET_PINCODE_NR) {
+        if (data == nullptr || size == 0) {
+            return LIBDC_STATUS_INVALIDARGS;
+        }
+
+        JNIEnv *env;
+        bool attached = false;
+        if (ctx->jvm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK) {
+            ctx->jvm->AttachCurrentThread(&env, nullptr);
+            attached = true;
+        }
+
+        // Call ioHandler.onPinCodeRequired(address) -- blocks until PIN is entered.
+        jclass cls = env->GetObjectClass(ctx->ioHandler);
+        jmethodID method = env->GetMethodID(cls, "onPinCodeRequired",
+            "(Ljava/lang/String;)Ljava/lang/String;");
+        if (method == nullptr) {
+            env->ExceptionClear();
+            env->DeleteLocalRef(cls);
+            if (attached) ctx->jvm->DetachCurrentThread();
+            return LIBDC_STATUS_UNSUPPORTED;
+        }
+
+        jstring jAddress = env->NewStringUTF(ctx->ble_name);
+        jstring jPin = (jstring)env->CallObjectMethod(ctx->ioHandler, method, jAddress);
+        env->DeleteLocalRef(jAddress);
+
+        int status = LIBDC_STATUS_SUCCESS;
+        if (jPin == nullptr || env->GetStringLength(jPin) == 0) {
+            status = LIBDC_STATUS_CANCELLED;
+        } else {
+            const char *pin_chars = env->GetStringUTFChars(jPin, nullptr);
+            size_t pin_len = strlen(pin_chars) + 1;
+            size_t copy_len = pin_len < size ? pin_len : size;
+            memcpy(data, pin_chars, copy_len);
+            static_cast<char *>(data)[copy_len - 1] = '\0';
+            env->ReleaseStringUTFChars(jPin, pin_chars);
+            __android_log_print(ANDROID_LOG_DEBUG, TAG,
+                "ioctl BLE_GET_PINCODE -> PIN provided (%zu chars)", pin_len - 1);
+        }
+
+        if (jPin != nullptr) env->DeleteLocalRef(jPin);
+        env->DeleteLocalRef(cls);
+        if (attached) ctx->jvm->DetachCurrentThread();
+        return status;
+    }
+
+    // Handle BLE_GET_ACCESSCODE / BLE_SET_ACCESSCODE.
+    if (ioctl_type == 0x62 && ioctl_nr == BLE_IOCTL_ACCESSCODE_NR) {
+        if (data == nullptr || size == 0) {
+            return LIBDC_STATUS_INVALIDARGS;
+        }
+
+        unsigned int direction = (request >> 30) & 0x3;
+
+        JNIEnv *env;
+        bool attached = false;
+        if (ctx->jvm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK) {
+            ctx->jvm->AttachCurrentThread(&env, nullptr);
+            attached = true;
+        }
+
+        jclass cls = env->GetObjectClass(ctx->ioHandler);
+        jstring jAddress = env->NewStringUTF(ctx->ble_name);
+        int status;
+
+        if (direction == 1) {
+            // GET access code
+            jmethodID method = env->GetMethodID(cls, "getAccessCode",
+                "(Ljava/lang/String;)[B");
+            if (method == nullptr) {
+                env->ExceptionClear();
+                env->DeleteLocalRef(jAddress);
+                env->DeleteLocalRef(cls);
+                if (attached) ctx->jvm->DetachCurrentThread();
+                return LIBDC_STATUS_UNSUPPORTED;
+            }
+            jbyteArray jCode = (jbyteArray)env->CallObjectMethod(
+                ctx->ioHandler, method, jAddress);
+
+            if (jCode == nullptr) {
+                status = LIBDC_STATUS_UNSUPPORTED;
+                __android_log_print(ANDROID_LOG_DEBUG, TAG,
+                    "ioctl BLE_GET_ACCESSCODE -> not found");
+            } else {
+                jsize code_len = env->GetArrayLength(jCode);
+                jsize copy_len = code_len < (jsize)size ? code_len : (jsize)size;
+                env->GetByteArrayRegion(jCode, 0, copy_len,
+                    reinterpret_cast<jbyte *>(data));
+                env->DeleteLocalRef(jCode);
+                status = LIBDC_STATUS_SUCCESS;
+                __android_log_print(ANDROID_LOG_DEBUG, TAG,
+                    "ioctl BLE_GET_ACCESSCODE -> found (%d bytes)", code_len);
+            }
+        } else {
+            // SET access code
+            jmethodID method = env->GetMethodID(cls, "setAccessCode",
+                "(Ljava/lang/String;[B)V");
+            if (method == nullptr) {
+                env->ExceptionClear();
+                env->DeleteLocalRef(jAddress);
+                env->DeleteLocalRef(cls);
+                if (attached) ctx->jvm->DetachCurrentThread();
+                return LIBDC_STATUS_UNSUPPORTED;
+            }
+            jbyteArray jCode = env->NewByteArray((jsize)size);
+            env->SetByteArrayRegion(jCode, 0, (jsize)size,
+                reinterpret_cast<const jbyte *>(data));
+            env->CallVoidMethod(ctx->ioHandler, method, jAddress, jCode);
+            env->DeleteLocalRef(jCode);
+            status = LIBDC_STATUS_SUCCESS;
+            __android_log_print(ANDROID_LOG_DEBUG, TAG,
+                "ioctl BLE_SET_ACCESSCODE -> stored (%zu bytes)", size);
+        }
+
+        env->DeleteLocalRef(jAddress);
+        env->DeleteLocalRef(cls);
+        if (attached) ctx->jvm->DetachCurrentThread();
+        return status;
+    }
+
+    // Handle BLE characteristic reads (issue #422).
+    {
+        char uuid[LIBDC_BLE_UUID_STRING_SIZE];
+        size_t value_size = 0;
+        int decoded = libdc_ble_characteristic_read_decode(
+            request, data, size, uuid, &value_size);
+        if (decoded == LIBDC_BLE_CHAR_READ_INVALID) {
+            return LIBDC_STATUS_INVALIDARGS;
+        }
+        if (decoded == LIBDC_BLE_CHAR_READ_OK) {
+            JNIEnv *env;
+            bool attached = false;
+            if (ctx->jvm->GetEnv(reinterpret_cast<void **>(&env),
+                                 JNI_VERSION_1_6) != JNI_OK) {
+                ctx->jvm->AttachCurrentThread(&env, nullptr);
+                attached = true;
+            }
+            jclass cls = env->GetObjectClass(ctx->ioHandler);
+            jmethodID method = env->GetMethodID(cls, "readCharacteristic",
+                "(Ljava/lang/String;)[B");
+            env->DeleteLocalRef(cls);
+            int status = LIBDC_STATUS_UNSUPPORTED;
+            if (method == nullptr) {
+                env->ExceptionClear();
+            } else {
+                jstring jUuid = env->NewStringUTF(uuid);
+                auto jValue = (jbyteArray)env->CallObjectMethod(
+                    ctx->ioHandler, method, jUuid);
+                env->DeleteLocalRef(jUuid);
+                if (env->ExceptionCheck()) {
+                    env->ExceptionClear();
+                    status = LIBDC_STATUS_IO;
+                } else if (jValue == nullptr) {
+                    status = LIBDC_STATUS_IO;
+                } else {
+                    jsize len = env->GetArrayLength(jValue);
+                    jbyte *bytes = env->GetByteArrayElements(jValue, nullptr);
+                    if (bytes == nullptr) {
+                        // Out of memory: an exception is pending and must be
+                        // cleared before any further JNI call.
+                        env->ExceptionClear();
+                        status = LIBDC_STATUS_NOMEMORY;
+                    } else {
+                        status = libdc_ble_characteristic_read_fill(
+                            data, size,
+                            reinterpret_cast<unsigned char *>(bytes),
+                            static_cast<size_t>(len));
+                        env->ReleaseByteArrayElements(jValue, bytes,
+                                                      JNI_ABORT);
+                    }
+                    env->DeleteLocalRef(jValue);
+                }
+            }
+            __android_log_print(ANDROID_LOG_DEBUG, TAG,
+                "ioctl BLE_CHARACTERISTIC_READ %s (%zu bytes) -> %d",
+                uuid, value_size, status);
+            if (attached) ctx->jvm->DetachCurrentThread();
+            return status;
+        }
+    }
+
+    return LIBDC_STATUS_UNSUPPORTED;
+}
+
+static int jni_io_purge(void *userdata, unsigned int direction) {
+    auto *ctx = static_cast<JniIoContext *>(userdata);
+    JNIEnv *env;
+    bool attached = false;
+    if (ctx->jvm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        ctx->jvm->AttachCurrentThread(&env, nullptr);
+        attached = true;
+    }
+
+    jclass cls = env->GetObjectClass(ctx->ioHandler);
+    jmethodID method = env->GetMethodID(cls, "purge", "(I)V");
+    env->DeleteLocalRef(cls);
+    if (method) {
+        env->CallVoidMethod(ctx->ioHandler, method, static_cast<jint>(direction));
+    } else {
+        // A failed GetMethodID leaves a pending NoSuchMethodError; every
+        // JNI call made while an exception is pending is undefined behavior,
+        // so it MUST be cleared before this callback returns. Leaving it
+        // pending here crashed the whole download process when R8 stripped
+        // the handler methods (#318). Same rule applies to every failed
+        // GetMethodID in this file.
+        env->ExceptionClear();
+    }
+
+    if (attached) ctx->jvm->DetachCurrentThread();
+    return LIBDC_STATUS_SUCCESS;
+}
+
+static int jni_io_close(void *userdata) {
+    auto *ctx = static_cast<JniIoContext *>(userdata);
+    JNIEnv *env;
+    bool attached = false;
+    if (ctx->jvm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        ctx->jvm->AttachCurrentThread(&env, nullptr);
+        attached = true;
+    }
+
+    jclass cls = env->GetObjectClass(ctx->ioHandler);
+    jmethodID method = env->GetMethodID(cls, "close", "()V");
+    env->DeleteLocalRef(cls);
+    if (method) {
+        env->CallVoidMethod(ctx->ioHandler, method);
+    } else {
+        env->ExceptionClear();
+    }
+
+    if (attached) ctx->jvm->DetachCurrentThread();
+    return LIBDC_STATUS_SUCCESS;
+}
+
+// Context for the libdivecomputer log callback: WARNING/ERROR messages are
+// forwarded to NativeTrace.writeLibdc so they land in the user-exportable
+// debug log, not only logcat. Cached once per process; the global ref and
+// jmethodID stay valid for the app's lifetime.
+struct LogForwardContext {
+    JavaVM *jvm;
+    jobject traceInstance;  // global ref to NativeTrace.INSTANCE
+    jmethodID writeLibdc;   // writeLibdc(String, String)
+};
+static LogForwardContext g_log_forward = {nullptr, nullptr, nullptr};
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeDownloadRun(
+    JNIEnv *env, jclass,
+    jlong sessionPtr,
+    jstring vendor, jstring product, jint model, jint transport,
+    jobject ioHandler,
+    jstring devName,
+    jbyteArray fingerprint,
+    jboolean syncClock,
+    jobject downloadCallback,
+    jbyteArray errorBuf,
+    jintArray infoOut) {
+
+    auto *session = reinterpret_cast<libdc_download_session_t *>(sessionPtr);
+
+    const char *vendorStr = env->GetStringUTFChars(vendor, nullptr);
+    const char *productStr = env->GetStringUTFChars(product, nullptr);
+
+    // Set up I/O callbacks via JNI bridge.
+    JavaVM *jvm;
+    env->GetJavaVM(&jvm);
+
+    JniIoContext ioCtx;
+    memset(&ioCtx, 0, sizeof(ioCtx));
+    ioCtx.jvm = jvm;
+    ioCtx.ioHandler = env->NewGlobalRef(ioHandler);
+    ioCtx.timeout_ms = 10000;
+
+    // Store BLE device name for DC_IOCTL_BLE_GET_NAME.
+    if (devName != nullptr) {
+        const char *nameStr = env->GetStringUTFChars(devName, nullptr);
+        strncpy(ioCtx.ble_name, nameStr, sizeof(ioCtx.ble_name) - 1);
+        ioCtx.ble_name[sizeof(ioCtx.ble_name) - 1] = '\0';
+        env->ReleaseStringUTFChars(devName, nameStr);
+    }
+
+    libdc_io_callbacks_t io_callbacks;
+    memset(&io_callbacks, 0, sizeof(io_callbacks));
+    io_callbacks.set_timeout = jni_io_set_timeout;
+    io_callbacks.read = jni_io_read;
+    io_callbacks.write = jni_io_write;
+    io_callbacks.ioctl = jni_io_ioctl;
+    io_callbacks.close = jni_io_close;
+    io_callbacks.purge = jni_io_purge;
+    io_callbacks.userdata = &ioCtx;
+
+    // Wire serial line-control callbacks only if the handler implements them
+    // (SerialIoHandler does, BleIoHandler does not). A missing method makes
+    // GetMethodID raise NoSuchMethodError, which we clear silently; leaving the
+    // callback NULL makes the C bridge treat it as a no-op.
+    {
+        jclass handlerCls = env->GetObjectClass(ioHandler);
+        if (env->GetMethodID(handlerCls, "configure", "(IIIII)I") != nullptr) {
+            io_callbacks.configure = jni_io_configure;
+        }
+        env->ExceptionClear();
+        if (env->GetMethodID(handlerCls, "setDtr", "(I)I") != nullptr) {
+            io_callbacks.set_dtr = jni_io_set_dtr;
+        }
+        env->ExceptionClear();
+        if (env->GetMethodID(handlerCls, "setRts", "(I)I") != nullptr) {
+            io_callbacks.set_rts = jni_io_set_rts;
+        }
+        env->ExceptionClear();
+    }
+
+    // Set up download callbacks.
+    JniDownloadContext dlCtx;
+    dlCtx.jvm = jvm;
+    dlCtx.callback = env->NewGlobalRef(downloadCallback);
+
+    libdc_download_callbacks_t dl_callbacks;
+    memset(&dl_callbacks, 0, sizeof(dl_callbacks));
+    dl_callbacks.on_progress = jni_on_progress;
+    dl_callbacks.on_dive = jni_on_dive;
+    dl_callbacks.userdata = &dlCtx;
+
+    // Decode fingerprint from Java byte array.
+    unsigned char *fp_data = nullptr;
+    unsigned int fp_size = 0;
+    if (fingerprint != nullptr) {
+        fp_size = static_cast<unsigned int>(env->GetArrayLength(fingerprint));
+        if (fp_size > 0) {
+            fp_data = new unsigned char[fp_size];
+            env->GetByteArrayRegion(fingerprint, 0, fp_size,
+                reinterpret_cast<jbyte *>(fp_data));
+        }
+    }
+
+    // Resolve NativeTrace once so the libdivecomputer log callback can
+    // forward WARNING/ERROR diagnostics into the user-exportable debug log.
+    // Issue #766 took three rounds of user logs to localize because the
+    // protocol-level messages only ever reached logcat.
+    if (g_log_forward.traceInstance == nullptr) {
+        jclass traceCls =
+            env->FindClass("com/submersion/libdivecomputer/NativeTrace");
+        if (traceCls != nullptr) {
+            jfieldID instField = env->GetStaticFieldID(traceCls, "INSTANCE",
+                "Lcom/submersion/libdivecomputer/NativeTrace;");
+            jmethodID writeMethod = env->GetMethodID(traceCls, "writeLibdc",
+                "(Ljava/lang/String;Ljava/lang/String;)V");
+            if (instField != nullptr && writeMethod != nullptr) {
+                jobject inst = env->GetStaticObjectField(traceCls, instField);
+                if (inst != nullptr) {
+                    g_log_forward.jvm = jvm;
+                    g_log_forward.writeLibdc = writeMethod;
+                    g_log_forward.traceInstance = env->NewGlobalRef(inst);
+                    env->DeleteLocalRef(inst);
+                }
+            }
+            env->DeleteLocalRef(traceCls);
+        }
+        env->ExceptionClear();
+    }
+
+    // Register libdivecomputer log callback so internal diagnostic messages
+    // appear in logcat. Android's NativeLogger already wraps Log.d(), so
+    // logcat output is captured by the platform-level logging infrastructure.
+    libdc_set_log_callback(
+        [](int level, const char *message, void *userdata) {
+            // Map dc_loglevel_t: ERROR=1, WARNING=2, INFO=3, DEBUG=4+
+            android_LogPriority priority;
+            switch (level) {
+            case 1:
+                priority = ANDROID_LOG_ERROR;
+                break;
+            case 2:
+                priority = ANDROID_LOG_WARN;
+                break;
+            case 3:
+                priority = ANDROID_LOG_INFO;
+                break;
+            default:
+                priority = ANDROID_LOG_DEBUG;
+                break;
+            }
+            __android_log_print(priority, "libdc", "%s", message);
+
+            // Forward WARNING/ERROR into the crash-survivable debug log so
+            // protocol-level failures reach user-exported logs.
+            auto *fwd = static_cast<LogForwardContext *>(userdata);
+            if (fwd == nullptr || fwd->traceInstance == nullptr || level > 2)
+                return;
+            JNIEnv *cbEnv;
+            if (fwd->jvm->GetEnv(reinterpret_cast<void **>(&cbEnv),
+                                 JNI_VERSION_1_6) != JNI_OK) {
+                // Only forward from already-attached threads (the download
+                // thread entered through JNI); logging must stay passive.
+                return;
+            }
+            jstring jlevel = cbEnv->NewStringUTF(level == 1 ? "ERROR" : "WARN");
+            jstring jmessage = cbEnv->NewStringUTF(message);
+            if (jlevel != nullptr && jmessage != nullptr) {
+                cbEnv->CallVoidMethod(fwd->traceInstance, fwd->writeLibdc,
+                                      jlevel, jmessage);
+            }
+            cbEnv->ExceptionClear();
+            if (jlevel != nullptr) cbEnv->DeleteLocalRef(jlevel);
+            if (jmessage != nullptr) cbEnv->DeleteLocalRef(jmessage);
+        },
+        &g_log_forward
+    );
+
+    // Run the download.
+    char error_buf[256] = {0};
+    unsigned int serial_out = 0;
+    unsigned int firmware_out = 0;
+    libdc_clock_sync_status_t clock_sync_out = LIBDC_CLOCK_SYNC_NOT_REQUESTED;
+    int result = libdc_download_run(
+        session,
+        vendorStr, productStr,
+        static_cast<unsigned int>(model),
+        static_cast<unsigned int>(transport),
+        &io_callbacks,
+        fp_data, fp_size,
+        syncClock == JNI_TRUE ? 1 : 0,
+        &dl_callbacks,
+        &serial_out, &firmware_out, &clock_sync_out,
+        error_buf, sizeof(error_buf));
+
+    // Cleanup fingerprint.
+    delete[] fp_data;
+
+    // Copy error message to output buffer.
+    if (errorBuf && error_buf[0]) {
+        jsize len = env->GetArrayLength(errorBuf);
+        jsize msgLen = static_cast<jsize>(strlen(error_buf));
+        if (msgLen > len) msgLen = len;
+        env->SetByteArrayRegion(errorBuf, 0, msgLen,
+            reinterpret_cast<const jbyte *>(error_buf));
+    }
+
+    // Device info and the clock sync outcome, in the slot order the Kotlin
+    // side reads: serial, firmware, clock sync status code (issue #1216).
+    if (infoOut != nullptr && env->GetArrayLength(infoOut) >= 3) {
+        jint info[3] = {
+            static_cast<jint>(serial_out),
+            static_cast<jint>(firmware_out),
+            static_cast<jint>(clock_sync_out),
+        };
+        env->SetIntArrayRegion(infoOut, 0, 3, info);
+    }
+
+    // Cleanup.
+    env->ReleaseStringUTFChars(vendor, vendorStr);
+    env->ReleaseStringUTFChars(product, productStr);
+    env->DeleteGlobalRef(ioCtx.ioHandler);
+    env->DeleteGlobalRef(dlCtx.callback);
+
+    return result;
+}
+
+// ============================================================
+// Dive Data Access (for reading parsed dive fields from Kotlin)
+// ============================================================
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveYear(
+    JNIEnv *, jclass, jlong divePtr) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    return dive->year;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveMonth(
+    JNIEnv *, jclass, jlong divePtr) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    return dive->month;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveDay(
+    JNIEnv *, jclass, jlong divePtr) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    return dive->day;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveHour(
+    JNIEnv *, jclass, jlong divePtr) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    return dive->hour;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveMinute(
+    JNIEnv *, jclass, jlong divePtr) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    return dive->minute;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveSecond(
+    JNIEnv *, jclass, jlong divePtr) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    return dive->second;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveTimezone(
+    JNIEnv *, jclass, jlong divePtr) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    return dive->timezone;
+}
+
+extern "C" JNIEXPORT jdouble JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveMaxDepth(
+    JNIEnv *, jclass, jlong divePtr) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    return dive->max_depth;
+}
+
+extern "C" JNIEXPORT jdouble JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveAvgDepth(
+    JNIEnv *, jclass, jlong divePtr) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    return dive->avg_depth;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveDuration(
+    JNIEnv *, jclass, jlong divePtr) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    return static_cast<jint>(dive->duration);
+}
+
+extern "C" JNIEXPORT jdouble JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveMinTemp(
+    JNIEnv *, jclass, jlong divePtr) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    return dive->min_temp;
+}
+
+extern "C" JNIEXPORT jdouble JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveMaxTemp(
+    JNIEnv *, jclass, jlong divePtr) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    return dive->max_temp;
+}
+
+extern "C" JNIEXPORT jdouble JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveSurfacePressure(
+    JNIEnv *, jclass, jlong divePtr) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    return dive->surface_pressure;
+}
+
+extern "C" JNIEXPORT jdouble JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveEntryLatitude(
+    JNIEnv *, jclass, jlong divePtr) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    return dive->entry_latitude;
+}
+
+extern "C" JNIEXPORT jdouble JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveEntryLongitude(
+    JNIEnv *, jclass, jlong divePtr) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    return dive->entry_longitude;
+}
+
+extern "C" JNIEXPORT jdouble JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveExitLatitude(
+    JNIEnv *, jclass, jlong divePtr) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    return dive->exit_latitude;
+}
+
+extern "C" JNIEXPORT jdouble JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveExitLongitude(
+    JNIEnv *, jclass, jlong divePtr) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    return dive->exit_longitude;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveMode(
+    JNIEnv *, jclass, jlong divePtr) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    return static_cast<jint>(dive->dive_mode);
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveFingerprint(
+    JNIEnv *env, jclass, jlong divePtr) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    char hex[LIBDC_MAX_FINGERPRINT * 2 + 1];
+    for (unsigned int i = 0; i < dive->fingerprint_size; i++) {
+        snprintf(hex + i * 2, 3, "%02x", dive->fingerprint[i]);
+    }
+    hex[dive->fingerprint_size * 2] = '\0';
+    return env->NewStringUTF(hex);
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveSampleCount(
+    JNIEnv *, jclass, jlong divePtr) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    return static_cast<jint>(dive->sample_count);
+}
+
+// Must match SAMPLE_FIELD_COUNT in SampleDecoder.kt.
+#define LIBDC_SAMPLE_FIELD_COUNT (28 + LIBDC_MAX_TANKS)
+
+// Index of the first per-tank pressure slot; must match TANK_PRESSURE_OFFSET in
+// SampleDecoder.kt.
+#define LIBDC_TANK_PRESSURE_OFFSET 28
+
+extern "C" JNIEXPORT jdoubleArray JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveSample(
+    JNIEnv *env, jclass, jlong divePtr, jint index) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    if (index < 0 || static_cast<unsigned int>(index) >= dive->sample_count) return nullptr;
+
+    const libdc_sample_t *s = &dive->samples[index];
+    // 28 scalar fields (14 base + 6 O2 cells + gas mix + heading + 6 cell mV),
+    // then one slot per tank for the per-transmitter pressures (issue #1223).
+    // Integer sentinels (UINT32_MAX) are cast to double; NAN doubles pass
+    // through and become null on the Kotlin side. Kotlin indexes this array
+    // positionally (see SampleDecoder.kt): append only, never insert.
+    jdouble values[LIBDC_SAMPLE_FIELD_COUNT] = {
+        static_cast<jdouble>(s->time_ms),
+        s->depth,
+        s->temperature,
+        s->pressure,
+        static_cast<jdouble>(s->tank),
+        static_cast<jdouble>(s->heartbeat),
+        s->setpoint,
+        s->ppo2,
+        s->cns,
+        static_cast<jdouble>(s->rbt),
+        static_cast<jdouble>(s->deco_type),
+        static_cast<jdouble>(s->deco_time),
+        s->deco_depth,
+        static_cast<jdouble>(s->deco_tts),
+        s->o2_sensor[0],
+        s->o2_sensor[1],
+        s->o2_sensor[2],
+        s->o2_sensor[3],
+        s->o2_sensor[4],
+        s->o2_sensor[5],
+        static_cast<jdouble>(s->gasmix),
+        static_cast<jdouble>(s->heading),
+        static_cast<jdouble>(s->o2_sensor_mv[0]),
+        static_cast<jdouble>(s->o2_sensor_mv[1]),
+        static_cast<jdouble>(s->o2_sensor_mv[2]),
+        static_cast<jdouble>(s->o2_sensor_mv[3]),
+        static_cast<jdouble>(s->o2_sensor_mv[4]),
+        static_cast<jdouble>(s->o2_sensor_mv[5])
+    };
+    for (unsigned int t = 0; t < LIBDC_MAX_TANKS; t++) {
+        values[LIBDC_TANK_PRESSURE_OFFSET + t] = s->tank_pressure[t];
+    }
+    jdoubleArray result = env->NewDoubleArray(LIBDC_SAMPLE_FIELD_COUNT);
+    env->SetDoubleArrayRegion(result, 0, LIBDC_SAMPLE_FIELD_COUNT, values);
+    return result;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveGasmixCount(
+    JNIEnv *, jclass, jlong divePtr) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    return static_cast<jint>(dive->gasmix_count);
+}
+
+extern "C" JNIEXPORT jdoubleArray JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveGasmix(
+    JNIEnv *env, jclass, jlong divePtr, jint index) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    if (index < 0 || static_cast<unsigned int>(index) >= dive->gasmix_count) return nullptr;
+
+    const libdc_gasmix_t *gm = &dive->gasmixes[index];
+    // Return [oxygen, helium, usage]. Positional: the Kotlin readers index it.
+    jdouble values[3] = { gm->oxygen, gm->helium, static_cast<jdouble>(gm->usage) };
+    jdoubleArray result = env->NewDoubleArray(3);
+    env->SetDoubleArrayRegion(result, 0, 3, values);
+    return result;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveTankCount(
+    JNIEnv *, jclass, jlong divePtr) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    return static_cast<jint>(dive->tank_count);
+}
+
+extern "C" JNIEXPORT jdoubleArray JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveTank(
+    JNIEnv *env, jclass, jlong divePtr, jint index) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    if (index < 0 || static_cast<unsigned int>(index) >= dive->tank_count) return nullptr;
+
+    const libdc_tank_t *tk = &dive->tanks[index];
+    // Return [gasmix, volume, workpressure, beginpressure, endpressure, usage,
+    //         transmitter serial]. Positional: the Kotlin readers index it.
+    jdouble values[7] = {
+        static_cast<jdouble>(tk->gasmix),
+        tk->volume,
+        tk->workpressure,
+        tk->beginpressure,
+        tk->endpressure,
+        static_cast<jdouble>(tk->usage),
+        static_cast<jdouble>(tk->serial)
+    };
+    jdoubleArray result = env->NewDoubleArray(7);
+    env->SetDoubleArrayRegion(result, 0, 7, values);
+    return result;
+}
+
+// ============================================================
+// Event Data Access
+// ============================================================
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveEventCount(
+    JNIEnv *, jclass, jlong divePtr) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    if (!dive->events) return 0;
+    return static_cast<jint>(dive->event_count);
+}
+
+extern "C" JNIEXPORT jlongArray JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveEvent(
+    JNIEnv *env, jclass, jlong divePtr, jint index) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    if (!dive->events || index < 0 ||
+        static_cast<unsigned int>(index) >= dive->event_count) return nullptr;
+
+    const libdc_event_t *e = &dive->events[index];
+    jlong values[4] = {
+        static_cast<jlong>(e->time_ms),
+        static_cast<jlong>(e->type),
+        static_cast<jlong>(e->flags),
+        static_cast<jlong>(e->value)
+    };
+    jlongArray result = env->NewLongArray(4);
+    env->SetLongArrayRegion(result, 0, 4, values);
+    return result;
+}
+
+// ============================================================
+// Decompression Model Access
+// ============================================================
+
+extern "C" JNIEXPORT jintArray JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveDecoModel(
+    JNIEnv *env, jclass, jlong divePtr) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    jint values[4] = {
+        static_cast<jint>(dive->deco_model_type),
+        static_cast<jint>(dive->deco_conservatism),
+        static_cast<jint>(dive->gf_low),
+        static_cast<jint>(dive->gf_high)
+    };
+    jintArray result = env->NewIntArray(4);
+    env->SetIntArrayRegion(result, 0, 4, values);
+    return result;
+}
+
+// ============================================================
+// Raw Dive Data Access
+// ============================================================
+
+extern "C" JNIEXPORT jbyteArray JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveRawData(
+    JNIEnv *env, jclass, jlong divePtr) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    if (dive->raw_data == nullptr || dive->raw_data_size == 0) return nullptr;
+    jbyteArray arr = env->NewByteArray(static_cast<jint>(dive->raw_data_size));
+    env->SetByteArrayRegion(arr, 0, static_cast<jint>(dive->raw_data_size),
+        reinterpret_cast<const jbyte *>(dive->raw_data));
+    return arr;
+}
+
+extern "C" JNIEXPORT jbyteArray JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeGetDiveRawFingerprint(
+    JNIEnv *env, jclass, jlong divePtr) {
+    auto *dive = reinterpret_cast<const libdc_parsed_dive_t *>(divePtr);
+    if (dive->raw_fingerprint == nullptr || dive->raw_fingerprint_size == 0) return nullptr;
+    jbyteArray arr = env->NewByteArray(static_cast<jint>(dive->raw_fingerprint_size));
+    env->SetByteArrayRegion(arr, 0, static_cast<jint>(dive->raw_fingerprint_size),
+        reinterpret_cast<const jbyte *>(dive->raw_fingerprint));
+    return arr;
+}
+
+// ============================================================
+// Standalone Raw Dive Parsing
+// ============================================================
+
+// Releases a dive allocated by nativeParseRawDive. Inside libdc_parsed_dive_t
+// only `samples` and `events` are heap-allocated; `gasmixes`, `tanks` and
+// `fingerprint` are inline arrays and must not be freed. This is the only
+// place that rule is expressed.
+static void free_parsed_dive(libdc_parsed_dive_t *dive) {
+    if (dive == nullptr) return;
+    free(dive->samples);
+    free(dive->events);
+    free(dive);
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeParseRawDive(
+    JNIEnv *env, jclass,
+    jstring vendor, jstring product, jint model,
+    jbyteArray data, jbyteArray errorBuf) {
+
+    // Heap-allocated because Kotlin reads the fields afterwards through the
+    // nativeGetDiveXxx accessors, which need the struct to outlive this call.
+    auto *dive = static_cast<libdc_parsed_dive_t *>(
+        calloc(1, sizeof(libdc_parsed_dive_t)));
+    if (dive == nullptr) return 0;
+
+    const char *vendorStr = env->GetStringUTFChars(vendor, nullptr);
+    const char *productStr = env->GetStringUTFChars(product, nullptr);
+    jsize dataLen = env->GetArrayLength(data);
+    jbyte *dataPtr = env->GetByteArrayElements(data, nullptr);
+
+    char error_buf[256] = {0};
+
+    // model was range-checked in Kotlin against UINT32_MAX before narrowing to
+    // jint, so this reinterprets the bit pattern rather than losing a value.
+    int rc = libdc_parse_raw_dive(
+        vendorStr, productStr, static_cast<unsigned int>(model),
+        reinterpret_cast<const unsigned char *>(dataPtr),
+        static_cast<unsigned int>(dataLen),
+        dive, error_buf, sizeof(error_buf));
+
+    env->ReleaseByteArrayElements(data, dataPtr, JNI_ABORT);
+    env->ReleaseStringUTFChars(vendor, vendorStr);
+    env->ReleaseStringUTFChars(product, productStr);
+
+    if (rc != 0) {
+        if (errorBuf != nullptr && error_buf[0]) {
+            jsize len = env->GetArrayLength(errorBuf);
+            jsize msgLen = static_cast<jsize>(strlen(error_buf));
+            if (msgLen > len) msgLen = len;
+            env->SetByteArrayRegion(errorBuf, 0, msgLen,
+                reinterpret_cast<const jbyte *>(error_buf));
+        }
+        free_parsed_dive(dive);
+        return 0;
+    }
+
+    return reinterpret_cast<jlong>(dive);
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_submersion_libdivecomputer_LibdcWrapper_nativeParsedDiveFree(
+    JNIEnv *, jclass, jlong divePtr) {
+    free_parsed_dive(reinterpret_cast<libdc_parsed_dive_t *>(divePtr));
+}

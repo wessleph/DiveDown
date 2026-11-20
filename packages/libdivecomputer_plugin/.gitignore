@@ -1,0 +1,24 @@
+# Derived from Submersion (https://github.com/submersion-app/submersion), commit e78a87cb, GPL-3.0. Modified for DiveDown.
+
+# Override root .gitignore: Pigeon-generated files must be committed
+# because they are part of the plugin's public API and native platform code
+!*.g.dart
+!*.g.swift
+!*.g.kt
+!*.g.h
+!*.g.cc
+
+# Standard ignores for the plugin package
+.dart_tool/
+.pub/
+build/
+pubspec.lock
+
+# Native build artifacts
+macos/build/
+ios/build/
+android/.gradle/
+
+# Swift Package Manager
+darwin/.build/
+.swiftpm/

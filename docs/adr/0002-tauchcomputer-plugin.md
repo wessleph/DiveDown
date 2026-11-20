@@ -35,3 +35,9 @@ Die Recherche (Option B) ging von eigenen `dart:ffi`-Bindings aus. Submersion ze
 - iOS: libdivecomputer wird per `build_libdc.sh` statisch gebaut. Weil DiveDown unter GPL-3 steht und der gesamte Quellcode öffentlich ist, ist die LGPL-Pflicht zum Neu-Linken erfüllt.
 - Mindestversionen: iOS 15, Android minSdk 26 (wie Submersion, endgültig festgelegt in ADR 0005).
 - Das Runbook `docs/entwickler/runbooks/libdivecomputer-update.md` (Phase 80) beschreibt: Submodul hochziehen → Patches prüfen → Fixture-Tests → TestFlight.
+
+## Nachtrag 2026-11-20: Übernahme umgesetzt
+- Plugin übernommen vom Stand Submersion `e78a87cb`. Seitdem gab es upstream nur eine Plugin-Änderung (#4775, Shearwater Avelo), die wir nicht brauchen.
+- libdivecomputer kommt aus dem eigenen Fork `wessleph/libdivecomputer`. Der Branch `divedown` zeigt auf `fbd2c42`, damit der Commit im Fork erreichbar ist. Das Submodul ist auf den Commit gepinnt, `.gitmodules` hat **keinen** `branch =`-Eintrag.
+- `ios/Classes/` besteht wie upstream aus Symlinks auf `darwin/Sources/` und `macos/Classes/`. Sie sind als Git-Symlinks eingecheckt und funktionieren auf dem macOS-Runner. Unter Windows erscheinen sie als kleine Textdateien: **Swift-Code nur in `darwin/Sources/` bearbeiten, C-Wrapper nur in `macos/Classes/`.**
+- Der Kotlin-Paketname `com.submersion.libdivecomputer` bleibt, damit Upstream-Diffs sauber bleiben. Er ist für Nutzer nicht sichtbar.

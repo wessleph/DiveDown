@@ -8,6 +8,7 @@ build/
 .flutter-plugins-dependencies
 *.iml
 .idea/
+.cxx/
 
 # Signing / secrets (security.md G6)
 *.jks

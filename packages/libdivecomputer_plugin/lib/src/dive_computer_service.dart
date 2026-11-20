@@ -1,0 +1,209 @@
+// Derived from Submersion (https://github.com/submersion-app/submersion), commit e78a87cb, GPL-3.0. Modified for DiveDown.
+
+import 'dart:async';
+
+import 'package:libdivecomputer_plugin/src/generated/dive_computer_api.g.dart';
+
+/// PlatformException code a native startDiscovery fails with when the
+/// Bluetooth radio is off or missing, so the app can say that instead of
+/// showing the platform's error text (issue #2507). Windows reports it; the
+/// other platforms end the scan without an error.
+const bluetoothUnavailableErrorCode = 'bluetooth_unavailable';
+
+/// Events emitted during a download.
+sealed class DownloadEvent {}
+
+class DownloadProgressEvent extends DownloadEvent {
+  final DownloadProgress progress;
+  DownloadProgressEvent(this.progress);
+}
+
+class DiveDownloadedEvent extends DownloadEvent {
+  final ParsedDive dive;
+  DiveDownloadedEvent(this.dive);
+}
+
+class DownloadCompleteEvent extends DownloadEvent {
+  final int totalDives;
+  final String? serialNumber;
+  final String? firmwareVersion;
+
+  /// Wire name of the clock sync outcome ("synced", "unsupported", "failed")
+  /// or null when no sync was requested. Parsed by the app layer.
+  final String? clockSyncStatus;
+
+  /// The libdivecomputer product the device reported about itself during the
+  /// download, when that differs from the one it was scanned as (issue #422:
+  /// a Cressi Donatello behind Cressi's Bluetooth adapter scans as a
+  /// Cartesio). Null when there is nothing to relabel.
+  final String? reportedProduct;
+
+  /// The descriptor model code matching [reportedProduct].
+  final int? reportedModel;
+
+  DownloadCompleteEvent(
+    this.totalDives, {
+    this.serialNumber,
+    this.firmwareVersion,
+    this.clockSyncStatus,
+    this.reportedProduct,
+    this.reportedModel,
+  });
+}
+
+class DownloadErrorEvent extends DownloadEvent {
+  final DiveComputerError error;
+  DownloadErrorEvent(this.error);
+}
+
+class PinCodeRequestEvent extends DownloadEvent {
+  final String deviceAddress;
+  PinCodeRequestEvent(this.deviceAddress);
+}
+
+/// High-level Dart service wrapping the Pigeon DiveComputerHostApi.
+///
+/// Provides a Stream-based interface over the callback-based Pigeon API.
+/// Implements [DiveComputerFlutterApi] to receive native-initiated callbacks
+/// for device discovery events, download progress, and dive data.
+class DiveComputerService implements DiveComputerFlutterApi {
+  final DiveComputerHostApi _hostApi;
+
+  final _discoveredDevicesController =
+      StreamController<DiscoveredDevice>.broadcast();
+  final _discoveryCompleteController = StreamController<void>.broadcast();
+  final _downloadEventsController = StreamController<DownloadEvent>.broadcast();
+  final _logEventsController =
+      StreamController<
+        ({String category, String level, String message})
+      >.broadcast();
+
+  DiveComputerService({DiveComputerHostApi? hostApi})
+    : _hostApi = hostApi ?? DiveComputerHostApi();
+
+  /// Stream of discovered devices during scanning.
+  Stream<DiscoveredDevice> get discoveredDevices =>
+      _discoveredDevicesController.stream;
+
+  /// Stream that emits when discovery is complete.
+  Stream<void> get discoveryComplete => _discoveryCompleteController.stream;
+
+  /// Stream of download events (progress, dives, complete, error).
+  Stream<DownloadEvent> get downloadEvents => _downloadEventsController.stream;
+
+  /// Stream of log events from native code.
+  Stream<({String category, String level, String message})> get logEvents =>
+      _logEventsController.stream;
+
+  /// Get all known device descriptors from libdivecomputer.
+  Future<List<DeviceDescriptor>> getDeviceDescriptors() {
+    return _hostApi.getDeviceDescriptors();
+  }
+
+  /// Get the libdivecomputer version string.
+  Future<String> getVersion() {
+    return _hostApi.getLibdivecomputerVersion();
+  }
+
+  /// Start scanning for dive computers.
+  Future<void> startDiscovery(TransportType transport) {
+    return _hostApi.startDiscovery(transport);
+  }
+
+  /// Stop scanning.
+  Future<void> stopDiscovery() {
+    return _hostApi.stopDiscovery();
+  }
+
+  /// Start downloading dives from a discovered device.
+  ///
+  /// [syncClock] asks the native side to set the computer's clock to the
+  /// host's local time once the download has succeeded (issue #1216).
+  Future<void> startDownload(
+    DiscoveredDevice device, {
+    String? fingerprint,
+    bool syncClock = false,
+  }) {
+    return _hostApi.startDownload(device, fingerprint, syncClock);
+  }
+
+  /// Cancel an ongoing download.
+  Future<void> cancelDownload() {
+    return _hostApi.cancelDownload();
+  }
+
+  /// Submit a PIN code entered by the user for BLE authentication.
+  Future<void> submitPinCode(String pinCode) {
+    return _hostApi.submitPinCode(pinCode);
+  }
+
+  // === DiveComputerFlutterApi callbacks (called from native) ===
+
+  @override
+  void onDeviceDiscovered(DiscoveredDevice device) {
+    _discoveredDevicesController.add(device);
+  }
+
+  @override
+  void onDiscoveryComplete() {
+    _discoveryCompleteController.add(null);
+  }
+
+  @override
+  void onDownloadProgress(DownloadProgress progress) {
+    _downloadEventsController.add(DownloadProgressEvent(progress));
+  }
+
+  @override
+  void onDiveDownloaded(ParsedDive dive) {
+    _downloadEventsController.add(DiveDownloadedEvent(dive));
+  }
+
+  @override
+  void onDownloadComplete(
+    int totalDives,
+    String? serialNumber,
+    String? firmwareVersion,
+    String? clockSyncStatus,
+    String? reportedProduct,
+    int? reportedModel,
+  ) {
+    _downloadEventsController.add(
+      DownloadCompleteEvent(
+        totalDives,
+        serialNumber: serialNumber,
+        firmwareVersion: firmwareVersion,
+        clockSyncStatus: clockSyncStatus,
+        reportedProduct: reportedProduct,
+        reportedModel: reportedModel,
+      ),
+    );
+  }
+
+  @override
+  void onError(DiveComputerError error) {
+    _downloadEventsController.add(DownloadErrorEvent(error));
+  }
+
+  @override
+  void onPinCodeRequired(String deviceAddress) {
+    _downloadEventsController.add(PinCodeRequestEvent(deviceAddress));
+  }
+
+  @override
+  void onLogEvent(String category, String level, String message) {
+    _logEventsController.add((
+      category: category,
+      level: level,
+      message: message,
+    ));
+  }
+
+  /// Dispose of all stream controllers.
+  void dispose() {
+    _discoveredDevicesController.close();
+    _discoveryCompleteController.close();
+    _downloadEventsController.close();
+    _logEventsController.close();
+  }
+}

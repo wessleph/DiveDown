@@ -1,0 +1,11 @@
+// Derived from Submersion (https://github.com/submersion-app/submersion), commit e78a87cb, GPL-3.0. Modified for DiveDown.
+
+package com.submersion.libdivecomputer;
+
+import com.submersion.libdivecomputer.IDiveDownloadCallback;
+import com.submersion.libdivecomputer.SerialDownloadRequest;
+
+interface IDiveDownloadService {
+    void startSerialDownload(in SerialDownloadRequest request, IDiveDownloadCallback callback);
+    void cancel();
+}

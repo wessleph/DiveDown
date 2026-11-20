@@ -1,0 +1,18 @@
+// Derived from Submersion (https://github.com/submersion-app/submersion), commit e78a87cb, GPL-3.0. Modified for DiveDown.
+
+package com.submersion.libdivecomputer
+
+import io.flutter.embedding.engine.plugins.FlutterPlugin
+
+class LibdivecomputerPlugin : FlutterPlugin {
+    override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        val context = binding.applicationContext
+        val messenger = binding.binaryMessenger
+        val api = DiveComputerHostApiImpl(context, messenger)
+        DiveComputerHostApi.setUp(messenger, api)
+    }
+
+    override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        DiveComputerHostApi.setUp(binding.binaryMessenger, null)
+    }
+}

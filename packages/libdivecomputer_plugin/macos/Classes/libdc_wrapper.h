@@ -1,0 +1,479 @@
+// Derived from Submersion (https://github.com/submersion-app/submersion), commit e78a87cb, GPL-3.0. Modified for DiveDown.
+
+// Thin C wrapper around libdivecomputer functions.
+// Keeps libdivecomputer headers as an implementation detail, not part
+// of the plugin framework's public interface.
+
+#ifndef LIBDC_WRAPPER_H
+#define LIBDC_WRAPPER_H
+
+#include <stdint.h>
+#include <stddef.h>
+
+// Get the libdivecomputer version string.
+// Returns a statically allocated string (do not free).
+const char *libdc_get_version(void);
+
+// ============================================================
+// Log Callback
+// ============================================================
+
+// Log callback for libdivecomputer diagnostic messages.
+// level maps to dc_loglevel_t: 0=NONE, 1=ERROR, 2=WARNING, 3=INFO, 4=DEBUG, 5=ALL
+typedef void (*libdc_log_callback_fn)(int level, const char *message, void *userdata);
+
+// Set the log callback that receives libdivecomputer's internal diagnostic messages.
+// Call this before creating a download session or starting operations.
+// Pass NULL to disable logging.
+void libdc_set_log_callback(libdc_log_callback_fn callback, void *userdata);
+
+// Transport type bitmask values matching dc_transport_t.
+#define LIBDC_TRANSPORT_SERIAL    (1 << 0)
+#define LIBDC_TRANSPORT_USB       (1 << 1)
+#define LIBDC_TRANSPORT_USBHID    (1 << 2)
+#define LIBDC_TRANSPORT_IRDA      (1 << 3)
+#define LIBDC_TRANSPORT_BLUETOOTH (1 << 4)
+#define LIBDC_TRANSPORT_BLE       (1 << 5)
+
+// Status codes (mirror dc_status_t).
+#define LIBDC_STATUS_SUCCESS     0
+#define LIBDC_STATUS_DONE        1
+#define LIBDC_STATUS_UNSUPPORTED (-1)
+#define LIBDC_STATUS_INVALIDARGS (-2)
+#define LIBDC_STATUS_NOMEMORY    (-3)
+#define LIBDC_STATUS_NODEVICE    (-4)
+#define LIBDC_STATUS_NOACCESS    (-5)
+#define LIBDC_STATUS_IO          (-6)
+#define LIBDC_STATUS_TIMEOUT     (-7)
+#define LIBDC_STATUS_PROTOCOL    (-8)
+#define LIBDC_STATUS_DATAFORMAT  (-9)
+#define LIBDC_STATUS_CANCELLED   (-10)
+
+// ============================================================
+// Descriptor Iterator
+// ============================================================
+
+// Descriptor info returned by the iterator.
+typedef struct {
+    const char *vendor;
+    const char *product;
+    unsigned int model;
+    // Bitmask of LIBDC_TRANSPORT_* values. From libdc_descriptor_iterator_next
+    // (the model catalog) it holds only transports the app can drive, so never
+    // LIBDC_TRANSPORT_USB (raw USB), which no platform bridge implements.
+    // libdc_descriptor_match and libdc_descriptor_lookup_model report the
+    // descriptor's raw bitmask, which they need to route a discovered device.
+    unsigned int transports;
+    // 1 when the backend hands dives to the dive callback oldest-first, 0 for
+    // libdivecomputer's usual newest-first order. Only then is a download
+    // that stopped part way a contiguous run of the oldest new dives, whose
+    // newest fingerprint is a safe resume point (issue #2902). Every function
+    // that fills this struct sets it.
+    int delivers_oldest_first;
+} libdc_descriptor_info_t;
+
+// Opaque iterator handle.
+typedef struct libdc_descriptor_iterator libdc_descriptor_iterator_t;
+
+// Create a descriptor iterator. Returns NULL on failure.
+libdc_descriptor_iterator_t *libdc_descriptor_iterator_new(void);
+
+// Get the next descriptor. Returns 0 on success, 1 when done, -1 on error.
+int libdc_descriptor_iterator_next(libdc_descriptor_iterator_t *iter,
+                                   libdc_descriptor_info_t *info);
+
+// Free the iterator.
+void libdc_descriptor_iterator_free(libdc_descriptor_iterator_t *iter);
+
+// ============================================================
+// BLE Discovery Helper
+// ============================================================
+
+// Check if a device name matches any descriptor for the given transport.
+// Returns 1 if match found (fills info), 0 if no match.
+// The vendor/product strings in info point to static data (valid for program lifetime).
+int libdc_descriptor_match(const char *name, unsigned int transport,
+                           libdc_descriptor_info_t *info);
+
+// Lookup a descriptor by exact model + transport.
+// Returns 1 if found (fills info), 0 otherwise.
+int libdc_descriptor_lookup_model(unsigned int transport, unsigned int model,
+                                  libdc_descriptor_info_t *info);
+
+// ============================================================
+// USB HID Discovery Helpers
+// ============================================================
+
+// Transport bitmask of the descriptor identified by vendor/product/model.
+// Returns 0 when no descriptor matches, which is also a valid "no transports"
+// answer; callers only ever test individual bits, so the two are equivalent.
+//
+// The USB HID download path uses this to decide whether a model is worth
+// looking for on the HID bus before it probes serial ports (issue #1271).
+unsigned int libdc_descriptor_transports(const char *vendor, const char *product,
+                                         unsigned int model);
+
+// Whether the descriptor identified by vendor/product/model accepts a USB HID
+// device with this vendor and product id. Returns 1 for a match, 0 otherwise.
+//
+// The id tables live in libdivecomputer's own filter functions
+// (dc_filter_uwatec, dc_filter_suunto), reachable through the public
+// dc_descriptor_filter(). Asking libdivecomputer rather than copying the
+// tables here means new HID hardware arrives with a submodule bump.
+//
+// A descriptor that does not declare DC_TRANSPORT_USBHID rejects every id.
+// That has to be decided from the transport bitmask rather than from the
+// filter: a filter with no USB HID branch (dc_filter_shearwater, for one)
+// falls through to "accept", so the filter alone would say yes for hardware
+// that has no HID interface at all.
+int libdc_usbhid_match(const char *vendor, const char *product,
+                       unsigned int model,
+                       unsigned short vid, unsigned short pid);
+
+// The product a device reported about itself, when that differs from the
+// descriptor it was opened with (issue #422).
+//
+// A Cressi Donatello behind Cressi's Bluetooth adapter advertises "1_...",
+// the Cartesio's model code, so the scan labels it a Cartesio. The version
+// block the Goa backend reads during the download carries the real model
+// code, in the same code space as the descriptor table.
+//
+// Only families on an allowlist are consulted: most families report a
+// DEVINFO model in a private code space that does not index the descriptor
+// table, and reading it as one would mislabel hardware.
+//
+// Returns 1 and copies the product into product_out when reported_model names
+// a different row of the same vendor and family. Returns 0 otherwise,
+// including when product_out is too small for the whole name (the app matches
+// descriptors by exact product string).
+int libdc_resolve_reported_product(const char *vendor, const char *product,
+                                   unsigned int model,
+                                   unsigned int reported_model,
+                                   char *product_out, size_t product_out_size);
+
+// ============================================================
+// Custom I/O Callbacks (for BLE bridge)
+// ============================================================
+
+// Callback function types matching dc_custom_cbs_t return values.
+// Return 0 (LIBDC_STATUS_SUCCESS) on success, negative on error.
+typedef int (*libdc_io_set_timeout_fn)(void *userdata, int timeout);
+typedef int (*libdc_io_read_fn)(void *userdata, void *data, size_t size,
+                                size_t *actual);
+typedef int (*libdc_io_write_fn)(void *userdata, const void *data, size_t size,
+                                 size_t *actual);
+typedef int (*libdc_io_ioctl_fn)(void *userdata, unsigned int request,
+                                 void *data, size_t size);
+typedef int (*libdc_io_close_fn)(void *userdata);
+typedef int (*libdc_io_poll_fn)(void *userdata, int timeout);
+typedef int (*libdc_io_purge_fn)(void *userdata, unsigned int direction);
+typedef int (*libdc_io_sleep_fn)(void *userdata, unsigned int milliseconds);
+typedef int (*libdc_io_configure_fn)(void *userdata, unsigned int baudrate,
+                                     unsigned int databits, unsigned int parity,
+                                     unsigned int stopbits, unsigned int flowcontrol);
+typedef int (*libdc_io_set_dtr_fn)(void *userdata, unsigned int value);
+typedef int (*libdc_io_set_rts_fn)(void *userdata, unsigned int value);
+
+// Flow-control values passed to libdc_io_configure_fn (mirror dc_flowcontrol_t
+// in third_party/libdivecomputer/include/libdivecomputer/iostream.h).
+//
+// The callback signature uses plain unsigned int so a platform backend does not
+// have to include libdivecomputer's headers, which also costs it the enum's
+// names. Backends should compare against these constants rather than against
+// bare 1 and 2: hardware comes first in dc_flowcontrol_t, which reads as the
+// wrong way round to anyone who thinks of XON/XOFF as the simpler case, and
+// every termios and DCB backend here had the two swapped (issue #1155).
+// test_serial_callbacks.c pins these against the real enum.
+#define LIBDC_FLOWCONTROL_NONE     0  // No flow control
+#define LIBDC_FLOWCONTROL_HARDWARE 1  // RTS/CTS
+#define LIBDC_FLOWCONTROL_SOFTWARE 2  // XON/XOFF
+
+typedef struct {
+    libdc_io_set_timeout_fn set_timeout;  // may be NULL
+    libdc_io_read_fn read;                // required
+    libdc_io_write_fn write;              // required
+    libdc_io_ioctl_fn ioctl;              // may be NULL
+    libdc_io_close_fn close;              // required
+    libdc_io_poll_fn poll;                // may be NULL
+    libdc_io_purge_fn purge;              // may be NULL
+    libdc_io_sleep_fn sleep;              // may be NULL
+    libdc_io_configure_fn configure;      // may be NULL (serial port config)
+    libdc_io_set_dtr_fn set_dtr;          // may be NULL (serial DTR line)
+    libdc_io_set_rts_fn set_rts;          // may be NULL (serial RTS line)
+    void *userdata;
+} libdc_io_callbacks_t;
+
+// ============================================================
+// BLE Characteristic Read ioctl (issue #422)
+// ============================================================
+
+// Some dive computers keep data outside the serial-over-GATT stream. The
+// Cressi Goa family has no BLE version command: libdivecomputer reads the
+// serial, model and firmware from three extra characteristics through
+// DC_IOCTL_BLE_CHARACTERISTIC_READ. The request buffer is the 16-byte
+// big-endian characteristic UUID followed by the bytes to fill with its
+// value; `size` covers both. The constants mirror libdivecomputer's
+// ioctl.h/ble.h so this header stays free of its headers;
+// test_ble_characteristic_read.c pins them against the real macros.
+#define LIBDC_BLE_UUID_SIZE 16
+#define LIBDC_BLE_UUID_STRING_SIZE 37
+// DC_IOCTL_IOR('b', 3, DC_IOCTL_SIZE_VARIABLE)
+#define LIBDC_IOCTL_BLE_CHARACTERISTIC_READ 0x40006203u
+
+#define LIBDC_BLE_CHAR_READ_NOT_THIS 0   // some other ioctl
+#define LIBDC_BLE_CHAR_READ_OK 1         // decoded
+#define LIBDC_BLE_CHAR_READ_INVALID (-1) // right ioctl, unusable buffer
+
+// Decode a characteristic read request. On LIBDC_BLE_CHAR_READ_OK, uuid_str
+// receives the lowercase 8-4-4-4-12 form and *value_size the number of value
+// bytes the bridge must supply. Anything else leaves both untouched.
+int libdc_ble_characteristic_read_decode(
+    unsigned int request, const void *data, size_t size,
+    char uuid_str[LIBDC_BLE_UUID_STRING_SIZE], size_t *value_size);
+
+// Copy a characteristic value into the request buffer after its UUID.
+// Returns LIBDC_STATUS_SUCCESS when value_len covers the requested size (a
+// longer value is truncated to it), LIBDC_STATUS_DATAFORMAT when it falls
+// short (a zero-padded version block would be misparsed), and
+// LIBDC_STATUS_INVALIDARGS for a malformed buffer.
+int libdc_ble_characteristic_read_fill(void *data, size_t size,
+                                       const unsigned char *value,
+                                       size_t value_len);
+
+// ============================================================
+// Parsed Dive Data
+// ============================================================
+
+#define LIBDC_MAX_FINGERPRINT 64
+#define LIBDC_MAX_GASMIXES    16
+#define LIBDC_MAX_TANKS       16
+
+typedef struct {
+    unsigned int time_ms;      // milliseconds since dive start
+    // Always finite -- depth has no "unavailable" sentinel, unlike every other
+    // field here. Samples the computer logged without a depth are filled in
+    // from their neighbours before this struct is returned (fill_missing_depths
+    // in libdc_download.c).
+    double depth;              // meters
+    double temperature;        // celsius (NAN if unavailable)
+    double pressure;           // bar (NAN if unavailable)
+    unsigned int tank;         // tank index (UINT32_MAX if unavailable)
+    // Per-tank pressure at this sample, indexed by libdivecomputer's tank
+    // index; NAN where that tank reported nothing. Issue #1223: a dive logged
+    // with two AI transmitters fires DC_SAMPLE_PRESSURE twice per sample, and
+    // the single `pressure`/`tank` pair above kept only the last one, so every
+    // tank but the highest-numbered lost its curve. `pressure`/`tank` still
+    // carry that last reading, for the single-pressure profile column; this
+    // array is the complete record.
+    double tank_pressure[LIBDC_MAX_TANKS];
+    unsigned int gasmix;       // active gas mix index (UINT32_MAX if unavailable)
+    // New fields for full sample capture
+    unsigned int heartbeat;    // bpm (UINT32_MAX if unavailable)
+    unsigned int heading;      // compass heading in degrees 0-359 (UINT32_MAX if unavailable)
+    double setpoint;           // bar (NAN if unavailable)
+    double ppo2;               // bar (NAN if unavailable; aggregate/computed)
+    double o2_sensor[6];       // per-cell ppO2 in bar (NAN if that cell absent)
+    unsigned int o2_sensor_mv[6]; // per-cell raw output in mV (UINT32_MAX if absent)
+    double cns;                // percentage 0-100 (NAN if unavailable)
+    unsigned int rbt;          // remaining bottom time in MINUTES as libdc reports it (UINT32_MAX if unavailable); Dart converts to seconds
+    // Decompression status at this sample
+    unsigned int deco_type;    // 0=NDL, 1=safetystop, 2=decostop, 3=deepstop (UINT32_MAX if unavailable)
+    unsigned int deco_time;    // seconds (NDL seconds or stop time remaining)
+    double deco_depth;         // stop depth in meters (NAN if unavailable)
+    unsigned int deco_tts;     // Time To Surface in seconds (UINT32_MAX if unavailable)
+} libdc_sample_t;
+
+typedef struct {
+    double oxygen;             // fraction 0.0-1.0
+    double helium;             // fraction 0.0-1.0
+    unsigned int usage;        // dc_usage_t (0=none, 1=oxygen, 2=diluent, 3=sidemount)
+} libdc_gasmix_t;
+
+typedef struct {
+    unsigned int gasmix;       // gasmix index
+    double volume;             // liters
+    double workpressure;       // bar
+    double beginpressure;      // bar
+    double endpressure;        // bar
+    unsigned int usage;        // dc_usage_t (0=none, 1=oxygen, 2=diluent, 3=sidemount, 4=Avelo Hydrotank)
+    unsigned int serial;       // air-integration transmitter serial, 0 when not reported
+} libdc_tank_t;
+
+// Name of a libdivecomputer sample event type (parser_sample_event_t), in
+// the spelling the Dart layer switches on ("ascent", "ceiling", ...). This is
+// the single table every platform binding must use: the per-platform copies
+// it replaced had all skipped SAMPLE_EVENT_RBT, shifting every later code by
+// one so ascent-rate alarms were reported as ceiling breaches. Returns
+// "unknown" for codes outside the enum. Statically allocated (do not free).
+const char *libdc_event_type_name(unsigned int type);
+
+// Outcome of the optional clock sync that runs after a successful download
+// (issue #1216). NOT_REQUESTED also covers a download that failed or was
+// cancelled, because the sync never runs then.
+typedef enum {
+    LIBDC_CLOCK_SYNC_NOT_REQUESTED = 0,
+    LIBDC_CLOCK_SYNC_SYNCED = 1,
+    LIBDC_CLOCK_SYNC_UNSUPPORTED = 2,
+    LIBDC_CLOCK_SYNC_FAILED = 3,
+} libdc_clock_sync_status_t;
+
+// Wire name for a clock sync status: "not_requested", "synced",
+// "unsupported" or "failed" ("unknown" outside the enum). This is the single
+// table every binding must report through; the Dart side switches on it.
+// Statically allocated (do not free).
+const char *libdc_clock_sync_status_name(libdc_clock_sync_status_t status);
+
+// Sets the device clock to the host's current local time (with the host UTC
+// offset) when `requested` and `download_succeeded` are both non-zero.
+// Returns NOT_REQUESTED without touching the device otherwise, SYNCED on
+// success, UNSUPPORTED when the backend has no timesync, FAILED (and logs a
+// warning through the log callback) for any other libdivecomputer status.
+struct dc_device_t;
+libdc_clock_sync_status_t libdc_sync_device_clock(struct dc_device_t *device,
+                                                   int requested,
+                                                   int download_succeeded);
+
+#define LIBDC_MAX_EVENTS 256
+
+// Plausible surface pressure: a 6000 m altitude lake to a record sea-level high.
+// The Dart importers apply the same window (lib/core/constants/
+// surface_pressure_limits.dart in the app); keep the two in step.
+#define LIBDC_MIN_SURFACE_PRESSURE_BAR 0.4
+#define LIBDC_MAX_SURFACE_PRESSURE_BAR 1.2
+
+typedef struct {
+    unsigned int time_ms;      // milliseconds since dive start
+    unsigned int type;         // parser_sample_event_t enum value
+    unsigned int flags;        // event-specific flags
+    unsigned int value;        // event-specific value
+} libdc_event_t;
+
+typedef struct {
+    // DateTime
+    int year, month, day, hour, minute, second, timezone;
+
+    // Summary fields
+    double max_depth;          // meters
+    double avg_depth;          // meters
+    unsigned int duration;     // seconds
+    double min_temp;           // celsius (NAN if unavailable)
+    double max_temp;           // celsius (NAN if unavailable)
+    double surface_pressure;   // bar, measured at the surface (NAN if unavailable)
+    // GPS entry/exit fixes (Shearwater Swift). Decimal degrees, NAN if unavailable.
+    double entry_latitude;
+    double entry_longitude;
+    double exit_latitude;
+    double exit_longitude;
+    unsigned int dive_mode;    // 0=freedive, 1=gauge, 2=OC, 3=CCR, 4=SCR
+
+    // Fingerprint
+    unsigned char fingerprint[LIBDC_MAX_FINGERPRINT];
+    unsigned int fingerprint_size;
+
+    // Profile samples (dynamically allocated)
+    libdc_sample_t *samples;
+    unsigned int sample_count;
+    unsigned int sample_capacity;
+
+    // Gas mixes (fixed-size arrays)
+    libdc_gasmix_t gasmixes[LIBDC_MAX_GASMIXES];
+    unsigned int gasmix_count;
+
+    // Tanks (fixed-size arrays)
+    libdc_tank_t tanks[LIBDC_MAX_TANKS];
+    unsigned int tank_count;
+
+    // Decompression model from dive computer
+    unsigned int deco_model_type;  // 0=none, 1=buhlmann, 2=vpm, 3=rgbm, 4=dciem
+    int deco_conservatism;         // personal adjustment (0 = neutral)
+    unsigned int gf_low;           // gradient factor low 0-100 (0 if unknown)
+    unsigned int gf_high;          // gradient factor high 0-100 (0 if unknown)
+
+    // Events (dynamically allocated)
+    libdc_event_t *events;
+    unsigned int event_count;
+    unsigned int event_capacity;
+
+    // Raw dive data for archival (not malloc'd — valid only during callback)
+    const unsigned char *raw_data;
+    unsigned int raw_data_size;
+    const unsigned char *raw_fingerprint;
+    unsigned int raw_fingerprint_size;
+} libdc_parsed_dive_t;
+
+// Free a parsed dive (frees the samples array).
+void libdc_parsed_dive_free(libdc_parsed_dive_t *dive);
+
+// ============================================================
+// Download Session
+// ============================================================
+
+typedef struct libdc_download_session libdc_download_session_t;
+
+// Download event callbacks.
+typedef void (*libdc_on_progress_fn)(unsigned int current, unsigned int maximum,
+                                     void *userdata);
+typedef void (*libdc_on_dive_fn)(const libdc_parsed_dive_t *dive, void *userdata);
+
+typedef struct {
+    libdc_on_progress_fn on_progress;  // may be NULL
+    libdc_on_dive_fn on_dive;          // required
+    void *userdata;
+} libdc_download_callbacks_t;
+
+// Create a download session. Returns NULL on failure.
+libdc_download_session_t *libdc_download_session_new(void);
+
+// Run the download. Blocks until complete or cancelled.
+// Returns 0 on success, non-zero on error.
+// sync_clock: non-zero to set the device clock to the host's local time after
+// a successful download (issue #1216). The result lands in clock_sync_out
+// (may be NULL) and never affects the return code or error_buf.
+// serial_out/firmware_out receive device info from DC_EVENT_DEVINFO (may be NULL).
+// error_buf receives a human-readable error message (optional, may be NULL).
+int libdc_download_run(
+    libdc_download_session_t *session,
+    const char *vendor, const char *product, unsigned int model,
+    unsigned int transport,
+    const libdc_io_callbacks_t *io_callbacks,
+    const unsigned char *fingerprint, unsigned int fsize,
+    int sync_clock,
+    const libdc_download_callbacks_t *callbacks,
+    unsigned int *serial_out,
+    unsigned int *firmware_out,
+    libdc_clock_sync_status_t *clock_sync_out,
+    char *error_buf, size_t error_buf_size);
+
+// Cancel a running download (thread-safe).
+void libdc_download_cancel(libdc_download_session_t *session);
+
+// Whether libdc_download_cancel has been called on this session (thread-safe).
+// Lets a transport stop a connect wait that runs before libdc_download_run.
+int libdc_download_is_cancelled(const libdc_download_session_t *session);
+
+// After libdc_download_run: the descriptor product and model the device
+// reported about itself, when it differs from the one the download was
+// opened with (see libdc_resolve_reported_product). Returns 1 and fills
+// both outputs, or 0 when there is nothing to relabel.
+int libdc_download_session_reported_device(
+    const libdc_download_session_t *session,
+    char *product_out, size_t product_out_size, unsigned int *model_out);
+
+// Free the session.
+void libdc_download_session_free(libdc_download_session_t *session);
+
+// ============================================================
+// Standalone Raw Dive Parsing
+// ============================================================
+
+/// Parse raw dive computer binary data without a device connection.
+/// Uses dc_parser_new2() with a descriptor looked up by vendor/product/model.
+/// Returns 0 on success, negative on failure.
+/// The caller must free result->samples and result->events when done.
+int libdc_parse_raw_dive(
+    const char *vendor, const char *product, unsigned int model,
+    const unsigned char *data, unsigned int size,
+    libdc_parsed_dive_t *result,
+    char *error_buf, size_t error_buf_size);
+
+#endif

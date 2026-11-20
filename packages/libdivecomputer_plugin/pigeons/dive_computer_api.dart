@@ -1,0 +1,337 @@
+// Derived from Submersion (https://github.com/submersion-app/submersion), commit e78a87cb, GPL-3.0. Modified for DiveDown.
+
+import 'package:pigeon/pigeon.dart';
+
+@ConfigurePigeon(
+  PigeonOptions(
+    dartOut: 'lib/src/generated/dive_computer_api.g.dart',
+    swiftOut: 'ios/Classes/DiveComputerApi.g.swift',
+    kotlinOut:
+        'android/src/main/kotlin/com/submersion/libdivecomputer/DiveComputerApi.g.kt',
+    kotlinOptions: KotlinOptions(package: 'com.submersion.libdivecomputer'),
+    gobjectHeaderOut: 'linux/dive_computer_api.g.h',
+    gobjectSourceOut: 'linux/dive_computer_api.g.cc',
+    gobjectOptions: GObjectOptions(module: 'LibdivecomputerPlugin'),
+    cppHeaderOut: 'windows/dive_computer_api.g.h',
+    cppSourceOut: 'windows/dive_computer_api.g.cc',
+    cppOptions: CppOptions(namespace: 'libdivecomputer_plugin'),
+  ),
+)
+// === Enums ===
+enum TransportType { ble, usb, serial, infrared }
+
+// === Data Classes ===
+
+class DeviceDescriptor {
+  const DeviceDescriptor({
+    required this.vendor,
+    required this.product,
+    required this.model,
+    required this.transports,
+    this.deliversOldestFirst = false,
+  });
+  final String vendor;
+  final String product;
+  final int model;
+  final List<TransportType> transports;
+
+  /// Whether this backend hands dives over oldest-first. libdivecomputer is
+  /// newest-first except where the fork reversed a driver (Shearwater
+  /// Petrel, issue #480). Only for such a backend is an interrupted
+  /// download's newest dive a safe resume point (issue #2902).
+  final bool deliversOldestFirst;
+}
+
+class DiscoveredDevice {
+  const DiscoveredDevice({
+    required this.vendor,
+    required this.product,
+    required this.model,
+    required this.address,
+    this.name,
+    required this.transport,
+  });
+  final String vendor;
+  final String product;
+  final int model;
+  final String address;
+  final String? name;
+  final TransportType transport;
+}
+
+class ProfileSample {
+  const ProfileSample({
+    required this.timeSeconds,
+    required this.depthMeters,
+    this.temperatureCelsius,
+    this.pressureBar,
+    this.tankIndex,
+    this.tankPressuresBar,
+    this.heartRate,
+    this.heading,
+    this.setpoint,
+    this.ppo2,
+    this.cns,
+    this.rbt,
+    this.decoType,
+    this.decoTime,
+    this.decoDepth,
+    this.tts,
+    this.o2Sensor1,
+    this.o2Sensor2,
+    this.o2Sensor3,
+    this.o2Sensor4,
+    this.o2Sensor5,
+    this.o2Sensor6,
+    this.o2SensorMv1,
+    this.o2SensorMv2,
+    this.o2SensorMv3,
+    this.o2SensorMv4,
+    this.o2SensorMv5,
+    this.o2SensorMv6,
+    this.gasMixIndex,
+  });
+  final int timeSeconds;
+  final double depthMeters;
+  final double? temperatureCelsius;
+  final double? pressureBar;
+  final int? tankIndex;
+
+  /// Every tank's pressure in bar at this sample, indexed by tank index, with
+  /// null where that tank reported nothing. libdivecomputer fires one pressure
+  /// reading per air-integrated transmitter, so a single sample can carry
+  /// several; [pressureBar]/[tankIndex] hold only the last of them and lose the
+  /// rest (issue #1223). Null when the sample carries no pressure at all, and
+  /// trimmed of trailing nulls, so an ordinary single-transmitter dive costs one
+  /// short list per sample.
+  final List<double?>? tankPressuresBar;
+  final int? heartRate;
+
+  /// Compass heading in degrees (0-359) from DC_SAMPLE_BEARING; null when the
+  /// computer does not report bearing samples.
+  final double? heading;
+  final double? setpoint;
+  final double? ppo2;
+  final double? cns;
+  final int? rbt;
+  final int? decoType;
+  final int? decoTime;
+  final double? decoDepth;
+  final int? tts;
+
+  /// Individual CCR O2 cell ppO2 readings in bar (sensor 1..6), null when that
+  /// cell has no reading. libdivecomputer reports these per-sensor via
+  /// DC_SAMPLE_PPO2; [ppo2] holds the aggregate/computed value.
+  final double? o2Sensor1;
+  final double? o2Sensor2;
+  final double? o2Sensor3;
+  final double? o2Sensor4;
+  final double? o2Sensor5;
+  final double? o2Sensor6;
+
+  /// Raw O2 cell output in millivolts (sensor 1..6), null when that cell
+  /// reports none. Present even when the cell's ppO2 is unavailable because the
+  /// logged calibration could not be trusted (issue #810).
+  final int? o2SensorMv1;
+  final int? o2SensorMv2;
+  final int? o2SensorMv3;
+  final int? o2SensorMv4;
+  final int? o2SensorMv5;
+  final int? o2SensorMv6;
+
+  /// Active gas mix index at this sample (from DC_SAMPLE_GASMIX), carried forward
+  /// from the most recent gas switch; null if the computer reported no gas.
+  final int? gasMixIndex;
+}
+
+class GasMix {
+  const GasMix({
+    required this.index,
+    required this.o2Percent,
+    required this.hePercent,
+    this.usage,
+  });
+  final int index;
+  final double o2Percent;
+  final double hePercent;
+
+  /// Gas usage from libdivecomputer's `dc_usage_t` (1=oxygen, 2=diluent,
+  /// 3=sidemount); null when the computer reported no usage (DC_USAGE_NONE).
+  /// Set on the gas mix itself, so it is available even when the mix has no
+  /// tank/transmitter record.
+  final int? usage;
+}
+
+class TankInfo {
+  const TankInfo({
+    required this.index,
+    required this.gasMixIndex,
+    this.volumeLiters,
+    this.startPressureBar,
+    this.endPressureBar,
+    this.usage,
+    this.transmitterSerial,
+  });
+  final int index;
+  final int gasMixIndex;
+  final double? volumeLiters;
+  final double? startPressureBar;
+  final double? endPressureBar;
+
+  /// Tank usage from libdivecomputer's `dc_usage_t` (1=oxygen, 2=diluent,
+  /// 3=sidemount, 4=the Avelo Hydrotank, a fork extension); null when the
+  /// computer reported no usage (DC_USAGE_NONE).
+  final int? usage;
+
+  /// Serial number of the air-integration transmitter that reported this
+  /// tank's pressures (`dc_tank_t.serial`, a fork extension); null when the
+  /// computer reported none. Identifies the physical cylinder across
+  /// computers paired to the same transmitter.
+  final int? transmitterSerial;
+}
+
+class DiveEvent {
+  const DiveEvent({required this.timeSeconds, required this.type, this.data});
+  final int timeSeconds;
+  final String type;
+  final Map<String, String>? data;
+}
+
+class ParsedDive {
+  const ParsedDive({
+    required this.fingerprint,
+    required this.dateTimeYear,
+    required this.dateTimeMonth,
+    required this.dateTimeDay,
+    required this.dateTimeHour,
+    required this.dateTimeMinute,
+    required this.dateTimeSecond,
+    this.dateTimeTimezoneOffset,
+    required this.maxDepthMeters,
+    required this.avgDepthMeters,
+    required this.durationSeconds,
+    this.minTemperatureCelsius,
+    this.maxTemperatureCelsius,
+    required this.samples,
+    required this.tanks,
+    required this.gasMixes,
+    required this.events,
+    this.diveMode,
+    this.decoAlgorithm,
+    this.gfLow,
+    this.gfHigh,
+    this.decoConservatism,
+    this.rawData,
+    this.rawFingerprint,
+    this.entryLatitude,
+    this.entryLongitude,
+    this.exitLatitude,
+    this.exitLongitude,
+    this.surfacePressureBar,
+  });
+  final String fingerprint;
+  final int dateTimeYear;
+  final int dateTimeMonth;
+  final int dateTimeDay;
+  final int dateTimeHour;
+  final int dateTimeMinute;
+  final int dateTimeSecond;
+  final int? dateTimeTimezoneOffset; // seconds east of UTC, null if unknown
+  final double maxDepthMeters;
+  final double avgDepthMeters;
+  final int durationSeconds;
+  final double? minTemperatureCelsius;
+  final double? maxTemperatureCelsius;
+  final List<ProfileSample> samples;
+  final List<TankInfo> tanks;
+  final List<GasMix> gasMixes;
+  final List<DiveEvent> events;
+  final String? diveMode;
+  final String? decoAlgorithm;
+  final int? gfLow;
+  final int? gfHigh;
+  final int? decoConservatism;
+  final Uint8List? rawData;
+  final Uint8List? rawFingerprint;
+  // GPS entry/exit fixes (Shearwater Swift); decimal degrees, null if unavailable.
+  final double? entryLatitude;
+  final double? entryLongitude;
+  final double? exitLatitude;
+  final double? exitLongitude;
+  // Atmospheric pressure the computer measured at the surface; null if unavailable.
+  final double? surfacePressureBar;
+}
+
+class DownloadProgress {
+  const DownloadProgress({
+    required this.current,
+    required this.total,
+    required this.status,
+  });
+  final int current;
+  final int total;
+  final String status;
+}
+
+class DiveComputerError {
+  const DiveComputerError({required this.code, required this.message});
+  final String code;
+  final String message;
+}
+
+// === Host API (Dart -> Native) ===
+
+@HostApi()
+abstract class DiveComputerHostApi {
+  @async
+  List<DeviceDescriptor> getDeviceDescriptors();
+
+  @async
+  void startDiscovery(TransportType transport);
+
+  void stopDiscovery();
+
+  @async
+  void startDownload(
+    DiscoveredDevice device,
+    String? fingerprint,
+    bool syncClock,
+  );
+
+  void cancelDownload();
+
+  void submitPinCode(String pinCode);
+
+  String getLibdivecomputerVersion();
+
+  @async
+  ParsedDive parseRawDiveData(
+    String vendor,
+    String product,
+    int model,
+    Uint8List data,
+  );
+}
+
+// === Flutter API (Native -> Dart) ===
+
+@FlutterApi()
+abstract class DiveComputerFlutterApi {
+  void onDeviceDiscovered(DiscoveredDevice device);
+  void onDiscoveryComplete();
+  void onDownloadProgress(DownloadProgress progress);
+  void onDiveDownloaded(ParsedDive dive);
+  void onDownloadComplete(
+    int totalDives,
+    String? serialNumber,
+    String? firmwareVersion,
+    String? clockSyncStatus,
+    // The descriptor product and model code the device reported about
+    // itself, when they differ from the ones it was scanned as (issue #422).
+    String? reportedProduct,
+    int? reportedModel,
+  );
+  void onError(DiveComputerError error);
+  void onPinCodeRequired(String deviceAddress);
+  void onLogEvent(String category, String level, String message);
+}

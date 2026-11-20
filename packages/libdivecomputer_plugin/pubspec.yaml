@@ -1,0 +1,30 @@
+# Derived from Submersion (https://github.com/submersion-app/submersion), commit e78a87cb, GPL-3.0. Modified for DiveDown.
+
+name: libdivecomputer_plugin
+description: Flutter plugin wrapping libdivecomputer for dive computer communication.
+version: 0.1.0
+
+environment:
+  sdk: ^3.10.0
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  pigeon: ^22.0.0
+
+flutter:
+  plugin:
+    # DiveDown: only iOS and Android (ADR 0002). The Kotlin package name is
+    # kept from upstream so updates stay a clean diff; it is not user-visible.
+    platforms:
+      ios:
+        pluginClass: LibdivecomputerPlugin
+      android:
+        package: com.submersion.libdivecomputer
+        pluginClass: LibdivecomputerPlugin
