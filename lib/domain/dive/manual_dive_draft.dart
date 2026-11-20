@@ -64,6 +64,9 @@ class ManualDiveDraft {
     return ManualDiveDraft(
       number: dive.number?.toString() ?? '',
       siteName: dive.siteName ?? '',
+      siteCatalogueId: dive.siteCatalogueId,
+      siteLat: dive.siteLat,
+      siteLon: dive.siteLon,
       start: dive.start,
       duration: (dive.durationS / 60).round().toString(),
       maxDepth: num(dive.maxDepthM, 1),
@@ -222,7 +225,6 @@ class ManualDiveDraft {
         text == shown ? originalValue : _parse(text);
 
     final site = siteName.trim().isEmpty ? null : siteName.trim();
-    final sameSite = original != null && site == original.siteName;
 
     final volume = value(tankVolume, before?.tankVolume, oldTank?.volumeL);
     final startBar = value(
@@ -250,9 +252,9 @@ class ManualDiveDraft {
           ? original?.number
           : int.parse(number.trim()),
       siteName: site,
-      siteCatalogueId: sameSite ? original.siteCatalogueId : null,
-      siteLat: sameSite ? original.siteLat : null,
-      siteLon: sameSite ? original.siteLon : null,
+      siteCatalogueId: site == null ? null : siteCatalogueId,
+      siteLat: site == null ? null : siteLat,
+      siteLon: site == null ? null : siteLon,
       diveComputerId: original?.diveComputerId,
       source: original?.source ?? DiveSource.manual,
       sourceId: original?.sourceId,
