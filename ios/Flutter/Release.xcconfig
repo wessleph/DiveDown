@@ -1,1 +1,11 @@
+#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"
 #include "Generated.xcconfig"
+
+// Manual signing for the TestFlight build (.github/workflows/ios-release.yml).
+// The values come from the provisioning profile in CI, passed by Flutter as
+// FLUTTER_XCODE_DIVEDOWN_*. Empty in the unsigned CI build (--no-codesign).
+CODE_SIGN_STYLE = Manual
+DEVELOPMENT_TEAM = $(DIVEDOWN_TEAM_ID)
+PROVISIONING_PROFILE_SPECIFIER = $(DIVEDOWN_PROFILE_NAME)
+CODE_SIGN_IDENTITY = Apple Distribution
+CODE_SIGN_IDENTITY[sdk=iphoneos*] = Apple Distribution

@@ -61,7 +61,7 @@ Die realistischen Risiken liegen in **vier Bereichen**:
 | E | Ein fremder Pull Request im öffentlichen Repo stiehlt Signier-Schlüssel aus GitHub Actions. | **Keine** Secrets in Workflows, die durch `pull_request` von Forks laufen. **Kein** `pull_request_target`. Die Signier- und TestFlight-Jobs laufen **nur** bei Tags bzw. auf `main`, in einer GitHub-**Environment** `release` mit manueller Freigabe. `permissions:` steht in jedem Workflow auf dem Minimum. Drittanbieter-Actions werden **per Commit-SHA gepinnt**. |
 | I | Secrets landen im Repo. | `gitleaks` läuft in der CI und optional als Pre-commit-Hook. Keystore und `.p8`-Schlüssel liegen nur als GitHub Secrets vor, `*.jks`, `*.p8`, `*.mobileprovision` und `key.properties` stehen in `.gitignore`. |
 | S | Gefälschte APK im Umlauf | Die APK wird nur über GitHub Releases verteilt und mit dem eigenen Keystore signiert. Den Fingerabdruck des Zertifikats geben wir in der README an. Obtainium prüft die Signatur bei Updates. |
-| R | Unklar, welcher Code in einem Build steckt | Jeder Build wird per Tag gebaut, die Build-Nummer ist der Git-SHA, und `THIRD_PARTY.md` wird gepflegt. |
+| R | Unklar, welcher Code in einem Build steckt | Jeder Build wird per Tag gebaut, und `THIRD_PARTY.md` wird gepflegt. Apple verlangt eine steigende Zahl als Build-Nummer, deshalb ist sie die Anzahl der Commits (`git rev-list --count HEAD`), der Git-SHA steckt als `GIT_SHA` in der App (geändert am 2026-11-20, E5). |
 
 ## 3. Was wird geloggt und was nie
 | Erlaubt | Nie |

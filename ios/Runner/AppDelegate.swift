@@ -18,7 +18,15 @@ import UIKit
     if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "DiveDownDevice") {
       registerDevice(messenger: registrar.messenger())
     }
+    if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "DiveDownShare") {
+      let receiver = SharedFileReceiver(messenger: registrar.messenger())
+      sharedFileReceiver = receiver
+      registrar.addSceneDelegate(receiver)
+    }
   }
+
+  /// Kept alive here; the registrar holds scene delegates weakly.
+  private var sharedFileReceiver: SharedFileReceiver?
 
   /// Keeps the display on during a dive computer transfer (ui-spec §5.7).
   /// Counterpart of lib/data/platform/device_channel.dart; the Bluetooth calls
@@ -42,10 +50,25 @@ import UIKit
     let channel = FlutterMethodChannel(
       name: "io.github.wessleph.divedown/backup", binaryMessenger: messenger)
     channel.setMethodCallHandler { call, result in
-      guard call.method == "excludeFromBackup",
-        let args = call.arguments as? [String: Any],
+      guard let args = call.arguments as? [String: Any],
         let path = args["path"] as? String
       else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+      // Read back for the iOS integration test (T20.12).
+      if call.method == "isExcludedFromBackup" {
+        let url = URL(fileURLWithPath: path, isDirectory: true)
+        do {
+          result(try url.resourceValues(forKeys: [.isExcludedFromBackupKey]).isExcludedFromBackup)
+        } catch {
+          result(
+            FlutterError(
+              code: "read_failed", message: error.localizedDescription, details: nil))
+        }
+        return
+      }
+      guard call.method == "excludeFromBackup" else {
         result(FlutterMethodNotImplemented)
         return
       }

@@ -1,0 +1,125 @@
+# CI for every push and pull request (ADR 0005). No secrets here: pull
+# requests from forks run this file too (security.md G6/A3). Rules W1-W9 are
+# checked by test/tool/workflow_policy_test.dart.
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Analyze, test, secrets scan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Secrets scan (gitleaks 8.30.1, MIT)
+        env:
+          GITLEAKS_VERSION: 8.30.1
+          GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+        run: |
+          archive="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -fsSL -o "$RUNNER_TEMP/$archive" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/$archive"
+          echo "$GITLEAKS_SHA256  $RUNNER_TEMP/$archive" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP" gitleaks
+          "$RUNNER_TEMP/gitleaks" git --redact --no-banner --verbose .
+
+      - name: Install Flutter
+        run: tool/ci/install_flutter.sh
+
+      - run: flutter pub get
+      - run: dart format --output=none --set-exit-if-changed lib test tool integration_test
+      - run: flutter analyze
+      - run: flutter test
+      - name: Site catalogue script tests
+        run: python3 -I -m unittest discover -s tool -p 'test_*.py'
+
+  android:
+    name: Android debug build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: recursive
+      - name: Use Java 17
+        run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> "$GITHUB_ENV"
+      - name: Install Flutter
+        run: tool/ci/install_flutter.sh
+      - run: flutter pub get
+      # Release APKs are signed on the PC only; the keystore never enters CI (A3).
+      - run: flutter build apk --debug
+
+  ios:
+    name: iOS build and tests (simulator, unsigned)
+    # ADR 0005: iOS only on main or by hand. ci/* branches are for work on the
+    # pipeline itself; only the owner can push them, forks only open PRs.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' &&
+       (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/ci/')))
+    runs-on: macos-15
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: recursive
+      - name: Select Xcode 26
+        run: tool/ci/select_xcode.sh
+      - name: Install Flutter
+        run: tool/ci/install_flutter.sh
+      - run: flutter pub get
+
+      - name: Device build, not signed
+        run: flutter build ios --release --no-codesign
+
+      - name: Boot simulator
+        id: sim
+        run: tool/ci/boot_simulator.sh
+
+      # T4.5 (EON Core fixtures through libdivecomputer built for iOS) and
+      # T20.12 (Swift side of the backup exclusion).
+      - name: Integration tests on the simulator
+        env:
+          UDID: ${{ steps.sim.outputs.udid }}
+        run: flutter test integration_test -d "$UDID"
+
+      # T20.9-T20.11 (XCTest in ios/RunnerTests).
+      - name: Swift unit tests
+        env:
+          UDID: ${{ steps.sim.outputs.udid }}
+        run: |
+          flutter build ios --simulator --debug
+          xcodebuild test \
+            -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Debug \
+            -destination "id=$UDID" \
+            CODE_SIGNING_ALLOWED=NO
+
+      # Podfile.lock is checked in (G6). Uploaded so a change can be reviewed
+      # and committed from the PC.
+      - name: Keep Podfile.lock
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ios-podfile-lock
+          path: ios/Podfile.lock
+          if-no-files-found: warn
+          retention-days: 14
