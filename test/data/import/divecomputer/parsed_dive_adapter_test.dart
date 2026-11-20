@@ -221,6 +221,45 @@ void main() {
     expect(d.events[1].value, isNull);
   });
 
+  test('T4.11 split samples with the same time are merged (EON Core)', () {
+    // Seen in the real dumps: depth first, temperature in a second sample.
+    final d = importedFromParsedDive(
+      _parsed(
+        samples: [
+          dc.ProfileSample(timeSeconds: 0, depthMeters: 1.24),
+          dc.ProfileSample(
+            timeSeconds: 0,
+            depthMeters: 1.24,
+            temperatureCelsius: 20.8,
+          ),
+          dc.ProfileSample(
+            timeSeconds: 10,
+            depthMeters: 2.6,
+            tankPressuresBar: [200.0],
+          ),
+          dc.ProfileSample(
+            timeSeconds: 10,
+            depthMeters: 2.63,
+            temperatureCelsius: 20.9,
+            tankPressuresBar: [null, 180.0],
+          ),
+        ],
+      ),
+      product: 'EON Core',
+    );
+
+    expect(d.samples, hasLength(2));
+    expect(d.samples[0].depthM, 1.24);
+    expect(d.samples[0].temperatureC, 20.8);
+    final s = d.samples[1];
+    expect(s.depthM, 2.63, reason: 'the later value wins');
+    expect(s.temperatureC, 20.9);
+    expect(s.pressures.map((p) => (p.tankIndex, p.pressureBar)), [
+      (0, 200.0),
+      (1, 180.0),
+    ]);
+  });
+
   test('T4.10 samples: temperature, heart rate, NDL and deco', () {
     final d = importedFromParsedDive(
       _parsed(

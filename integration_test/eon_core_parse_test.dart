@@ -61,7 +61,14 @@ void main() {
         );
 
         expect(result, isA<Plausible>());
-        expect((result as Plausible).warnings.isEmpty, isTrue);
+        final w = (result as Plausible).warnings;
+        expect(
+          w.isEmpty,
+          isTrue,
+          reason:
+              'dropped ${w.samplesDropped}, pressures ${w.pressuresDropped}, '
+              'reordered ${w.samplesReordered}',
+        );
       });
     });
   }

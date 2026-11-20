@@ -18,6 +18,7 @@ const _decoTypeNdl = 0;
 /// - Mean depth and temperatures from the samples when the device reports
 ///   none; a mean depth of exactly 0 counts as none (EON Core, T4.6, T4.7).
 /// - `sourceId` = `<product>:<fingerprint>` (T4.8).
+/// - Split samples with the same time are merged into one (EON Core, T4.11).
 ImportedDive importedFromParsedDive(
   dc.ParsedDive dive, {
   required String product,
@@ -31,7 +32,7 @@ ImportedDive importedFromParsedDive(
     dive.dateTimeSecond,
   );
   final offset = dive.dateTimeTimezoneOffset;
-  final samples = [for (final s in dive.samples) _sample(s)];
+  final samples = _mergeSameTime([for (final s in dive.samples) _sample(s)]);
   final temperatures = [for (final s in samples) ?s.temperatureC];
 
   return ImportedDive(
@@ -69,6 +70,39 @@ ImportedDive importedFromParsedDive(
     siteLat: dive.entryLatitude,
     siteLon: dive.entryLongitude,
   );
+}
+
+/// libdivecomputer reports some times twice, e.g. depth first and the
+/// temperature in a second sample. Later values win, missing ones are kept.
+List<DiveSample> _mergeSameTime(List<DiveSample> samples) {
+  final merged = <DiveSample>[];
+  for (final s in samples) {
+    if (merged.isEmpty || merged.last.timeS != s.timeS) {
+      merged.add(s);
+      continue;
+    }
+    final a = merged.removeLast();
+    final pressures = {
+      for (final p in a.pressures) p.tankIndex: p,
+      for (final p in s.pressures) p.tankIndex: p,
+    };
+    merged.add(
+      DiveSample(
+        timeS: s.timeS,
+        depthM: s.depthM,
+        temperatureC: s.temperatureC ?? a.temperatureC,
+        pressures: [
+          for (final i in pressures.keys.toList()..sort()) pressures[i]!,
+        ],
+        heartRate: s.heartRate ?? a.heartRate,
+        ndlS: s.ndlS ?? a.ndlS,
+        decoCeilingM: s.decoCeilingM ?? a.decoCeilingM,
+        decoTimeS: s.decoTimeS ?? a.decoTimeS,
+        gasIndex: s.gasIndex ?? a.gasIndex,
+      ),
+    );
+  }
+  return merged;
 }
 
 double _min(double a, double b) => a < b ? a : b;
