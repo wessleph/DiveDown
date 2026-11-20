@@ -1,0 +1,16 @@
+{
+  "@@locale": "de",
+  "appTitle": "DiveDown",
+  "navLogbook": "Logbuch",
+  "@navLogbook": {
+    "description": "Bottom navigation: dive log tab"
+  },
+  "navImport": "Importieren",
+  "@navImport": {
+    "description": "Bottom navigation: import tab"
+  },
+  "navSettings": "Einstellungen",
+  "@navSettings": {
+    "description": "Bottom navigation: settings tab"
+  }
+}

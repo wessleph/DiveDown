@@ -1,0 +1,28 @@
+name: divedown
+description: "Tauch-Logbuch für iOS und Android"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.0
+
+# New dependencies only with a checked, GPL-3-compatible licence
+# (constitution, rule 4). Versions follow Submersion where possible (ADR 0005).
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  flutter_riverpod: ^3.4.2 # MIT
+  go_router: ^17.0.1 # BSD-3-Clause
+  intl: any # BSD-3-Clause, version pinned by flutter_localizations
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true
