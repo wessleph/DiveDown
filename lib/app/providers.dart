@@ -2,11 +2,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/local/database.dart';
 import '../data/local/drift_app_settings.dart';
+import '../data/local/drift_dive_computer_repository.dart';
 import '../data/local/drift_dive_repository.dart';
 import '../data/local/drift_site_repository.dart';
 import '../domain/dive/dive.dart';
 import '../domain/dive/dive_repository.dart';
 import '../domain/dive/diver.dart';
+import '../domain/import/bluetooth_access.dart';
+import '../domain/import/dive_computer_import.dart';
+import '../domain/import/dive_computer_registry.dart';
+import '../domain/import/dive_computer_source.dart';
+import '../domain/import/import_service.dart';
 import '../domain/settings/app_settings.dart';
 import '../domain/sites/site_repository.dart';
 import '../domain/sites/site_suggestions.dart';
@@ -75,6 +81,32 @@ final visitedCountriesProvider = FutureProvider<Set<String>>((ref) async {
   if (diver == null) return const {};
   return ref.watch(siteRepositoryProvider).visitedCountries(diver.id!);
 });
+
+final diveComputerRepositoryProvider = Provider<DiveComputerRepository>(
+  (ref) => DriftDiveComputerRepository(ref.watch(appDatabaseProvider)),
+);
+
+/// The plugin behind [DiveComputerSource]; tests override it with a fake.
+final diveComputerSourceProvider = Provider<DiveComputerSource>(
+  (ref) => throw UnimplementedError('diveComputerSourceProvider'),
+);
+
+/// Runtime permissions and the radio (permission_handler, security.md §4).
+final bluetoothAccessProvider = Provider<BluetoothAccess>(
+  (ref) => throw UnimplementedError('bluetoothAccessProvider'),
+);
+
+final screenAwakeProvider = Provider<ScreenAwake>(
+  (ref) => throw UnimplementedError('screenAwakeProvider'),
+);
+
+final diveComputerImportProvider = Provider<DiveComputerImport>(
+  (ref) => DiveComputerImport(
+    source: ref.watch(diveComputerSourceProvider),
+    registry: DiveComputerRegistry(ref.watch(diveComputerRepositoryProvider)),
+    importService: ImportService(ref.watch(diveRepositoryProvider)),
+  ),
+);
 
 extension RefreshDives on WidgetRef {
   /// Call after a dive was saved, deleted or restored.

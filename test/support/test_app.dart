@@ -11,6 +11,7 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
@@ -87,6 +88,7 @@ Future<void> pumpTestApp(
   Size size = const Size(400, 800),
   double textScale = 1,
   String? location,
+  List<Override> overrides = const [],
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -96,7 +98,7 @@ Future<void> pumpTestApp(
 
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [appDatabaseProvider.overrideWithValue(db)],
+      overrides: [appDatabaseProvider.overrideWithValue(db), ...overrides],
       child: const DiveDownApp(),
     ),
   );

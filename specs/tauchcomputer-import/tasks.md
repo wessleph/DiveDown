@@ -103,6 +103,37 @@ Nicht in diesem Paket: die Import-Oberfläche (T12.4–T12.11) und das Zusammens
 - [x] T4 `importedFromParsedDive` → T4.1–T4.4, T4.6–T4.11 grün (PC). **T4.5 auf dem S25 Ultra grün (9/9):** alle 3 echten Tauchgänge bestehen die Plausibilitätsprüfung ohne Änderung, Ø-Tiefe und Temperatur werden aus den Samples ergänzt. Die T4.5-Erwartung zur Sample-Anzahl zählt seit T4.11 Zeitpunkte statt Rohsamples.
 - Gesamt: `flutter test` 195/195, `flutter analyze` ohne Befund.
 
+## T17: BLE-Import von der Übertragung bis ins Logbuch (`domain/import/dive_computer_import.dart`, design §4.1)
+| ID | A | W | D | Rot gesehen |
+|---|---|---|---|---|
+| T17.1 | EON Core bekannt mit Fingerprint F | Download mit 2 Tauchgängen | Plugin bekommt F. Tauchgänge in Reihenfolge, Seriennummer und Firmware im Ergebnis, Fortschritt und Tauchgänge gehen an die Oberfläche | ✅ 2026-11-20: rot wegen `UnimplementedError` (`DiveComputerImport.download`) |
+| T17.2 | Gerät unbekannt | 2 Tauchgänge gespeichert | Gerät angelegt, Tauchgänge verweisen darauf (auch beim **ersten** Import), nächster Download startet nach dem neuesten | ✅ 2026-11-20: rot, wie T17.1 |
+| T17.3 | 2 Tauchgänge, dann Abbruch durch Nutzer | gespeichert | beide gespeichert, Fingerprint unverändert | ✅ 2026-11-20: rot, wie T17.1 |
+| T17.4 | 1 Tauchgang, dann `download_error` | gespeichert | Ende `connectionLost`, Tauchgang gespeichert, Fingerprint unverändert | ✅ 2026-11-20: rot, wie T17.1 |
+| T17.5 | `download_crashed` | Download | Ende `failed` mit Code | ✅ 2026-11-20: rot, wie T17.1 |
+| T17.6 | bekannte Seriennummer S, Gerät meldet S′ | Download / „Als neues Gerät verwenden“ | Abweichung steht **vor** der Vorschau im Ergebnis. Danach neues Gerät S′, Fingerprint von S unberührt, Tauchgänge verweisen auf S′ | ✅ 2026-11-20: rot, wie T17.1 |
+| T17.7 | Download fertig | nichts ausgewählt, gespeichert | nichts gespeichert, Fingerprint unverändert (T3.6) | ✅ 2026-11-20: rot, wie T17.1 |
+| T17.8 | 1 exaktes und 1 ähnliches Duplikat | Vorschau, dann ähnliches bestätigt | `SkippedDuplicate`, `NeedsConfirmation`, `Saved`. Bestätigtes wird gespeichert | ✅ 2026-11-20: rot, wie T17.1 |
+| T17.9 | PIN angefordert, keine neuen Tauchgänge | Code eingegeben | Code geht ans Gerät, Ende `completed` ohne Tauchgänge | ✅ 2026-11-20: rot, wie T17.1 |
+
+Tests: `test/domain/import/dive_computer_import_test.dart` (In-Memory-Drift, Fake-Quelle).
+
+## T18: Plugin als `DiveComputerSource` (`data/import/divecomputer/plugin_dive_computer_source.dart`)
+| ID | A | W | D | Rot gesehen |
+|---|---|---|---|---|
+| T18.1 | Plugin meldet dasselbe Gerät zweimal, eins ohne Namen | Suche | nur BLE, jede Adresse einmal, ohne Namen steht das Produkt da, Stream endet mit der Suche | ✅ 2026-11-20: rot wegen `UnimplementedError` (`PluginDiveComputerSource.discover`) |
+| T18.2 | Gerät mit Modell −1 (z. B. Ocean) | Suche, dann Stopp | sichtbar, `supported = false` | ✅ 2026-11-20: rot, wie T18.1 |
+| T18.3 | Fingerprint `5576006a` | Download | Plugin bekommt Hex-Text, ohne Uhrzeit-Abgleich; ohne Fingerprint `null` | ✅ 2026-11-20: rot wegen `UnimplementedError` (`…download`) |
+| T18.4 | Fortschritt, 1 Tauchgang, Ende | Download | über `importedFromParsedDive` übersetzt (`sourceId`, Ø-Tiefe), Ende mit Seriennummer und Firmware | ✅ 2026-11-20: rot, wie T18.3 |
+| T18.5 | BLE-Download läuft | Abbrechen | `cancelDownload`, `TransferCancelled`, Stream endet, **obwohl das Plugin bei BLE nach Abbruch nichts mehr meldet** | ✅ 2026-11-20: rot, wie T18.3 |
+| T18.6 | USB: Plugin schickt nach Abbruch noch Tauchgänge und `onDownloadComplete` | Abbrechen | kein `TransferCompleted` | ✅ 2026-11-20: rot, wie T18.3 |
+| T18.7 | Fehlercodes | Download | `connect_failed`, `bond_failed`, `not_found`, `download_error` = Verbindungsproblem, sonst unerwarteter Fehler | ✅ 2026-11-20: rot, wie T18.3 |
+| T18.8 | PIN angefordert | Code eingegeben | `PinRequested`, Code geht an `submitPinCode` | ✅ 2026-11-20: rot, wie T18.3 |
+| T18.9 | Adresse `…:3F:7A` bzw. iOS-UUID `…3A2B` | Kurzkennung | „3F7A“ bzw. „3A2B“ | ✅ 2026-11-20: rot wegen `UnimplementedError` (`shortId`) |
+
+Tests: `test/data/import/divecomputer/plugin_dive_computer_source_test.dart` (Fake-`DiveComputerHostApi`, Rückrufe direkt am `DiveComputerService`).
+Nicht am PC testbar: Laufzeit-Berechtigungen und Bluetooth-Zustand (`permission_handler`), Bildschirm anlassen und „Bluetooth einschalten“ (eigener Plattform-Kanal). Prüfung auf dem S25 Ultra mit dem echten EON Core.
+
 ## T5: FIT-Import (`data/import/fit/`, security A2/R3)
 | ID | A | W | D | Rot gesehen |
 |---|---|---|---|---|
@@ -227,20 +258,31 @@ Tests T11.9/T11.10: `test/data/platform/backup_exclusion_test.dart`, `test/app/s
 | T12.1 | keine Tauchgänge | Logbuch | Leerzustand mit „Importieren“ und „Manuell eintragen“ | ✅ 2026-11-20: rot, Leerzustand fehlt (Text nicht gefunden) |
 | T12.2 | Tauchgang ohne Tauchplatz | Logbuch-Zeile | „Ohne Tauchplatz“ | ✅ 2026-11-20: rot, Liste fehlt (Text nicht gefunden) |
 | T12.3 | Tauchgang #42 | Logbuch-Zeile | Semantics-Label beginnt mit „Tauchgang 42“ | ✅ 2026-11-20: rot, Liste fehlt (`#42` nicht gefunden) |
-| T12.4 | Bluetooth aus | Gerätesuche | Text „Bluetooth ist ausgeschaltet.“ + Knopf | |
-| T12.5 | Berechtigung dauerhaft verweigert | Gerätesuche | „Einstellungen öffnen“ | |
-| T12.6 | 30 s ohne Fund | Gerätesuche | Checkliste + „Erneut suchen“ | |
-| T12.7 | Suunto Ocean gefunden | Gerätesuche | ausgegraut + Link zur FIT-Anleitung | |
-| T12.8 | `SerialMismatch` | Gerätesuche | Warn-Dialog, Primärknopf „Abbrechen“ | |
-| T12.9 | PIN angefordert von „EON Core ••3F7A“ | Dialog | Gerätename sichtbar. Nach 60 s „Zeit abgelaufen“. | |
-| T12.10 | Vorschau mit 1 Duplikat | Vorschau | Duplikat nicht ausgewählt, Knopf „2 Tauchgänge importieren“ | |
-| T12.11 | nichts ausgewählt | Vorschau | Knopf deaktiviert „Nichts ausgewählt“ | |
+| T12.4 | Bluetooth aus | Gerätesuche | Text „Bluetooth ist ausgeschaltet.“ + Knopf || ✅ 2026-11-20: rot, `DiveComputerScreen` wirft `UnimplementedError` |
+| T12.5 | Berechtigung dauerhaft verweigert | Gerätesuche | „Einstellungen öffnen“ || ✅ 2026-11-20: rot, `DiveComputerScreen` wirft `UnimplementedError` |
+| T12.6 | 30 s ohne Fund | Gerätesuche | Checkliste + „Erneut suchen“ || ✅ 2026-11-20: rot, `DiveComputerScreen` wirft `UnimplementedError` |
+| T12.7 | Suunto Ocean gefunden | Gerätesuche | ausgegraut + Link zur FIT-Anleitung || ✅ 2026-11-20: rot, `DiveComputerScreen` wirft `UnimplementedError` |
+| T12.8 | `SerialMismatch` | Gerätesuche | Warn-Dialog, Primärknopf „Abbrechen“ || ✅ 2026-11-20: rot, `DiveComputerScreen` wirft `UnimplementedError` |
+| T12.9 | PIN angefordert von „EON Core ••3F7A“ | Dialog | Gerätename sichtbar. Nach 60 s „Zeit abgelaufen“. || ✅ 2026-11-20: rot, `DiveComputerScreen` wirft `UnimplementedError` |
+| T12.10 | Vorschau mit 1 Duplikat | Vorschau | Duplikat nicht ausgewählt, Knopf „2 Tauchgänge importieren“ || ✅ 2026-11-20: rot, `DiveComputerScreen` wirft `UnimplementedError` |
+| T12.11 | nichts ausgewählt | Vorschau | Knopf deaktiviert „Nichts ausgewählt“ || ✅ 2026-11-20: rot, `DiveComputerScreen` wirft `UnimplementedError` |
 | T12.12 | Detail ohne Druck | Detail | SAC „—“ + Info-Text | ✅ 2026-11-20: rot, `DiveDetailScreen` wirft `UnimplementedError` |
 | T12.13 | Textskalierung 200 % | Logbuch, Detail | kein Overflow (`tester.takeException() == null`) | ✅ 2026-11-20: rot, Inhalt fehlt (Liste, Detail, Formular). Der Test verlangt vorher sichtbaren Inhalt, damit er nicht leer grün wird |
-| T12.14 | alle Bildschirme | Semantics-Prüfung | jedes tippbare Element ≥ 48 dp (`androidTapTargetGuideline`, `iOSTapTargetGuideline`, `textContrastGuideline`) | ✅ 2026-11-20: rot, Inhalt fehlt, wie T12.13. Abgedeckt: Logbuch (leer und Liste), Detail, Formular. Import-Bildschirme folgen mit dem Import |
+| T12.14 | alle Bildschirme | Semantics-Prüfung | jedes tippbare Element ≥ 48 dp (`androidTapTargetGuideline`, `iOSTapTargetGuideline`, `textContrastGuideline`) | ✅ 2026-11-20: rot, Inhalt fehlt, wie T12.13. Abgedeckt: Logbuch (leer und Liste), Detail, Formular. Import-Bildschirme folgen mit dem Import. **Import (Quelle, Geräteliste, Vorschau):** ✅ 2026-11-20 rot, Karte „Tauchcomputer“ fehlt |
 | T12.15 | Manuelles Formular, Tiefe 400 | Speichern | Fehler „Tiefe muss zwischen 0 und 350 m liegen.“, Fokus springt hin | ✅ 2026-11-20: rot, Formular fehlt (kein FAB) |
 
-Tests: `test/features/logbook/` (Liste, Detail, Formular). In diesem Paket nur die Logbuch-Zeilen T12.1–T12.3 und T12.12–T12.15. T12.4–T12.11 gehören zum Import (BLE, Vorschau) und kommen mit T3/T4.
+| T12.16 | Importieren-Tab, Android | angezeigt | „Importieren für: Anna“, Karten „Tauchcomputer · Per Bluetooth übertragen“ und „FIT-Datei“, **kein** Apple Health. Tippen auf „Tauchcomputer“ öffnet die Suche | ✅ 2026-11-20: rot, Text nicht gefunden (Tab ist leer) |
+| T12.17 | Bluetooth bereit | Gerätesuche geöffnet | Suche startet von selbst, „Suche nach Tauchcomputern …“, Koppel-Hinweis EON Core, „Stopp“ beendet die Suche | ✅ 2026-11-20: rot, `UnimplementedError` (`DiveComputerScreen`) |
+| T12.18 | Übertragung läuft, 2 Tauchgänge da, Fortschritt 100/400 | angezeigt, dann „Abbrechen“ | „2 neue Tauchgänge gefunden …“, Balken 25 %, Hinweis „Halte den Tauchcomputer in der Nähe …“, Bildschirm bleibt an. Nach Abbruch „Übertragung abgebrochen.“, Vorschau mit beiden, Bildschirm wieder frei | ✅ 2026-11-20: rot, wie T12.17 |
+| T12.19 | Download ohne neue Tauchgänge | beendet | „Alles auf dem neuesten Stand. …“, „Fertig“ führt zurück zu „Importieren“ | ✅ 2026-11-20: rot, wie T12.17 |
+| T12.20 | Verbindung bricht nach 2 Tauchgängen ab | angezeigt | „Die Verbindung wurde unterbrochen.“, „2 Tauchgänge wurden übertragen.“, „Übertragene prüfen“ (→ Vorschau), „Erneut verbinden“ | ✅ 2026-11-20: rot, wie T12.17 |
+| T12.21 | Vorschau mit 3 neuen Tauchgängen | „3 Tauchgänge importieren“ | zurück im Logbuch, Snackbar „3 Tauchgänge importiert“, 3 Tauchgänge gespeichert, Gerät mit Seriennummer und neuestem Fingerprint | ✅ 2026-11-20: rot, wie T12.17 |
+| T12.22 | Berechtigung noch nicht erteilt | Gerätesuche | Vorab-Erklärung, erst „Weiter“ öffnet den System-Dialog, danach startet die Suche | ✅ 2026-11-20: rot, wie T12.17 |
+| T12.23 | EON Core schon bekannt | gefunden | Kennzeichnung „Bekannt“ | ✅ 2026-11-20: rot, wie T12.17 |
+| T12.24 | unerwarteter Fehler `download_crashed` | Übertragung | Fehlerkarte mit „Erneut versuchen“ und dem Code | ✅ 2026-11-20: rot, wie T12.17 |
+| T12.25 | Tauchgang exakt schon im Logbuch | Vorschau | „Bereits im Logbuch“, Checkbox nicht bedienbar, zählt nicht mit | ✅ 2026-11-20: rot, wie T12.17 |
+
+Tests: `test/features/logbook/` (Liste, Detail, Formular). In diesem Paket nur die Logbuch-Zeilen T12.1–T12.3 und T12.12–T12.15. T12.4–T12.11 und T12.16–T12.25 (Import) liegen in `test/features/import/dive_computer_screen_test.dart`, mit Fakes für Plugin, Berechtigungen und Bildschirm (`test/support/fake_dive_computer.dart`).
 
 ## T13: Katalog-Skript (`tool/build_site_catalogue.py`, ADR 0006). Kann sofort auf dem Laptop umgesetzt werden.
 | ID | A | W | D | Rot gesehen |
