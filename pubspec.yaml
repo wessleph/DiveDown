@@ -39,6 +39,8 @@ dev_dependencies:
   integration_test: # BSD-3-Clause, part of the Flutter SDK; T4.5 on the phone
     sdk: flutter
   flutter_lints: ^6.0.0
+  xml: ^7.0.1 # MIT (petitparser MIT), already pulled in by file_picker; reads Info.plist (I1-I6)
+  yaml: ^3.1.4 # MIT (source_span, string_scanner BSD-3), already transitive; workflow policy (W1-W9)
 
 flutter:
   uses-material-design: true

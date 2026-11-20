@@ -391,3 +391,41 @@ Tests: `test/app/startup_test.dart`, `test/app/startup_gate_test.dart`. „Logs 
 - Gesamt: `flutter test` 111/111, `flutter analyze` ohne Befund, `flutter build apk --debug` ok, Backup-Attribute im zusammengeführten Manifest geprüft.
 - Zwei Testaufbauten korrigiert, ohne die Aussage zu ändern: T0 „starts in the logbook“ sucht die Tab-Namen jetzt in der `NavigationBar`, weil der Leerzustand einen zweiten Knopf „Importieren“ hat. T12.13 (Liste) prüft die erste Zeile `#43` mit dem langen Namen, weil `#42` bei 200 % unterhalb des Bildschirms liegt.
 - Noch nicht geprüft: iOS-Seite von T11.9 (kein Mac, kommt mit der CI-Pipeline), Bedienung auf einem echten Handy.
+
+## T19: CI-Richtlinie (`tool/workflow_policy.dart`, security G6/A3, ADR 0005)
+Prüft jede Datei unter `.github/workflows/`. Regeln W1–W9 stehen im Dateikopf von `tool/workflow_policy.dart`.
+| ID | A | W | D | Rot gesehen |
+|---|---|---|---|---|
+| T19.1 | Workflow hält alle Regeln ein | geprüft | keine Verstöße | ✅ 2026-11-20: rot wegen `UnimplementedError` (`checkWorkflow`) |
+| T19.2 | `uses: actions/checkout@v4` bzw. kurzer SHA; lokale Action `./…` | geprüft | W1; lokale Action erlaubt | ✅ 2026-11-20: rot, wie T19.1 |
+| T19.3 | `pull_request_target` bzw. `workflow_run` | geprüft | W2 | ✅ 2026-11-20: rot, wie T19.1 |
+| T19.4 | `permissions:` fehlt, `write-all` oben oder am Job | geprüft | W3 | ✅ 2026-11-20: rot, wie T19.1 |
+| T19.5 | `secrets.*` in Job ohne `environment: release`; `secrets.GITHUB_TOKEN` | geprüft | W4; `GITHUB_TOKEN` erlaubt | ✅ 2026-11-20: rot, wie T19.1 |
+| T19.6 | Secret in einem Workflow mit `pull_request` | geprüft | W4, auch mit Environment | ✅ 2026-11-20: rot, wie T19.1 |
+| T19.7 | Release-Job ohne `if:`, ohne Ref- oder ohne Repo-Bedingung | geprüft | W5 | ✅ 2026-11-20: rot, wie T19.1 |
+| T19.8 | `actions/checkout` ohne `persist-credentials: false` | geprüft | W6 | ✅ 2026-11-20: rot, wie T19.1 |
+| T19.9 | `${{ github.event.… }}` bzw. `${{ github.head_ref }}` in `run:`; dasselbe über `env:` | geprüft | W7 je Fundstelle; über `env:` erlaubt | ✅ 2026-11-20: rot, wie T19.1 |
+| T19.10 | `git clone --branch 3.47.0 …flutter.git` bzw. `flutter-version: '3.47.0'` | geprüft | W8 | ✅ 2026-11-20: rot, wie T19.1 |
+| T19.11 | Job ohne `timeout-minutes` | geprüft | W9 | ✅ 2026-11-20: rot, wie T19.1 |
+| T19.12 | Repo | geprüft | `.github/flutter-version.txt` = 3.47.0. `ci.yml` (Push und PR, ohne Secrets, Job `ios` auf macOS nur `main` oder manuell) und `ios-release.yml` (Tags `v*`, manuell, monatlich, nie PR; Jobs mit Secrets nur in `release`) existieren und halten W1–W9 ein | ✅ 2026-11-20: rot, Dateien fehlen |
+
+Tests: `test/tool/workflow_policy_test.dart`. Neue Dev-Abhängigkeit (Lizenz am 2026-11-20 geprüft): `yaml` 3.1.4 (MIT; `source_span`, `string_scanner`, `term_glyph`, `collection`, `path` BSD-3), bisher schon transitiv.
+
+## T20: iOS-Konfiguration und Swift-Seite (security §4, A2, A3, O1)
+| ID | A | W | D | Rot gesehen |
+|---|---|---|---|---|
+| T20.1 | `Info.plist` | geprüft | I1: `NSBluetoothAlwaysUsageDescription` auf Deutsch, nirgends „Submersion“ | sofort grün (sichert den Stand aus T12) |
+| T20.2 | `Info.plist` | geprüft | I2: kein `NSLocation*`, `NSHealthUpdateUsageDescription`, Kamera, Kontakte, Mikrofon | sofort grün (sichert den Stand) |
+| T20.3 | `Info.plist` | geprüft | I3: genau ein importierter Typ mit Endung `.fit`, konform zu `public.data` | ✅ 2026-11-20: rot, `UTImportedTypeDeclarations` fehlt |
+| T20.4 | `Info.plist` | geprüft | I3: Dokumenttyp für diesen Typ, Rolle `Viewer`, Rang `Alternate` | ✅ 2026-11-20: rot, wie T20.3 |
+| T20.5 | `Info.plist` | geprüft | I3: `LSSupportsOpeningDocumentsInPlace` = false (Kopie nach `Inbox/`), `UIFileSharingEnabled` nicht an | ✅ 2026-11-20: rot, Schlüssel fehlt |
+| T20.6 | `Info.plist` | geprüft | I4: `ITSAppUsesNonExemptEncryption` = false | ✅ 2026-11-20: rot, Schlüssel fehlt |
+| T20.7 | `ios/Podfile` | geprüft | I5: iOS 15.0, nur `PERMISSION_BLUETOOTH=1`; `Podfile.lock` eingecheckt (G6) | ✅ 2026-11-20: rot, Podfile fehlt. `Podfile.lock` entsteht beim ersten `pod install` in der CI |
+| T20.8 | Xcode-Projekt, Podfile, Podspec | geprüft | I6: überall iOS 15.0 | ✅ 2026-11-20: rot, Podfile fehlt |
+| T20.9 | Datei in `Documents/Inbox` | `SharedFileInbox.acceptedPath` | Pfad wird angenommen | rot erwartet (Stub gibt `nil`), sichtbar erst in der CI |
+| T20.10 | Datei außerhalb, `Inbox/../x.fit`, Symlink nach außen, Nachbarordner `InboxEvil` | `acceptedPath` | `nil` | im Stub schon `nil`, gilt erst mit T20.9 als Nachweis |
+| T20.11 | `https://…`, Ordner, fehlende Datei | `acceptedPath` | `nil` | wie T20.10 |
+| T20.12 | iOS-Simulator | `openAppDatabase`, dann `isExcludedFromBackup` | Ordner `db/` trägt `NSURLIsExcludedFromBackupKey` (Swift-Seite von T11.9) | rot erwartet (`isExcludedFromBackup` fehlt in `AppDelegate.swift`), sichtbar erst in der CI |
+
+Tests: `test/ios/ios_config_test.dart` (PC), `ios/RunnerTests/RunnerTests.swift` (XCTest, `xcodebuild test` in der CI), `integration_test/ios_platform_test.dart` (iOS-Simulator in der CI, auf Android übersprungen). Neue Dev-Abhängigkeit (Lizenz am 2026-11-20 geprüft): `xml` 7.0.1 (MIT, dazu `petitparser` 7.0.2 MIT, `meta` BSD-3), bisher schon transitiv über `file_picker`.
+Stub: `ios/Runner/SharedFileInbox.swift` (im Runner-Target eingetragen), gibt immer `nil`.
