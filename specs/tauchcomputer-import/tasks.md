@@ -122,6 +122,10 @@ Nachweis: `flutter test test/app`, `flutter analyze`, `flutter build apk --debug
 Tests: `test/data/local/dive_repository_test.dart` (T8.1–T8.6, zusätzlich: Nummern zählen pro Taucher), `test/data/local/catalogue_loader_test.dart` (T8.7, T8.8). In-Memory-SQLite (3.53.4) läuft unter Windows, Schema v1 mit 9 Tabellen wird angelegt.
 Nachweis: `flutter test test/data`
 
+**Umgesetzt (Phase 50, 2026-11-20):**
+- [x] Repositories (`lib/data/local/drift_dive_repository.dart`) → T8.1–T8.3, T8.5, T8.6 grün. Nachweis: `flutter test test/data/local/dive_repository_test.dart` (6/6)
+- [x] Katalog-Loader (`lib/data/local/catalogue_loader.dart`) → T8.7, T8.8 grün. Nachweis: `flutter test test/data/local/catalogue_loader_test.dart` (2/2). Zusätzlich einmalig mit dem echten Katalog geprüft: 5.401 Plätze in 177 ms (In-Memory, PC).
+
 ## T9: Tauchplatz-Vorschläge (`domain/sites/site_suggestions.dart`, ADR 0006)
 | ID | A | W | D | Rot gesehen |
 |---|---|---|---|---|
