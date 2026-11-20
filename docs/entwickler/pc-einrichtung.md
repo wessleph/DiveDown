@@ -28,7 +28,29 @@ flutter doctor --android-licenses
 flutter doctor
 ```
 
-`flutter doctor` sollte bei **Flutter** und **Android toolchain** einen grünen Haken zeigen. „Visual Studio“ und „Chrome“ dürfen fehlen, weil wir weder für Windows noch fürs Web bauen.
+`flutter doctor` sollte bei **Flutter** und **Android toolchain** einen grünen Haken zeigen. „Visual Studio“ und „Chrome“ dürfen fehlen, weil wir weder für Windows noch fürs Web bauen. Die Meldung „Android license status unknown“ ist harmlos, der Build funktioniert trotzdem.
+
+### Android SDK Command-line Tools und NDK
+Das Plugin `libdivecomputer_plugin` baut nativen C-Code und braucht dafür das **NDK**. Gradle kann es nicht selbst nachladen, deshalb wird es einmalig von Hand installiert.
+
+1. In Android Studio: **Settings → Languages & Frameworks → Android SDK → SDK Tools** → Haken bei **Android SDK Command-line Tools (latest)** → Apply.
+   Danach liegen die Werkzeuge unter `%LOCALAPPDATA%\Android\Sdk\cmdline-tools\latest\bin`.
+2. Das frühere `sdkmanager` ist dort durch das neue Android-CLI ersetzt. Damit das NDK in genau der Version installieren, die der Build erwartet:
+
+```powershell
+& "$env:LOCALAPPDATA\Android\Sdk\cmdline-tools\latest\bin\android.exe" sdk install "ndk;28.2.13676358"
+```
+
+Prüfen: Der Ordner `%LOCALAPPDATA%\Android\Sdk\ndk\28.2.13676358` muss existieren.
+
+### Lange Pfade in Git
+Das Plugin und der Submersion-Referenz-Checkout enthalten sehr tief verschachtelte Dateien. Liegt der Klon in einem tiefen Ordner, überschreitet Windows die Grenze von 260 Zeichen und `git clone` bzw. `git checkout` bricht mit „Filename too long“ ab. Einmalig einschalten:
+
+```powershell
+git config --global core.longpaths true
+```
+
+Kurze Pfade helfen zusätzlich, z. B. `C:\dev\DiveDown`.
 
 ## 2. Repo holen
 ```powershell
