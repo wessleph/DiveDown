@@ -1,3 +1,6 @@
+import 'package:clock/clock.dart';
+
+import '../units/unit_formatter.dart';
 import 'dive.dart';
 
 /// Fields of the manual entry form (ui-spec §5.4), in screen order.
@@ -51,8 +54,27 @@ class ManualDiveDraft {
   });
 
   /// Prefills the form for editing [dive].
-  factory ManualDiveDraft.fromDive(Dive dive) =>
-      throw UnimplementedError('T15.19: ManualDiveDraft.fromDive');
+  factory ManualDiveDraft.fromDive(Dive dive) {
+    final tank = _firstTank(dive);
+    String num(double? v, int decimals) =>
+        v == null ? '' : UnitFormatter.trimmed(v, decimals);
+    return ManualDiveDraft(
+      number: dive.number?.toString() ?? '',
+      siteName: dive.siteName ?? '',
+      start: dive.start,
+      duration: (dive.durationS / 60).round().toString(),
+      maxDepth: num(dive.maxDepthM, 1),
+      avgDepth: num(dive.avgDepthM, 1),
+      temperature: num(dive.minTemperatureC, 1),
+      tankVolume: num(tank?.volumeL, 1),
+      startPressure: num(tank?.startPressureBar, 0),
+      endPressure: num(tank?.endPressureBar, 0),
+      o2: tank?.gas == null ? '' : (tank!.gas!.o2 * 100).round().toString(),
+      waterType: dive.waterType,
+      notes: dive.notes ?? '',
+      rating: dive.rating,
+    );
+  }
 
   final String number;
   final String siteName;
@@ -77,11 +99,197 @@ class ManualDiveDraft {
 
   /// Errors per field; empty when the draft can be saved.
   /// Ordered like [ManualDiveField], so the first entry gets the focus.
-  Map<ManualDiveField, ManualDiveError> validate() =>
-      throw UnimplementedError('T15.18: ManualDiveDraft.validate');
+  Map<ManualDiveField, ManualDiveError> validate() {
+    final errors = <ManualDiveField, ManualDiveError>{};
+
+    if (number.trim().isNotEmpty) {
+      final n = int.tryParse(number.trim());
+      if (n == null || n < 1) {
+        errors[ManualDiveField.number] = ManualDiveError.numberInvalid;
+      }
+    }
+
+    if (_wallClock(start).isAfter(_wallClock(clock.now()))) {
+      errors[ManualDiveField.start] = ManualDiveError.dateInFuture;
+    }
+
+    /// Parses [text] and checks it against [min]..[max]; returns the value
+    /// when it is valid, records the error otherwise.
+    double? check(
+      ManualDiveField field,
+      String text,
+      bool Function(double) inRange,
+      ManualDiveError outOfRange, {
+      bool required = false,
+    }) {
+      if (text.trim().isEmpty) {
+        if (required) errors[field] = ManualDiveError.required;
+        return null;
+      }
+      final v = _parse(text);
+      if (v == null) {
+        errors[field] = ManualDiveError.notANumber;
+        return null;
+      }
+      if (!inRange(v)) {
+        errors[field] = outOfRange;
+        return null;
+      }
+      return v;
+    }
+
+    check(
+      ManualDiveField.duration,
+      duration,
+      (v) => v >= 1 && v <= 1440,
+      ManualDiveError.durationOutOfRange,
+      required: true,
+    );
+    final max = check(
+      ManualDiveField.maxDepth,
+      maxDepth,
+      _depthOk,
+      ManualDiveError.depthOutOfRange,
+      required: true,
+    );
+    final avg = check(
+      ManualDiveField.avgDepth,
+      avgDepth,
+      _depthOk,
+      ManualDiveError.depthOutOfRange,
+    );
+    if (avg != null && max != null && avg > max) {
+      errors[ManualDiveField.avgDepth] = ManualDiveError.avgDepthAboveMax;
+    }
+    check(
+      ManualDiveField.temperature,
+      temperature,
+      (v) => v >= -5 && v <= 45,
+      ManualDiveError.temperatureOutOfRange,
+    );
+    check(
+      ManualDiveField.tankVolume,
+      tankVolume,
+      (v) => v > 0 && v <= 30,
+      ManualDiveError.volumeOutOfRange,
+    );
+    final startBar = check(
+      ManualDiveField.startPressure,
+      startPressure,
+      _pressureOk,
+      ManualDiveError.pressureOutOfRange,
+    );
+    final endBar = check(
+      ManualDiveField.endPressure,
+      endPressure,
+      _pressureOk,
+      ManualDiveError.pressureOutOfRange,
+    );
+    if (startBar != null && endBar != null && endBar >= startBar) {
+      errors[ManualDiveField.endPressure] =
+          ManualDiveError.endPressureNotBelowStart;
+    }
+    check(
+      ManualDiveField.o2,
+      o2,
+      (v) => v >= 1 && v <= 100,
+      ManualDiveError.o2OutOfRange,
+    );
+
+    return {
+      for (final f in ManualDiveField.values)
+        if (errors.containsKey(f)) f: errors[f]!,
+    };
+  }
 
   /// Builds the dive to save. With [original] (editing), everything the form
   /// does not show is kept, and unchanged fields keep their exact value.
-  Dive toDive({required String diverId, Dive? original}) =>
-      throw UnimplementedError('T15.19: ManualDiveDraft.toDive');
+  Dive toDive({required String diverId, Dive? original}) {
+    final before = original == null ? null : ManualDiveDraft.fromDive(original);
+    final oldTank = original == null ? null : _firstTank(original);
+
+    /// The original value when [text] is what the form showed for it.
+    double? value(String text, String? shown, double? originalValue) =>
+        text == shown ? originalValue : _parse(text);
+
+    final site = siteName.trim().isEmpty ? null : siteName.trim();
+    final sameSite = original != null && site == original.siteName;
+
+    final volume = value(tankVolume, before?.tankVolume, oldTank?.volumeL);
+    final startBar = value(
+      startPressure,
+      before?.startPressure,
+      oldTank?.startPressureBar,
+    );
+    final endBar = value(
+      endPressure,
+      before?.endPressure,
+      oldTank?.endPressureBar,
+    );
+    final GasMix? gas = o2 == before?.o2
+        ? oldTank?.gas
+        : _parse(o2) == null
+        ? null
+        : GasMix(o2: _parse(o2)! / 100, he: oldTank?.gas?.he ?? 0);
+    final hasTank =
+        volume != null || startBar != null || endBar != null || gas != null;
+
+    return Dive(
+      id: original?.id,
+      diverId: diverId,
+      number: number.trim().isEmpty
+          ? original?.number
+          : int.parse(number.trim()),
+      siteName: site,
+      siteCatalogueId: sameSite ? original.siteCatalogueId : null,
+      siteLat: sameSite ? original.siteLat : null,
+      siteLon: sameSite ? original.siteLon : null,
+      diveComputerId: original?.diveComputerId,
+      source: original?.source ?? DiveSource.manual,
+      sourceId: original?.sourceId,
+      start: start,
+      utcOffsetS: original?.utcOffsetS,
+      durationS: duration == before?.duration
+          ? original!.durationS
+          : (_parse(duration)! * 60).round(),
+      maxDepthM: value(maxDepth, before?.maxDepth, original?.maxDepthM)!,
+      avgDepthM: value(avgDepth, before?.avgDepth, original?.avgDepthM),
+      minTemperatureC: value(
+        temperature,
+        before?.temperature,
+        original?.minTemperatureC,
+      ),
+      maxTemperatureC: original?.maxTemperatureC,
+      waterType: waterType,
+      notes: notes.trim().isEmpty ? null : notes,
+      rating: rating,
+      samples: original?.samples ?? const [],
+      events: original?.events ?? const [],
+      tanks: [
+        if (hasTank)
+          DiveTank(
+            index: 0,
+            volumeL: volume,
+            startPressureBar: startBar,
+            endPressureBar: endBar,
+            gas: gas,
+          ),
+        ...?original?.tanks.where((t) => t.index != 0),
+      ],
+    );
+  }
+
+  static DiveTank? _firstTank(Dive dive) =>
+      dive.tanks.where((t) => t.index == 0).firstOrNull;
+
+  static bool _depthOk(double v) => v >= 0 && v <= 350;
+  static bool _pressureOk(double v) => v >= 0 && v <= 400;
+
+  /// Accepts `18,4` and `18.4`; null for empty or invalid text.
+  static double? _parse(String text) =>
+      double.tryParse(text.trim().replaceAll(',', '.'));
+
+  /// Compares wall-clock fields only, whatever the time zone flag says.
+  static DateTime _wallClock(DateTime t) =>
+      DateTime.utc(t.year, t.month, t.day, t.hour, t.minute, t.second);
 }

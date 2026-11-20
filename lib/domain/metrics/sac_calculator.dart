@@ -19,9 +19,47 @@ class SacResult {
 class SacCalculator {
   const SacCalculator();
 
+  static const _surfaceBar = 1.0;
+  static const _saltBarPerM = 0.1005;
+  static const _freshBarPerM = 0.0981;
+
   /// Average SAC of one tank from its start and end pressure.
   /// The mean depth is [Dive.avgDepthM], else the mean of the samples.
   SacResult average(Dive dive, {int tankIndex = 0}) {
-    throw UnimplementedError('T7: SacCalculator.average');
+    final tank = dive.tanks.where((t) => t.index == tankIndex).firstOrNull;
+    final start = tank?.startPressureBar;
+    final end = tank?.endPressureBar;
+    if (tank == null || start == null || end == null) {
+      return const SacResult.missing(SacMissing.pressure);
+    }
+    final volume = tank.volumeL;
+    if (volume == null || volume <= 0) {
+      return const SacResult.missing(SacMissing.volume);
+    }
+    if (dive.durationS <= 0) {
+      return const SacResult.missing(SacMissing.duration);
+    }
+    final meanDepth = dive.avgDepthM ?? _sampleMean(dive.samples);
+    if (meanDepth == null) return const SacResult.missing(SacMissing.depth);
+
+    final perMetre = dive.waterType == WaterType.fresh
+        ? _freshBarPerM
+        : _saltBarPerM;
+    final ambient = _surfaceBar + meanDepth * perMetre;
+    final minutes = dive.durationS / 60;
+    return SacResult.value((start - end) * volume / (minutes * ambient));
+  }
+
+  /// Time-weighted mean depth (trapezoids between samples).
+  static double? _sampleMean(List<DiveSample> samples) {
+    if (samples.length < 2) return null;
+    var area = 0.0;
+    for (var i = 1; i < samples.length; i++) {
+      final a = samples[i - 1];
+      final b = samples[i];
+      area += (b.timeS - a.timeS) * (a.depthM + b.depthM) / 2;
+    }
+    final span = samples.last.timeS - samples.first.timeS;
+    return span > 0 ? area / span : null;
   }
 }

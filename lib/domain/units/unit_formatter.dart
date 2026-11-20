@@ -6,24 +6,42 @@ class UnitFormatter {
   const UnitFormatter.metric();
 
   /// `18,4 m`
-  String depth(double metres) => throw UnimplementedError('T15.1: depth');
+  String depth(double metres) => '${_fixed(metres, 1)} m';
 
   /// `47 min`, rounded to whole minutes.
-  String duration(int seconds) => throw UnimplementedError('T15.1: duration');
+  String duration(int seconds) => '${(seconds / 60).round()} min';
 
   /// `21 °C`
-  String temperature(double celsius) =>
-      throw UnimplementedError('T15.1: temperature');
+  String temperature(double celsius) => '${celsius.round()} °C';
 
   /// `200 bar`
-  String pressure(double bar) => throw UnimplementedError('T15.1: pressure');
+  String pressure(double bar) => '${bar.round()} bar';
 
   /// `12 l`
-  String volume(double litres) => throw UnimplementedError('T15.1: volume');
+  String volume(double litres) => '${trimmed(litres, 1)} l';
 
   /// `18,0 l/min`
-  String sac(double litresPerMinute) => throw UnimplementedError('T15.1: sac');
+  String sac(double litresPerMinute) => '${_fixed(litresPerMinute, 1)} l/min';
 
   /// `Luft`, `EAN32`, `Tx 21/35`
-  String gas(GasMix gas) => throw UnimplementedError('T15.1: gas');
+  String gas(GasMix gas) {
+    final o2 = (gas.o2 * 100).round();
+    final he = (gas.he * 100).round();
+    if (he > 0) return 'Tx $o2/$he';
+    if (o2 == 21) return 'Luft';
+    return 'EAN$o2';
+  }
+
+  /// Number without unit for form fields: up to [decimals] places, no
+  /// trailing zeros, German comma (`18,4`, `12`).
+  static String trimmed(double value, int decimals) {
+    var s = value.toStringAsFixed(decimals);
+    if (s.contains('.')) {
+      s = s.replaceFirst(RegExp(r'0+$'), '').replaceFirst(RegExp(r'\.$'), '');
+    }
+    return s.replaceAll('.', ',');
+  }
+
+  static String _fixed(double value, int decimals) =>
+      value.toStringAsFixed(decimals).replaceAll('.', ',');
 }
