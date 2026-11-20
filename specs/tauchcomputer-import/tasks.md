@@ -142,6 +142,9 @@ Nicht am PC testbar: Laufzeit-Berechtigungen und Bluetooth-Zustand (`permission_
 - [x] Plugin (`// DiveDown:`): Suunto Ocean und Nautic werden mit Modell −1 gemeldet (`UnsupportedComputers.kt`, `BleScanner.swift`), JUnit `UnsupportedComputersTest` grün. **Ungeprüft:** der echte BLE-Name der Ocean.
 - Gesamt: `flutter test` 242/242, `flutter analyze` ohne Befund.
 - Noch offen aus §5.9: „Vergleichen“, „Tauchplatz für Ausgewählte setzen“, Sparkline und Info-Zeile „unplausible Messwerte entfernt“. Aus §5.7: „Logs senden“ (kommt mit T10). Aus §5.5: Untertitel „Zuletzt: EON Core, vor 3 Tagen“.
+- **Auf dem S25 Ultra (Android 17) mit dem echten EON Core geprüft, 2026-11-20:** Vorab-Erklärung, System-Dialog nur „Geräte in der Nähe“ (kein Standort), Suche stoppt nach 30 s, bei laufender Suunto-App „Kein Tauchcomputer gefunden“ mit Suunto-Hinweis. Nach Deaktivieren der Suunto-App gefunden, **71 Tauchgänge in ca. 4,5 min** übertragen, alle plausibel, Nummern #1–#71 chronologisch, Bildschirm blieb an, kein PIN nötig (Kopplung bestand). Zweiter Download mit Fingerprint nach ca. 3 s „Alles auf dem neuesten Stand“, Gerät als „Bekannt“ markiert.
+- Gefunden auf dem Handy und behoben (T12.26, T12.27): Der Import-Tab behielt nach dem Speichern die alte Vorschau. Der Tauchcomputer-Ablauf läuft jetzt über dem Tab-Gerüst (Root-Navigator), der Import-Tab öffnet immer bei der Quellenwahl. `flutter test` 244/244.
+- Nicht auf dem Handy geprüft: PIN-Dialog (EON Core war gekoppelt), Abbrechen, Verbindungsabbruch, Seriennummer-Warnung. Diese Fälle decken nur die Widget-Tests ab.
 - iOS: `permission_handler` braucht im Podfile `PERMISSION_BLUETOOTH=1`. Das kommt mit der iOS-Pipeline (KW 49), Swift ist ohne Mac nicht gebaut.
 
 ## T5: FIT-Import (`data/import/fit/`, security A2/R3)
@@ -291,6 +294,8 @@ Tests T11.9/T11.10: `test/data/platform/backup_exclusion_test.dart`, `test/app/s
 | T12.23 | EON Core schon bekannt | gefunden | Kennzeichnung „Bekannt“ | ✅ 2026-11-20: rot, wie T12.17 |
 | T12.24 | unerwarteter Fehler `download_crashed` | Übertragung | Fehlerkarte mit „Erneut versuchen“ und dem Code | ✅ 2026-11-20: rot, wie T12.17 |
 | T12.25 | Tauchgang exakt schon im Logbuch | Vorschau | „Bereits im Logbuch“, Checkbox nicht bedienbar, zählt nicht mit | ✅ 2026-11-20: rot, wie T12.17 |
+| T12.26 | Import gespeichert, zurück im Logbuch | Tab „Importieren“ | Quellenwahl, nicht die alte Vorschau | ✅ 2026-11-20: rot, Ort blieb `/import/divecomputer`. Gefunden auf dem Handy |
+| T12.27 | Tauchcomputer-Ablauf offen | angezeigt | keine Tab-Leiste (ein Tab-Wechsel würde die Übertragung abbrechen) | ✅ 2026-11-20: rot, `NavigationBar` sichtbar |
 
 Tests: `test/features/logbook/` (Liste, Detail, Formular). In diesem Paket nur die Logbuch-Zeilen T12.1–T12.3 und T12.12–T12.15. T12.4–T12.11 und T12.16–T12.25 (Import) liegen in `test/features/import/dive_computer_screen_test.dart`, mit Fakes für Plugin, Berechtigungen und Bildschirm (`test/support/fake_dive_computer.dart`).
 

@@ -11,8 +11,14 @@ class HomeShell extends StatelessWidget {
 
   final StatefulNavigationShell shell;
 
-  void _select(int index) =>
-      shell.goBranch(index, initialLocation: index == shell.currentIndex);
+  /// The import tab keeps no state of its own: its flows run above the
+  /// shell, so it always opens at the source choice (ui-spec §5.5).
+  static const _importBranch = 1;
+
+  void _select(int index) => shell.goBranch(
+    index,
+    initialLocation: index == shell.currentIndex || index == _importBranch,
+  );
 
   @override
   Widget build(BuildContext context) {

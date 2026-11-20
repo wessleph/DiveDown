@@ -512,6 +512,34 @@ void main() {
       expect(device!.serial, 'S');
       expect(device.lastFingerprint, [14]);
     });
+
+    testWidgets('T12.26 after the import, the tab starts at the source '
+        'choice again', (tester) async {
+      await preview(tester);
+      await _tapText(tester, '3 Tauchgänge importieren');
+      await tester.pumpAndSettle();
+
+      await tester.tap(
+        find.descendant(
+          of: find.byType(NavigationBar),
+          matching: find.text('Importieren'),
+        ),
+      );
+      await _frames(tester);
+
+      expect(currentLocation(tester), ImportScreen.path);
+      expect(find.text('Per Bluetooth übertragen'), findsOneWidget);
+      expect(find.byType(Checkbox), findsNothing);
+    });
+
+    testWidgets('T12.27 no tab bar while the dive computer flow runs', (
+      tester,
+    ) async {
+      final h = await _setUp(tester);
+      await _pump(tester, h);
+
+      expect(find.byType(NavigationBar), findsNothing);
+    });
   });
 
   group('T12.14 import screens: tap targets and contrast', () {

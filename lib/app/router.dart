@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -14,12 +14,17 @@ import 'providers.dart';
 
 // Top-level navigation from ui-spec §2: Logbuch, Importieren, Einstellungen.
 // Without an active diver everything leads to the welcome (§5.1).
+
+/// Routes above the tab shell, without the tab bar.
+final _rootNavigatorKey = GlobalKey<NavigatorState>();
+
 final routerProvider = Provider<GoRouter>((ref) {
   final diverChanged = ValueNotifier(0);
   ref.listen(activeDiverProvider, (_, _) => diverChanged.value++);
   ref.onDispose(diverChanged.dispose);
 
   final router = GoRouter(
+    navigatorKey: _rootNavigatorKey,
     initialLocation: LogbookScreen.path,
     refreshListenable: diverChanged,
     redirect: (context, state) {
@@ -70,8 +75,11 @@ final routerProvider = Provider<GoRouter>((ref) {
                 path: ImportScreen.path,
                 builder: (context, state) => const ImportScreen(),
                 routes: [
+                  // A flow of its own: no tab bar that could leave a running
+                  // transfer, and the import tab is fresh afterwards.
                   GoRoute(
                     path: 'divecomputer',
+                    parentNavigatorKey: _rootNavigatorKey,
                     builder: (context, state) => const DiveComputerScreen(),
                   ),
                 ],
