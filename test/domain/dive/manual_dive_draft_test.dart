@@ -320,4 +320,46 @@ void main() {
       expect(saved.durationS, 2827);
     });
   });
+
+  group('T9.11 catalogue link in the draft', () {
+    test('a chosen catalogue site is saved with id and position', () {
+      final dive = ManualDiveDraft(
+        siteName: 'SS Thistlegorm',
+        siteCatalogueId: 'osm_1',
+        siteLat: 27.81409,
+        siteLon: 33.92005,
+        start: DateTime(2026, 11, 14, 10, 42),
+        duration: '47',
+        maxDepth: '18,4',
+      ).toDive(diverId: 'diver-1');
+
+      expect(dive.siteCatalogueId, 'osm_1');
+      expect(dive.siteLat, 27.81409);
+      expect(dive.siteLon, 33.92005);
+    });
+
+    test('fromDive takes the link over', () {
+      final d = ManualDiveDraft.fromDive(_imported());
+      expect(d.siteCatalogueId, 'osm_123');
+      expect(d.siteLat, 27.81361);
+      expect(d.siteLon, 33.92139);
+    });
+
+    test('the draft decides: same name without link clears it', () {
+      // The form drops the link as soon as the name is typed over, even if
+      // the result reads the same.
+      final original = _imported();
+      final draft = ManualDiveDraft.fromDive(original);
+      final saved = ManualDiveDraft(
+        siteName: 'SS Thistlegorm',
+        start: draft.start,
+        duration: draft.duration,
+        maxDepth: draft.maxDepth,
+      ).toDive(diverId: original.diverId, original: original);
+
+      expect(saved.siteName, 'SS Thistlegorm');
+      expect(saved.siteCatalogueId, isNull);
+      expect(saved.siteLat, isNull);
+    });
+  });
 }

@@ -99,13 +99,13 @@ Nachweis: `flutter test test/app`, `flutter analyze`, `flutter build apk --debug
 ## T7: Luftverbrauch (`domain/metrics/sac_calculator.dart`, design §6)
 | ID | A | W | D | Rot gesehen |
 |---|---|---|---|---|
-| T7.1 | Flasche 12 l, 200 → 50 bar, Dauer 50 min, mittlere Tiefe 10 m (Salzwasser) | Ø-SAC berechnet | (150 × 12) / (50 × 2,0) = **18,0 l/min** (±0,1) |  ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
-| T7.2 | wie T7.1, Süßwasser | berechnet | Umgebungsdruck mit 9,81 kPa/m statt 10,05 kPa/m, Ergebnis entsprechend |  ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
+| T7.1 | Flasche 12 l, 200 → 50 bar, Dauer 50 min, mittlere Tiefe 10 m (Salzwasser) | Ø-SAC berechnet | (150 × 12) / (50 × 2,0) = **18,0 l/min** (±0,1) | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
+| T7.2 | wie T7.1, Süßwasser | berechnet | Umgebungsdruck mit 9,81 kPa/m statt 10,05 kPa/m, Ergebnis entsprechend | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
 | T7.3 | Druckverlauf in Samples | Kurve berechnet | 1-min-Abschnitte. Abschnitt ohne Druckänderung = 0. Kein Abschnitt negativ. | |
-| T7.4 | kein Druck | berechnet | `null` |  ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
-| T7.5 | Druck vorhanden, kein Flaschenvolumen | berechnet | `null` mit Grund `missingVolume` |  ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
+| T7.4 | kein Druck | berechnet | `null` | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
+| T7.5 | Druck vorhanden, kein Flaschenvolumen | berechnet | `null` mit Grund `missingVolume` | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
 | T7.6 | 2 Flaschen (Gaswechsel) | berechnet | SAC pro Flasche über deren Nutzungszeit | |
-| T7.7 | Dauer 0 | berechnet | `null`, kein Division-durch-0 |  ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
+| T7.7 | Dauer 0 | berechnet | `null`, kein Division-durch-0 | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
 | T7.8 | Druck und Volumen da, keine Ø-Tiefe | berechnet | ohne Samples `null` mit Grund `depth`. Mit Samples: zeitgewichtetes Mittel der Samples | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
 
 Tests: `test/domain/metrics/sac_calculator_test.dart`. Annahme: Oberflächendruck **1,0 bar** (mit 1,013 bar läge T7.1 bei 17,84 und damit außerhalb ±0,1). Unbekannter Wassertyp zählt als Salzwasser. T7.3 (Kurve) und T7.6 (Gaswechsel) kommen mit dem Profil-Diagramm (KW 49).
@@ -132,13 +132,30 @@ Nachweis: `flutter test test/data`
 ## T9: Tauchplatz-Vorschläge (`domain/sites/site_suggestions.dart`, ADR 0006)
 | ID | A | W | D | Rot gesehen |
 |---|---|---|---|---|
-| T9.1 | eigener Name „Walensee, Quinten“ verwendet, Katalog enthält „Walchensee“ | Eingabe „wal“ | zuerst „Walensee, Quinten“ (eigen), dann Katalog | |
-| T9.2 | Katalog enthält „SS Thistlegorm“ (EG) | Eingabe „thistle“ | Treffer „SS Thistlegorm · …, Ägypten“ | |
-| T9.3 | Eingabe „sha'ab el erg“ vs. Katalog „Sha’ab El Erg“ | gesucht | Treffer (ohne Akzente, Groß-/Kleinschreibung und Apostroph-Varianten) | |
-| T9.4 | 20 Treffer möglich | gesucht | höchstens 8 | |
-| T9.5 | Position bekannt (27,81 N / 33,92 O) | Eingabe „reef“ | nähere Treffer zuerst | |
-| T9.6 | beliebige Eingabe | gesucht | letzte Zeile „‚…‘ als neuen Tauchplatz verwenden“ | |
-| T9.7 | Name > 120 Zeichen im Katalog | angezeigt | auf 120 gekürzt, als reiner Text | |
+| T9.1 | eigener Name „Walensee, Quinten“ verwendet, Katalog enthält „Walchensee“ | Eingabe „wal“ | zuerst „Walensee, Quinten“ (eigen), dann Katalog | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SiteSuggester` fehlt), Testaufbau ok |
+| T9.2 | Katalog enthält „SS Thistlegorm“ (EG) | Eingabe „thistle“ | Treffer „SS Thistlegorm“ mit „South Sinai, Ägypten“ (Region aus dem Katalog, Land deutsch). Ohne Region nur das Land, ohne beides nichts | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SiteSuggester` fehlt), Testaufbau ok |
+| T9.3 | Eingabe „sha'ab el erg“ vs. Katalog „Sha’ab El Erg“ | gesucht | Treffer (ohne Akzente, Groß-/Kleinschreibung und Apostroph-Varianten) | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SiteSuggester` fehlt), Testaufbau ok |
+| T9.4 | 20 Treffer möglich | gesucht | höchstens 8 (eigene und Katalog zusammen) | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SiteSuggester` fehlt), Testaufbau ok |
+| T9.5 | Position bekannt (27,81 N / 33,92 O) | Eingabe „reef“ | nähere Treffer zuerst | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SiteSuggester` fehlt), Testaufbau ok |
+| T9.6 | beliebige Eingabe | gesucht | letzte Zeile „‚…‘ als neuen Tauchplatz verwenden“ | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SiteSuggester` fehlt), Testaufbau ok |
+| T9.7 | Name > 120 Zeichen im Katalog | angezeigt | auf 120 gekürzt, als reiner Text | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SiteSuggester` fehlt), Testaufbau ok |
+| T9.8 | Tauchgänge mehrerer Taucher mit Namen, ohne Namen, nur Leerzeichen, gelöscht | `ownSites` | jeder Name einmal, zuletzt benutzt zuerst, mit Verknüpfung und Position der letzten Nutzung. Leere und gelöschte fallen weg | ✅ 2026-11-20: rot wegen `UnimplementedError` (`DriftSiteRepository`) |
+| T9.9 | Anna taucht an `osm_1` (EG), Ben an `osm_2` (DE) | `visitedCountries` | Anna {EG}, Ben {DE} | ✅ 2026-11-20: rot wegen `UnimplementedError` |
+| T9.10 | 2 Katalog-Einträge | `catalogue` | beide mit allen Feldern | ✅ 2026-11-20: rot wegen `UnimplementedError` |
+| T9.11 | Formular-Entwurf mit Katalog-Verknüpfung | `toDive` / `fromDive` | `site_catalogue_id`, `site_lat`, `site_lon` gespeichert bzw. übernommen. Der Entwurf entscheidet: ohne Verknüpfung wird sie gelöscht, auch bei gleichem Namen | ✅ 2026-11-20: rot, Felder werden nicht übernommen (Expected `osm_1`, Actual null) |
+| T9.12 | Formular, Katalog geladen | „thistle“ getippt, Vorschlag gewählt | Feld „SS Thistlegorm“, Liste zu. Gespeichert mit `osm_1` und Position | ✅ 2026-11-20: rot, keine Vorschläge im Feld |
+| T9.13 | Formular | „Walensee, Quinten“ getippt | Zeile „‚Walensee, Quinten‘ als neuen Tauchplatz verwenden“, gespeichert ohne Verknüpfung | ✅ 2026-11-20: rot, keine Vorschläge |
+| T9.14 | Katalog-Platz gewählt | Name danach überschrieben | gespeichert ohne Verknüpfung und Position | ✅ 2026-11-20: rot, keine Vorschläge |
+| T9.15 | früherer Tauchgang „Walensee, Quinten“ | „wal“ getippt | eigener Name über „Walchensee“. Ein eigener Name mit Katalog-Verknüpfung erscheint nur einmal. Stimmt die Eingabe mit einem eigenen Namen überein, keine „neu“-Zeile | ✅ 2026-11-20: rot (Domäne `UnimplementedError`, UI keine Vorschläge) |
+| T9.16 | frühere Plätze | leeres Feld angetippt | die zuletzt benutzten eigenen Namen (höchstens 8), keine „neu“-Zeile | ✅ 2026-11-20: rot, keine Vorschläge |
+| T9.17 | Tauchgang mit Katalog-Verknüpfung | nur Tiefe geändert, gespeichert | Verknüpfung und Position bleiben | ⚠️ 2026-11-20: sofort grün, weil das heute über den Namensvergleich in `toDive` schon gilt. Bleibt als Absicherung, weil T9.11 genau diesen Weg umbaut |
+| T9.18 | eigener Platz mit Verknüpfung | gewählt | einmal angezeigt, Verknüpfung wird mitgespeichert | ✅ 2026-11-20: rot, keine Vorschläge |
+| T9.19 | Ländercodes | übersetzt | `EG` → Ägypten, `CH` → Schweiz, `US` → Vereinigte Staaten usw.; jedes Land im mitgelieferten Katalog hat einen deutschen Namen; unbekannt → Code | ✅ 2026-11-20: rot wegen `UnimplementedError` (`countryNameDe`) |
+| T9.20 | App | Einstellungen → „Open-Source-Lizenzen“ | Lizenzseite mit Eintrag „Tauchplatz-Katalog“: ODbL, OpenStreetMap, Wikidata (ADR 0006) | ✅ 2026-11-20: rot, `registerCatalogueLicence` wirft `UnimplementedError`, Eintrag in den Einstellungen fehlt |
+| T9.21 (=T12.14) | Vorschlagsliste offen | Semantics-Prüfung | Touch-Ziele und Kontrast erfüllt | ✅ 2026-11-20: rot, keine Vorschläge |
+
+Tests: `test/domain/sites/site_suggestions_test.dart`, `test/data/local/site_repository_test.dart`, `test/domain/dive/manual_dive_draft_test.dart` (T9.11), `test/features/logbook/site_field_test.dart`, `test/app/licenses_test.dart`.
+Festlegungen: Eigene Namen kommen von **allen Tauchern auf dem Gerät**. Leere Eingabe zeigt nur eigene Namen. Rangfolge im Katalog: mit Position nach Entfernung, sonst besuchte Länder zuerst, dann Namensanfang vor Wortanfang, dann alphabetisch. Deutsche Ländernamen als feste Tabelle im Code (Ländernamen sind Fakten, keine neue Abhängigkeit). Position aus FIT-Dateien gibt es erst mit T5. Bis dahin wirkt T9.5 nur in der Domäne.
 
 ## T10: Diagnose-Logs (`data/diagnostics/`, security A4, design §9)
 | ID | A | W | D | Rot gesehen |
@@ -165,7 +182,7 @@ Nachweis: `flutter test test/data`
 | T11.6 | gültige Sicherung, Ersetzen schlägt fehl (simuliert) | wiederhergestellt | alte DB aus automatischer Kopie zurück, `RestoreFailed` | |
 | T11.7 | Datei > 200 MB | gewählt | `FileTooLarge` | |
 | T11.8 | letzte Sicherung vor 31 Tagen | Logbuch geöffnet | Erinnerung sichtbar. Nach „✕“ 7 Tage unsichtbar. | |
-| T11.9 | DB-Datei | Pfad geprüft (iOS) | `NSURLIsExcludedFromBackupKey` gesetzt (Integrationstest auf iOS bzw. Prüfung der Plattform-Methode) |  ✅ 2026-11-20: rot wegen `UnimplementedError` (`BackupExclusion`, `openAppDatabase` fehlen), Testaufbau ok. Geprüft wird der Aufruf aus Dart, die Swift-Seite läuft erst auf iOS (CI/TestFlight) |
+| T11.9 | DB-Datei | Pfad geprüft (iOS) | `NSURLIsExcludedFromBackupKey` gesetzt (Integrationstest auf iOS bzw. Prüfung der Plattform-Methode) | ✅ 2026-11-20: rot wegen `UnimplementedError` (`BackupExclusion`, `openAppDatabase` fehlen), Testaufbau ok. Geprüft wird der Aufruf aus Dart, die Swift-Seite läuft erst auf iOS (CI/TestFlight) |
 | T11.10 | DB-Datei | Android-Manifest geprüft | `dataExtractionRules` schließt den Ordner `db/` aus `cloud-backup` **und** `device-transfer` aus, `fullBackupContent` (Android 8–11, minSdk 26) aus dem Voll-Backup. Kein Kanalaufruf unter Android | ✅ 2026-11-20: rot, Manifest-Attribute und `res/xml/*.xml` fehlen bzw. `UnimplementedError` |
 
 Tests T11.9/T11.10: `test/data/platform/backup_exclusion_test.dart`, `test/app/startup_test.dart`. Die DB liegt in einem **eigenen Ordner** `db/`, damit auch die `-wal`/`-journal`-Dateien vom Ausschluss erfasst sind. Der Ausschluss wird bei jedem Start erneut gesetzt.
@@ -173,9 +190,9 @@ Tests T11.9/T11.10: `test/data/platform/backup_exclusion_test.dart`, `test/app/s
 ## T12: UI-Zustände (Widget-Tests, `ui-spec.md`)
 | ID | A | W | D | Rot gesehen |
 |---|---|---|---|---|
-| T12.1 | keine Tauchgänge | Logbuch | Leerzustand mit „Importieren“ und „Manuell eintragen“ |  ✅ 2026-11-20: rot, Leerzustand fehlt (Text nicht gefunden) |
-| T12.2 | Tauchgang ohne Tauchplatz | Logbuch-Zeile | „Ohne Tauchplatz“ |  ✅ 2026-11-20: rot, Liste fehlt (Text nicht gefunden) |
-| T12.3 | Tauchgang #42 | Logbuch-Zeile | Semantics-Label beginnt mit „Tauchgang 42“ |  ✅ 2026-11-20: rot, Liste fehlt (`#42` nicht gefunden) |
+| T12.1 | keine Tauchgänge | Logbuch | Leerzustand mit „Importieren“ und „Manuell eintragen“ | ✅ 2026-11-20: rot, Leerzustand fehlt (Text nicht gefunden) |
+| T12.2 | Tauchgang ohne Tauchplatz | Logbuch-Zeile | „Ohne Tauchplatz“ | ✅ 2026-11-20: rot, Liste fehlt (Text nicht gefunden) |
+| T12.3 | Tauchgang #42 | Logbuch-Zeile | Semantics-Label beginnt mit „Tauchgang 42“ | ✅ 2026-11-20: rot, Liste fehlt (`#42` nicht gefunden) |
 | T12.4 | Bluetooth aus | Gerätesuche | Text „Bluetooth ist ausgeschaltet.“ + Knopf | |
 | T12.5 | Berechtigung dauerhaft verweigert | Gerätesuche | „Einstellungen öffnen“ | |
 | T12.6 | 30 s ohne Fund | Gerätesuche | Checkliste + „Erneut suchen“ | |
@@ -184,10 +201,10 @@ Tests T11.9/T11.10: `test/data/platform/backup_exclusion_test.dart`, `test/app/s
 | T12.9 | PIN angefordert von „EON Core ••3F7A“ | Dialog | Gerätename sichtbar. Nach 60 s „Zeit abgelaufen“. | |
 | T12.10 | Vorschau mit 1 Duplikat | Vorschau | Duplikat nicht ausgewählt, Knopf „2 Tauchgänge importieren“ | |
 | T12.11 | nichts ausgewählt | Vorschau | Knopf deaktiviert „Nichts ausgewählt“ | |
-| T12.12 | Detail ohne Druck | Detail | SAC „—“ + Info-Text |  ✅ 2026-11-20: rot, `DiveDetailScreen` wirft `UnimplementedError` |
-| T12.13 | Textskalierung 200 % | Logbuch, Detail | kein Overflow (`tester.takeException() == null`) |  ✅ 2026-11-20: rot, Inhalt fehlt (Liste, Detail, Formular). Der Test verlangt vorher sichtbaren Inhalt, damit er nicht leer grün wird |
-| T12.14 | alle Bildschirme | Semantics-Prüfung | jedes tippbare Element ≥ 48 dp (`androidTapTargetGuideline`, `iOSTapTargetGuideline`, `textContrastGuideline`) |  ✅ 2026-11-20: rot, Inhalt fehlt, wie T12.13. Abgedeckt: Logbuch (leer und Liste), Detail, Formular. Import-Bildschirme folgen mit dem Import |
-| T12.15 | Manuelles Formular, Tiefe 400 | Speichern | Fehler „Tiefe muss zwischen 0 und 350 m liegen.“, Fokus springt hin |  ✅ 2026-11-20: rot, Formular fehlt (kein FAB) |
+| T12.12 | Detail ohne Druck | Detail | SAC „—“ + Info-Text | ✅ 2026-11-20: rot, `DiveDetailScreen` wirft `UnimplementedError` |
+| T12.13 | Textskalierung 200 % | Logbuch, Detail | kein Overflow (`tester.takeException() == null`) | ✅ 2026-11-20: rot, Inhalt fehlt (Liste, Detail, Formular). Der Test verlangt vorher sichtbaren Inhalt, damit er nicht leer grün wird |
+| T12.14 | alle Bildschirme | Semantics-Prüfung | jedes tippbare Element ≥ 48 dp (`androidTapTargetGuideline`, `iOSTapTargetGuideline`, `textContrastGuideline`) | ✅ 2026-11-20: rot, Inhalt fehlt, wie T12.13. Abgedeckt: Logbuch (leer und Liste), Detail, Formular. Import-Bildschirme folgen mit dem Import |
+| T12.15 | Manuelles Formular, Tiefe 400 | Speichern | Fehler „Tiefe muss zwischen 0 und 350 m liegen.“, Fokus springt hin | ✅ 2026-11-20: rot, Formular fehlt (kein FAB) |
 
 Tests: `test/features/logbook/` (Liste, Detail, Formular). In diesem Paket nur die Logbuch-Zeilen T12.1–T12.3 und T12.12–T12.15. T12.4–T12.11 gehören zum Import (BLE, Vorschau) und kommen mit T3/T4.
 

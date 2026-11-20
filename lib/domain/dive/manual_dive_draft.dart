@@ -39,6 +39,9 @@ class ManualDiveDraft {
   const ManualDiveDraft({
     this.number = '',
     this.siteName = '',
+    this.siteCatalogueId,
+    this.siteLat,
+    this.siteLon,
     required this.start,
     this.duration = '',
     this.maxDepth = '',
@@ -78,6 +81,12 @@ class ManualDiveDraft {
 
   final String number;
   final String siteName;
+
+  /// Set when a suggestion with a catalogue link or position was chosen
+  /// (ADR 0006); the form clears them when the name is typed over.
+  final String? siteCatalogueId;
+  final double? siteLat;
+  final double? siteLon;
 
   /// Wall-clock start, as on the dive computer.
   final DateTime start;
