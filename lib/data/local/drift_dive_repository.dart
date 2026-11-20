@@ -46,8 +46,20 @@ class DriftDiverRepository implements DiverRepository {
   }
 
   @override
-  Future<List<Diver>> list() =>
-      throw UnimplementedError('T15.24: DiverRepository.list');
+  Future<List<Diver>> list() async {
+    final rows =
+        await (_db.select(_db.divers)
+              ..where((t) => t.deletedAt.isNull())
+              ..orderBy([
+                (t) => OrderingTerm.asc(t.createdAt),
+                (t) => OrderingTerm.asc(t.rowId),
+              ]))
+            .get();
+    return [
+      for (final r in rows)
+        Diver(id: r.id, name: r.name, firstDiveNumber: r.firstDiveNumber),
+    ];
+  }
 }
 
 class DriftDiveRepository implements DiveRepository {
@@ -107,8 +119,7 @@ class DriftDiveRepository implements DiveRepository {
   }
 
   @override
-  Future<int> nextNumber(String diverId) =>
-      throw UnimplementedError('T15.23: DiveRepository.nextNumber');
+  Future<int> nextNumber(String diverId) => _nextNumber(diverId);
 
   @override
   Future<void> delete(String id) => _setDeleted(id, clock.now().toUtc());

@@ -36,3 +36,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true
+  assets:
+    - assets/data/dive_sites.json.gz
+    - assets/data/dive_sites.version

@@ -7,14 +7,20 @@ const activeDiverKey = 'active_diver_id';
 class DriftAppSettings implements AppSettings {
   DriftAppSettings(this._db);
 
-  // ignore: unused_field
   final AppDatabase _db;
 
   @override
-  Future<String?> activeDiverId() =>
-      throw UnimplementedError('T15.25: activeDiverId');
+  Future<String?> activeDiverId() async {
+    final row = await (_db.select(
+      _db.appMeta,
+    )..where((t) => t.key.equals(activeDiverKey))).getSingleOrNull();
+    return row?.value;
+  }
 
   @override
-  Future<void> setActiveDiverId(String id) =>
-      throw UnimplementedError('T15.25: setActiveDiverId');
+  Future<void> setActiveDiverId(String id) => _db
+      .into(_db.appMeta)
+      .insertOnConflictUpdate(
+        AppMetaCompanion.insert(key: activeDiverKey, value: id),
+      );
 }

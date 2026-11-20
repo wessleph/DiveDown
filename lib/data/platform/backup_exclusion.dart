@@ -15,12 +15,12 @@ class BackupExclusion {
   static const channelName = 'io.github.wessleph.divedown/backup';
   static const excludeMethod = 'excludeFromBackup';
 
-  // ignore: unused_field
   final MethodChannel _channel;
-  // ignore: unused_field
   final TargetPlatform _platform;
 
   /// Excludes the folder at [path] and everything in it.
-  Future<void> excludeDirectory(String path) =>
-      throw UnimplementedError('T11.9: BackupExclusion.excludeDirectory');
+  Future<void> excludeDirectory(String path) async {
+    if (_platform != TargetPlatform.iOS) return;
+    await _channel.invokeMethod<void>(excludeMethod, {'path': path});
+  }
 }
