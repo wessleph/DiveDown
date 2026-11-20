@@ -89,6 +89,16 @@ jobs:
       - name: Device build, not signed
         run: flutter build ios --release --no-codesign
 
+      # Podfile.lock is checked in (G6). Uploaded right after pod install, so
+      # it is kept even if a later step hangs, and can be committed from the PC.
+      - name: Keep Podfile.lock
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ios-podfile-lock
+          path: ios/Podfile.lock
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: Boot simulator
         id: sim
         run: tool/ci/boot_simulator.sh
@@ -96,12 +106,19 @@ jobs:
       # T4.5 (EON Core fixtures through libdivecomputer built for iOS) and
       # T20.12 (Swift side of the backup exclusion).
       - name: Integration tests on the simulator
+        timeout-minutes: 20
         env:
           UDID: ${{ steps.sim.outputs.udid }}
-        run: flutter test integration_test -d "$UDID"
+        run: |
+          for test in integration_test/*_test.dart; do
+            echo "::group::$test"
+            flutter test "$test" -d "$UDID" -r expanded
+            echo "::endgroup::"
+          done
 
       # T20.9-T20.11 (XCTest in ios/RunnerTests).
       - name: Swift unit tests
+        timeout-minutes: 20
         env:
           UDID: ${{ steps.sim.outputs.udid }}
         run: |
@@ -113,13 +130,19 @@ jobs:
             -destination "id=$UDID" \
             CODE_SIGNING_ALLOWED=NO
 
-      # Podfile.lock is checked in (G6). Uploaded so a change can be reviewed
-      # and committed from the PC.
-      - name: Keep Podfile.lock
-        if: always()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: ios-podfile-lock
-          path: ios/Podfile.lock
-          if-no-files-found: warn
-          retention-days: 14
+      # When a step fails or hangs: what the app on the simulator logged and
+      # whether it crashed.
+      - name: Simulator diagnostics
+        if: failure() || cancelled()
+        env:
+          UDID: ${{ steps.sim.outputs.udid }}
+        run: |
+          [ -n "$UDID" ] || exit 0
+          echo "::group::Runner log, last 30 minutes"
+          xcrun simctl spawn "$UDID" log show --last 30m --style compact --predicate 'process == "Runner"' | tail -400 || true
+          echo "::endgroup::"
+          echo "::group::Crash reports"
+          ls -t "$HOME/Library/Logs/DiagnosticReports" 2>/dev/null | grep -i runner | head -5 || true
+          latest="$(ls -t "$HOME/Library/Logs/DiagnosticReports"/Runner* 2>/dev/null | head -1 || true)"
+          if [ -n "$latest" ]; then head -120 "$latest"; fi
+          echo "::endgroup::"

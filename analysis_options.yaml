@@ -13,6 +13,9 @@ analyzer:
   exclude:
     - build/**
     - submersion-referenz/**
+    # Pigeon input files, need the plugin's own dev dependency `pigeon`. The
+    # generated Dart code in the plugin's lib/ is still analysed.
+    - packages/libdivecomputer_plugin/pigeons/**
     - lib/l10n/app_localizations*.dart
     - android/**
     - ios/**
