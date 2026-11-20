@@ -90,10 +90,18 @@ Tests: `test/domain/import/dive_computer_registry_test.dart` (In-Memory-Drift, `
 | T4.8 | Fingerprint `5576006a` | übersetzt | `source=diveComputer`, `sourceId` = `EON Core:5576006a`, Fingerprint als Bytes | ✅ 2026-11-20: rot wegen `UnimplementedError` |
 | T4.9 | Ereignisse mit und ohne Daten | übersetzt | Zeit und Typ bleiben, Daten als Text `mix=1` | ✅ 2026-11-20: rot wegen `UnimplementedError` |
 | T4.10 | Samples mit NDL (decoType 0) und Dekostopp (decoType 2) | übersetzt | `ndlS` bzw. `decoCeilingM`/`decoTimeS`, Temperatur, Puls, Gas-Index | ✅ 2026-11-20: rot wegen `UnimplementedError` |
+| T4.11 | Teil-Samples mit derselben Zeit (EON Core: erst Tiefe, dann Temperatur) | übersetzt | zu einem Sample zusammengeführt, spätere Werte gewinnen, fehlende bleiben, Druck pro Flasche vereint | ✅ 2026-11-20: rot, 4 statt 2 Samples. Gefunden mit T4.5: die Plausibilitätsprüfung verwarf 3–5 Samples pro echtem Tauchgang und damit Temperaturen |
 
 Tests: `test/data/import/divecomputer/parsed_dive_adapter_test.dart` (PC). T4.5: `integration_test/eon_core_parse_test.dart` (auf dem Handy: `flutter test integration_test/eon_core_parse_test.dart`). Die Fixtures stecken eingebettet in `integration_test/eon_core_fixtures.g.dart`, erzeugt mit `dart run tool/embed_fixtures.dart`. `test/tool/embed_fixtures_test.dart` schlägt fehl, wenn die Datei nicht zu den Fixtures passt.
 Neue Dev-Abhängigkeit: `integration_test` (Teil des Flutter-SDK, BSD-3).
 Nicht in diesem Paket: die Import-Oberfläche (T12.4–T12.11) und das Zusammenspiel mit dem Plugin-Download. Sie folgen als nächster Schritt.
+
+**Umgesetzt (Phase 50, 2026-11-20), T1–T4:**
+- [x] T1 `checkPlausibility` → T1.1–T1.10 grün
+- [x] T2 `ImportService` (+ `findBySource`, `listStartingBetween`) → T2.1–T2.10 grün. Bestätigte T2.3-Fälle ersetzen die Messdaten, Nummer, Tauchplatz, Notizen und Bewertung bleiben.
+- [x] T3 `DiveComputerRegistry`, `DriftDiveComputerRepository` → T3.1–T3.7 grün
+- [x] T4 `importedFromParsedDive` → T4.1–T4.4, T4.6–T4.11 grün (PC). **T4.5 auf dem S25 Ultra grün (9/9):** alle 3 echten Tauchgänge bestehen die Plausibilitätsprüfung ohne Änderung, Ø-Tiefe und Temperatur werden aus den Samples ergänzt. Die T4.5-Erwartung zur Sample-Anzahl zählt seit T4.11 Zeitpunkte statt Rohsamples.
+- Gesamt: `flutter test` 195/195, `flutter analyze` ohne Befund.
 
 ## T5: FIT-Import (`data/import/fit/`, security A2/R3)
 | ID | A | W | D | Rot gesehen |

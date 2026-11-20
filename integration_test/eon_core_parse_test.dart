@@ -45,7 +45,11 @@ void main() {
         final dive = importedFromParsedDive(parsed, product: 'EON Core');
 
         expect(dive.maxDepthM, closeTo(parsed.maxDepthMeters, 1e-9));
-        expect(dive.samples, hasLength(parsed.samples.length));
+        // One sample per time: split samples are merged (T4.11).
+        expect(
+          dive.samples,
+          hasLength(parsed.samples.map((s) => s.timeSeconds).toSet().length),
+        );
         // The device reports 0,0 m and no temperature (fixture README).
         expect(dive.avgDepthM, isNotNull);
         expect(dive.avgDepthM, inExclusiveRange(1, dive.maxDepthM));
