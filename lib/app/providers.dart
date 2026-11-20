@@ -1,10 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:libdivecomputer_plugin/libdivecomputer_plugin.dart' as dc;
+
+import '../data/import/divecomputer/plugin_dive_computer_source.dart';
 
 import '../data/local/database.dart';
 import '../data/local/drift_app_settings.dart';
 import '../data/local/drift_dive_computer_repository.dart';
 import '../data/local/drift_dive_repository.dart';
 import '../data/local/drift_site_repository.dart';
+import '../data/platform/device_channel.dart';
+import '../data/platform/permission_bluetooth_access.dart';
 import '../domain/dive/dive.dart';
 import '../domain/dive/dive_repository.dart';
 import '../domain/dive/diver.dart';
@@ -86,18 +91,29 @@ final diveComputerRepositoryProvider = Provider<DiveComputerRepository>(
   (ref) => DriftDiveComputerRepository(ref.watch(appDatabaseProvider)),
 );
 
+/// The plugin; receives the native callbacks while the app runs.
+final diveComputerServiceProvider = Provider<dc.DiveComputerService>((ref) {
+  final service = dc.DiveComputerService();
+  dc.DiveComputerFlutterApi.setUp(service);
+  ref.onDispose(() {
+    dc.DiveComputerFlutterApi.setUp(null);
+    service.dispose();
+  });
+  return service;
+});
+
 /// The plugin behind [DiveComputerSource]; tests override it with a fake.
 final diveComputerSourceProvider = Provider<DiveComputerSource>(
-  (ref) => throw UnimplementedError('diveComputerSourceProvider'),
+  (ref) => PluginDiveComputerSource(ref.watch(diveComputerServiceProvider)),
 );
 
 /// Runtime permissions and the radio (permission_handler, security.md §4).
 final bluetoothAccessProvider = Provider<BluetoothAccess>(
-  (ref) => throw UnimplementedError('bluetoothAccessProvider'),
+  (ref) => PermissionBluetoothAccess(),
 );
 
 final screenAwakeProvider = Provider<ScreenAwake>(
-  (ref) => throw UnimplementedError('screenAwakeProvider'),
+  (ref) => const ChannelScreenAwake(),
 );
 
 final diveComputerImportProvider = Provider<DiveComputerImport>(

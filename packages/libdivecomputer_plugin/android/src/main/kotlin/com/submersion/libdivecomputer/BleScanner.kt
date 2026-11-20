@@ -98,6 +98,21 @@ class BleScanner(private val context: Context) {
                     name, LIBDC_TRANSPORT_BLE, info
                 )
                 if (!matched) {
+                    // DiveDown: show known unsupported computers greyed out.
+                    UnsupportedComputers.match(name)?.let { unsupported ->
+                        seenAddresses.add(address)
+                        onDeviceDiscovered?.invoke(
+                            DiscoveredDevice(
+                                vendor = unsupported.vendor,
+                                product = unsupported.product,
+                                model = UnsupportedComputers.MODEL,
+                                address = address,
+                                name = name,
+                                transport = TransportType.BLE
+                            )
+                        )
+                        return
+                    }
                     diagnostics.describeUnmatched(address, name, rssi)?.let {
                         NativeLogger.d(TAG, "BLE", it)
                     }

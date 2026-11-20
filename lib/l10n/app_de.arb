@@ -150,5 +150,105 @@
   "errorVolume": "Die Flaschengröße muss zwischen 0 und 30 l liegen.",
   "errorPressure": "Druck muss zwischen 0 und 400 bar liegen.",
   "errorEndPressure": "Der Enddruck muss kleiner als der Startdruck sein.",
-  "errorO2": "Der O₂-Anteil muss zwischen 1 und 100 % liegen."
+  "errorO2": "Der O₂-Anteil muss zwischen 1 und 100 % liegen.",
+
+  "importFor": "Importieren für: {name}",
+  "@importFor": {
+    "description": "Above every import screen; the name is shown bold",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "importSourceComputer": "Tauchcomputer",
+  "importSourceComputerHint": "Per Bluetooth übertragen",
+  "importSourceFit": "FIT-Datei",
+  "importSourceFitHint": "Datei aus der Suunto-App oder Garmin",
+  "importSourceHealth": "Apple Health",
+  "importSourceHealthHint": "Tauchgänge der Apple Watch",
+  "importComingSoon": "Kommt mit einem der nächsten Updates.",
+
+  "btOff": "Bluetooth ist ausgeschaltet.",
+  "btTurnOn": "Bluetooth einschalten",
+  "btTurnOnIos": "Schalte Bluetooth im Kontrollzentrum ein.",
+  "btExplain": "DiveDown braucht Bluetooth, um Tauchgänge von deinem Tauchcomputer zu laden. Es werden keine anderen Geräte gespeichert.",
+  "btContinue": "Weiter",
+  "btDenied": "Ohne Bluetooth-Berechtigung kann DiveDown keine Tauchcomputer finden.",
+  "btOpenSettings": "Einstellungen öffnen",
+  "scanPairHintEonCore": "Aktiviere Bluetooth am Tauchcomputer: EON Core → Einstellungen → Verbindungen → Koppeln.",
+  "scanRunning": "Suche nach Tauchcomputern …",
+  "scanStop": "Stopp",
+  "scanAgain": "Erneut suchen",
+  "scanNothing": "Kein Tauchcomputer gefunden.",
+  "scanCheckBluetooth": "Ist Bluetooth am Tauchcomputer aktiv?",
+  "scanCheckDistance": "Liegt der Tauchcomputer nah am Handy?",
+  "scanCheckSuuntoApp": "Schließe die Suunto-App ganz. Sie hält sonst die Verbindung zum EON Core, auch im Hintergrund.",
+  "scanKnown": "Bekannt",
+  "scanUnsupported": "Dieses Modell wird nicht direkt unterstützt.",
+  "scanUseFit": "Nutze den Import per FIT-Datei.",
+  "scanFitGuide": "Zur FIT-Anleitung",
+  "fitGuideTitle": "So exportierst du aus der Suunto-App",
+  "fitGuideSteps": "1. Öffne die Suunto-App und wähle den Tauchgang.\n2. Tippe auf ⋯ → ‚Exportieren‘ bzw. ‚Teilen‘ und wähle FIT.\n3. Wähle DiveDown oder speichere die Datei und öffne sie hier.",
+  "ok": "OK",
+
+  "transferConnecting": "Verbinde mit {name} …",
+  "@transferConnecting": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "transferFound": "{count, plural, =1{1 neuer Tauchgang gefunden …} other{{count} neue Tauchgänge gefunden …}}",
+  "@transferFound": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "transferKeepClose": "Halte den Tauchcomputer in der Nähe. Das kann einige Minuten dauern.",
+  "transferUpToDate": "Alles auf dem neuesten Stand. Keine neuen Tauchgänge auf dem Tauchcomputer.",
+  "transferDone": "Fertig",
+  "transferLost": "Die Verbindung wurde unterbrochen.",
+  "transferPartial": "{count, plural, =1{1 Tauchgang wurde übertragen.} other{{count} Tauchgänge wurden übertragen.}}",
+  "@transferPartial": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "transferCheckReceived": "Übertragene prüfen",
+  "transferReconnect": "Erneut verbinden",
+  "transferCancelled": "Übertragung abgebrochen.",
+  "transferFailed": "Die Übertragung ist fehlgeschlagen.",
+  "errorCode": "Fehlercode: {code}",
+  "@errorCode": {
+    "placeholders": { "code": { "type": "String" } }
+  },
+  "pinTitle": "Code eingeben",
+  "pinBody": "{name} (••{id}) fragt nach einem Code. Gib den Code ein, der auf dem Tauchcomputer angezeigt wird.",
+  "@pinBody": {
+    "placeholders": { "name": { "type": "String" }, "id": { "type": "String" } }
+  },
+  "pinField": "Code",
+  "pinConfirm": "Bestätigen",
+  "pinTimeout": "Zeit abgelaufen. Bitte erneut verbinden.",
+  "serialTitle": "Andere Seriennummer",
+  "serialBody": "Dieses Gerät meldet eine andere Seriennummer als dein gespeicherter ‚{product}‘. Wenn du das Gerät nicht kennst, brich ab.",
+  "@serialBody": {
+    "placeholders": { "product": { "type": "String" } }
+  },
+  "serialUseAsNew": "Als neues Gerät verwenden",
+
+  "previewSourceComputer": "Vom Tauchcomputer: {name}",
+  "@previewSourceComputer": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "previewSimilar": "Ähnlicher Tauchgang vorhanden ({date}, {depth}, {duration})",
+  "@previewSimilar": {
+    "placeholders": {
+      "date": { "type": "String" },
+      "depth": { "type": "String" },
+      "duration": { "type": "String" }
+    }
+  },
+  "previewSameIdOtherData": "Gleiche Kennung, aber abweichende Daten",
+  "previewAlreadyThere": "Bereits im Logbuch",
+  "previewRejected": "Unplausible Werte, kann nicht importiert werden.",
+  "previewImport": "{count, plural, =1{1 Tauchgang importieren} other{{count} Tauchgänge importieren}}",
+  "@previewImport": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "previewNothing": "Nichts ausgewählt",
+  "importedSnack": "{count, plural, =1{1 Tauchgang importiert} other{{count} Tauchgänge importiert}}",
+  "@importedSnack": {
+    "placeholders": { "count": { "type": "int" } }
+  }
 }

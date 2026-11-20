@@ -134,6 +134,16 @@ Tests: `test/domain/import/dive_computer_import_test.dart` (In-Memory-Drift, Fak
 Tests: `test/data/import/divecomputer/plugin_dive_computer_source_test.dart` (Fake-`DiveComputerHostApi`, Rückrufe direkt am `DiveComputerService`).
 Nicht am PC testbar: Laufzeit-Berechtigungen und Bluetooth-Zustand (`permission_handler`), Bildschirm anlassen und „Bluetooth einschalten“ (eigener Plattform-Kanal). Prüfung auf dem S25 Ultra mit dem echten EON Core.
 
+**Umgesetzt (Phase 50, 2026-11-20), BLE-Import T12.4–T12.11, T12.14 (Import), T12.16–T12.25, T17, T18:**
+- [x] `DiveComputerImport` (Download → `ImportService` → `DiveComputerRegistry`), neu `DiveComputerRegistry.ensure`, damit Tauchgänge schon beim ersten Import auf ihr Gerät verweisen → T17.1–T17.9 grün. Gespeichert wird **chronologisch**, damit die Nummern stimmen, auch wenn der Tauchcomputer den neuesten zuerst schickt.
+- [x] `PluginDiveComputerSource` → T18.1–T18.9 grün. T18.6 umbenannt: Nach einem Abbruch endet der Stream sofort, späte Ereignisse (USB-Flush) werden nicht abgewartet. Aussage des Tests unverändert.
+- [x] Oberfläche `ImportScreen`, `DiveComputerScreen` (Suche, Übertragung, PIN-Dialog, Seriennummer-Warnung, Vorschau), Texte in `app_de.arb` → alle T12-Import-Zeilen grün.
+- [x] Plattform: `permission_handler` 13.0.2 (MIT, auch die 5 Plattformpakete), `PermissionBluetoothAccess`, Kanal `io.github.wessleph.divedown/device` (Android: Bluetooth an/aus, System-Dialog, SDK-Stufe, Bildschirm an; iOS: Bildschirm an). Manifest nach security §4 (`neverForLocation`, Standort und alte Bluetooth-Rechte nur bis SDK 30), `NSBluetoothAlwaysUsageDescription`.
+- [x] Plugin (`// DiveDown:`): Suunto Ocean und Nautic werden mit Modell −1 gemeldet (`UnsupportedComputers.kt`, `BleScanner.swift`), JUnit `UnsupportedComputersTest` grün. **Ungeprüft:** der echte BLE-Name der Ocean.
+- Gesamt: `flutter test` 242/242, `flutter analyze` ohne Befund.
+- Noch offen aus §5.9: „Vergleichen“, „Tauchplatz für Ausgewählte setzen“, Sparkline und Info-Zeile „unplausible Messwerte entfernt“. Aus §5.7: „Logs senden“ (kommt mit T10). Aus §5.5: Untertitel „Zuletzt: EON Core, vor 3 Tagen“.
+- iOS: `permission_handler` braucht im Podfile `PERMISSION_BLUETOOTH=1`. Das kommt mit der iOS-Pipeline (KW 49), Swift ist ohne Mac nicht gebaut.
+
 ## T5: FIT-Import (`data/import/fit/`, security A2/R3)
 | ID | A | W | D | Rot gesehen |
 |---|---|---|---|---|

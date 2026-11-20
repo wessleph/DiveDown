@@ -182,7 +182,7 @@ void main() {
   );
 
   test(
-    'T18.6 dives the plugin flushes after a cancel still arrive (USB)',
+    'T18.6 after a cancel, late plugin events are ignored (USB flush)',
     () async {
       final events = <TransferEvent>[];
       final done = source.download(_computer).forEach(events.add);

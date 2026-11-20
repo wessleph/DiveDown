@@ -6,7 +6,8 @@ plugins {
 
 android {
     namespace = "io.github.wessleph.divedown"
-    compileSdk = flutter.compileSdkVersion
+    // permission_handler_android needs 37; backward compatible, targetSdk stays.
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

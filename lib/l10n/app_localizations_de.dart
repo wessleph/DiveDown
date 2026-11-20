@@ -348,4 +348,233 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get errorO2 => 'Der O₂-Anteil muss zwischen 1 und 100 % liegen.';
+
+  @override
+  String importFor(String name) {
+    return 'Importieren für: $name';
+  }
+
+  @override
+  String get importSourceComputer => 'Tauchcomputer';
+
+  @override
+  String get importSourceComputerHint => 'Per Bluetooth übertragen';
+
+  @override
+  String get importSourceFit => 'FIT-Datei';
+
+  @override
+  String get importSourceFitHint => 'Datei aus der Suunto-App oder Garmin';
+
+  @override
+  String get importSourceHealth => 'Apple Health';
+
+  @override
+  String get importSourceHealthHint => 'Tauchgänge der Apple Watch';
+
+  @override
+  String get importComingSoon => 'Kommt mit einem der nächsten Updates.';
+
+  @override
+  String get btOff => 'Bluetooth ist ausgeschaltet.';
+
+  @override
+  String get btTurnOn => 'Bluetooth einschalten';
+
+  @override
+  String get btTurnOnIos => 'Schalte Bluetooth im Kontrollzentrum ein.';
+
+  @override
+  String get btExplain =>
+      'DiveDown braucht Bluetooth, um Tauchgänge von deinem Tauchcomputer zu laden. Es werden keine anderen Geräte gespeichert.';
+
+  @override
+  String get btContinue => 'Weiter';
+
+  @override
+  String get btDenied =>
+      'Ohne Bluetooth-Berechtigung kann DiveDown keine Tauchcomputer finden.';
+
+  @override
+  String get btOpenSettings => 'Einstellungen öffnen';
+
+  @override
+  String get scanPairHintEonCore =>
+      'Aktiviere Bluetooth am Tauchcomputer: EON Core → Einstellungen → Verbindungen → Koppeln.';
+
+  @override
+  String get scanRunning => 'Suche nach Tauchcomputern …';
+
+  @override
+  String get scanStop => 'Stopp';
+
+  @override
+  String get scanAgain => 'Erneut suchen';
+
+  @override
+  String get scanNothing => 'Kein Tauchcomputer gefunden.';
+
+  @override
+  String get scanCheckBluetooth => 'Ist Bluetooth am Tauchcomputer aktiv?';
+
+  @override
+  String get scanCheckDistance => 'Liegt der Tauchcomputer nah am Handy?';
+
+  @override
+  String get scanCheckSuuntoApp =>
+      'Schließe die Suunto-App ganz. Sie hält sonst die Verbindung zum EON Core, auch im Hintergrund.';
+
+  @override
+  String get scanKnown => 'Bekannt';
+
+  @override
+  String get scanUnsupported => 'Dieses Modell wird nicht direkt unterstützt.';
+
+  @override
+  String get scanUseFit => 'Nutze den Import per FIT-Datei.';
+
+  @override
+  String get scanFitGuide => 'Zur FIT-Anleitung';
+
+  @override
+  String get fitGuideTitle => 'So exportierst du aus der Suunto-App';
+
+  @override
+  String get fitGuideSteps =>
+      '1. Öffne die Suunto-App und wähle den Tauchgang.\n2. Tippe auf ⋯ → ‚Exportieren‘ bzw. ‚Teilen‘ und wähle FIT.\n3. Wähle DiveDown oder speichere die Datei und öffne sie hier.';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String transferConnecting(String name) {
+    return 'Verbinde mit $name …';
+  }
+
+  @override
+  String transferFound(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count neue Tauchgänge gefunden …',
+      one: '1 neuer Tauchgang gefunden …',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get transferKeepClose =>
+      'Halte den Tauchcomputer in der Nähe. Das kann einige Minuten dauern.';
+
+  @override
+  String get transferUpToDate =>
+      'Alles auf dem neuesten Stand. Keine neuen Tauchgänge auf dem Tauchcomputer.';
+
+  @override
+  String get transferDone => 'Fertig';
+
+  @override
+  String get transferLost => 'Die Verbindung wurde unterbrochen.';
+
+  @override
+  String transferPartial(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Tauchgänge wurden übertragen.',
+      one: '1 Tauchgang wurde übertragen.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get transferCheckReceived => 'Übertragene prüfen';
+
+  @override
+  String get transferReconnect => 'Erneut verbinden';
+
+  @override
+  String get transferCancelled => 'Übertragung abgebrochen.';
+
+  @override
+  String get transferFailed => 'Die Übertragung ist fehlgeschlagen.';
+
+  @override
+  String errorCode(String code) {
+    return 'Fehlercode: $code';
+  }
+
+  @override
+  String get pinTitle => 'Code eingeben';
+
+  @override
+  String pinBody(String name, String id) {
+    return '$name (••$id) fragt nach einem Code. Gib den Code ein, der auf dem Tauchcomputer angezeigt wird.';
+  }
+
+  @override
+  String get pinField => 'Code';
+
+  @override
+  String get pinConfirm => 'Bestätigen';
+
+  @override
+  String get pinTimeout => 'Zeit abgelaufen. Bitte erneut verbinden.';
+
+  @override
+  String get serialTitle => 'Andere Seriennummer';
+
+  @override
+  String serialBody(String product) {
+    return 'Dieses Gerät meldet eine andere Seriennummer als dein gespeicherter ‚$product‘. Wenn du das Gerät nicht kennst, brich ab.';
+  }
+
+  @override
+  String get serialUseAsNew => 'Als neues Gerät verwenden';
+
+  @override
+  String previewSourceComputer(String name) {
+    return 'Vom Tauchcomputer: $name';
+  }
+
+  @override
+  String previewSimilar(String date, String depth, String duration) {
+    return 'Ähnlicher Tauchgang vorhanden ($date, $depth, $duration)';
+  }
+
+  @override
+  String get previewSameIdOtherData =>
+      'Gleiche Kennung, aber abweichende Daten';
+
+  @override
+  String get previewAlreadyThere => 'Bereits im Logbuch';
+
+  @override
+  String get previewRejected =>
+      'Unplausible Werte, kann nicht importiert werden.';
+
+  @override
+  String previewImport(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Tauchgänge importieren',
+      one: '1 Tauchgang importieren',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get previewNothing => 'Nichts ausgewählt';
+
+  @override
+  String importedSnack(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Tauchgänge importiert',
+      one: '1 Tauchgang importiert',
+    );
+    return '$_temp0';
+  }
 }

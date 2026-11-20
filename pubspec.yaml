@@ -23,6 +23,7 @@ dependencies:
     path: packages/libdivecomputer_plugin
   path: ^1.9.0 # BSD-3-Clause, already pulled in by Flutter
   path_provider: ^2.1.6 # BSD-3-Clause (incl. platform packages), database folder
+  permission_handler: ^13.0.2 # MIT (incl. 5 platform packages), BLE runtime permissions (security.md §4)
   sqlite3: ^3.5.1 # MIT, bundles SQLite via build hooks (no SQLCipher, security R4)
   uuid: ^4.5.0 # MIT (ADR 0004)
 

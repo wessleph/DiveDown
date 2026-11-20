@@ -134,7 +134,8 @@ Oben: „Importieren für: **Anna** ▾“
 ### 5.6 Tauchcomputer: Suche und Auswahl
 **Ablauf:** Rechte prüfen → Scan startet automatisch (max. 30 s) → Liste der gefundenen Geräte → antippen → Download (§5.7).
 
-Pro Gerät: Name · Modell (falls erkannt) · **Signalstärke** als 4 Balken + Text („stark“, „mittel“, „schwach“) · Kennzeichnung **„Bekannt“**, wenn es bereits gekoppelt war.
+Pro Gerät: Name · Modell (falls erkannt) · Kennzeichnung **„Bekannt“**, wenn es bereits gekoppelt war.
+*(Änderung 2026-11-20: Die Signalstärke entfällt in 1.0, weil das Plugin keinen RSSI-Wert an Dart weitergibt. Sie käme mit einer Änderung der Pigeon-Schnittstelle.)*
 Vor der Suche ein kleiner Hinweis: „Aktiviere Bluetooth am Tauchcomputer: EON Core → Einstellungen → Verbindungen → Koppeln.“ Die Hilfe ist pro Modell hinterlegt, zunächst nur für die EON Core.
 
 | Zustand | Text / Aktion |
@@ -143,10 +144,10 @@ Vor der Suche ein kleiner Hinweis: „Aktiviere Bluetooth am Tauchcomputer: EON 
 | Berechtigung noch nicht erteilt | Vorab-Erklärung: „DiveDown braucht Bluetooth, um Tauchgänge von deinem Tauchcomputer zu laden. Es werden keine anderen Geräte gespeichert.“ · **„Weiter“** → System-Dialog |
 | Berechtigung verweigert | „Ohne Bluetooth-Berechtigung kann DiveDown keine Tauchcomputer finden.“ · **„Einstellungen öffnen“** |
 | Suche läuft | Animiertes Radar-Icon (mit „Bewegung reduzieren“ nur statisch), „Suche nach Tauchcomputern …“ und Knopf „Stopp“ |
-| nichts gefunden (30 s) | „Kein Tauchcomputer gefunden.“ + Checkliste: Bluetooth am Gerät aktiv? Gerät näher ans Handy? Tauchcomputer nicht mit einer anderen App verbunden (z. B. Suunto-App)? · **„Erneut suchen“** |
+| nichts gefunden (30 s) | „Kein Tauchcomputer gefunden.“ + Checkliste: „Ist Bluetooth am Tauchcomputer aktiv?“ · „Liegt der Tauchcomputer nah am Handy?“ · „Schließe die Suunto-App ganz. Sie hält sonst die Verbindung zum EON Core, auch im Hintergrund.“ · **„Erneut suchen“** |
 | Gerät nicht unterstützt | Eintrag ausgegraut: „Dieses Modell wird nicht direkt unterstützt.“ Bei **Suunto Ocean / Nautic** zusätzlich: „Nutze den Import per FIT-Datei.“ → **„Zur FIT-Anleitung“** |
 | PIN nötig | Dialog: „**EON Core (••3F7A)** fragt nach einem Code. Gib den Code ein, der auf dem Tauchcomputer angezeigt wird.“ · Feld (Ziffern) · **„Bestätigen“** / „Abbrechen“ (60 s Zeitlimit, danach „Zeit abgelaufen. Bitte erneut verbinden.“) |
-| **Seriennummer weicht ab** (security A1) | Warnung: „Dieses Gerät meldet eine andere Seriennummer als dein gespeicherter ‚EON Core‘. Wenn du das Gerät nicht kennst, brich ab.“ · **„Abbrechen“** (primär) / „Als neues Gerät verwenden“ |
+| **Seriennummer weicht ab** (security A1) | Nach der Übertragung, **vor** der Vorschau. Warnung: „Dieses Gerät meldet eine andere Seriennummer als dein gespeicherter ‚EON Core‘. Wenn du das Gerät nicht kennst, brich ab.“ · **„Abbrechen“** (primär) / „Als neues Gerät verwenden“ |
 
 ### 5.7 Tauchcomputer: Übertragung
 - Fortschrittsbalken (bestimmt, wenn das Plugin `DownloadProgress` liefert, sonst unbestimmt) und „**3 neue Tauchgänge** gefunden …“
@@ -157,7 +158,7 @@ Vor der Suche ein kleiner Hinweis: „Aktiviere Bluetooth am Tauchcomputer: EON 
 | Zustand | Text / Aktion |
 |---|---|
 | keine neuen Tauchgänge | „Alles auf dem neuesten Stand. Keine neuen Tauchgänge auf dem Tauchcomputer.“ · **„Fertig“** |
-| Verbindung abgebrochen | „Die Verbindung wurde unterbrochen.“ Sind schon Tauchgänge da, kommt zusätzlich: „**2 von 5** Tauchgängen wurden übertragen.“ · **„Übertragene prüfen“** · **„Erneut verbinden“** · „Logs senden“ |
+| Verbindung abgebrochen | „Die Verbindung wurde unterbrochen.“ Sind schon Tauchgänge da, kommt zusätzlich: „**2 Tauchgänge** wurden übertragen.“ (Die Gesamtzahl ist unbekannt: der Fortschritt des Plugins zählt Bytes, nicht Tauchgänge. Er treibt den Balken.) · **„Übertragene prüfen“** · **„Erneut verbinden“** · „Logs senden“ |
 | Abbruch durch Nutzer | „Übertragung abgebrochen.“ Bereits übertragene Tauchgänge gehen in die Vorschau. |
 | unbekannter Fehler | wie §4 Fehler, mit Fehlercode klein darunter |
 | Erfolg | weiter zur Vorschau (§5.9) |

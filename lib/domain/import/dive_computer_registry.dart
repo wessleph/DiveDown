@@ -101,6 +101,33 @@ class DiveComputerRegistry {
     known: await _computers.findByAddress(address),
   );
 
+  /// The device the dives of [session] belong to, found by address or, from
+  /// a new phone, by [serial] (T3.7). Unknown devices are created without a
+  /// fingerprint, so dives can point to them before [finish] runs.
+  Future<KnownDiveComputer> ensure(
+    DownloadSession session, {
+    String? serial,
+    String? firmware,
+  }) async {
+    final known =
+        session.known ??
+        (serial == null
+            ? null
+            : await _computers.findBySerial(session.vendor, serial));
+    if (known != null) return known;
+    return _computers.create(
+      KnownDiveComputer(
+        id: '',
+        vendor: session.vendor,
+        product: session.product,
+        model: session.model,
+        serial: serial,
+        firmware: firmware,
+        address: session.address,
+      ),
+    );
+  }
+
   /// Call when the download ended. Writes the fingerprint of the newest of
   /// [savedDives] only if the download [completed], something was saved and
   /// the serial matches.

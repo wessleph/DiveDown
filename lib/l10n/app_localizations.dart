@@ -687,6 +687,354 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Der O₂-Anteil muss zwischen 1 und 100 % liegen.'**
   String get errorO2;
+
+  /// Above every import screen; the name is shown bold
+  ///
+  /// In de, this message translates to:
+  /// **'Importieren für: {name}'**
+  String importFor(String name);
+
+  /// No description provided for @importSourceComputer.
+  ///
+  /// In de, this message translates to:
+  /// **'Tauchcomputer'**
+  String get importSourceComputer;
+
+  /// No description provided for @importSourceComputerHint.
+  ///
+  /// In de, this message translates to:
+  /// **'Per Bluetooth übertragen'**
+  String get importSourceComputerHint;
+
+  /// No description provided for @importSourceFit.
+  ///
+  /// In de, this message translates to:
+  /// **'FIT-Datei'**
+  String get importSourceFit;
+
+  /// No description provided for @importSourceFitHint.
+  ///
+  /// In de, this message translates to:
+  /// **'Datei aus der Suunto-App oder Garmin'**
+  String get importSourceFitHint;
+
+  /// No description provided for @importSourceHealth.
+  ///
+  /// In de, this message translates to:
+  /// **'Apple Health'**
+  String get importSourceHealth;
+
+  /// No description provided for @importSourceHealthHint.
+  ///
+  /// In de, this message translates to:
+  /// **'Tauchgänge der Apple Watch'**
+  String get importSourceHealthHint;
+
+  /// No description provided for @importComingSoon.
+  ///
+  /// In de, this message translates to:
+  /// **'Kommt mit einem der nächsten Updates.'**
+  String get importComingSoon;
+
+  /// No description provided for @btOff.
+  ///
+  /// In de, this message translates to:
+  /// **'Bluetooth ist ausgeschaltet.'**
+  String get btOff;
+
+  /// No description provided for @btTurnOn.
+  ///
+  /// In de, this message translates to:
+  /// **'Bluetooth einschalten'**
+  String get btTurnOn;
+
+  /// No description provided for @btTurnOnIos.
+  ///
+  /// In de, this message translates to:
+  /// **'Schalte Bluetooth im Kontrollzentrum ein.'**
+  String get btTurnOnIos;
+
+  /// No description provided for @btExplain.
+  ///
+  /// In de, this message translates to:
+  /// **'DiveDown braucht Bluetooth, um Tauchgänge von deinem Tauchcomputer zu laden. Es werden keine anderen Geräte gespeichert.'**
+  String get btExplain;
+
+  /// No description provided for @btContinue.
+  ///
+  /// In de, this message translates to:
+  /// **'Weiter'**
+  String get btContinue;
+
+  /// No description provided for @btDenied.
+  ///
+  /// In de, this message translates to:
+  /// **'Ohne Bluetooth-Berechtigung kann DiveDown keine Tauchcomputer finden.'**
+  String get btDenied;
+
+  /// No description provided for @btOpenSettings.
+  ///
+  /// In de, this message translates to:
+  /// **'Einstellungen öffnen'**
+  String get btOpenSettings;
+
+  /// No description provided for @scanPairHintEonCore.
+  ///
+  /// In de, this message translates to:
+  /// **'Aktiviere Bluetooth am Tauchcomputer: EON Core → Einstellungen → Verbindungen → Koppeln.'**
+  String get scanPairHintEonCore;
+
+  /// No description provided for @scanRunning.
+  ///
+  /// In de, this message translates to:
+  /// **'Suche nach Tauchcomputern …'**
+  String get scanRunning;
+
+  /// No description provided for @scanStop.
+  ///
+  /// In de, this message translates to:
+  /// **'Stopp'**
+  String get scanStop;
+
+  /// No description provided for @scanAgain.
+  ///
+  /// In de, this message translates to:
+  /// **'Erneut suchen'**
+  String get scanAgain;
+
+  /// No description provided for @scanNothing.
+  ///
+  /// In de, this message translates to:
+  /// **'Kein Tauchcomputer gefunden.'**
+  String get scanNothing;
+
+  /// No description provided for @scanCheckBluetooth.
+  ///
+  /// In de, this message translates to:
+  /// **'Ist Bluetooth am Tauchcomputer aktiv?'**
+  String get scanCheckBluetooth;
+
+  /// No description provided for @scanCheckDistance.
+  ///
+  /// In de, this message translates to:
+  /// **'Liegt der Tauchcomputer nah am Handy?'**
+  String get scanCheckDistance;
+
+  /// No description provided for @scanCheckSuuntoApp.
+  ///
+  /// In de, this message translates to:
+  /// **'Schließe die Suunto-App ganz. Sie hält sonst die Verbindung zum EON Core, auch im Hintergrund.'**
+  String get scanCheckSuuntoApp;
+
+  /// No description provided for @scanKnown.
+  ///
+  /// In de, this message translates to:
+  /// **'Bekannt'**
+  String get scanKnown;
+
+  /// No description provided for @scanUnsupported.
+  ///
+  /// In de, this message translates to:
+  /// **'Dieses Modell wird nicht direkt unterstützt.'**
+  String get scanUnsupported;
+
+  /// No description provided for @scanUseFit.
+  ///
+  /// In de, this message translates to:
+  /// **'Nutze den Import per FIT-Datei.'**
+  String get scanUseFit;
+
+  /// No description provided for @scanFitGuide.
+  ///
+  /// In de, this message translates to:
+  /// **'Zur FIT-Anleitung'**
+  String get scanFitGuide;
+
+  /// No description provided for @fitGuideTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'So exportierst du aus der Suunto-App'**
+  String get fitGuideTitle;
+
+  /// No description provided for @fitGuideSteps.
+  ///
+  /// In de, this message translates to:
+  /// **'1. Öffne die Suunto-App und wähle den Tauchgang.\n2. Tippe auf ⋯ → ‚Exportieren‘ bzw. ‚Teilen‘ und wähle FIT.\n3. Wähle DiveDown oder speichere die Datei und öffne sie hier.'**
+  String get fitGuideSteps;
+
+  /// No description provided for @ok.
+  ///
+  /// In de, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// No description provided for @transferConnecting.
+  ///
+  /// In de, this message translates to:
+  /// **'Verbinde mit {name} …'**
+  String transferConnecting(String name);
+
+  /// No description provided for @transferFound.
+  ///
+  /// In de, this message translates to:
+  /// **'{count, plural, =1{1 neuer Tauchgang gefunden …} other{{count} neue Tauchgänge gefunden …}}'**
+  String transferFound(int count);
+
+  /// No description provided for @transferKeepClose.
+  ///
+  /// In de, this message translates to:
+  /// **'Halte den Tauchcomputer in der Nähe. Das kann einige Minuten dauern.'**
+  String get transferKeepClose;
+
+  /// No description provided for @transferUpToDate.
+  ///
+  /// In de, this message translates to:
+  /// **'Alles auf dem neuesten Stand. Keine neuen Tauchgänge auf dem Tauchcomputer.'**
+  String get transferUpToDate;
+
+  /// No description provided for @transferDone.
+  ///
+  /// In de, this message translates to:
+  /// **'Fertig'**
+  String get transferDone;
+
+  /// No description provided for @transferLost.
+  ///
+  /// In de, this message translates to:
+  /// **'Die Verbindung wurde unterbrochen.'**
+  String get transferLost;
+
+  /// No description provided for @transferPartial.
+  ///
+  /// In de, this message translates to:
+  /// **'{count, plural, =1{1 Tauchgang wurde übertragen.} other{{count} Tauchgänge wurden übertragen.}}'**
+  String transferPartial(int count);
+
+  /// No description provided for @transferCheckReceived.
+  ///
+  /// In de, this message translates to:
+  /// **'Übertragene prüfen'**
+  String get transferCheckReceived;
+
+  /// No description provided for @transferReconnect.
+  ///
+  /// In de, this message translates to:
+  /// **'Erneut verbinden'**
+  String get transferReconnect;
+
+  /// No description provided for @transferCancelled.
+  ///
+  /// In de, this message translates to:
+  /// **'Übertragung abgebrochen.'**
+  String get transferCancelled;
+
+  /// No description provided for @transferFailed.
+  ///
+  /// In de, this message translates to:
+  /// **'Die Übertragung ist fehlgeschlagen.'**
+  String get transferFailed;
+
+  /// No description provided for @errorCode.
+  ///
+  /// In de, this message translates to:
+  /// **'Fehlercode: {code}'**
+  String errorCode(String code);
+
+  /// No description provided for @pinTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Code eingeben'**
+  String get pinTitle;
+
+  /// No description provided for @pinBody.
+  ///
+  /// In de, this message translates to:
+  /// **'{name} (••{id}) fragt nach einem Code. Gib den Code ein, der auf dem Tauchcomputer angezeigt wird.'**
+  String pinBody(String name, String id);
+
+  /// No description provided for @pinField.
+  ///
+  /// In de, this message translates to:
+  /// **'Code'**
+  String get pinField;
+
+  /// No description provided for @pinConfirm.
+  ///
+  /// In de, this message translates to:
+  /// **'Bestätigen'**
+  String get pinConfirm;
+
+  /// No description provided for @pinTimeout.
+  ///
+  /// In de, this message translates to:
+  /// **'Zeit abgelaufen. Bitte erneut verbinden.'**
+  String get pinTimeout;
+
+  /// No description provided for @serialTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Andere Seriennummer'**
+  String get serialTitle;
+
+  /// No description provided for @serialBody.
+  ///
+  /// In de, this message translates to:
+  /// **'Dieses Gerät meldet eine andere Seriennummer als dein gespeicherter ‚{product}‘. Wenn du das Gerät nicht kennst, brich ab.'**
+  String serialBody(String product);
+
+  /// No description provided for @serialUseAsNew.
+  ///
+  /// In de, this message translates to:
+  /// **'Als neues Gerät verwenden'**
+  String get serialUseAsNew;
+
+  /// No description provided for @previewSourceComputer.
+  ///
+  /// In de, this message translates to:
+  /// **'Vom Tauchcomputer: {name}'**
+  String previewSourceComputer(String name);
+
+  /// No description provided for @previewSimilar.
+  ///
+  /// In de, this message translates to:
+  /// **'Ähnlicher Tauchgang vorhanden ({date}, {depth}, {duration})'**
+  String previewSimilar(String date, String depth, String duration);
+
+  /// No description provided for @previewSameIdOtherData.
+  ///
+  /// In de, this message translates to:
+  /// **'Gleiche Kennung, aber abweichende Daten'**
+  String get previewSameIdOtherData;
+
+  /// No description provided for @previewAlreadyThere.
+  ///
+  /// In de, this message translates to:
+  /// **'Bereits im Logbuch'**
+  String get previewAlreadyThere;
+
+  /// No description provided for @previewRejected.
+  ///
+  /// In de, this message translates to:
+  /// **'Unplausible Werte, kann nicht importiert werden.'**
+  String get previewRejected;
+
+  /// No description provided for @previewImport.
+  ///
+  /// In de, this message translates to:
+  /// **'{count, plural, =1{1 Tauchgang importieren} other{{count} Tauchgänge importieren}}'**
+  String previewImport(int count);
+
+  /// No description provided for @previewNothing.
+  ///
+  /// In de, this message translates to:
+  /// **'Nichts ausgewählt'**
+  String get previewNothing;
+
+  /// No description provided for @importedSnack.
+  ///
+  /// In de, this message translates to:
+  /// **'{count, plural, =1{1 Tauchgang importiert} other{{count} Tauchgänge importiert}}'**
+  String importedSnack(int count);
 }
 
 class _AppLocalizationsDelegate

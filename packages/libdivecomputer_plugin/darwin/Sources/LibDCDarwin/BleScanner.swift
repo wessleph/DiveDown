@@ -139,6 +139,20 @@ class BleScanner: NSObject, CBCentralManagerDelegate {
         }
 
         guard matched != 0 else {
+            // DiveDown: show known unsupported computers greyed out
+            // (same list as UnsupportedComputers.kt).
+            if let product = Self.unsupportedProduct(name) {
+                seenIdentifiers.insert(peripheral.identifier)
+                onDeviceDiscovered?(DiscoveredDevice(
+                    vendor: "Suunto",
+                    product: product,
+                    model: -1,
+                    address: peripheral.identifier.uuidString,
+                    name: name,
+                    transport: .ble
+                ))
+                return
+            }
             NativeLogger.d("BleScanner", category: "BLE",
                 "Unmatched peripheral \(peripheral.identifier.uuidString) (\(name))")
             return
@@ -159,5 +173,17 @@ class BleScanner: NSObject, CBCentralManagerDelegate {
         )
 
         onDeviceDiscovered?(device)
+    }
+
+    // DiveDown: dive computers libdivecomputer cannot read (ui-spec §5.6).
+    static func unsupportedProduct(_ advertisedName: String) -> String? {
+        let name = advertisedName.trimmingCharacters(in: .whitespaces).lowercased()
+        for product in ["Ocean", "Nautic"] {
+            let p = product.lowercased()
+            if name == p || name == "suunto \(p)" || name.hasPrefix("suunto \(p) ") {
+                return product
+            }
+        }
+        return nil
     }
 }

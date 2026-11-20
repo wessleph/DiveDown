@@ -29,7 +29,10 @@ class DiscoveredComputer {
 
   /// Last four hex digits of the address, for the PIN dialog: „3F7A“
   /// (security.md: say which device asks).
-  String get shortId => throw UnimplementedError('shortId');
+  String get shortId {
+    final hex = address.replaceAll(RegExp('[^0-9A-Fa-f]'), '').toUpperCase();
+    return hex.length <= 4 ? hex : hex.substring(hex.length - 4);
+  }
 }
 
 /// What a download reports, in order. Ends with exactly one of
