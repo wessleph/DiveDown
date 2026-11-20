@@ -7,10 +7,12 @@ import '../../app/providers.dart';
 import '../../domain/dive/dive.dart';
 import '../../domain/dive/dive_repository.dart';
 import '../../domain/dive/manual_dive_draft.dart';
+import '../../domain/sites/site_suggestions.dart';
 import '../../l10n/app_localizations.dart';
 import 'dive_detail_screen.dart';
 import 'dive_texts.dart';
 import 'logbook_screen.dart';
+import 'site_field.dart';
 
 /// Manuell eintragen / Bearbeiten (ui-spec §5.4).
 class ManualDiveScreen extends ConsumerStatefulWidget {
@@ -53,6 +55,11 @@ class _ManualDiveScreenState extends ConsumerState<ManualDiveScreen> {
   late DateTime _start;
   WaterType? _waterType;
   int? _rating;
+
+  /// Catalogue link and position of the chosen site (ADR 0006); cleared as
+  /// soon as the name is typed over.
+  ({String? id, double? lat, double? lon}) _siteLink = _noLink;
+  static const _noLink = (id: null, lat: null, lon: null);
   Map<ManualDiveField, ManualDiveError> _errors = const {};
   bool _submitted = false;
   bool _saving = false;
@@ -115,6 +122,7 @@ class _ManualDiveScreenState extends ConsumerState<ManualDiveScreen> {
       _controllers[key]!.text = value;
     }
     _site.text = d.siteName;
+    _siteLink = (id: d.siteCatalogueId, lat: d.siteLat, lon: d.siteLon);
     _notes.text = d.notes;
     _start = d.start;
     _waterType = d.waterType;
@@ -126,6 +134,9 @@ class _ManualDiveScreenState extends ConsumerState<ManualDiveScreen> {
     return ManualDiveDraft(
       number: t(ManualDiveField.number),
       siteName: _site.text,
+      siteCatalogueId: _siteLink.id,
+      siteLat: _siteLink.lat,
+      siteLon: _siteLink.lon,
       start: _start,
       duration: t(ManualDiveField.duration),
       maxDepth: t(ManualDiveField.maxDepth),
@@ -147,6 +158,7 @@ class _ManualDiveScreenState extends ConsumerState<ManualDiveScreen> {
     final b = _draft;
     return a.number != b.number ||
         a.siteName != b.siteName ||
+        a.siteCatalogueId != b.siteCatalogueId ||
         a.start != b.start ||
         a.duration != b.duration ||
         a.maxDepth != b.maxDepth ||
@@ -159,6 +171,28 @@ class _ManualDiveScreenState extends ConsumerState<ManualDiveScreen> {
         a.waterType != b.waterType ||
         a.notes != b.notes ||
         a.rating != b.rating;
+  }
+
+  void _siteChosen(SiteSuggestion s) {
+    _siteLink = switch (s) {
+      OwnSiteSuggestion(:final site) => (
+        id: site.catalogueId,
+        lat: site.lat,
+        lon: site.lon,
+      ),
+      CatalogueSiteSuggestion(:final site) => (
+        id: site.id,
+        lat: site.lat,
+        lon: site.lon,
+      ),
+      NewSiteSuggestion() => _noLink,
+    };
+    _changed();
+  }
+
+  void _siteTyped(String _) {
+    _siteLink = _noLink;
+    _changed();
   }
 
   /// Rebuilds for the dirty state and, after the first save, inline errors.
@@ -354,14 +388,10 @@ class _ManualDiveScreenState extends ConsumerState<ManualDiveScreen> {
                   field(ManualDiveField.number, l10n.fieldNumber),
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),
-                    // Suggestions from own names and the catalogue follow
-                    // with T9; free text until then (ADR 0006).
-                    child: TextField(
+                    child: SiteField(
                       controller: _site,
-                      textInputAction: TextInputAction.next,
-                      textCapitalization: TextCapitalization.words,
-                      onChanged: (_) => _changed(),
-                      decoration: InputDecoration(labelText: l10n.fieldSite),
+                      onChosen: _siteChosen,
+                      onTyped: _siteTyped,
                     ),
                   ),
                   Wrap(

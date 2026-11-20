@@ -25,6 +25,11 @@
   },
 
   "startupError": "Das Logbuch konnte nicht geöffnet werden.",
+  "settingsLicences": "Open-Source-Lizenzen",
+  "siteUseNew": "‚{name}‘ als neuen Tauchplatz verwenden",
+  "@siteUseNew": {
+    "placeholders": { "name": { "type": "String" } }
+  },
 
   "welcomeTitle": "Willkommen bei DiveDown",
   "welcomeBody": "Wer taucht? Du kannst später weitere Taucher hinzufügen.",

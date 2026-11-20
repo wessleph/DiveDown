@@ -160,6 +160,18 @@ abstract class AppLocalizations {
   /// **'Das Logbuch konnte nicht geöffnet werden.'**
   String get startupError;
 
+  /// No description provided for @settingsLicences.
+  ///
+  /// In de, this message translates to:
+  /// **'Open-Source-Lizenzen'**
+  String get settingsLicences;
+
+  /// No description provided for @siteUseNew.
+  ///
+  /// In de, this message translates to:
+  /// **'‚{name}‘ als neuen Tauchplatz verwenden'**
+  String siteUseNew(String name);
+
   /// No description provided for @welcomeTitle.
   ///
   /// In de, this message translates to:

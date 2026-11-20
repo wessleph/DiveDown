@@ -157,6 +157,12 @@ Nachweis: `flutter test test/data`
 Tests: `test/domain/sites/site_suggestions_test.dart`, `test/data/local/site_repository_test.dart`, `test/domain/dive/manual_dive_draft_test.dart` (T9.11), `test/features/logbook/site_field_test.dart`, `test/app/licenses_test.dart`.
 Festlegungen: Eigene Namen kommen von **allen Tauchern auf dem Gerät**. Leere Eingabe zeigt nur eigene Namen. Rangfolge im Katalog: mit Position nach Entfernung, sonst besuchte Länder zuerst, dann Namensanfang vor Wortanfang, dann alphabetisch. Deutsche Ländernamen als feste Tabelle im Code (Ländernamen sind Fakten, keine neue Abhängigkeit). Position aus FIT-Dateien gibt es erst mit T5. Bis dahin wirkt T9.5 nur in der Domäne.
 
+**Umgesetzt (Phase 50, 2026-11-20):**
+- [x] Domäne: `SiteSuggester`, `normalizeSiteName`, deutsche Ländernamen (`country_names_de.dart`) → T9.1–T9.7, T9.15–T9.19 grün. Nachweis: `flutter test test/domain/sites` (17/17)
+- [x] Daten: `DriftSiteRepository`, Katalog-Verknüpfung im `ManualDiveDraft` → T9.8–T9.11 grün
+- [x] Oberfläche: `SiteField` mit Vorschlagsliste unter dem Feld (kein Overlay), Einstellungen → „Open-Source-Lizenzen“ mit ODbL-Hinweis → T9.12–T9.18, T9.20, T9.21 grün
+- Gesamt: `flutter test` 146/146, `flutter analyze` ohne Befund, `flutter build apk --debug` ok.
+
 ## T10: Diagnose-Logs (`data/diagnostics/`, security A4, design §9)
 | ID | A | W | D | Rot gesehen |
 |---|---|---|---|---|

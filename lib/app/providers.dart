@@ -3,10 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/local/database.dart';
 import '../data/local/drift_app_settings.dart';
 import '../data/local/drift_dive_repository.dart';
+import '../data/local/drift_site_repository.dart';
 import '../domain/dive/dive.dart';
 import '../domain/dive/dive_repository.dart';
 import '../domain/dive/diver.dart';
 import '../domain/settings/app_settings.dart';
+import '../domain/sites/site_repository.dart';
+import '../domain/sites/site_suggestions.dart';
 
 /// The open database. Set by [AppStartupGate] once the file is open;
 /// tests override it with an in-memory database.
@@ -51,10 +54,34 @@ final diveDetailProvider = FutureProvider.autoDispose
       return (dive: dive, diverName: diver?.name);
     });
 
+final siteRepositoryProvider = Provider<SiteRepository>(
+  (ref) => DriftSiteRepository(ref.watch(appDatabaseProvider)),
+);
+
+/// Built once from the catalogue table and kept for every keystroke.
+final siteSuggesterProvider = FutureProvider<SiteSuggester>(
+  (ref) async =>
+      SiteSuggester(await ref.watch(siteRepositoryProvider).catalogue()),
+);
+
+/// Site names already used on this device, newest first.
+final ownSitesProvider = FutureProvider<List<OwnSite>>(
+  (ref) => ref.watch(siteRepositoryProvider).ownSites(),
+);
+
+/// Countries the active diver has dived in (ADR 0006: ranked first).
+final visitedCountriesProvider = FutureProvider<Set<String>>((ref) async {
+  final diver = await ref.watch(activeDiverProvider.future);
+  if (diver == null) return const {};
+  return ref.watch(siteRepositoryProvider).visitedCountries(diver.id!);
+});
+
 extension RefreshDives on WidgetRef {
   /// Call after a dive was saved, deleted or restored.
   void refreshDives({String? diveId}) {
     invalidate(logbookProvider);
+    invalidate(ownSitesProvider);
+    invalidate(visitedCountriesProvider);
     if (diveId != null) invalidate(diveDetailProvider(diveId));
   }
 }
@@ -63,5 +90,7 @@ extension RefreshDives on WidgetRef {
 /// (e.g. the undo action of a snackbar).
 void refreshDivesIn(ProviderContainer container, {String? diveId}) {
   container.invalidate(logbookProvider);
+  container.invalidate(ownSitesProvider);
+  container.invalidate(visitedCountriesProvider);
   if (diveId != null) container.invalidate(diveDetailProvider(diveId));
 }

@@ -43,6 +43,14 @@ class AppLocalizationsDe extends AppLocalizations {
   String get startupError => 'Das Logbuch konnte nicht geöffnet werden.';
 
   @override
+  String get settingsLicences => 'Open-Source-Lizenzen';
+
+  @override
+  String siteUseNew(String name) {
+    return '‚$name‘ als neuen Tauchplatz verwenden';
+  }
+
+  @override
   String get welcomeTitle => 'Willkommen bei DiveDown';
 
   @override
