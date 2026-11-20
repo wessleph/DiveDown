@@ -26,6 +26,7 @@ abstract interface class DiveRepository {
   Future<Dive?> findById(String id);
 
   /// Dives of one diver that are not deleted, newest first.
+  /// For the list only: samples, tanks and events are left empty.
   Future<List<Dive>> listForDiver(String diverId);
 
   /// Marks the dive as deleted (soft delete, ADR 0004).

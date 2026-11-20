@@ -115,7 +115,9 @@ class Dive {
   final DiveSource source;
   final String? sourceId;
 
-  /// Wall-clock start time as shown on the dive computer.
+  /// Wall-clock start time as shown on the dive computer, to the second.
+  /// Repositories return it UTC-flagged so the phone's time zone never
+  /// shifts it; read the fields, not the instant.
   final DateTime start;
 
   /// Seconds east of UTC, null if the source does not know it.
@@ -131,4 +133,54 @@ class Dive {
   final List<DiveSample> samples;
   final List<DiveTank> tanks;
   final List<DiveEvent> events;
+
+  Dive copyWith({
+    String? id,
+    String? diverId,
+    int? number,
+    String? siteName,
+    String? siteCatalogueId,
+    double? siteLat,
+    double? siteLon,
+    String? diveComputerId,
+    DiveSource? source,
+    String? sourceId,
+    DateTime? start,
+    int? utcOffsetS,
+    int? durationS,
+    double? maxDepthM,
+    double? avgDepthM,
+    double? minTemperatureC,
+    double? maxTemperatureC,
+    WaterType? waterType,
+    String? notes,
+    int? rating,
+    List<DiveSample>? samples,
+    List<DiveTank>? tanks,
+    List<DiveEvent>? events,
+  }) => Dive(
+    id: id ?? this.id,
+    diverId: diverId ?? this.diverId,
+    number: number ?? this.number,
+    siteName: siteName ?? this.siteName,
+    siteCatalogueId: siteCatalogueId ?? this.siteCatalogueId,
+    siteLat: siteLat ?? this.siteLat,
+    siteLon: siteLon ?? this.siteLon,
+    diveComputerId: diveComputerId ?? this.diveComputerId,
+    source: source ?? this.source,
+    sourceId: sourceId ?? this.sourceId,
+    start: start ?? this.start,
+    utcOffsetS: utcOffsetS ?? this.utcOffsetS,
+    durationS: durationS ?? this.durationS,
+    maxDepthM: maxDepthM ?? this.maxDepthM,
+    avgDepthM: avgDepthM ?? this.avgDepthM,
+    minTemperatureC: minTemperatureC ?? this.minTemperatureC,
+    maxTemperatureC: maxTemperatureC ?? this.maxTemperatureC,
+    waterType: waterType ?? this.waterType,
+    notes: notes ?? this.notes,
+    rating: rating ?? this.rating,
+    samples: samples ?? this.samples,
+    tanks: tanks ?? this.tanks,
+    events: events ?? this.events,
+  );
 }
