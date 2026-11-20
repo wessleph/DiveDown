@@ -86,7 +86,6 @@ class SerialMismatch extends DownloadOutcome {
 class DiveComputerRegistry {
   DiveComputerRegistry(this._computers);
 
-  // ignore: unused_field
   final DiveComputerRepository _computers;
 
   Future<DownloadSession> begin({
@@ -94,7 +93,13 @@ class DiveComputerRegistry {
     required String product,
     required int model,
     required String address,
-  }) => throw UnimplementedError('T3: DiveComputerRegistry.begin');
+  }) async => DownloadSession(
+    vendor: vendor,
+    product: product,
+    model: model,
+    address: address,
+    known: await _computers.findByAddress(address),
+  );
 
   /// Call when the download ended. Writes the fingerprint of the newest of
   /// [savedDives] only if the download [completed], something was saved and
@@ -105,7 +110,45 @@ class DiveComputerRegistry {
     required String? serial,
     String? firmware,
     required List<ImportedDive> savedDives,
-  }) => throw UnimplementedError('T3: DiveComputerRegistry.finish');
+  }) async {
+    if (!completed || savedDives.isEmpty) return const FingerprintKept();
+    final fingerprint = _newest(savedDives).fingerprint;
+
+    final known = session.known;
+    if (known != null) {
+      final stored = known.serial;
+      if (serial != null && stored != null && serial != stored) {
+        return SerialMismatch(known, serial);
+      }
+      return FingerprintStored(
+        await _store(known, session, serial, firmware, fingerprint),
+      );
+    }
+
+    // Unknown address: maybe a known device seen from a new phone (T3.7).
+    final bySerial = serial == null
+        ? null
+        : await _computers.findBySerial(session.vendor, serial);
+    if (bySerial != null) {
+      return FingerprintStored(
+        await _store(bySerial, session, serial, firmware, fingerprint),
+      );
+    }
+    return FingerprintStored(
+      await _computers.create(
+        KnownDiveComputer(
+          id: '',
+          vendor: session.vendor,
+          product: session.product,
+          model: session.model,
+          serial: serial,
+          firmware: firmware,
+          address: session.address,
+          lastFingerprint: fingerprint,
+        ),
+      ),
+    );
+  }
 
   /// After [SerialMismatch], „Als neues Gerät verwenden“ (T3.5): stores the
   /// device as a new one; the old device stays untouched.
@@ -114,5 +157,63 @@ class DiveComputerRegistry {
     required String serial,
     String? firmware,
     required List<ImportedDive> savedDives,
-  }) => throw UnimplementedError('T3.5: DiveComputerRegistry.registerAsNew');
+  }) async {
+    final old = session.known;
+    if (old != null) {
+      // The address now belongs to the new device; the old one keeps its
+      // serial and fingerprint for when it shows up again.
+      await _computers.update(_with(old, address: null));
+    }
+    return _computers.create(
+      KnownDiveComputer(
+        id: '',
+        vendor: session.vendor,
+        product: session.product,
+        model: session.model,
+        serial: serial,
+        firmware: firmware,
+        address: session.address,
+        lastFingerprint: savedDives.isEmpty
+            ? null
+            : _newest(savedDives).fingerprint,
+      ),
+    );
+  }
+
+  Future<KnownDiveComputer> _store(
+    KnownDiveComputer computer,
+    DownloadSession session,
+    String? serial,
+    String? firmware,
+    Uint8List? fingerprint,
+  ) async {
+    final updated = KnownDiveComputer(
+      id: computer.id,
+      vendor: computer.vendor,
+      product: computer.product,
+      model: computer.model ?? session.model,
+      serial: serial ?? computer.serial,
+      firmware: firmware ?? computer.firmware,
+      address: session.address,
+      lastFingerprint: fingerprint ?? computer.lastFingerprint,
+    );
+    await _computers.update(updated);
+    return updated;
+  }
+
+  static KnownDiveComputer _with(KnownDiveComputer c, {String? address}) =>
+      KnownDiveComputer(
+        id: c.id,
+        vendor: c.vendor,
+        product: c.product,
+        model: c.model,
+        serial: c.serial,
+        firmware: c.firmware,
+        address: address,
+        lastFingerprint: c.lastFingerprint,
+      );
+
+  /// The dive with the latest wall-clock start.
+  static ImportedDive _newest(List<ImportedDive> dives) =>
+      dives.reduce((a, b) => b.start.isAfter(a.start) ? b : a);
 }
