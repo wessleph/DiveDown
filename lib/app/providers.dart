@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:libdivecomputer_plugin/libdivecomputer_plugin.dart' as dc;
 
 import '../data/import/divecomputer/plugin_dive_computer_source.dart';
+import '../data/import/fit/fit_dive_parser.dart';
 
 import '../data/local/database.dart';
 import '../data/local/drift_app_settings.dart';
@@ -17,6 +18,7 @@ import '../domain/import/bluetooth_access.dart';
 import '../domain/import/dive_computer_import.dart';
 import '../domain/import/dive_computer_registry.dart';
 import '../domain/import/dive_computer_source.dart';
+import '../domain/import/file_import.dart';
 import '../domain/import/import_service.dart';
 import '../domain/settings/app_settings.dart';
 import '../domain/sites/site_repository.dart';
@@ -123,6 +125,32 @@ final diveComputerImportProvider = Provider<DiveComputerImport>(
     importService: ImportService(ref.watch(diveRepositoryProvider)),
   ),
 );
+
+/// FIT files (ui-spec §5.8); parses in an isolate.
+final fileDiveSourceProvider = Provider<FileDiveSource>(
+  (ref) => FitDiveParser(),
+);
+
+/// The system dialog „Datei wählen“ (file_picker).
+final importFilePickerProvider = Provider<ImportFilePicker>(
+  (ref) => throw UnimplementedError('importFilePickerProvider'),
+);
+
+/// Files shared with DiveDown (receive_sharing_intent).
+final sharedFilesProvider = Provider<SharedFiles>(
+  (ref) => throw UnimplementedError('sharedFilesProvider'),
+);
+
+/// The file the FIT screen works on: picked in §5.5 or shared.
+final pendingImportFileProvider =
+    NotifierProvider<PendingImportFile, PickResult?>(PendingImportFile.new);
+
+class PendingImportFile extends Notifier<PickResult?> {
+  @override
+  PickResult? build() => null;
+
+  void set(PickResult? file) => state = file;
+}
 
 extension RefreshDives on WidgetRef {
   /// Call after a dive was saved, deleted or restored.

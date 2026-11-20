@@ -150,15 +150,19 @@ Nicht am PC testbar: Laufzeit-Berechtigungen und Bluetooth-Zustand (`permission_
 ## T5: FIT-Import (`data/import/fit/`, security A2/R3)
 | ID | A | W | D | Rot gesehen |
 |---|---|---|---|---|
-| T5.1 | gültige FIT-Datei eines Tauchgangs (Fixture, Suunto Ocean) | geparst | 1 `ImportedDive` mit Profil, Temperatur, `sourceId` aus `file_id` | |
-| T5.2 | Datei > 10 MB | geparst | `FileTooLarge`, ohne Parser-Aufruf | |
-| T5.3 | Datei ohne `.FIT`-Signatur im Header | geparst | `NotAFitFile`, ohne Parser-Aufruf | |
-| T5.4 | Header gültig, CRC falsch | geparst | `CorruptFile` | |
-| T5.5 | gültige Datei, nach 50 % abgeschnitten | geparst | `CorruptFile`, **kein Absturz** | |
-| T5.6 | FIT einer Laufaktivität | geparst | `NoDiveInFile` | |
-| T5.7 | Parser hängt (simuliert) | 30 s vergangen (`fake_async`) | `Timeout`, Isolate beendet | |
-| T5.8 | Fuzz: 200 zufällig veränderte Varianten der Fixture (fester Seed) | jeweils geparst | jede liefert Ergebnis **oder** definierten Fehler, nie eine ungefangene Exception | |
-| T5.9 | Dateiname `../../databases/x.fit` | über „Teilen“ empfangen | Name nur angezeigt, nie als Pfad verwendet. Kein Schreiben außerhalb des Cache. | |
+| T5.1 | gültige FIT-Datei eines Tauchgangs (Fixture, Suunto Ocean) | geparst | 1 `ImportedDive` mit Profil, Temperatur, `sourceId` aus `file_id` || ✅ 2026-11-20: rot, wie T5.2. Fixture vorerst Submersions Garmin-Datei, eine Ocean-Datei folgt (README im Fixture-Ordner). Ergänzt: T5.1b mit synthetischer Suunto-Datei |
+| T5.2 | Datei > 10 MB | geparst | `FileTooLarge`, ohne Parser-Aufruf || ✅ 2026-11-20: rot wegen `UnimplementedError` (`FitDiveParser.parse`), Testaufbau ok |
+| T5.3 | Datei ohne `.FIT`-Signatur im Header | geparst | `NotAFitFile`, ohne Parser-Aufruf || ✅ 2026-11-20: rot wegen `UnimplementedError` (`FitDiveParser.parse`), Testaufbau ok |
+| T5.4 | Header gültig, CRC falsch | geparst | `CorruptFile` || ✅ 2026-11-20: rot wegen `UnimplementedError` (`FitDiveParser.parse`), Testaufbau ok |
+| T5.5 | gültige Datei, nach 50 % abgeschnitten | geparst | `CorruptFile`, **kein Absturz** || ✅ 2026-11-20: rot wegen `UnimplementedError` (`FitDiveParser.parse`), Testaufbau ok |
+| T5.6 | FIT einer Laufaktivität | geparst | `NoDiveInFile` || ✅ 2026-11-20: rot wegen `UnimplementedError` (`FitDiveParser.parse`), Testaufbau ok (Laufen synthetisch erzeugt) |
+| T5.7 | Parser hängt (simuliert) | 30 s vergangen (`fake_async`) | `Timeout`, Isolate beendet || ✅ 2026-11-20: rot wegen `UnimplementedError` (`FitDiveParser.parse`), Testaufbau ok. Ergänzt: T5.7b, ein werfender Parser ergibt `corrupt` |
+| T5.8 | Fuzz: 200 zufällig veränderte Varianten der Fixture (fester Seed) | jeweils geparst | jede liefert Ergebnis **oder** definierten Fehler, nie eine ungefangene Exception || ✅ 2026-11-20: rot wegen `UnimplementedError` (`FitDiveParser.parse`), Testaufbau ok. Bei jeder dritten Variante wird die CRC neu berechnet, damit der Parser selbst kaputte Daten sieht |
+| T5.9 | Dateiname `../../databases/x.fit` | über „Teilen“ empfangen | Name nur angezeigt, nie als Pfad verwendet. Kein Schreiben außerhalb des Cache. || ✅ 2026-11-20: rot wegen `UnimplementedError` (`readSharedFile`). Dazu: Datei im Cache wird gelesen und gelöscht, > 10 MB, fehlende Datei |
+
+Tests: `test/data/import/fit/fit_dive_parser_test.dart`, `test/data/import/fit/shared_file_reader_test.dart`. Synthetische FIT-Dateien baut `test/support/fit_builder.dart` (aus Submersion) mit `fit_tool`.
+Festlegungen: `sourceId` = `<file_id.serial_number>:<time_created in Unix-Sekunden>`. Größenlimit **10 MB** wie A2 und ui-spec §5.8 (security G2 nennt noch 20 MB). Gasgemische ohne Flaschen-Infos werden je eine Flasche, wie beim BLE-Adapter. Der Parser läuft in einem Isolate, das bei Zeitüberschreitung beendet wird. Die Ablaufsteuerung ist für T5.7 austauschbar.
+Neue Abhängigkeiten (Lizenzen am 2026-11-20 an den eingesetzten Versionen geprüft): `fit_tool` 1.0.5 (BSD-3, dazu `csv` 5.1.1 und `logger` 1.4.0, beide MIT), `file_picker` 13.4.0 (MIT, Plattformpakete MIT; `cross_file`, `win32`, `ffi_leak_tracker` BSD-3; `dbus` 0.8.1 MPL-2.0 ohne Vermerk „Incompatible With Secondary Licenses“, nur Linux; `xml`, `petitparser` MIT), `receive_sharing_intent` 1.8.1 (Apache-2.0), Dev: `fake_async` (Apache-2.0).
 
 ## T6: Apple Health (`data/import/health/`)
 | ID | A | W | D | Rot gesehen |
@@ -296,6 +300,13 @@ Tests T11.9/T11.10: `test/data/platform/backup_exclusion_test.dart`, `test/app/s
 | T12.25 | Tauchgang exakt schon im Logbuch | Vorschau | „Bereits im Logbuch“, Checkbox nicht bedienbar, zählt nicht mit | ✅ 2026-11-20: rot, wie T12.17 |
 | T12.26 | Import gespeichert, zurück im Logbuch | Tab „Importieren“ | Quellenwahl, nicht die alte Vorschau | ✅ 2026-11-20: rot, Ort blieb `/import/divecomputer`. Gefunden auf dem Handy |
 | T12.27 | Tauchcomputer-Ablauf offen | angezeigt | keine Tab-Leiste (ein Tab-Wechsel würde die Übertragung abbrechen) | ✅ 2026-11-20: rot, `NavigationBar` sichtbar |
+| T12.28 | Importieren-Tab | „So exportierst du aus der Suunto-App“ | Anleitung mit den 3 Schritten aus §5.8 | ✅ 2026-11-20: rot, Link fehlt |
+| T12.29 | Datei-Dialog | ohne Datei geschlossen | bleibt auf „Importieren“, nichts geparst | ✅ 2026-11-20: rot, Dialog nicht geöffnet (Karte zeigt „Kommt bald“) |
+| T12.30 | Parser arbeitet | FIT-Bildschirm | „Datei wird gelesen …“, danach weg | ✅ 2026-11-20: rot, kein Wechsel nach `/import/fit` |
+| T12.31 | FIT-Datei mit 1 Tauchgang | Vorschau, dann importieren | „Aus Datei: Tauchgang.fit“, „Importieren für: Anna“, gespeichert mit `source=fit`, ohne Tauchcomputer, Snackbar, Logbuch | ✅ 2026-11-20: rot, wie T12.30 |
+| T12.32 | gleiche Datei schon importiert | Vorschau | „Bereits im Logbuch“, „Nichts ausgewählt“ | ✅ 2026-11-20: rot, wie T12.30 |
+| T12.33 | zu groß / keine FIT / kaputt / unlesbar / kein Tauchgang / Zeitüberschreitung | FIT-Bildschirm | Text aus §5.8 mit Dateiname, nichts gespeichert. Zu groß schon im Dialog: Parser wird nicht aufgerufen | ✅ 2026-11-20: rot, wie T12.30 |
+| T12.34 | App im Logbuch | Datei aus anderer App geteilt | öffnet direkt die FIT-Vorschau (§2) | ✅ 2026-11-20: rot, bleibt auf `/logbook` |
 
 Tests: `test/features/logbook/` (Liste, Detail, Formular). In diesem Paket nur die Logbuch-Zeilen T12.1–T12.3 und T12.12–T12.15. T12.4–T12.11 und T12.16–T12.25 (Import) liegen in `test/features/import/dive_computer_screen_test.dart`, mit Fakes für Plugin, Berechtigungen und Bildschirm (`test/support/fake_dive_computer.dart`).
 

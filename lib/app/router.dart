@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/import/dive_computer_screen.dart';
+import '../features/import/fit_import_screen.dart';
 import '../features/import/import_screen.dart';
 import '../features/logbook/dive_detail_screen.dart';
 import '../features/logbook/logbook_screen.dart';
@@ -81,6 +82,11 @@ final routerProvider = Provider<GoRouter>((ref) {
                     path: 'divecomputer',
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (context, state) => const DiveComputerScreen(),
+                  ),
+                  GoRoute(
+                    path: 'fit',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (context, state) => const FitImportScreen(),
                   ),
                 ],
               ),
