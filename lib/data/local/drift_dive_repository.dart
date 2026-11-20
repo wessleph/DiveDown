@@ -122,6 +122,20 @@ class DriftDiveRepository implements DiveRepository {
   Future<int> nextNumber(String diverId) => _nextNumber(diverId);
 
   @override
+  Future<Dive?> findBySource(
+    String diverId,
+    DiveSource source,
+    String sourceId,
+  ) => throw UnimplementedError('T2: findBySource');
+
+  @override
+  Future<List<Dive>> listStartingBetween(
+    String diverId,
+    DateTime from,
+    DateTime to,
+  ) => throw UnimplementedError('T2: listStartingBetween');
+
+  @override
   Future<void> delete(String id) => _setDeleted(id, clock.now().toUtc());
 
   @override

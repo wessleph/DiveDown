@@ -33,47 +33,67 @@ Nachweis: `flutter test test/app`, `flutter analyze`, `flutter build apk --debug
 ## T1: Plausibilitätsprüfung (`domain/import/plausibility.dart`, security G1/A1)
 | ID | A | W | D | Rot gesehen |
 |---|---|---|---|---|
-| T1.1 | ein `ImportedDive` mit max. Tiefe 18,4 m, Dauer 47 min, Temp. 21 °C | geprüft | gültig, keine Warnungen | |
-| T1.2 | max. Tiefe 351 m | geprüft | **abgelehnt** mit Grund `depthOutOfRange` | |
-| T1.3 | max. Tiefe −1 m | geprüft | abgelehnt `depthOutOfRange` | |
-| T1.4 | Dauer 24 h + 1 s | geprüft | abgelehnt `durationOutOfRange` | |
-| T1.5 | Startzeit 10 min in der Zukunft (laut `clock`) | geprüft | abgelehnt `startInFuture` | |
-| T1.6 | 3 Samples mit Temperatur 80 °C zwischen gültigen | geprüft | Tauchgang gültig, **diese 3 Samples verworfen**, Warnung `samplesDropped(3)` | |
-| T1.7 | Sample mit Druck 450 bar | geprüft | Druckwert verworfen (Sample bleibt), Warnung | |
-| T1.8 | 100.001 Samples | geprüft | abgelehnt `tooManySamples` | |
-| T1.9 | Samples mit nicht steigender Zeit (t = 10, 10, 5) | geprüft | Samples nach Zeit sortiert, Duplikate entfernt, Warnung | |
-| T1.10 | genau an den Grenzen (0 m, 350 m, 24 h, −5 °C, 45 °C, 0 bar, 400 bar) | geprüft | gültig (Grenzen sind inklusiv) | |
+| T1.1 | ein `ImportedDive` mit max. Tiefe 18,4 m, Dauer 47 min, Temp. 21 °C | geprüft | gültig, keine Warnungen | ✅ 2026-11-20: rot wegen `UnimplementedError` (`checkPlausibility`), Testaufbau ok |
+| T1.2 | max. Tiefe 351 m | geprüft | **abgelehnt** mit Grund `depthOutOfRange` | ✅ 2026-11-20: rot wegen `UnimplementedError` (`checkPlausibility`), Testaufbau ok |
+| T1.3 | max. Tiefe −1 m | geprüft | abgelehnt `depthOutOfRange` | ✅ 2026-11-20: rot wegen `UnimplementedError` (`checkPlausibility`), Testaufbau ok |
+| T1.4 | Dauer 24 h + 1 s | geprüft | abgelehnt `durationOutOfRange` | ✅ 2026-11-20: rot wegen `UnimplementedError` (`checkPlausibility`), Testaufbau ok |
+| T1.5 | Startzeit 10 min in der Zukunft (laut `clock`) | geprüft | abgelehnt `startInFuture` | ✅ 2026-11-20: rot wegen `UnimplementedError` (`checkPlausibility`), Testaufbau ok |
+| T1.6 | 3 Samples mit Temperatur 80 °C zwischen gültigen | geprüft | Tauchgang gültig, **diese 3 Samples verworfen**, Warnung `samplesDropped(3)` | ✅ 2026-11-20: rot wegen `UnimplementedError` (`checkPlausibility`), Testaufbau ok |
+| T1.7 | Sample mit Druck 450 bar | geprüft | Druckwert verworfen (Sample bleibt), Warnung | ✅ 2026-11-20: rot wegen `UnimplementedError` (`checkPlausibility`), Testaufbau ok |
+| T1.8 | 100.001 Samples | geprüft | abgelehnt `tooManySamples` | ✅ 2026-11-20: rot wegen `UnimplementedError` (`checkPlausibility`), Testaufbau ok |
+| T1.9 | Samples mit nicht steigender Zeit (t = 10, 10, 5) | geprüft | Samples nach Zeit sortiert, Duplikate entfernt, Warnung | ✅ 2026-11-20: rot wegen `UnimplementedError` (`checkPlausibility`), Testaufbau ok |
+| T1.10 | genau an den Grenzen (0 m, 350 m, 24 h, −5 °C, 45 °C, 0 bar, 400 bar) | geprüft | gültig (Grenzen sind inklusiv) | ✅ 2026-11-20: rot wegen `UnimplementedError` (`checkPlausibility`), Testaufbau ok |
+
+Tests: `test/domain/import/plausibility_test.dart`. Ergänzt: negative Dauer (T1.4), Tiefe außerhalb der Grenzen verwirft das Sample (T1.6), Duplikate zählen als verworfene Samples (T1.9).
+Festlegung T1.5: Mit UTC-Zeitpunkt wird genau verglichen. Ohne (Gerät kennt seine Zeitzone nicht, T4.2) wird die Wandzeit gegen „jetzt“ in UTC geprüft, mit **14 h Spielraum** für die größte Zeitzone. 10 h voraus geht, 15 h voraus nicht.
 
 ## T2: Duplikaterkennung (`domain/import/import_service.dart`, ADR 0003, security A2)
 | ID | A | W | D | Rot gesehen |
 |---|---|---|---|---|
-| T2.1 | DB leer | 1 Tauchgang importiert | `Saved` | |
-| T2.2 | Tauchgang mit `source=diveComputer`, `sourceId=X`, gleiche Daten existiert | gleicher erneut importiert | `SkippedDuplicate`, nicht in Vorschau auswählbar | |
-| T2.3 | gleiche `source` + `sourceId`, aber **andere max. Tiefe** | importiert | `NeedsConfirmation(reason: sameIdDifferentContent)`, **kein** stilles Überspringen | |
-| T2.4 | anderer `sourceId`, Start ±90 s und max. Tiefe ±0,3 m zu bestehendem | importiert | `NeedsConfirmation(reason: similar)` | |
-| T2.5 | Start +3 min Abstand | importiert | `Saved` (außerhalb ±2 min) | |
-| T2.6 | ähnlicher Tauchgang existiert, aber bei **anderem Taucher** | importiert | `Saved` (Duplikate nur pro Taucher) | |
-| T2.7 | ähnlicher Tauchgang ist soft-gelöscht | importiert | `Saved` | |
-| T2.8 | 5 Tauchgänge, Speichern von Nr. 3 schlägt fehl (DB-Fehler simuliert) | importiert | 1, 2, 4, 5 gespeichert; 3 `Failed`; jeder Tauchgang in **eigener Transaktion** | |
+| T2.1 | DB leer | 1 Tauchgang importiert | `Saved` | ✅ 2026-11-20: rot wegen `UnimplementedError` (`ImportService.importDives`), Testaufbau ok |
+| T2.2 | Tauchgang mit `source=diveComputer`, `sourceId=X`, gleiche Daten existiert | gleicher erneut importiert | `SkippedDuplicate`, nicht in Vorschau auswählbar | ✅ 2026-11-20: rot wegen `UnimplementedError` (`ImportService.importDives`), Testaufbau ok |
+| T2.3 | gleiche `source` + `sourceId`, aber **andere max. Tiefe** | importiert | `NeedsConfirmation(reason: sameIdDifferentContent)`, **kein** stilles Überspringen | ✅ 2026-11-20: rot wegen `UnimplementedError` (`ImportService.importDives`), Testaufbau ok |
+| T2.4 | anderer `sourceId`, Start ±90 s und max. Tiefe ±0,3 m zu bestehendem | importiert | `NeedsConfirmation(reason: similar)` | ✅ 2026-11-20: rot wegen `UnimplementedError` (`ImportService.importDives`), Testaufbau ok |
+| T2.5 | Start +3 min Abstand | importiert | `Saved` (außerhalb ±2 min) | ✅ 2026-11-20: rot wegen `UnimplementedError` (`ImportService.importDives`), Testaufbau ok |
+| T2.6 | ähnlicher Tauchgang existiert, aber bei **anderem Taucher** | importiert | `Saved` (Duplikate nur pro Taucher) | ✅ 2026-11-20: rot wegen `UnimplementedError` (`ImportService.importDives`), Testaufbau ok |
+| T2.7 | ähnlicher Tauchgang ist soft-gelöscht | importiert | `Saved` | ✅ 2026-11-20: rot wegen `UnimplementedError` (`ImportService.importDives`), Testaufbau ok |
+| T2.8 | 5 Tauchgänge, Speichern von Nr. 3 schlägt fehl (DB-Fehler simuliert) | importiert | 1, 2, 4, 5 gespeichert; 3 `Failed`; jeder Tauchgang in **eigener Transaktion** | ✅ 2026-11-20: rot wegen `UnimplementedError` (`ImportService.importDives`), Testaufbau ok |
+| T2.9 | 2 Tauchgänge, einer mit 400 m / zweimal derselbe in einem Download | importiert | `Rejected(depthOutOfRange)`, der andere `Saved` / der zweite `SkippedDuplicate` | ✅ 2026-11-20: rot wegen `UnimplementedError` |
+| T2.10 | bekannter Tauchcomputer `dc-1` | importiert | gespeicherter Tauchgang verweist auf `dc-1` | ✅ 2026-11-20: rot wegen `UnimplementedError` |
+
+Tests: `test/domain/import/import_service_test.dart` (In-Memory-Drift, für T2.8 ein Repository, das genau ein Speichern scheitern lässt). `preview` liefert dieselben Ergebnisse ohne zu speichern (T2.2).
+Toleranzen nach ADR 0003: Start ±2 min **und** max. Tiefe ±0,5 m. Plausibilität läuft zentral im `ImportService` (security §9.2). Neue Abfragen `findBySource`, `listStartingBetween` im `DiveRepository`.
 
 ## T3: Fingerprint und Geräte-Identität (`domain/import/dive_computer_registry.dart`, security A1)
 | ID | A | W | D | Rot gesehen |
 |---|---|---|---|---|
-| T3.1 | Gerät mit Seriennummer S unbekannt | Download mit 3 Tauchgängen, alle gespeichert | Gerät angelegt, `last_fingerprint` = Fingerprint des **neuesten** Tauchgangs | |
-| T3.2 | Gerät S bekannt mit Fingerprint F | neuer Download startet | Plugin bekommt `sinceFingerprint = F` | |
-| T3.3 | Download liefert 2 Tauchgänge, dann Abbruch | Abbruch | 2 Tauchgänge in Vorschau, `last_fingerprint` **unverändert** | |
-| T3.4 | gespeicherte Seriennummer S, Gerät meldet per `DEVINFO` S′ ≠ S bei gleichem Namen bzw. gleicher Adresse | Download | `SerialMismatch`-Ereignis, **kein** Fingerprint geschrieben, UI-Warnung | |
-| T3.5 | wie T3.4, Nutzer wählt „Als neues Gerät verwenden“ | bestätigt | neues Gerät S′ angelegt, Fingerprint von S unberührt | |
-| T3.6 | Speichern in Vorschau abgebrochen (Nutzer wählt nichts) | Vorschau verlassen | Fingerprint **nicht** gesetzt | |
+| T3.1 | Gerät mit Seriennummer S unbekannt | Download mit 3 Tauchgängen, alle gespeichert | Gerät angelegt, `last_fingerprint` = Fingerprint des **neuesten** Tauchgangs | ✅ 2026-11-20: rot wegen `UnimplementedError` (`DiveComputerRegistry`), Testaufbau ok |
+| T3.2 | Gerät S bekannt mit Fingerprint F | neuer Download startet | Plugin bekommt `sinceFingerprint = F` | ✅ 2026-11-20: rot wegen `UnimplementedError` (`DiveComputerRegistry`), Testaufbau ok |
+| T3.3 | Download liefert 2 Tauchgänge, dann Abbruch | Abbruch | 2 Tauchgänge in Vorschau, `last_fingerprint` **unverändert** | ✅ 2026-11-20: rot wegen `UnimplementedError` (`DiveComputerRegistry`), Testaufbau ok |
+| T3.4 | gespeicherte Seriennummer S, Gerät meldet per `DEVINFO` S′ ≠ S bei gleichem Namen bzw. gleicher Adresse | Download | `SerialMismatch`-Ereignis, **kein** Fingerprint geschrieben, UI-Warnung | ✅ 2026-11-20: rot wegen `UnimplementedError` (`DiveComputerRegistry`), Testaufbau ok |
+| T3.5 | wie T3.4, Nutzer wählt „Als neues Gerät verwenden“ | bestätigt | neues Gerät S′ angelegt, Fingerprint von S unberührt | ✅ 2026-11-20: rot wegen `UnimplementedError` (`DiveComputerRegistry`), Testaufbau ok |
+| T3.6 | Speichern in Vorschau abgebrochen (Nutzer wählt nichts) | Vorschau verlassen | Fingerprint **nicht** gesetzt | ✅ 2026-11-20: rot wegen `UnimplementedError` (`DiveComputerRegistry`), Testaufbau ok |
+| T3.7 | Gerät S bekannt, neues Handy (andere BLE-Adresse) | Download, Seriennummer S | dasselbe Gerät, Adresse aktualisiert, neuer Fingerprint | ✅ 2026-11-20: rot wegen `UnimplementedError` |
+
+Tests: `test/domain/import/dive_computer_registry_test.dart` (In-Memory-Drift, `DriftDiveComputerRepository`). Die Seriennummer meldet das Plugin erst am Ende (`DownloadCompleteEvent.serialNumber`), deshalb wird in `finish` geprüft. „Neuester“ Fingerprint = der des gespeicherten Tauchgangs mit dem spätesten Start.
 
 ## T4: Adapter ParsedDive → ImportedDive (`data/import/divecomputer/`)
 | ID | A | W | D | Rot gesehen |
 |---|---|---|---|---|
-| T4.1 | `ParsedDive` mit Datum 2026-11-14 10:42:00, TZ-Offset +7200 s | übersetzt | `startTime` = 10:42 Ortszeit, `startInstant` = 08:42 UTC | |
-| T4.2 | `ParsedDive` ohne TZ-Offset | übersetzt | `startTime` = Gerätezeit, `startInstant` = null | |
-| T4.3 | Sample mit `tankPressuresBar = [200.0, null, 180.0]` | übersetzt | 2 Druckwerte mit `tankIndex` 0 und 2 | |
-| T4.4 | Gasgemisch O₂ 0,32 / He 0 | übersetzt | Gas „EAN32“ | |
-| T4.5 | **Fixtures** `test/fixtures/divecomputer/eon_core/*.bin` (3 echte EON-Core-Tauchgänge, aufgenommen am 2026-11-20 per BLE, Seriennummer genullt, siehe README dort) | über `parseRawDiveData` geparst | erwartete Tiefe, Dauer und Sample-Anzahl laut `…expected.json` | |
+| T4.1 | `ParsedDive` mit Datum 2026-11-14 10:42:00, TZ-Offset +7200 s | übersetzt | `startTime` = 10:42 Ortszeit, `startInstant` = 08:42 UTC | ✅ 2026-11-20: rot wegen `UnimplementedError` (`importedFromParsedDive`), Testaufbau ok |
+| T4.2 | `ParsedDive` ohne TZ-Offset | übersetzt | `startTime` = Gerätezeit, `startInstant` = null | ✅ 2026-11-20: rot wegen `UnimplementedError` (`importedFromParsedDive`), Testaufbau ok |
+| T4.3 | Sample mit `tankPressuresBar = [200.0, null, 180.0]` | übersetzt | 2 Druckwerte mit `tankIndex` 0 und 2 | ✅ 2026-11-20: rot wegen `UnimplementedError` (`importedFromParsedDive`), Testaufbau ok |
+| T4.4 | Gasgemisch O₂ 0,32 / He 0 | übersetzt | Gas „EAN32“ | ✅ 2026-11-20: rot wegen `UnimplementedError` (`importedFromParsedDive`), Testaufbau ok |
+| T4.5 | **Fixtures** `test/fixtures/divecomputer/eon_core/*.bin` (3 echte EON-Core-Tauchgänge, aufgenommen am 2026-11-20 per BLE, Seriennummer genullt, siehe README dort) | über `parseRawDiveData` geparst | erwartete Tiefe, Dauer und Sample-Anzahl laut `…expected.json` | ✅ 2026-11-20 auf dem S25 Ultra: libdivecomputer liest alle 3 Tauchgänge wie erwartet (sofort grün, prüft den übernommenen Parser). Adapter und Plausibilität rot wegen `UnimplementedError` (`importedFromParsedDive`) |
+| T4.6 | `avgDepthMeters` = 0,0 (EON Core) | übersetzt | Ø-Tiefe zeitgewichtet aus den Samples; ohne Samples `null`, nie 0 | ✅ 2026-11-20: rot wegen `UnimplementedError` |
+| T4.7 | keine Min./Max.-Temperatur | übersetzt | aus den Sample-Temperaturen | ✅ 2026-11-20: rot wegen `UnimplementedError` |
+| T4.8 | Fingerprint `5576006a` | übersetzt | `source=diveComputer`, `sourceId` = `EON Core:5576006a`, Fingerprint als Bytes | ✅ 2026-11-20: rot wegen `UnimplementedError` |
+| T4.9 | Ereignisse mit und ohne Daten | übersetzt | Zeit und Typ bleiben, Daten als Text `mix=1` | ✅ 2026-11-20: rot wegen `UnimplementedError` |
+| T4.10 | Samples mit NDL (decoType 0) und Dekostopp (decoType 2) | übersetzt | `ndlS` bzw. `decoCeilingM`/`decoTimeS`, Temperatur, Puls, Gas-Index | ✅ 2026-11-20: rot wegen `UnimplementedError` |
+
+Tests: `test/data/import/divecomputer/parsed_dive_adapter_test.dart` (PC). T4.5: `integration_test/eon_core_parse_test.dart` (auf dem Handy: `flutter test integration_test/eon_core_parse_test.dart`). Die Fixtures stecken eingebettet in `integration_test/eon_core_fixtures.g.dart`, erzeugt mit `dart run tool/embed_fixtures.dart`. `test/tool/embed_fixtures_test.dart` schlägt fehl, wenn die Datei nicht zu den Fixtures passt.
+Neue Dev-Abhängigkeit: `integration_test` (Teil des Flutter-SDK, BSD-3).
+Nicht in diesem Paket: die Import-Oberfläche (T12.4–T12.11) und das Zusammenspiel mit dem Plugin-Download. Sie folgen als nächster Schritt.
 
 ## T5: FIT-Import (`data/import/fit/`, security A2/R3)
 | ID | A | W | D | Rot gesehen |

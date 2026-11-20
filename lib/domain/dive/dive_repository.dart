@@ -35,6 +35,21 @@ abstract interface class DiveRepository {
   /// The number [save] would give a new dive of this diver (ui-spec §5.4).
   Future<int> nextNumber(String diverId);
 
+  /// The diver's dive from this source with this id, not deleted (T2).
+  Future<Dive?> findBySource(
+    String diverId,
+    DiveSource source,
+    String sourceId,
+  );
+
+  /// The diver's dives starting within [from]..[to] (wall clock, inclusive),
+  /// not deleted. For the list only, like [listForDiver].
+  Future<List<Dive>> listStartingBetween(
+    String diverId,
+    DateTime from,
+    DateTime to,
+  );
+
   /// Marks the dive as deleted (soft delete, ADR 0004).
   Future<void> delete(String id);
 
