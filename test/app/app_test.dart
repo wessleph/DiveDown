@@ -1,17 +1,17 @@
-import 'package:divedown/app/app.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/test_app.dart';
+
+/// App with an active diver, so it starts in the logbook.
 Future<void> pumpApp(
   WidgetTester tester, {
   Size size = const Size(400, 800),
 }) async {
-  tester.view.physicalSize = size;
-  tester.view.devicePixelRatio = 1;
-  addTearDown(tester.view.reset);
-  await tester.pumpWidget(const ProviderScope(child: DiveDownApp()));
-  await tester.pumpAndSettle();
+  final db = newTestDatabase();
+  addTearDown(db.close);
+  await seedActiveDiver(db);
+  await pumpTestApp(tester, db: db, size: size);
 }
 
 void main() {

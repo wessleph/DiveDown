@@ -112,7 +112,7 @@ Gruppiert nach Monat, neuester oben. FAB **„Manuell eintragen“**.
 | kein Druck | Kennzahl „Druck“ zeigt „—“, SAC zeigt „—“ und ein Info-Icon: „Für den Luftverbrauch werden Flaschendruck und Flaschengröße benötigt.“ |
 | Druck, aber keine Flaschengröße | SAC „—“ und der Link **„Flaschengröße eintragen“** |
 | Apple Watch | Kein Druck, kein SAC. Dafür eine Pulskurve als zuschaltbare Ebene. |
-| Löschen | Dialog: „Tauchgang löschen? Das kann nicht rückgängig gemacht werden.“ · **„Löschen“** (rot) / „Abbrechen“. Danach Snackbar mit **„Rückgängig“** für 5 s (Soft Delete macht das möglich). |
+| Löschen | Dialog: „Tauchgang löschen?“ · **„Löschen“** (rot) / „Abbrechen“. Danach Snackbar mit **„Rückgängig“** für 5 s (Soft Delete macht das möglich). Geändert am 2026-11-20: Der Satz „Das kann nicht rückgängig gemacht werden.“ ist entfallen, weil er der Snackbar widersprach. |
 
 ### 5.4 Manuell eintragen / Bearbeiten
 Felder: **Nr.** (vorbelegt mit der nächsten freien Nummer, änderbar), **Tauchplatz** (Freitext mit Vorschlägen: zuerst eigene Namen, dann der mitgelieferte Katalog mit „Name · Region, Land“. Eine Zeile „‚…‘ als neuen Tauchplatz verwenden“ gibt es immer, siehe ADR 0006), Datum*, Startzeit*, Dauer* (min), max. Tiefe*, Ø-Tiefe, Wassertemp., Flasche (Volumen, Start-/Enddruck, O₂-Anteil), Wassertyp (Salz/Süß), Notizen, Bewertung.

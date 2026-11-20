@@ -44,6 +44,10 @@ class DriftDiverRepository implements DiverRepository {
       firstDiveNumber: row.firstDiveNumber,
     );
   }
+
+  @override
+  Future<List<Diver>> list() =>
+      throw UnimplementedError('T15.24: DiverRepository.list');
 }
 
 class DriftDiveRepository implements DiveRepository {
@@ -101,6 +105,10 @@ class DriftDiveRepository implements DiveRepository {
             .get();
     return rows.map(_fromRow).toList();
   }
+
+  @override
+  Future<int> nextNumber(String diverId) =>
+      throw UnimplementedError('T15.23: DiveRepository.nextNumber');
 
   @override
   Future<void> delete(String id) => _setDeleted(id, clock.now().toUtc());

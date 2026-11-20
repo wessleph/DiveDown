@@ -99,13 +99,16 @@ Nachweis: `flutter test test/app`, `flutter analyze`, `flutter build apk --debug
 ## T7: Luftverbrauch (`domain/metrics/sac_calculator.dart`, design §6)
 | ID | A | W | D | Rot gesehen |
 |---|---|---|---|---|
-| T7.1 | Flasche 12 l, 200 → 50 bar, Dauer 50 min, mittlere Tiefe 10 m (Salzwasser) | Ø-SAC berechnet | (150 × 12) / (50 × 2,0) = **18,0 l/min** (±0,1) | |
-| T7.2 | wie T7.1, Süßwasser | berechnet | Umgebungsdruck mit 9,81 kPa/m statt 10,05 kPa/m, Ergebnis entsprechend | |
+| T7.1 | Flasche 12 l, 200 → 50 bar, Dauer 50 min, mittlere Tiefe 10 m (Salzwasser) | Ø-SAC berechnet | (150 × 12) / (50 × 2,0) = **18,0 l/min** (±0,1) |  ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
+| T7.2 | wie T7.1, Süßwasser | berechnet | Umgebungsdruck mit 9,81 kPa/m statt 10,05 kPa/m, Ergebnis entsprechend |  ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
 | T7.3 | Druckverlauf in Samples | Kurve berechnet | 1-min-Abschnitte. Abschnitt ohne Druckänderung = 0. Kein Abschnitt negativ. | |
-| T7.4 | kein Druck | berechnet | `null` | |
-| T7.5 | Druck vorhanden, kein Flaschenvolumen | berechnet | `null` mit Grund `missingVolume` | |
+| T7.4 | kein Druck | berechnet | `null` |  ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
+| T7.5 | Druck vorhanden, kein Flaschenvolumen | berechnet | `null` mit Grund `missingVolume` |  ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
 | T7.6 | 2 Flaschen (Gaswechsel) | berechnet | SAC pro Flasche über deren Nutzungszeit | |
-| T7.7 | Dauer 0 | berechnet | `null`, kein Division-durch-0 | |
+| T7.7 | Dauer 0 | berechnet | `null`, kein Division-durch-0 |  ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
+| T7.8 | Druck und Volumen da, keine Ø-Tiefe | berechnet | ohne Samples `null` mit Grund `depth`. Mit Samples: zeitgewichtetes Mittel der Samples | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
+
+Tests: `test/domain/metrics/sac_calculator_test.dart`. Annahme: Oberflächendruck **1,0 bar** (mit 1,013 bar läge T7.1 bei 17,84 und damit außerhalb ±0,1). Unbekannter Wassertyp zählt als Salzwasser. T7.3 (Kurve) und T7.6 (Gaswechsel) kommen mit dem Profil-Diagramm (KW 49).
 
 ## T8: Datenbank (`data/local/`, ADR 0004/0006)
 | ID | A | W | D | Rot gesehen |
@@ -162,14 +165,17 @@ Nachweis: `flutter test test/data`
 | T11.6 | gültige Sicherung, Ersetzen schlägt fehl (simuliert) | wiederhergestellt | alte DB aus automatischer Kopie zurück, `RestoreFailed` | |
 | T11.7 | Datei > 200 MB | gewählt | `FileTooLarge` | |
 | T11.8 | letzte Sicherung vor 31 Tagen | Logbuch geöffnet | Erinnerung sichtbar. Nach „✕“ 7 Tage unsichtbar. | |
-| T11.9 | DB-Datei | Pfad geprüft (iOS) | `NSURLIsExcludedFromBackupKey` gesetzt (Integrationstest auf iOS bzw. Prüfung der Plattform-Methode) | |
+| T11.9 | DB-Datei | Pfad geprüft (iOS) | `NSURLIsExcludedFromBackupKey` gesetzt (Integrationstest auf iOS bzw. Prüfung der Plattform-Methode) |  ✅ 2026-11-20: rot wegen `UnimplementedError` (`BackupExclusion`, `openAppDatabase` fehlen), Testaufbau ok. Geprüft wird der Aufruf aus Dart, die Swift-Seite läuft erst auf iOS (CI/TestFlight) |
+| T11.10 | DB-Datei | Android-Manifest geprüft | `dataExtractionRules` schließt den Ordner `db/` aus `cloud-backup` **und** `device-transfer` aus, `fullBackupContent` (Android 8–11, minSdk 26) aus dem Voll-Backup. Kein Kanalaufruf unter Android | ✅ 2026-11-20: rot, Manifest-Attribute und `res/xml/*.xml` fehlen bzw. `UnimplementedError` |
+
+Tests T11.9/T11.10: `test/data/platform/backup_exclusion_test.dart`, `test/app/startup_test.dart`. Die DB liegt in einem **eigenen Ordner** `db/`, damit auch die `-wal`/`-journal`-Dateien vom Ausschluss erfasst sind. Der Ausschluss wird bei jedem Start erneut gesetzt.
 
 ## T12: UI-Zustände (Widget-Tests, `ui-spec.md`)
 | ID | A | W | D | Rot gesehen |
 |---|---|---|---|---|
-| T12.1 | keine Tauchgänge | Logbuch | Leerzustand mit „Importieren“ und „Manuell eintragen“ | |
-| T12.2 | Tauchgang ohne Tauchplatz | Logbuch-Zeile | „Ohne Tauchplatz“ | |
-| T12.3 | Tauchgang #42 | Logbuch-Zeile | Semantics-Label beginnt mit „Tauchgang 42“ | |
+| T12.1 | keine Tauchgänge | Logbuch | Leerzustand mit „Importieren“ und „Manuell eintragen“ |  ✅ 2026-11-20: rot, Leerzustand fehlt (Text nicht gefunden) |
+| T12.2 | Tauchgang ohne Tauchplatz | Logbuch-Zeile | „Ohne Tauchplatz“ |  ✅ 2026-11-20: rot, Liste fehlt (Text nicht gefunden) |
+| T12.3 | Tauchgang #42 | Logbuch-Zeile | Semantics-Label beginnt mit „Tauchgang 42“ |  ✅ 2026-11-20: rot, Liste fehlt (`#42` nicht gefunden) |
 | T12.4 | Bluetooth aus | Gerätesuche | Text „Bluetooth ist ausgeschaltet.“ + Knopf | |
 | T12.5 | Berechtigung dauerhaft verweigert | Gerätesuche | „Einstellungen öffnen“ | |
 | T12.6 | 30 s ohne Fund | Gerätesuche | Checkliste + „Erneut suchen“ | |
@@ -178,10 +184,12 @@ Nachweis: `flutter test test/data`
 | T12.9 | PIN angefordert von „EON Core ••3F7A“ | Dialog | Gerätename sichtbar. Nach 60 s „Zeit abgelaufen“. | |
 | T12.10 | Vorschau mit 1 Duplikat | Vorschau | Duplikat nicht ausgewählt, Knopf „2 Tauchgänge importieren“ | |
 | T12.11 | nichts ausgewählt | Vorschau | Knopf deaktiviert „Nichts ausgewählt“ | |
-| T12.12 | Detail ohne Druck | Detail | SAC „—“ + Info-Text | |
-| T12.13 | Textskalierung 200 % | Logbuch, Detail | kein Overflow (`tester.takeException() == null`) | |
-| T12.14 | alle Bildschirme | Semantics-Prüfung | jedes tippbare Element ≥ 48 dp (`androidTapTargetGuideline`, `iOSTapTargetGuideline`, `textContrastGuideline`) | |
-| T12.15 | Manuelles Formular, Tiefe 400 | Speichern | Fehler „Tiefe muss zwischen 0 und 350 m liegen.“, Fokus springt hin | |
+| T12.12 | Detail ohne Druck | Detail | SAC „—“ + Info-Text |  ✅ 2026-11-20: rot, `DiveDetailScreen` wirft `UnimplementedError` |
+| T12.13 | Textskalierung 200 % | Logbuch, Detail | kein Overflow (`tester.takeException() == null`) |  ✅ 2026-11-20: rot, Inhalt fehlt (Liste, Detail, Formular). Der Test verlangt vorher sichtbaren Inhalt, damit er nicht leer grün wird |
+| T12.14 | alle Bildschirme | Semantics-Prüfung | jedes tippbare Element ≥ 48 dp (`androidTapTargetGuideline`, `iOSTapTargetGuideline`, `textContrastGuideline`) |  ✅ 2026-11-20: rot, Inhalt fehlt, wie T12.13. Abgedeckt: Logbuch (leer und Liste), Detail, Formular. Import-Bildschirme folgen mit dem Import |
+| T12.15 | Manuelles Formular, Tiefe 400 | Speichern | Fehler „Tiefe muss zwischen 0 und 350 m liegen.“, Fokus springt hin |  ✅ 2026-11-20: rot, Formular fehlt (kein FAB) |
+
+Tests: `test/features/logbook/` (Liste, Detail, Formular). In diesem Paket nur die Logbuch-Zeilen T12.1–T12.3 und T12.12–T12.15. T12.4–T12.11 gehören zum Import (BLE, Vorschau) und kommen mit T3/T4.
 
 ## T13: Katalog-Skript (`tool/build_site_catalogue.py`, ADR 0006). Kann sofort auf dem Laptop umgesetzt werden.
 | ID | A | W | D | Rot gesehen |
@@ -203,3 +211,45 @@ Nachweis: `flutter test test/data`
 | T14.2 | Release-Build | `NativeLogger.d` | kein `Log.d`-Aufruf (logcat) | |
 | T14.3 | Access-Code gespeichert | gelesen | aus Keystore bzw. Keychain, nicht aus `SharedPreferences` (JUnit mit Fake-Speicher) | |
 | T14.4 | Android-Manifest der App (merged) | geprüft | kein `INTERNET`, `ACCESS_FINE_LOCATION` nur mit `maxSdkVersion=30`, `BLUETOOTH_SCAN` mit `neverForLocation` (Test über `aapt dump`/Manifest-Parser in CI) | |
+
+## T15: Logbuch (ui-spec §5.1–5.4, KW 48)
+| ID | A | W | D | Rot gesehen |
+|---|---|---|---|---|
+| T15.1 | SI-Werte | formatiert (metrisch) | `18,4 m` · `47 min` · `21 °C` · `200 bar` · `12 l` · `18,0 l/min` · Gas `Luft` / `EAN32` / `Tx 21/35` | ✅ 2026-11-20: rot wegen `UnimplementedError` (`UnitFormatter` fehlt) |
+| T15.2 | Tauchgänge am 20.10., 02.11. und 14.11.2026, ein zweiter Taucher mit eigenem Tauchgang | Logbuch | Überschriften „November 2026“, „Oktober 2026“, neuester oben. Nur Tauchgänge des aktiven Tauchers | ✅ 2026-11-20: rot, Liste fehlt |
+| T15.3 | #42, SS Thistlegorm, 14.11.2026, 18,4 m, 47 min, vom Tauchcomputer | Logbuch-Zeile | sichtbar `#42`, Platz, `18,4 m`, `14.11.2026`, `47 min`. Ein Semantics-Element „Tauchgang 42, SS Thistlegorm, 14. November, 18,4 Meter, 47 Minuten, vom Tauchcomputer“ | ✅ 2026-11-20: rot, Liste fehlt |
+| T15.4 | Liste | Zeile angetippt | Detail des Tauchgangs | ✅ 2026-11-20: rot, Liste fehlt |
+| T15.5 | wie T15.3, dazu Ø 10 m, 21 °C, 12 l 200 → 50 bar EAN32, Salzwasser | Detail | `#42`, Platz, Datum, `10:42`, Taucher. `18,4 m` · `47 min` · `10,0 m` · `21 °C` · `200 → 50 bar` · `19,1 l/min` · `EAN32` · `Salzwasser` | ✅ 2026-11-20: rot, `DiveDetailScreen` wirft `UnimplementedError` |
+| T15.6 | ohne Tauchplatz | Detail | Link „Tauchplatz hinzufügen“ öffnet das Bearbeiten-Formular | ✅ 2026-11-20: rot, wie T15.5 |
+| T15.7 | Druck, aber keine Flaschengröße | Detail | SAC „—“, Link „Flaschengröße eintragen“ öffnet das Formular | ✅ 2026-11-20: rot, wie T15.5 |
+| T15.8 | keine Samples | Detail | Hinweis „Geschätztes Profil“. Mit Samples kein Hinweis | ✅ 2026-11-20: rot, wie T15.5 |
+| T15.9 | Detail | Menü → „Löschen“ → bestätigt | Dialog „Tauchgang löschen?“, danach Logbuch ohne Eintrag, `findById` = null. „Rückgängig“ in der Snackbar stellt ihn wieder her | ✅ 2026-11-20: rot, wie T15.5 |
+| T15.10 | Löschdialog | „Abbrechen“ | Detail bleibt, Tauchgang da | ✅ 2026-11-20: rot, wie T15.5 |
+| T15.11 | Taucher mit #1–#5 | FAB „Manuell eintragen“ | Formular, „Nr.“ = `6`, Datum und Startzeit = jetzt. Zahlenfelder mit Ziffern-Tastatur | ✅ 2026-11-20: rot, kein FAB |
+| T15.12 | leeres Formular | „Speichern“ | 2 × „Bitte ausfüllen.“ (Dauer, max. Tiefe), Fokus auf „Dauer“, nichts gespeichert | ✅ 2026-11-20: rot, kein FAB |
+| T15.13 | Startdruck 200, Enddruck 210 | „Speichern“ | „Der Enddruck muss kleiner als der Startdruck sein.“, Fokus auf „Enddruck“ | ✅ 2026-11-20: rot, kein FAB |
+| T15.14 | gültige Eingabe „47“, „18,4“, 12 l, 200/50 bar | „Speichern“ | zurück im Logbuch mit `#6`. DB: `manual`, 2.820 s, 18,4 m, Flasche gespeichert | ✅ 2026-11-20: rot, kein FAB |
+| T15.15 | importierter Tauchgang mit 48 Samples | bearbeitet, Tiefe 19,5 | Detail zeigt `19,5 m`, Samples und Quelle bleiben | ✅ 2026-11-20: rot, `ManualDiveScreen` wirft `UnimplementedError` |
+| T15.16 | Formular mit bzw. ohne Änderung | Zurück | mit: „Änderungen verwerfen?“, „Weiter bearbeiten“ bleibt, „Verwerfen“ speichert nichts. Ohne: kein Dialog | ✅ 2026-11-20: rot, kein FAB |
+| T15.17 | #1–#5 | Nr. 3 vergeben, gespeichert | gespeichert, Snackbar „Die Nummer 3 gibt es schon. Der Tauchgang ist trotzdem gespeichert.“ | ✅ 2026-11-20: rot, kein FAB |
+| T15.18 | Formular-Entwurf | geprüft | Pflicht: Dauer, max. Tiefe. Grenzen inklusiv wie G1: Tiefe 0–350 m, Ø ≤ max., Dauer 1–1.440 min, −5 bis 45 °C, 0–400 bar, Ende < Start, Flasche über 0 bis 30 l, O₂ 1–100 %, Start nicht in der Zukunft, Nr. leer oder ganze Zahl ≥ 1. Komma und Punkt erlaubt. Fehler in Bildschirm-Reihenfolge | ✅ 2026-11-20: rot wegen `UnimplementedError` (`ManualDiveDraft.validate`) |
+| T15.19 | Entwurf | in `Dive` übersetzt | neu: `manual`, SI, leere Felder null, keine leere Flasche. Bearbeiten: Samples, Ereignisse, Quelle, 2. Flasche und Katalog-Daten bleiben. **Unveränderte Felder behalten den genauen Wert** (2.827 s bleibt 2.827 s, nicht 2.820). Geleerte Felder werden null | ✅ 2026-11-20: rot wegen `UnimplementedError` (`fromDive`, `toDive`) |
+| T15.20 | kein Taucher | App-Start | „Willkommen bei DiveDown“ ohne Navigationsleiste. Name leer oder nur Leerzeichen → „Los geht’s“ deaktiviert, „Bitte gib einen Namen ein.“ | ✅ 2026-11-20: rot, Start in `/logbook`, `WelcomeScreen` fehlt |
+| T15.21 | Name „ Anna “ | „Los geht’s“ | Taucher „Anna“ angelegt und aktiv, leeres Logbuch | ✅ 2026-11-20: rot, `WelcomeScreen` fehlt |
+| T15.22 | aktiver Taucher mit #42 | App-Start | Logbuch mit `#42`, kein Willkommen | ⚠️ 2026-11-20: zuerst sofort grün, weil die App ohnehin im Logbuch startet. Um `#42` verschärft, jetzt rot: Liste fehlt |
+| T15.23 | Taucher mit `first_dive_number` 101 / #1–#5 / #7 und #8, #8 gelöscht | `nextNumber` | 101 / 6 (gleich der Nummer beim Speichern) / 8, pro Taucher | ✅ 2026-11-20: rot wegen `UnimplementedError` |
+| T15.24 | Anna, Ben | `DiverRepository.list` | in Anlage-Reihenfolge | ✅ 2026-11-20: rot wegen `UnimplementedError` |
+| T15.25 | leere DB | aktiven Taucher setzen | zuerst null, dann in `app_meta` (`active_diver_id`) gespeichert | ✅ 2026-11-20: rot wegen `UnimplementedError` |
+
+Tests: `test/domain/units/`, `test/domain/dive/manual_dive_draft_test.dart`, `test/data/local/logbook_queries_test.dart`, `test/features/logbook/`, `test/features/onboarding/`. Gemeinsamer Aufbau: `test/support/test_app.dart` (In-Memory-DB, aktiver Taucher).
+Bewusst **nicht** in diesem Paket: Tauchplatz-Vorschläge (T9, bis dahin Freitext), Taucher-Wechsel über den Avatar, Einheiten und Farbe beim ersten Start, Sparkline und Profil-Diagramm (KW 49), Sicherungs-Erinnerung (T11.8), Schnellscroll ab 500 Einträgen, Hervorhebung nach Import.
+
+## T16: App-Start und Datenbankdatei
+| ID | A | W | D | Rot gesehen |
+|---|---|---|---|---|
+| T16.1 | leerer Application-Support-Ordner | DB geöffnet, beschrieben, geschlossen, erneut geöffnet | Datei `<Support>/db/divedown.sqlite`, sonst nichts daneben. Daten bleiben | ✅ 2026-11-20: rot wegen `UnimplementedError` (`openAppDatabase`) |
+| T16.2 | Backup-Ausschluss schlägt fehl | DB geöffnet | Logbuch öffnet trotzdem (offline-first geht vor) | ✅ 2026-11-20: rot wegen `UnimplementedError` |
+| T16.3 | Katalog-Version „V1“ + Zeilenumbruch in den Assets | App-Start, danach gleiche Version | geladen (Version getrimmt), beim 2. Mal wird die `.json.gz` nicht gelesen. Die echten Assets sind in `pubspec.yaml` eingetragen und liefern über 5.000 Plätze | ✅ 2026-11-20: rot wegen `UnimplementedError` (`loadBundledCatalogue`) |
+| T16.4 | Öffnen schlägt einmal fehl | App-Start | Fehlerkarte mit Icon, „Das Logbuch konnte nicht geöffnet werden.“ und „Erneut versuchen“. Der zweite Versuch öffnet die App. Kein Overflow bei 200 % | ✅ 2026-11-20: rot wegen `UnimplementedError` (`AppStartupGate`) |
+
+Tests: `test/app/startup_test.dart`, `test/app/startup_gate_test.dart`. „Logs an Entwickler senden“ auf der Fehlerkarte kommt mit T10.

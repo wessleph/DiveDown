@@ -18,6 +18,9 @@ class SaveDiveResult {
 abstract interface class DiverRepository {
   Future<Diver> create(Diver diver);
   Future<Diver?> findById(String id);
+
+  /// All divers that are not deleted, in the order they were created.
+  Future<List<Diver>> list();
 }
 
 abstract interface class DiveRepository {
@@ -28,6 +31,9 @@ abstract interface class DiveRepository {
   /// Dives of one diver that are not deleted, newest first.
   /// For the list only: samples, tanks and events are left empty.
   Future<List<Dive>> listForDiver(String diverId);
+
+  /// The number [save] would give a new dive of this diver (ui-spec §5.4).
+  Future<int> nextNumber(String diverId);
 
   /// Marks the dive as deleted (soft delete, ADR 0004).
   Future<void> delete(String id);
