@@ -171,7 +171,9 @@ Neue Abhängigkeiten (Lizenzen am 2026-11-20 an den eingesetzten Versionen gepr�
 - [x] Vorschau als gemeinsames Widget `ImportPreview` für BLE und FIT. `FitImportScreen` mit „Datei wird gelesen …“ ab 300 ms (§4) und den Fehlertexten aus §5.8. Geteilte Dateien öffnen die FIT-Vorschau von jedem Tab aus.
 - Testaufbau T12.34: wartet mit `pumpAndSettle`, weil der Seitenwechsel aus einem anderen Tab länger dauert. Aussage unverändert.
 - Gesamt: `flutter test` 275/275, `flutter analyze` ohne Befund, Debug-APK baut, Manifest ohne neue Rechte.
-- Offen: Prüfung auf dem Handy mit einer FIT-Datei aus der Suunto-App (welchen MIME-Typ sendet sie?), echte Ocean-Fixture, iOS (Dokumenttyp FIT und „Öffnen in“, kommt mit der iOS-Pipeline), „Logs senden“ (T10).
+- **Auf dem S25 Ultra geprüft, 2026-11-20:** Datei-Dialog mit der Fixture: Vorschau „Aus Datei: …“, 26.03.2026 11:02, 58,9 m, 75 min, gespeichert. Ein FIT-Export der Suunto-App (EON-Core-Tauchgang vom 13.11.) kam als `VIEW` mit `application/octet-stream` an und wurde gelesen. Die Vorschau warnte „Ähnlicher Tauchgang vorhanden“ (gleicher Tauchgang schon per BLE da), der Haken war aus. Ein `adb`-Teilen ohne Leserechte zeigte richtig „konnte nicht gelesen werden“ statt abzustürzen.
+- Beobachtet: Die Suunto-App schreibt keine Seriennummer in `file_id`, die `sourceId` lautet dann `0:<time_created>`. Sie kennt den Zeitversatz (hier +7 h), der EON Core per BLE nicht. Die Wandzeit stimmt trotzdem überein. Ältere Tauchgänge bekommen die nächste freie Nummer (#72 für März 2026), nicht eine Nummer nach Datum.
+- Offen: echte Ocean-Fixture, iOS (Dokumenttyp FIT und „Öffnen in“, kommt mit der iOS-Pipeline), „Logs senden“ (T10).
 
 ## T6: Apple Health (`data/import/health/`)
 | ID | A | W | D | Rot gesehen |
