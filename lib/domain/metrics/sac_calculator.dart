@@ -1,4 +1,5 @@
 import '../dive/dive.dart';
+import 'profile_stats.dart';
 
 /// Why no SAC value can be given (design.md §6).
 enum SacMissing { pressure, volume, duration, depth }
@@ -39,7 +40,7 @@ class SacCalculator {
     if (dive.durationS <= 0) {
       return const SacResult.missing(SacMissing.duration);
     }
-    final meanDepth = dive.avgDepthM ?? _sampleMean(dive.samples);
+    final meanDepth = dive.avgDepthM ?? meanDepthFromSamples(dive.samples);
     if (meanDepth == null) return const SacResult.missing(SacMissing.depth);
 
     final perMetre = dive.waterType == WaterType.fresh
@@ -48,18 +49,5 @@ class SacCalculator {
     final ambient = _surfaceBar + meanDepth * perMetre;
     final minutes = dive.durationS / 60;
     return SacResult.value((start - end) * volume / (minutes * ambient));
-  }
-
-  /// Time-weighted mean depth (trapezoids between samples).
-  static double? _sampleMean(List<DiveSample> samples) {
-    if (samples.length < 2) return null;
-    var area = 0.0;
-    for (var i = 1; i < samples.length; i++) {
-      final a = samples[i - 1];
-      final b = samples[i];
-      area += (b.timeS - a.timeS) * (a.depthM + b.depthM) / 2;
-    }
-    final span = samples.last.timeS - samples.first.timeS;
-    return span > 0 ? area / span : null;
   }
 }
