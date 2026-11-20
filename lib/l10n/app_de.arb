@@ -12,5 +12,138 @@
   "navSettings": "Einstellungen",
   "@navSettings": {
     "description": "Bottom navigation: settings tab"
-  }
+  },
+
+  "retry": "Erneut versuchen",
+  "cancel": "Abbrechen",
+  "delete": "Löschen",
+  "undo": "Rückgängig",
+  "save": "Speichern",
+  "valueMissing": "—",
+  "@valueMissing": {
+    "description": "Shown instead of a value that is not known"
+  },
+
+  "startupError": "Das Logbuch konnte nicht geöffnet werden.",
+
+  "welcomeTitle": "Willkommen bei DiveDown",
+  "welcomeBody": "Wer taucht? Du kannst später weitere Taucher hinzufügen.",
+  "welcomeName": "Name",
+  "welcomeNameMissing": "Bitte gib einen Namen ein.",
+  "welcomeStart": "Los geht’s",
+  "welcomeLocalOnly": "Alle Daten bleiben auf diesem Gerät.",
+
+  "logbookEmptyTitle": "Noch keine Tauchgänge",
+  "logbookEmptyBody": "Importiere vom Tauchcomputer oder trage einen Tauchgang von Hand ein.",
+  "logbookManualEntry": "Manuell eintragen",
+  "logbookLoadError": "Das Logbuch konnte nicht geladen werden.",
+  "noSite": "Ohne Tauchplatz",
+  "diveNumber": "#{number}",
+  "@diveNumber": {
+    "placeholders": { "number": { "type": "int", "format": "decimalPattern" } }
+  },
+  "diveNumberSpoken": "Tauchgang {number}",
+  "@diveNumberSpoken": {
+    "placeholders": { "number": { "type": "int", "format": "decimalPattern" } }
+  },
+  "depthSpoken": "{depth} Meter",
+  "@depthSpoken": {
+    "placeholders": { "depth": { "type": "String" } }
+  },
+  "durationSpoken": "{minutes} Minuten",
+  "@durationSpoken": {
+    "placeholders": { "minutes": { "type": "int" } }
+  },
+  "sourceDiveComputer": "Tauchcomputer",
+  "sourceFit": "Datei",
+  "sourceAppleHealth": "Apple Watch",
+  "sourceManual": "Von Hand",
+  "sourceSpokenDiveComputer": "vom Tauchcomputer",
+  "sourceSpokenFit": "aus einer Datei",
+  "sourceSpokenAppleHealth": "von der Apple Watch",
+  "sourceSpokenManual": "von Hand eingetragen",
+  "diveDeleted": "Tauchgang gelöscht.",
+  "duplicateNumber": "Die Nummer {number} gibt es schon. Der Tauchgang ist trotzdem gespeichert.",
+  "@duplicateNumber": {
+    "placeholders": { "number": { "type": "int" } }
+  },
+
+  "detailEdit": "Bearbeiten",
+  "detailAddSite": "Tauchplatz hinzufügen",
+  "detailNotFound": "Diesen Tauchgang gibt es nicht mehr.",
+  "metricMaxDepth": "Max. Tiefe",
+  "metricDuration": "Dauer",
+  "metricAvgDepth": "Ø-Tiefe",
+  "metricMinTemperature": "Wassertemp. min",
+  "metricPressure": "Druck",
+  "metricSac": "Ø-SAC",
+  "metricGas": "Gas",
+  "metricWaterType": "Wassertyp",
+  "waterSalt": "Salzwasser",
+  "waterFresh": "Süßwasser",
+  "sacNeedsPressure": "Für den Luftverbrauch werden Flaschendruck und Flaschengröße benötigt.",
+  "sacAddTankSize": "Flaschengröße eintragen",
+  "estimatedProfile": "Geschätztes Profil",
+  "profileSemantics": "Tiefenprofil: max. {depth}, Dauer {duration}",
+  "@profileSemantics": {
+    "placeholders": { "depth": { "type": "String" }, "duration": { "type": "String" } }
+  },
+  "tanksTitle": "Flaschen",
+  "tankNumber": "Flasche {number}",
+  "@tankNumber": {
+    "placeholders": { "number": { "type": "int" } }
+  },
+  "eventsTitle": "Ereignisse",
+  "eventGasChange": "Gaswechsel",
+  "eventAscent": "Aufstieg zu schnell",
+  "eventSafetyStop": "Sicherheitsstopp",
+  "eventDeco": "Dekostopp",
+  "notesTitle": "Notizen",
+  "ratingSpoken": "Bewertung: {stars} von 5 Sternen",
+  "@ratingSpoken": {
+    "placeholders": { "stars": { "type": "int" } }
+  },
+  "deleteDialogTitle": "Tauchgang löschen?",
+
+  "formNewTitle": "Tauchgang eintragen",
+  "formEditTitle": "Tauchgang bearbeiten",
+  "fieldNumber": "Nr.",
+  "fieldSite": "Tauchplatz",
+  "fieldDate": "Datum",
+  "fieldStartTime": "Startzeit",
+  "fieldDuration": "Dauer (min)",
+  "fieldMaxDepth": "Max. Tiefe (m)",
+  "fieldAvgDepth": "Ø-Tiefe (m)",
+  "fieldTemperature": "Wassertemp. (°C)",
+  "fieldTankVolume": "Flasche (l)",
+  "fieldStartPressure": "Startdruck (bar)",
+  "fieldEndPressure": "Enddruck (bar)",
+  "fieldO2": "O₂ (%)",
+  "fieldWaterType": "Wassertyp",
+  "fieldNotes": "Notizen",
+  "fieldRating": "Bewertung",
+  "ratingStars": "{count, plural, =1{1 Stern} other{{count} Sterne}}",
+  "@ratingStars": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "requiredField": "{label} *",
+  "@requiredField": {
+    "description": "Label of a required form field",
+    "placeholders": { "label": { "type": "String" } }
+  },
+  "discardTitle": "Änderungen verwerfen?",
+  "discard": "Verwerfen",
+  "keepEditing": "Weiter bearbeiten",
+  "errorRequired": "Bitte ausfüllen.",
+  "errorNotANumber": "Bitte gib eine Zahl ein.",
+  "errorNumberInvalid": "Die Nummer muss eine ganze Zahl ab 1 sein.",
+  "errorDateInFuture": "Das Datum darf nicht in der Zukunft liegen.",
+  "errorDuration": "Dauer muss zwischen 1 und 1.440 min liegen.",
+  "errorDepth": "Tiefe muss zwischen 0 und 350 m liegen.",
+  "errorAvgDepthAboveMax": "Die Ø-Tiefe darf nicht größer als die max. Tiefe sein.",
+  "errorTemperature": "Temperatur muss zwischen −5 und 45 °C liegen.",
+  "errorVolume": "Die Flaschengröße muss zwischen 0 und 30 l liegen.",
+  "errorPressure": "Druck muss zwischen 0 und 400 bar liegen.",
+  "errorEndPressure": "Der Enddruck muss kleiner als der Startdruck sein.",
+  "errorO2": "Der O₂-Anteil muss zwischen 1 und 100 % liegen."
 }

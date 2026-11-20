@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -8,11 +9,25 @@ import '../features/logbook/manual_dive_screen.dart';
 import '../features/onboarding/welcome_screen.dart';
 import '../features/settings/settings_screen.dart';
 import 'home_shell.dart';
+import 'providers.dart';
 
 // Top-level navigation from ui-spec §2: Logbuch, Importieren, Einstellungen.
+// Without an active diver everything leads to the welcome (§5.1).
 final routerProvider = Provider<GoRouter>((ref) {
+  final diverChanged = ValueNotifier(0);
+  ref.listen(activeDiverProvider, (_, _) => diverChanged.value++);
+  ref.onDispose(diverChanged.dispose);
+
   final router = GoRouter(
     initialLocation: LogbookScreen.path,
+    refreshListenable: diverChanged,
+    redirect: (context, state) {
+      final diver = ref.read(activeDiverProvider);
+      if (!diver.hasValue) return null;
+      final welcome = state.matchedLocation == WelcomeScreen.path;
+      if (diver.value == null) return welcome ? null : WelcomeScreen.path;
+      return welcome ? LogbookScreen.path : null;
+    },
     routes: [
       GoRoute(
         path: WelcomeScreen.path,

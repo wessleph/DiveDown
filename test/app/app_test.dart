@@ -22,8 +22,13 @@ void main() {
 
     expect(find.byType(NavigationBar), findsOneWidget);
     expect(find.text('Logbuch'), findsWidgets);
-    expect(find.text('Importieren'), findsOneWidget);
-    expect(find.text('Einstellungen'), findsOneWidget);
+    Finder inNav(String text) => find.descendant(
+      of: find.byType(NavigationBar),
+      matching: find.text(text),
+    );
+    expect(inNav('Logbuch'), findsOneWidget);
+    expect(inNav('Importieren'), findsOneWidget);
+    expect(inNav('Einstellungen'), findsOneWidget);
     expect(
       tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
       0,

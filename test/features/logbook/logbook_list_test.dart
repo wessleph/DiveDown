@@ -153,18 +153,20 @@ void main() {
     final db = newTestDatabase();
     addTearDown(db.close);
     final anna = await seedActiveDiver(db);
+    await seedDive(db, exampleDive(anna.id!, number: 42, siteName: null));
+    // Same start, so #43 is the first row and visible at 200 %.
     await seedDive(
       db,
       exampleDive(
         anna.id!,
+        number: 43,
         siteName: 'Ein sehr langer Tauchplatzname am Walensee bei Quinten',
       ),
     );
-    await seedDive(db, exampleDive(anna.id!, number: 43, siteName: null));
     await pumpTestApp(tester, db: db, size: const Size(360, 740), textScale: 2);
 
     expect(tester.takeException(), isNull);
-    expect(find.text('#42'), findsOneWidget);
+    expect(find.text('#43'), findsOneWidget);
   });
 
   testWidgets('T12.13 empty state: no overflow at 200 %', (tester) async {

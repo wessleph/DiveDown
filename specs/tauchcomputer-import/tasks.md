@@ -253,3 +253,11 @@ Bewusst **nicht** in diesem Paket: Tauchplatz-Vorschläge (T9, bis dahin Freitex
 | T16.4 | Öffnen schlägt einmal fehl | App-Start | Fehlerkarte mit Icon, „Das Logbuch konnte nicht geöffnet werden.“ und „Erneut versuchen“. Der zweite Versuch öffnet die App. Kein Overflow bei 200 % | ✅ 2026-11-20: rot wegen `UnimplementedError` (`AppStartupGate`) |
 
 Tests: `test/app/startup_test.dart`, `test/app/startup_gate_test.dart`. „Logs an Entwickler senden“ auf der Fehlerkarte kommt mit T10.
+
+**Umgesetzt (Phase 50, 2026-11-20), Logbuch-Paket T7 (Ø-SAC), T11.9, T11.10, T12 (Logbuch-Zeilen), T15, T16:**
+- [x] Domäne: `UnitFormatter`, `SacCalculator.average`, `ManualDiveDraft` → T7.1, T7.2, T7.4, T7.5, T7.7, T7.8, T15.1, T15.18, T15.19 grün. Nachweis: `flutter test test/domain` (33/33)
+- [x] Daten und App-Start: `openAppDatabase`, `BackupExclusion` (iOS über `AppDelegate.swift`), Android-Regeln in `res/xml/`, `loadBundledCatalogue`, `nextNumber`, `DiverRepository.list`, `DriftAppSettings` → T11.9, T11.10, T15.23–T15.25, T16.1–T16.3 grün. Nachweis: `flutter test test/data test/app/startup_test.dart` (25/25)
+- [x] Oberfläche: Willkommen, Logbuch, Detail, Formular, `AppStartupGate`, Texte in `app_de.arb` → T12.1–T12.3, T12.12–T12.15, T15.2–T15.17, T15.20–T15.22, T16.4 grün
+- Gesamt: `flutter test` 111/111, `flutter analyze` ohne Befund, `flutter build apk --debug` ok, Backup-Attribute im zusammengeführten Manifest geprüft.
+- Zwei Testaufbauten korrigiert, ohne die Aussage zu ändern: T0 „starts in the logbook“ sucht die Tab-Namen jetzt in der `NavigationBar`, weil der Leerzustand einen zweiten Knopf „Importieren“ hat. T12.13 (Liste) prüft die erste Zeile `#43` mit dem langen Namen, weil `#42` bei 200 % unterhalb des Bildschirms liegt.
+- Noch nicht geprüft: iOS-Seite von T11.9 (kein Mac, kommt mit der CI-Pipeline), Bedienung auf einem echten Handy.

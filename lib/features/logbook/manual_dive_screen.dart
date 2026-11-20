@@ -1,7 +1,19 @@
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../app/providers.dart';
+import '../../domain/dive/dive.dart';
+import '../../domain/dive/dive_repository.dart';
+import '../../domain/dive/manual_dive_draft.dart';
+import '../../l10n/app_localizations.dart';
+import 'dive_detail_screen.dart';
+import 'dive_texts.dart';
+import 'logbook_screen.dart';
 
 /// Manuell eintragen / Bearbeiten (ui-spec §5.4).
-class ManualDiveScreen extends StatelessWidget {
+class ManualDiveScreen extends ConsumerStatefulWidget {
   const ManualDiveScreen({super.key, this.diveId});
 
   static const newPath = '/logbook/new';
@@ -11,6 +23,456 @@ class ManualDiveScreen extends StatelessWidget {
   final String? diveId;
 
   @override
-  Widget build(BuildContext context) =>
-      throw UnimplementedError('T15: ManualDiveScreen');
+  ConsumerState<ManualDiveScreen> createState() => _ManualDiveScreenState();
+}
+
+/// Text fields of the form, in screen order (site has no validation).
+const _textFields = [
+  ManualDiveField.number,
+  ManualDiveField.duration,
+  ManualDiveField.maxDepth,
+  ManualDiveField.avgDepth,
+  ManualDiveField.temperature,
+  ManualDiveField.tankVolume,
+  ManualDiveField.startPressure,
+  ManualDiveField.endPressure,
+  ManualDiveField.o2,
+];
+
+class _ManualDiveScreenState extends ConsumerState<ManualDiveScreen> {
+  final _controllers = {
+    for (final f in _textFields) f: TextEditingController(),
+  };
+  final _focus = {for (final f in _textFields) f: FocusNode()};
+  final _site = TextEditingController();
+  final _notes = TextEditingController();
+
+  /// Set once loaded; null while the dive or next number is read.
+  ManualDiveDraft? _initial;
+  Dive? _original;
+  late DateTime _start;
+  WaterType? _waterType;
+  int? _rating;
+  Map<ManualDiveField, ManualDiveError> _errors = const {};
+  bool _submitted = false;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  @override
+  void dispose() {
+    for (final c in [..._controllers.values, _site, _notes]) {
+      c.dispose();
+    }
+    for (final f in _focus.values) {
+      f.dispose();
+    }
+    super.dispose();
+  }
+
+  Future<void> _load() async {
+    final ManualDiveDraft draft;
+    if (widget.diveId case final id?) {
+      final dive = await ref.read(diveRepositoryProvider).findById(id);
+      if (dive == null) return;
+      _original = dive;
+      draft = ManualDiveDraft.fromDive(dive);
+    } else {
+      final diver = await ref.read(activeDiverProvider.future);
+      final next = await ref
+          .read(diveRepositoryProvider)
+          .nextNumber(diver!.id!);
+      final now = clock.now();
+      draft = ManualDiveDraft(
+        number: '$next',
+        start: DateTime(now.year, now.month, now.day, now.hour, now.minute),
+      );
+    }
+    if (!mounted) return;
+    setState(() {
+      _initial = draft;
+      _fill(draft);
+    });
+  }
+
+  void _fill(ManualDiveDraft d) {
+    final texts = {
+      ManualDiveField.number: d.number,
+      ManualDiveField.duration: d.duration,
+      ManualDiveField.maxDepth: d.maxDepth,
+      ManualDiveField.avgDepth: d.avgDepth,
+      ManualDiveField.temperature: d.temperature,
+      ManualDiveField.tankVolume: d.tankVolume,
+      ManualDiveField.startPressure: d.startPressure,
+      ManualDiveField.endPressure: d.endPressure,
+      ManualDiveField.o2: d.o2,
+    };
+    for (final MapEntry(:key, :value) in texts.entries) {
+      _controllers[key]!.text = value;
+    }
+    _site.text = d.siteName;
+    _notes.text = d.notes;
+    _start = d.start;
+    _waterType = d.waterType;
+    _rating = d.rating;
+  }
+
+  ManualDiveDraft get _draft {
+    String t(ManualDiveField f) => _controllers[f]!.text;
+    return ManualDiveDraft(
+      number: t(ManualDiveField.number),
+      siteName: _site.text,
+      start: _start,
+      duration: t(ManualDiveField.duration),
+      maxDepth: t(ManualDiveField.maxDepth),
+      avgDepth: t(ManualDiveField.avgDepth),
+      temperature: t(ManualDiveField.temperature),
+      tankVolume: t(ManualDiveField.tankVolume),
+      startPressure: t(ManualDiveField.startPressure),
+      endPressure: t(ManualDiveField.endPressure),
+      o2: t(ManualDiveField.o2),
+      waterType: _waterType,
+      notes: _notes.text,
+      rating: _rating,
+    );
+  }
+
+  bool get _dirty {
+    final a = _initial;
+    if (a == null) return false;
+    final b = _draft;
+    return a.number != b.number ||
+        a.siteName != b.siteName ||
+        a.start != b.start ||
+        a.duration != b.duration ||
+        a.maxDepth != b.maxDepth ||
+        a.avgDepth != b.avgDepth ||
+        a.temperature != b.temperature ||
+        a.tankVolume != b.tankVolume ||
+        a.startPressure != b.startPressure ||
+        a.endPressure != b.endPressure ||
+        a.o2 != b.o2 ||
+        a.waterType != b.waterType ||
+        a.notes != b.notes ||
+        a.rating != b.rating;
+  }
+
+  /// Rebuilds for the dirty state and, after the first save, inline errors.
+  void _changed() => setState(() {
+    if (_submitted) _errors = _draft.validate();
+  });
+
+  Future<void> _save() async {
+    final errors = _draft.validate();
+    setState(() {
+      _submitted = true;
+      _errors = errors;
+    });
+    if (errors.isNotEmpty) {
+      _focus[errors.keys.first]?.requestFocus();
+      return;
+    }
+
+    setState(() => _saving = true);
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final diverId =
+        _original?.diverId ?? (await ref.read(activeDiverProvider.future))!.id!;
+    final result = await ref
+        .read(diveRepositoryProvider)
+        .save(_draft.toDive(diverId: diverId, original: _original));
+    ref.refreshDives(diveId: result.dive.id);
+    if (!mounted) return;
+
+    _initial = _draft; // nothing left to discard
+    if (result.warnings.contains(DiveWarning.duplicateNumber)) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.duplicateNumber(result.dive.number!))),
+      );
+    }
+    context.go(
+      _original == null
+          ? LogbookScreen.path
+          : DiveDetailScreen.pathFor(result.dive.id!),
+    );
+  }
+
+  Future<void> _confirmLeave() async {
+    final l10n = AppLocalizations.of(context);
+    final discard = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.discardTitle),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.keepEditing),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.discard),
+          ),
+        ],
+      ),
+    );
+    if (discard == true && mounted) Navigator.of(context).pop();
+  }
+
+  Future<void> _pickDate() async {
+    final now = clock.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _start.isAfter(now) ? now : _start,
+      firstDate: DateTime(1950),
+      lastDate: now,
+    );
+    if (picked == null) return;
+    _start = _withDate(_start, picked);
+    _changed();
+  }
+
+  Future<void> _pickTime() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: _start.hour, minute: _start.minute),
+    );
+    if (picked == null) return;
+    _start = _withTime(_start, picked.hour, picked.minute);
+    _changed();
+  }
+
+  /// Keeps the UTC flag of [start], so edited wall-clock times stay put.
+  static DateTime _withDate(DateTime start, DateTime d) => start.isUtc
+      ? DateTime.utc(d.year, d.month, d.day, start.hour, start.minute)
+      : DateTime(d.year, d.month, d.day, start.hour, start.minute);
+
+  static DateTime _withTime(DateTime start, int hour, int minute) => start.isUtc
+      ? DateTime.utc(start.year, start.month, start.day, hour, minute)
+      : DateTime(start.year, start.month, start.day, hour, minute);
+
+  String _errorText(AppLocalizations l10n, ManualDiveError e) => switch (e) {
+    ManualDiveError.required => l10n.errorRequired,
+    ManualDiveError.notANumber => l10n.errorNotANumber,
+    ManualDiveError.numberInvalid => l10n.errorNumberInvalid,
+    ManualDiveError.dateInFuture => l10n.errorDateInFuture,
+    ManualDiveError.durationOutOfRange => l10n.errorDuration,
+    ManualDiveError.depthOutOfRange => l10n.errorDepth,
+    ManualDiveError.avgDepthAboveMax => l10n.errorAvgDepthAboveMax,
+    ManualDiveError.temperatureOutOfRange => l10n.errorTemperature,
+    ManualDiveError.volumeOutOfRange => l10n.errorVolume,
+    ManualDiveError.pressureOutOfRange => l10n.errorPressure,
+    ManualDiveError.endPressureNotBelowStart => l10n.errorEndPressure,
+    ManualDiveError.o2OutOfRange => l10n.errorO2,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final loaded = _initial != null;
+
+    Widget field(
+      ManualDiveField f,
+      String label, {
+      bool required = false,
+      bool decimal = false,
+    }) {
+      final error = _errors[f];
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: TextField(
+          controller: _controllers[f],
+          focusNode: _focus[f],
+          keyboardType: decimal
+              ? const TextInputType.numberWithOptions(decimal: true)
+              : TextInputType.number,
+          textInputAction: TextInputAction.next,
+          onChanged: (_) => _changed(),
+          decoration: InputDecoration(
+            labelText: required ? l10n.requiredField(label) : label,
+            errorText: error == null ? null : _errorText(l10n, error),
+            errorMaxLines: 3,
+          ),
+        ),
+      );
+    }
+
+    Widget pickerField(
+      String label,
+      String value,
+      VoidCallback onTap, {
+      String? error,
+    }) {
+      return InkWell(
+        onTap: onTap,
+        child: InputDecorator(
+          decoration: InputDecoration(
+            labelText: l10n.requiredField(label),
+            errorText: error,
+            errorMaxLines: 3,
+          ),
+          child: Text(value),
+        ),
+      );
+    }
+
+    final startError = _errors[ManualDiveField.start];
+
+    return PopScope(
+      canPop: !_dirty,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _confirmLeave();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            widget.diveId == null ? l10n.formNewTitle : l10n.formEditTitle,
+          ),
+        ),
+        bottomNavigationBar: !loaded
+            ? null
+            : SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size.fromHeight(56),
+                    ),
+                    onPressed: _saving ? null : _save,
+                    child: Text(l10n.save),
+                  ),
+                ),
+              ),
+        body: !loaded
+            ? const SizedBox.shrink()
+            : ListView(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                children: [
+                  field(ManualDiveField.number, l10n.fieldNumber),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    // Suggestions from own names and the catalogue follow
+                    // with T9; free text until then (ADR 0006).
+                    child: TextField(
+                      controller: _site,
+                      textInputAction: TextInputAction.next,
+                      textCapitalization: TextCapitalization.words,
+                      onChanged: (_) => _changed(),
+                      decoration: InputDecoration(labelText: l10n.fieldSite),
+                    ),
+                  ),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      SizedBox(
+                        width: 160,
+                        child: pickerField(
+                          l10n.fieldDate,
+                          dateFormat.format(_start),
+                          _pickDate,
+                          error: startError == null
+                              ? null
+                              : _errorText(l10n, startError),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 160,
+                        child: pickerField(
+                          l10n.fieldStartTime,
+                          timeFormat.format(_start),
+                          _pickTime,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  field(
+                    ManualDiveField.duration,
+                    l10n.fieldDuration,
+                    required: true,
+                  ),
+                  field(
+                    ManualDiveField.maxDepth,
+                    l10n.fieldMaxDepth,
+                    required: true,
+                    decimal: true,
+                  ),
+                  field(
+                    ManualDiveField.avgDepth,
+                    l10n.fieldAvgDepth,
+                    decimal: true,
+                  ),
+                  field(
+                    ManualDiveField.temperature,
+                    l10n.fieldTemperature,
+                    decimal: true,
+                  ),
+                  field(
+                    ManualDiveField.tankVolume,
+                    l10n.fieldTankVolume,
+                    decimal: true,
+                  ),
+                  field(ManualDiveField.startPressure, l10n.fieldStartPressure),
+                  field(ManualDiveField.endPressure, l10n.fieldEndPressure),
+                  field(ManualDiveField.o2, l10n.fieldO2),
+                  Text(
+                    l10n.fieldWaterType,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 4),
+                  SegmentedButton<WaterType>(
+                    emptySelectionAllowed: true,
+                    showSelectedIcon: false,
+                    segments: [
+                      for (final w in WaterType.values)
+                        ButtonSegment(
+                          value: w,
+                          label: Text(waterTypeLabel(l10n, w)),
+                        ),
+                    ],
+                    selected: {?_waterType},
+                    onSelectionChanged: (s) {
+                      _waterType = s.firstOrNull;
+                      _changed();
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _notes,
+                    minLines: 3,
+                    maxLines: null,
+                    textCapitalization: TextCapitalization.sentences,
+                    onChanged: (_) => _changed(),
+                    decoration: InputDecoration(labelText: l10n.fieldNotes),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    l10n.fieldRating,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  Wrap(
+                    children: [
+                      for (var i = 1; i <= 5; i++)
+                        IconButton(
+                          tooltip: l10n.ratingStars(i),
+                          isSelected: (_rating ?? 0) >= i,
+                          icon: const Icon(Icons.star_border),
+                          selectedIcon: const Icon(Icons.star),
+                          onPressed: () {
+                            // Tapping the current rating again clears it.
+                            _rating = _rating == i ? null : i;
+                            _changed();
+                          },
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
 }
