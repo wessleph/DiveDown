@@ -11,6 +11,8 @@ import '../data/local/drift_dive_repository.dart';
 import '../data/local/drift_site_repository.dart';
 import '../data/platform/device_channel.dart';
 import '../data/platform/permission_bluetooth_access.dart';
+import '../data/platform/share_channel.dart';
+import '../data/platform/system_file_picker.dart';
 import '../domain/dive/dive.dart';
 import '../domain/dive/dive_repository.dart';
 import '../domain/dive/diver.dart';
@@ -122,7 +124,7 @@ final diveComputerImportProvider = Provider<DiveComputerImport>(
   (ref) => DiveComputerImport(
     source: ref.watch(diveComputerSourceProvider),
     registry: DiveComputerRegistry(ref.watch(diveComputerRepositoryProvider)),
-    importService: ImportService(ref.watch(diveRepositoryProvider)),
+    importService: ref.watch(importServiceProvider),
   ),
 );
 
@@ -133,12 +135,21 @@ final fileDiveSourceProvider = Provider<FileDiveSource>(
 
 /// The system dialog „Datei wählen“ (file_picker).
 final importFilePickerProvider = Provider<ImportFilePicker>(
-  (ref) => throw UnimplementedError('importFilePickerProvider'),
+  (ref) => const SystemFilePicker(),
 );
 
-/// Files shared with DiveDown (receive_sharing_intent).
+/// Files shared with DiveDown from other apps (own channel, T5.9).
 final sharedFilesProvider = Provider<SharedFiles>(
-  (ref) => throw UnimplementedError('sharedFilesProvider'),
+  (ref) => ChannelSharedFiles(),
+);
+
+/// Each file shared with DiveDown, as it arrives.
+final sharedFileEventsProvider = StreamProvider<PickResult>(
+  (ref) => ref.watch(sharedFilesProvider).incoming,
+);
+
+final importServiceProvider = Provider<ImportService>(
+  (ref) => ImportService(ref.watch(diveRepositoryProvider)),
 );
 
 /// The file the FIT screen works on: picked in §5.5 or shared.

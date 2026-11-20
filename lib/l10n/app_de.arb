@@ -250,5 +250,16 @@
   "importedSnack": "{count, plural, =1{1 Tauchgang importiert} other{{count} Tauchgänge importiert}}",
   "@importedSnack": {
     "placeholders": { "count": { "type": "int" } }
+  },
+
+  "fitReading": "Datei wird gelesen …",
+  "fitTooLarge": "Die Datei ist zu groß (max. 10 MB).",
+  "fitUnreadable": "Diese Datei konnte nicht gelesen werden. Ist es eine FIT-Datei aus der Suunto- oder Garmin-App?",
+  "fitNoDive": "Die Datei enthält keinen Tauchgang (sondern z. B. Laufen oder Radfahren).",
+  "fitTimeout": "Das Lesen hat zu lange gedauert. Die Datei ist möglicherweise beschädigt.",
+  "previewSourceFile": "Aus Datei: {name}",
+  "@previewSourceFile": {
+    "description": "Shown above every file preview and error; the name is only shown, never used as a path",
+    "placeholders": { "name": { "type": "String" } }
   }
 }

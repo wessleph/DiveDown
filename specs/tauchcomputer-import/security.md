@@ -27,7 +27,7 @@ Die realistischen Risiken liegen in **vier Bereichen**:
 ### G2: App ↔ Dateien (FIT-Import, „Teilen → DiveDown“)
 | STRIDE | Bedrohung | Gegenmaßnahme |
 |---|---|---|
-| T/D | Eine präparierte FIT-Datei, z. B. per WhatsApp, lässt den Parser abstürzen, hängen oder viel Speicher belegen. | **Größenlimit 20 MB**. Geparst wird in einem **eigenen Isolate** mit Timeout (30 s) und `try/catch` um alles. Fehler zeigt die App als Meldung an, die App stürzt nicht ab. **Fuzz-Tests** mit beschädigten bzw. abgeschnittenen Dateien (Phase 40). |
+| T/D | Eine präparierte FIT-Datei, z. B. per WhatsApp, lässt den Parser abstürzen, hängen oder viel Speicher belegen. | **Größenlimit 10 MB** (wie A2, angeglichen am 2026-11-20). Geparst wird in einem **eigenen Isolate** mit Timeout (30 s) und `try/catch` um alles. Fehler zeigt die App als Meldung an, die App stürzt nicht ab. **Fuzz-Tests** mit beschädigten bzw. abgeschnittenen Dateien (Phase 40). |
 | T | `fit_tool` (BSD-3) wurde zuletzt **im November 2022** veröffentlicht und wird nicht mehr gepflegt. | Es ist reines Dart, daher gibt es keine Speicherfehler. Das Risiko beschränkt sich auf Abstürze und Hänger, die das Isolate abfängt. Bei Bedarf wird `fit_tool` geforkt bzw. als Paket übernommen (R3). |
 | S | Eine Datei mit irreführendem Inhalt (falsche Gerätedaten) | Vor dem Speichern zeigt die App eine Vorschau, und der Nutzer bestätigt. Es gilt dieselbe Plausibilitätsprüfung wie bei G1. |
 | E | Pfad-Tricks beim Empfang geteilter Dateien | Wir verarbeiten nur Bytes, keine Pfade aus fremden Quellen. Die App speichert die Datei nicht. |
@@ -94,7 +94,7 @@ Die realistischen Risiken liegen in **vier Bereichen**:
 | health | 13.3.2 | MIT | ✅ |
 | file_picker | 13.4.0 | MIT | ✅ |
 | share_plus | 13.3.1 | BSD-3 | ✅ |
-| receive_sharing_intent | 1.8.x (**< 1.9.0**, siehe Hinweis) | Apache-2.0 | ✅ |
+| ~~receive_sharing_intent~~ | entfällt (2026-11-20) | Apache-2.0 | ersetzt durch eigenen Android-Code, siehe Hinweis |
 | permission_handler | 13.0.2 | MIT | ✅ |
 | uuid, logger, equatable | 4.6.0, 2.8.0, 3.0.0 | MIT | ✅ |
 | intl, path_provider, package_info_plus, device_info_plus | aktuell | BSD-3 | ✅ |
@@ -102,7 +102,7 @@ Die realistischen Risiken liegen in **vier Bereichen**:
 | **Im Plugin:** libdivecomputer | Fork-Commit `fbd2c42` | **LGPL-2.1+** | ✅ |
 | **Im Plugin:** usb-serial-for-android | eingebettet | MIT | ✅ |
 
-Hinweis: `receive_sharing_intent` ab 1.9.0 funktioniert nur noch mit Swift Package Manager. Submersion pinnt deshalb `< 1.9.0`, und das übernehmen wir.
+Hinweis (2026-11-20): `receive_sharing_intent` 1.8.1 schreibt geteilte Dateien unter Android nach `File(cacheDir, <Name der sendenden App>)`, ein Name mit `../` landet außerhalb des Cache (A2). Deshalb liest DiveDown geteilte Dateien selbst (`SharedFileIntake.kt`): Inhalt in den Speicher, max. 10 MB, Name nur zur Anzeige. iOS folgt mit der iOS-Pipeline.
 Hinweis für später (Karte): Die **Kachel-Richtlinie von OpenStreetMap verbietet es, Kacheln von `tile.openstreetmap.org` massenhaft herunterzuladen**. Für Offline-Regionen brauchen wir deshalb einen anderen Kachel-Anbieter. Das ist zu klären, bevor die Karte gebaut wird.
 
 ## 6. OWASP Mobile Top 10 (2024): kurzer Abgleich

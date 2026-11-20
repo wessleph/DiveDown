@@ -48,3 +48,8 @@ kotlin {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    // JVM tests for MainActivity helpers (EPL-1.0, test only, not shipped).
+    testImplementation("junit:junit:4.13.2")
+}

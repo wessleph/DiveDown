@@ -184,7 +184,8 @@ void main() {
     final h = await _open(tester, location: LogbookScreen.path);
 
     h.shared.share(Picked(fitFile('Ocean 14.11.fit')));
-    await _frames(tester);
+    // From another tab the page change takes longer than _frames.
+    await tester.pumpAndSettle();
 
     expect(currentLocation(tester), FitImportScreen.path);
     expect(find.text('Aus Datei: Ocean 14.11.fit'), findsOneWidget);

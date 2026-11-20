@@ -1035,6 +1035,42 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'{count, plural, =1{1 Tauchgang importiert} other{{count} Tauchgänge importiert}}'**
   String importedSnack(int count);
+
+  /// No description provided for @fitReading.
+  ///
+  /// In de, this message translates to:
+  /// **'Datei wird gelesen …'**
+  String get fitReading;
+
+  /// No description provided for @fitTooLarge.
+  ///
+  /// In de, this message translates to:
+  /// **'Die Datei ist zu groß (max. 10 MB).'**
+  String get fitTooLarge;
+
+  /// No description provided for @fitUnreadable.
+  ///
+  /// In de, this message translates to:
+  /// **'Diese Datei konnte nicht gelesen werden. Ist es eine FIT-Datei aus der Suunto- oder Garmin-App?'**
+  String get fitUnreadable;
+
+  /// No description provided for @fitNoDive.
+  ///
+  /// In de, this message translates to:
+  /// **'Die Datei enthält keinen Tauchgang (sondern z. B. Laufen oder Radfahren).'**
+  String get fitNoDive;
+
+  /// No description provided for @fitTimeout.
+  ///
+  /// In de, this message translates to:
+  /// **'Das Lesen hat zu lange gedauert. Die Datei ist möglicherweise beschädigt.'**
+  String get fitTimeout;
+
+  /// Shown above every file preview and error; the name is only shown, never used as a path
+  ///
+  /// In de, this message translates to:
+  /// **'Aus Datei: {name}'**
+  String previewSourceFile(String name);
 }
 
 class _AppLocalizationsDelegate

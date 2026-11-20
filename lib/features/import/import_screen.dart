@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/providers.dart';
 import '../../l10n/app_localizations.dart';
 import 'dive_computer_screen.dart';
+import 'fit_import_screen.dart';
 
 /// Choose where dives come from (ui-spec §5.5).
 class ImportScreen extends ConsumerWidget {
@@ -19,6 +20,13 @@ class ImportScreen extends ConsumerWidget {
     void soon() =>
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(l10n.importComingSoon)));
+
+    Future<void> pickFit() async {
+      final file = await ref.read(importFilePickerProvider).pick();
+      if (file == null || !context.mounted) return;
+      ref.read(pendingImportFileProvider.notifier).set(file);
+      context.go(FitImportScreen.path);
+    }
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.navImport)),
@@ -37,8 +45,16 @@ class ImportScreen extends ConsumerWidget {
             icon: Icons.description_outlined,
             title: l10n.importSourceFit,
             subtitle: l10n.importSourceFitHint,
-            onTap: soon,
+            onTap: pickFit,
           ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              onPressed: () => showFitGuide(context),
+              child: Text(l10n.fitGuideTitle),
+            ),
+          ),
+          const SizedBox(height: 12),
           if (defaultTargetPlatform == TargetPlatform.iOS)
             _SourceCard(
               icon: Icons.favorite_outline,
@@ -51,6 +67,24 @@ class ImportScreen extends ConsumerWidget {
     );
   }
 }
+
+/// The three steps to export a FIT file from the Suunto app (ui-spec §5.8).
+Future<void> showFitGuide(BuildContext context) => showDialog<void>(
+  context: context,
+  builder: (context) {
+    final l10n = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(l10n.fitGuideTitle),
+      content: Text(l10n.fitGuideSteps),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.ok),
+        ),
+      ],
+    );
+  },
+);
 
 /// „Importieren für: **Anna**“ (ui-spec §2).
 class ImportForLine extends ConsumerWidget {

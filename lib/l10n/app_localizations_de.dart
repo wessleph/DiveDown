@@ -577,4 +577,27 @@ class AppLocalizationsDe extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get fitReading => 'Datei wird gelesen …';
+
+  @override
+  String get fitTooLarge => 'Die Datei ist zu groß (max. 10 MB).';
+
+  @override
+  String get fitUnreadable =>
+      'Diese Datei konnte nicht gelesen werden. Ist es eine FIT-Datei aus der Suunto- oder Garmin-App?';
+
+  @override
+  String get fitNoDive =>
+      'Die Datei enthält keinen Tauchgang (sondern z. B. Laufen oder Radfahren).';
+
+  @override
+  String get fitTimeout =>
+      'Das Lesen hat zu lange gedauert. Die Datei ist möglicherweise beschädigt.';
+
+  @override
+  String previewSourceFile(String name) {
+    return 'Aus Datei: $name';
+  }
 }

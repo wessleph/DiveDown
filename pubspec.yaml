@@ -23,10 +23,10 @@ dependencies:
   intl: any # BSD-3-Clause, version pinned by flutter_localizations
   libdivecomputer_plugin: # GPL-3.0, taken over from Submersion (ADR 0002)
     path: packages/libdivecomputer_plugin
+  logger: ^1.4.0 # MIT, already pulled in by fit_tool; silences its warnings
   path: ^1.9.0 # BSD-3-Clause, already pulled in by Flutter
   path_provider: ^2.1.6 # BSD-3-Clause (incl. platform packages), database folder
   permission_handler: ^13.0.2 # MIT (incl. 5 platform packages), BLE runtime permissions (security.md §4)
-  receive_sharing_intent: ">=1.8.1 <1.9.0" # Apache-2.0; 1.9 needs Swift Package Manager (security.md §5)
   sqlite3: ^3.5.1 # MIT, bundles SQLite via build hooks (no SQLCipher, security R4)
   uuid: ^4.5.0 # MIT (ADR 0004)
 

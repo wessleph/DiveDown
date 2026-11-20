@@ -164,6 +164,15 @@ Tests: `test/data/import/fit/fit_dive_parser_test.dart`, `test/data/import/fit/s
 Festlegungen: `sourceId` = `<file_id.serial_number>:<time_created in Unix-Sekunden>`. Größenlimit **10 MB** wie A2 und ui-spec §5.8 (security G2 nennt noch 20 MB). Gasgemische ohne Flaschen-Infos werden je eine Flasche, wie beim BLE-Adapter. Der Parser läuft in einem Isolate, das bei Zeitüberschreitung beendet wird. Die Ablaufsteuerung ist für T5.7 austauschbar.
 Neue Abhängigkeiten (Lizenzen am 2026-11-20 an den eingesetzten Versionen geprüft): `fit_tool` 1.0.5 (BSD-3, dazu `csv` 5.1.1 und `logger` 1.4.0, beide MIT), `file_picker` 13.4.0 (MIT, Plattformpakete MIT; `cross_file`, `win32`, `ffi_leak_tracker` BSD-3; `dbus` 0.8.1 MPL-2.0 ohne Vermerk „Incompatible With Secondary Licenses“, nur Linux; `xml`, `petitparser` MIT), `receive_sharing_intent` 1.8.1 (Apache-2.0), Dev: `fake_async` (Apache-2.0).
 
+**Umgesetzt (Phase 50, 2026-11-20), FIT-Import T5.1–T5.9, T12.28–T12.34, T12.14 (FIT):**
+- [x] `FitDiveParser`: Größe, `.FIT`-Header und Datei-CRC vor dem Parsen, dann `importedFromFit` in einem eigenen Isolate mit 30 s Zeitlimit (wird bei Zeitüberschreitung beendet). Sechs Extraktoren aus Submersion übernommen (`lib/data/import/fit/`, Herkunftskopf, seit `e78a87cb` unverändert): Profil mit Deko-Werten, Flaschendruck, Gase, Zeit. Ohne GPS-Spur, Gewebe-Werte, Gaswechsel und Gerätenamen (keine Felder in DiveDown). Einstiegsposition kommt als `siteLat`/`siteLon` mit → T5.1–T5.8 grün, Fuzz 200/200.
+- [x] **Teilen ohne `receive_sharing_intent`:** Das Plugin (1.8.1) schreibt geteilte Dateien unter Android nach `File(cacheDir, <Name der sendenden App>)`. Ein Name mit `../` schreibt also außerhalb des Cache, bevor DiveDown die Datei sieht (security A2). Außerdem baute es hier nicht (JVM-Ziel). Ersetzt durch `SharedFileIntake.kt` und `MainActivity.kt`: Inhalt per `ContentResolver` direkt in den Speicher, höchstens 10 MB, der Name ist nur Anzeige. JUnit `SharedFileIntakeTest` 5/5. Dart: `ChannelSharedFiles`. `readSharedFile` (T5.9) bleibt für iOS, wo Dateien als Pfad im Inbox-Ordner ankommen. Abhängigkeit entfernt.
+- [x] Dateiauswahl über `file_picker` (`SystemFilePicker`). Das Plugin prüft Path-Traversal selbst (`PickerPaths.uniqueCachedFile`). Gelesen wird in den Speicher, der Cache wird danach geleert.
+- [x] Vorschau als gemeinsames Widget `ImportPreview` für BLE und FIT. `FitImportScreen` mit „Datei wird gelesen …“ ab 300 ms (§4) und den Fehlertexten aus §5.8. Geteilte Dateien öffnen die FIT-Vorschau von jedem Tab aus.
+- Testaufbau T12.34: wartet mit `pumpAndSettle`, weil der Seitenwechsel aus einem anderen Tab länger dauert. Aussage unverändert.
+- Gesamt: `flutter test` 275/275, `flutter analyze` ohne Befund, Debug-APK baut, Manifest ohne neue Rechte.
+- Offen: Prüfung auf dem Handy mit einer FIT-Datei aus der Suunto-App (welchen MIME-Typ sendet sie?), echte Ocean-Fixture, iOS (Dokumenttyp FIT und „Öffnen in“, kommt mit der iOS-Pipeline), „Logs senden“ (T10).
+
 ## T6: Apple Health (`data/import/health/`)
 | ID | A | W | D | Rot gesehen |
 |---|---|---|---|---|
