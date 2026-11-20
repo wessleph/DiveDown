@@ -76,6 +76,22 @@ class ImportedDive {
   );
 
   /// The dive to store for [diverId]; the number is assigned on save.
-  Dive toDive({required String diverId, String? diveComputerId}) =>
-      throw UnimplementedError('T2: ImportedDive.toDive');
+  Dive toDive({required String diverId, String? diveComputerId}) => Dive(
+    diverId: diverId,
+    diveComputerId: diveComputerId,
+    source: source,
+    sourceId: sourceId,
+    start: start,
+    utcOffsetS: utcOffsetS,
+    durationS: durationS,
+    maxDepthM: maxDepthM,
+    avgDepthM: avgDepthM,
+    minTemperatureC: minTemperatureC,
+    maxTemperatureC: maxTemperatureC,
+    siteLat: siteLat,
+    siteLon: siteLon,
+    samples: samples,
+    tanks: tanks,
+    events: events,
+  );
 }

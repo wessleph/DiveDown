@@ -126,14 +126,40 @@ class DriftDiveRepository implements DiveRepository {
     String diverId,
     DiveSource source,
     String sourceId,
-  ) => throw UnimplementedError('T2: findBySource');
+  ) async {
+    final row =
+        await (_db.select(_db.dives)
+              ..where(
+                (t) =>
+                    t.diverId.equals(diverId) &
+                    t.source.equals(_sourceNames[source]!) &
+                    t.sourceId.equals(sourceId) &
+                    t.deletedAt.isNull(),
+              )
+              ..limit(1))
+            .getSingleOrNull();
+    return row == null ? null : _fromRow(row);
+  }
 
   @override
   Future<List<Dive>> listStartingBetween(
     String diverId,
     DateTime from,
     DateTime to,
-  ) => throw UnimplementedError('T2: listStartingBetween');
+  ) async {
+    final rows =
+        await (_db.select(_db.dives)..where(
+              (t) =>
+                  t.diverId.equals(diverId) &
+                  t.deletedAt.isNull() &
+                  t.startLocal.isBetweenValues(
+                    _wallClockAsUtc(from),
+                    _wallClockAsUtc(to),
+                  ),
+            ))
+            .get();
+    return rows.map(_fromRow).toList();
+  }
 
   @override
   Future<void> delete(String id) => _setDeleted(id, clock.now().toUtc());
