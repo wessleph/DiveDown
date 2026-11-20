@@ -43,3 +43,10 @@ So bleibt die Berechnung austauschbar und testbar.
 - `dives.site_name`: In v1.0 ist das **Freitext**. Kommt später das Feature Tauchplätze mit Karte, wird daraus ein Verweis auf die Tabelle `dive_sites`. Die Migration legt pro eindeutigem Namen einen Tauchplatz an.
 - Datenschutz: `site_name` gilt als persönliche Angabe und wird **nie geloggt** (security.md §3, „Tauchplatz-Namen“).
 - **Ergänzung (ADR 0006):** `dives.site_catalogue_id`, `dives.site_lat` und `dives.site_lon` sind optional und werden gesetzt, wenn ein Katalog-Vorschlag gewählt wird. Dazu kommt die nur lesbare Tabelle `catalogue_sites`. Sie gehört **nicht** zur Sicherung und nicht zum Sync.
+
+## Nachtrag 2026-11-20: Schema v1 (Phase 40, T8)
+- **Flaschendruck** liegt in einer eigenen Tabelle `dive_tank_pressures` (dive_id, time_s, tank_index, pressure_bar), weil ein Sample mehrere Flaschen haben kann (Plugin: `tankPressuresBar`, T4.3). `dive_samples` hat deshalb keine Druckspalte.
+- **Kindzeilen** eines Tauchgangs (`dive_samples`, `dive_tanks`, `dive_tank_pressures`) haben keine eigene UUID und keine Zeitstempel. Ihr Schlüssel ist (`dive_id`, Zeit bzw. Index). Sie werden mit dem Tauchgang gespeichert, ersetzt und per `ON DELETE CASCADE` entfernt. Der spätere Sync überträgt den ganzen Tauchgang. `dive_events` bekommt eine UUID, weil Zeit und Typ nicht eindeutig sind.
+- `(diver_id, source, source_id)` ist **kein** Unique-Index in der Datenbank. Sonst ließe sich ein soft-gelöschter Tauchgang nicht erneut importieren (T2.7). Die Duplikaterkennung übernimmt der `ImportService`.
+- Zusätzliche Tabelle `app_meta` (Schlüssel/Wert), z. B. für die geladene Katalog-Version. Wie `catalogue_sites` gehört sie nicht zur Sicherung.
+- Drift-Zeilenklassen enden auf `Row` (`DiveRow`, `DiverRow` …), damit sie nicht mit dem Domänenmodell (`Dive`, `Diver`) kollidieren.

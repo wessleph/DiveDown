@@ -1,0 +1,32 @@
+import 'package:drift/drift.dart';
+
+import 'tables.dart';
+
+part 'database.g.dart';
+
+@DriftDatabase(
+  tables: [
+    Divers,
+    DiveComputers,
+    Dives,
+    DiveSamples,
+    DiveTankPressures,
+    DiveTanks,
+    DiveEvents,
+    CatalogueSites,
+    AppMeta,
+  ],
+)
+class AppDatabase extends _$AppDatabase {
+  AppDatabase(super.executor);
+
+  @override
+  int get schemaVersion => 1;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    beforeOpen: (details) async {
+      await customStatement('PRAGMA foreign_keys = ON');
+    },
+  );
+}

@@ -110,14 +110,17 @@ Nachweis: `flutter test test/app`, `flutter analyze`, `flutter build apk --debug
 ## T8: Datenbank (`data/local/`, ADR 0004/0006)
 | ID | A | W | D | Rot gesehen |
 |---|---|---|---|---|
-| T8.1 | leere DB | Tauchgang mit 1.800 Samples gespeichert und gelesen | identisch (Rundung ≤ 1e-6) | |
-| T8.2 | Tauchgang gespeichert | gelöscht | `deleted_at` gesetzt, nicht mehr in Liste, über „Rückgängig“ wiederherstellbar | |
-| T8.3 | IDs | neue Datensätze | UUID v4, nie Autoincrement | |
-| T8.4 | Schema v1 mit Daten | Migration auf v2 (sobald es eine gibt) | Daten unverändert. Vor der Migration existiert eine Kopie. | |
-| T8.5 | Taucher mit `first_dive_number = 101`, keine Tauchgänge | 2 Tauchgänge importiert | Nummern 101, 102 | |
-| T8.6 | Tauchgänge #1–#5 | manuell #3 doppelt vergeben | gespeichert, Hinweis `duplicateNumber`, nicht blockiert | |
-| T8.7 | Katalog-Datei Version V1 geladen | App-Start mit gleicher Version | `catalogue_sites` nicht neu befüllt | |
-| T8.8 | Katalog-Datei Version V2 | App-Start | `catalogue_sites` neu befüllt, `dives.site_name` unverändert | |
+| T8.1 | leere DB | Tauchgang mit 1.800 Samples gespeichert und gelesen | identisch (Rundung ≤ 1e-6) | ✅ 2026-11-20: rot wegen `UnimplementedError` (Repository fehlt), Testaufbau ok |
+| T8.2 | Tauchgang gespeichert | gelöscht | `deleted_at` gesetzt, nicht mehr in Liste, über „Rückgängig“ wiederherstellbar | ✅ 2026-11-20: rot wegen `UnimplementedError` (Repository fehlt), Testaufbau ok |
+| T8.3 | IDs | neue Datensätze | UUID v4, nie Autoincrement | ✅ 2026-11-20: rot wegen `UnimplementedError` (Repository fehlt), Testaufbau ok |
+| T8.4 | Schema v1 mit Daten | Migration auf v2 (sobald es eine gibt) | Daten unverändert. Vor der Migration existiert eine Kopie. | ⏸ entfällt bis Schema v2: Es gibt noch keine Migration. Test entsteht zusammen mit v2. |
+| T8.5 | Taucher mit `first_dive_number = 101`, keine Tauchgänge | 2 Tauchgänge importiert | Nummern 101, 102 | ✅ 2026-11-20: rot wegen `UnimplementedError` (Repository fehlt), Testaufbau ok |
+| T8.6 | Tauchgänge #1–#5 | manuell #3 doppelt vergeben | gespeichert, Hinweis `duplicateNumber`, nicht blockiert | ✅ 2026-11-20: rot wegen `UnimplementedError` (Repository fehlt), Testaufbau ok |
+| T8.7 | Katalog-Datei Version V1 geladen | App-Start mit gleicher Version | `catalogue_sites` nicht neu befüllt | ✅ 2026-11-20: rot wegen `UnimplementedError` (CatalogueLoader fehlt), Testaufbau ok |
+| T8.8 | Katalog-Datei Version V2 | App-Start | `catalogue_sites` neu befüllt, `dives.site_name` unverändert | ✅ 2026-11-20: rot wegen `UnimplementedError` (CatalogueLoader fehlt), Testaufbau ok |
+
+Tests: `test/data/local/dive_repository_test.dart` (T8.1–T8.6, zusätzlich: Nummern zählen pro Taucher), `test/data/local/catalogue_loader_test.dart` (T8.7, T8.8). In-Memory-SQLite (3.53.4) läuft unter Windows, Schema v1 mit 9 Tabellen wird angelegt.
+Nachweis: `flutter test test/data`
 
 ## T9: Tauchplatz-Vorschläge (`domain/sites/site_suggestions.dart`, ADR 0006)
 | ID | A | W | D | Rot gesehen |
