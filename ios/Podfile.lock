@@ -1,0 +1,22 @@
+PODS:
+  - Flutter (1.0.0)
+  - libdivecomputer_plugin (0.1.0):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - libdivecomputer_plugin (from `.symlinks/plugins/libdivecomputer_plugin/ios`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  libdivecomputer_plugin:
+    :path: ".symlinks/plugins/libdivecomputer_plugin/ios"
+
+SPEC CHECKSUMS:
+  Flutter: 71a624a5bc0c04062bf19101d501e466baf2fb47
+  libdivecomputer_plugin: c1303496c81ee0efeb1f9a5bef55ac62ff0c9992
+
+PODFILE CHECKSUM: 3d709d30acfd83032d4520bf6fd5b34a1b830706
+
+COCOAPODS: 1.17.0
