@@ -435,6 +435,10 @@ Stub: `ios/Runner/SharedFileInbox.swift` (im Runner-Target eingetragen), gibt im
 
 Test: `test/data/platform/share_channel_test.dart`.
 
+**Umgesetzt (Phase 50, 2026-11-21), T20.13:**
+- [x] `ChannelSharedFiles` liest `{name, path}` über `readSharedFile`, nur innerhalb von `inboxDirs` (ohne Ordner wird jeder Pfad abgelehnt). Der Name kommt von der Plattform und wird nur angezeigt. `sharedFilesProvider` gibt `Documents/Inbox` mit → T20.13 grün.
+- Gesamt: `flutter test` 303/304 (rot nur T20.7 `Podfile.lock`, kommt aus der CI), `flutter analyze` ohne Befund, Debug-APK baut. Auf Android unverändert: dort kommen weiter Bytes, nie Pfade.
+
 **Umgesetzt (Phase 50, 2026-11-20), iOS-Pipeline T19, T20.1–T20.12:**
 - [x] `checkWorkflow` (W1–W9) → T19.1–T19.11 grün.
 - [x] `.github/flutter-version.txt`, `.github/workflows/ci.yml`, `.github/workflows/ios-release.yml`, Hilfsskripte `tool/ci/` (Flutter per `git clone` des Tags, Xcode 26 wählen, Simulator starten) → T19.12 grün.

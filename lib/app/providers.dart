@@ -1,5 +1,10 @@
+import 'dart:io';
+
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:libdivecomputer_plugin/libdivecomputer_plugin.dart' as dc;
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 
 import '../data/import/divecomputer/plugin_dive_computer_source.dart';
 import '../data/import/fit/fit_dive_parser.dart';
@@ -138,9 +143,16 @@ final importFilePickerProvider = Provider<ImportFilePicker>(
   (ref) => const SystemFilePicker(),
 );
 
-/// Files shared with DiveDown from other apps (own channel, T5.9).
+/// Files shared with DiveDown from other apps (own channel, T5.9). On iOS
+/// they arrive as a copy in Documents/Inbox (T20.13).
 final sharedFilesProvider = Provider<SharedFiles>(
-  (ref) => ChannelSharedFiles(),
+  (ref) => ChannelSharedFiles(
+    const MethodChannel(ChannelSharedFiles.channelName),
+    () async {
+      final documents = await getApplicationDocumentsDirectory();
+      return [Directory(p.join(documents.path, 'Inbox'))];
+    },
+  ),
 );
 
 /// Each file shared with DiveDown, as it arrives.
