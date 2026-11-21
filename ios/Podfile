@@ -36,9 +36,11 @@ target 'Runner' do
   end
 end
 
-# permission_handler compiles only the permissions switched on here. DiveDown
-# asks for Bluetooth only (security.md §4); every other permission stays off,
-# so App Store review sees no unused permission APIs.
+# permission_handler compiles only the permissions switched on. DiveDown asks
+# for Bluetooth only (security.md §4). Since Flutter builds permission_handler
+# through Swift Package Manager, its manifest takes Bluetooth from Info.plist
+# and the CI turns notifications off (PERMISSION_NOTIFICATIONS=0, checked in
+# ci.yml). This block only applies if it is ever built through CocoaPods.
 PERMISSION_DEFINES = ['PERMISSION_BLUETOOTH=1'].freeze
 
 post_install do |installer|
