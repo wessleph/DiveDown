@@ -429,6 +429,11 @@ Tests: `test/tool/workflow_policy_test.dart`. Neue Dev-Abhängigkeit (Lizenz am 
 
 Tests: `test/ios/ios_config_test.dart` (PC), `ios/RunnerTests/RunnerTests.swift` (XCTest, `xcodebuild test` in der CI), `integration_test/ios_platform_test.dart` (iOS-Simulator in der CI, auf Android übersprungen). Neue Dev-Abhängigkeit (Lizenz am 2026-11-20 geprüft): `xml` 7.0.1 (MIT, dazu `petitparser` 7.0.2 MIT, `meta` BSD-3), bisher schon transitiv über `file_picker`.
 Stub: `ios/Runner/SharedFileInbox.swift` (im Runner-Target eingetragen), gibt immer `nil`.
+| ID | A | W | D | Rot gesehen |
+|---|---|---|---|---|
+| T20.13 | iOS meldet `{name, path}` für eine Kopie in `Documents/Inbox` bzw. einen Pfad außerhalb | `ChannelSharedFiles.incoming` | über `readSharedFile`: Bytes gelesen, Name nur angezeigt, Kopie gelöscht; außerhalb `unreadable`, Datei bleibt unberührt | ✅ 2026-11-20: rot, `{path}` wird als Fehler gelesen (`PickFailed` statt `Picked`). Der Fall „außerhalb“ ist schon grün. Ergänzt bei der Umsetzung, abgenommen am 2026-11-21 |
+
+Test: `test/data/platform/share_channel_test.dart`.
 
 **Umgesetzt (Phase 50, 2026-11-20), iOS-Pipeline T19, T20.1–T20.12:**
 - [x] `checkWorkflow` (W1–W9) → T19.1–T19.11 grün.

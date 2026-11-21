@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/services.dart';
 
@@ -6,9 +7,16 @@ import '../../domain/import/file_import.dart';
 
 /// Files other apps share with DiveDown. Android: `MainActivity.kt` reads
 /// the content into memory and sends it here, never a path (T5.9).
-/// iOS: not wired yet (needs the document type, comes with the iOS build).
+/// iOS: `SharedFileInbox.swift` sends `{name, path}` for a copy in
+/// Documents/Inbox, read here through `readSharedFile` within [inboxDirs].
 class ChannelSharedFiles implements SharedFiles {
-  ChannelSharedFiles([this._channel = const MethodChannel(channelName)]);
+  ChannelSharedFiles([
+    this._channel = const MethodChannel(channelName),
+    this.inboxDirs,
+  ]);
+
+  /// Folders a `{path}` message may point into (iOS: Documents/Inbox).
+  final Future<List<Directory>> Function()? inboxDirs;
 
   static const channelName = 'io.github.wessleph.divedown/share';
 
