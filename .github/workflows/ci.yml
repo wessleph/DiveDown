@@ -93,17 +93,8 @@ jobs:
       - run: flutter pub get
 
       - name: Device build, not signed
+        id: device
         run: flutter build ios --release --no-codesign
-
-      # Prints which PERMISSION_* macros the permission_handler package was
-      # built with; only PERMISSION_BLUETOOTH may be 1.
-      - name: Check permission_handler macros
-        run: |
-          out="$(PERMISSION_HANDLER_VERBOSE=1 swift package --manifest-cache none --package-path ios/Flutter/ephemeral/Packages/.packages/permission_handler_apple dump-package 2>&1 >/dev/null)"
-          echo "$out"
-          enabled="$(echo "$out" | grep -oE 'PERMISSION_[A-Z_]+ *(=|:) *1' | grep -oE 'PERMISSION_[A-Z_]+' | sort -u)"
-          echo "Enabled: ${enabled:-none}"
-          [ "$enabled" = "PERMISSION_BLUETOOTH" ]
 
       # Podfile.lock is checked in (G6). Uploaded right after pod install, so
       # it is kept even if a later step hangs, and can be committed from the PC.
@@ -147,6 +138,22 @@ jobs:
             -configuration Debug \
             -destination "id=$UDID" \
             CODE_SIGNING_ALLOWED=NO
+
+      # Which PERMISSION_* macros the permission_handler package is built
+      # with (Swift Package Manager, from Info.plist and env); only
+      # PERMISSION_BLUETOOTH may be 1. Runs after the tests so a failure here
+      # does not hide their result. Flutter links the package with its
+      # version in the name.
+      - name: Check permission_handler macros
+        if: always() && steps.device.outcome == 'success'
+        run: |
+          pkg="$(ls -d ios/Flutter/ephemeral/Packages/.packages/permission_handler_apple-* | head -1)"
+          echo "Package: $pkg"
+          out="$(PERMISSION_HANDLER_VERBOSE=1 swift package --manifest-cache none --package-path "$pkg" dump-package 2>&1 >/dev/null || true)"
+          echo "$out"
+          enabled="$(echo "$out" | grep -oE 'PERMISSION_[A-Z_]+=1' | cut -d= -f1 | sort -u)"
+          echo "Enabled: ${enabled:-none}"
+          [ "$enabled" = "PERMISSION_BLUETOOTH" ]
 
       # When a step fails or hangs: what the app on the simulator logged and
       # whether it crashed.
