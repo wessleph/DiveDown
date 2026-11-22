@@ -23,6 +23,7 @@ import '../data/local/drift_site_repository.dart';
 import '../data/platform/device_channel.dart';
 import '../data/platform/permission_bluetooth_access.dart';
 import '../data/platform/share_channel.dart';
+import '../data/platform/share_folder.dart';
 import '../data/platform/system_file_picker.dart';
 import '../domain/dive/dive.dart';
 import '../domain/dive/dive_repository.dart';
@@ -143,27 +144,22 @@ final backupActionsProvider = Provider<BackupActions>(
   (ref) => AppBackupActions(ref.watch(appDatabaseProvider)),
 );
 
-/// Opens the system share dialog for a file (`share_plus`). The file is
-/// written to `<cache>/share/` and removed afterwards (security.md caches).
+/// Opens the system share dialog for a file (`share_plus`). The file stays
+/// in `<cache>/share/` until the next share or app start (T11.16).
 final shareFileProvider =
     Provider<Future<void> Function(String name, Uint8List bytes)>(
       (ref) => (name, bytes) async {
-        final dir = Directory(
-          p.join((await getTemporaryDirectory()).path, 'share'),
+        final file = await prepareShareFile(
+          await getTemporaryDirectory(),
+          name,
+          bytes,
         );
-        await dir.create(recursive: true);
-        final file = File(p.join(dir.path, p.basename(name)));
-        await file.writeAsBytes(bytes, flush: true);
-        try {
-          await SharePlus.instance.share(
-            ShareParams(
-              files: [XFile(file.path, mimeType: 'application/zip')],
-              fileNameOverrides: [p.basename(name)],
-            ),
-          );
-        } finally {
-          if (file.existsSync()) file.deleteSync();
-        }
+        await SharePlus.instance.share(
+          ShareParams(
+            files: [XFile(file.path, mimeType: 'application/zip')],
+            fileNameOverrides: [p.basename(file.path)],
+          ),
+        );
       },
     );
 
