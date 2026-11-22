@@ -16,7 +16,13 @@ class DriftDiverRepository implements DiverRepository {
 
   @override
   Future<void> update(Diver diver) =>
-      throw UnimplementedError('DriftDiverRepository.update');
+      (_db.update(_db.divers)..where((t) => t.id.equals(diver.id!))).write(
+        DiversCompanion(
+          name: Value(diver.name),
+          firstDiveNumber: Value(diver.firstDiveNumber),
+          updatedAt: Value(clock.now().toUtc()),
+        ),
+      );
 
   @override
   Future<Diver> create(Diver diver) async {
@@ -153,16 +159,53 @@ class DriftDiveRepository implements DiveRepository, DiveNumbering {
   Future<int> nextNumber(String diverId) => _nextNumber(diverId);
 
   @override
-  Future<void> shiftNumbers(String diverId, int delta) =>
-      throw UnimplementedError('shiftNumbers');
+  Future<void> shiftNumbers(String diverId, int delta) async {
+    if (delta == 0) return;
+    await _db.customUpdate(
+      'UPDATE dives SET dive_number = dive_number + ?, updated_at = ? '
+      'WHERE diver_id = ? AND deleted_at IS NULL',
+      variables: [
+        Variable.withInt(delta),
+        Variable.withDateTime(clock.now().toUtc()),
+        Variable.withString(diverId),
+      ],
+      updates: {_db.dives},
+    );
+  }
+
+  /// Live dives of the diver by start time, ties by old number.
+  Future<List<DiveRow>> _byDate(String diverId) =>
+      (_db.select(_db.dives)
+            ..where((t) => t.diverId.equals(diverId) & t.deletedAt.isNull())
+            ..orderBy([
+              (t) => OrderingTerm.asc(t.startLocal),
+              (t) => OrderingTerm.asc(t.diveNumber),
+            ]))
+          .get();
 
   @override
-  Future<int> renumberByDate(String diverId, {required int start}) =>
-      throw UnimplementedError('renumberByDate');
+  Future<int> renumberByDate(String diverId, {required int start}) {
+    return _db.transaction(() async {
+      final rows = await _byDate(diverId);
+      final now = clock.now().toUtc();
+      for (final (i, row) in rows.indexed) {
+        if (row.diveNumber == start + i) continue;
+        await (_db.update(_db.dives)..where((t) => t.id.equals(row.id))).write(
+          DivesCompanion(diveNumber: Value(start + i), updatedAt: Value(now)),
+        );
+      }
+      return rows.length;
+    });
+  }
 
   @override
-  Future<bool> numbersFollowDates(String diverId) =>
-      throw UnimplementedError('numbersFollowDates');
+  Future<bool> numbersFollowDates(String diverId) async {
+    final rows = await _byDate(diverId);
+    for (var i = 1; i < rows.length; i++) {
+      if (rows[i].diveNumber <= rows[i - 1].diveNumber) return false;
+    }
+    return true;
+  }
 
   @override
   Future<Dive?> findBySource(

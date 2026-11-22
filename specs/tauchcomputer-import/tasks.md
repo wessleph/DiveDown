@@ -526,3 +526,11 @@ Entscheidungen vom 2026-11-22: **ein Taucher pro App** (kein Wechsel, kein Anleg
 
 Abgenommen am 2026-11-22. Tests: `test/data/local/settings_data_test.dart` (T23.1–T23.5), `test/features/settings/settings_test.dart` (T23.6–T23.12), T23.13 in den bestehenden Tests. Stubs: `DiverRepository.update`, `DiveNumbering` (`shiftNumbers`, `renumberByDate`, `numbersFollowDates`), `AppSettings.themeMode`/`setThemeMode`, `DiveComputerRepository.listAll`/`forget`, `appInfoProvider`, `urlOpenerProvider`.
 Neue Abhängigkeiten (Lizenzen am 2026-11-22 an den eingesetzten Versionen geprüft): `url_launcher` 6.3.3 (BSD-3, ebenso `url_launcher_android` 6.3.35, `_ios` 6.4.2, `_platform_interface` 2.3.2 und die Desktop/Web-Pakete), `package_info_plus` 10.2.2 (BSD-3, `package_info_plus_platform_interface` 4.1.0 BSD-3, `http` 1.6.0 BSD-3; `web`, `win32`, `ffi` BSD-3 und `clock` Apache-2.0 waren schon da).
+
+**Umgesetzt (Phase 50, 2026-11-22), T23:**
+- [x] Daten: `DiverRepository.update`, `DiveNumbering` in `DriftDiveRepository` (`shiftNumbers` per SQL-Update, `renumberByDate` in einer Transaktion, `numbersFollowDates`), `AppSettings.themeMode` (Schlüssel `theme_mode` in `app_meta`), `DiveComputerRepository.listAll`/`forget` (Soft Delete) → T23.1–T23.5 grün.
+- [x] Provider: `appInfoProvider` (`package_info_plus` und `getLibdivecomputerVersion`), `urlOpenerProvider` (`url_launcher`, externer Browser), `themeModeProvider` (wirkt auf `MaterialApp.themeMode`), `knownComputersProvider` (letzter Tauchgang je Gerät), `numbersFollowDatesProvider`.
+- [x] `SettingsScreen` neu: Abschnitte TAUCHER (Name, Startnummer mit Rückfrage und Verschieben, Neu-Nummerieren nur wenn nötig), GERÄTE (mit „Vergessen“), DARSTELLUNG (Segmentknopf), ÜBER DIVEDOWN (Version, libdivecomputer, Lizenz, Open-Source-Lizenzen, Datenschutzerklärung, Quellcode) → T23.6–T23.12 grün.
+- [x] Avatar im Logbuch und „Importieren für“ in Quellenwahl und Vorschau entfernt, Texte `importFor`/`diverAvatarSpoken` gelöscht → T23.13 grün.
+- Gesamt: `flutter test` 357/357, `flutter analyze` ohne Befund, Debug-APK baut.
+- Noch nicht auf dem Handy geprüft, vor allem ob die Links ohne `<queries>` im Manifest den Browser öffnen.

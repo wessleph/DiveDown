@@ -46,6 +46,118 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsLicences => 'Open-Source-Lizenzen';
 
   @override
+  String get settingsSectionDiver => 'TAUCHER';
+
+  @override
+  String get settingsSectionDevices => 'GERÄTE';
+
+  @override
+  String get settingsSectionAppearance => 'DARSTELLUNG';
+
+  @override
+  String get settingsSectionAbout => 'ÜBER DIVEDOWN';
+
+  @override
+  String get settingsName => 'Name';
+
+  @override
+  String get settingsRenameTitle => 'Name ändern';
+
+  @override
+  String get settingsStartNumber => 'Nummerierung beginnt bei';
+
+  @override
+  String get settingsStartNumberHint =>
+      'Für Tauchgänge aus früheren Logbüchern';
+
+  @override
+  String get settingsStartNumberInvalid =>
+      'Bitte eine Zahl von 1 bis 9999 eingeben.';
+
+  @override
+  String get settingsShiftTitle => 'Nummern verschieben?';
+
+  @override
+  String settingsShiftBody(int from, int to, int newFrom, int newTo) {
+    return 'Aus #$from–#$to werden #$newFrom–#$newTo.';
+  }
+
+  @override
+  String get settingsShift => 'Verschieben';
+
+  @override
+  String get settingsRenumber => 'Nummern nach Datum neu vergeben';
+
+  @override
+  String settingsRenumberBody(int start) {
+    return 'Alle Tauchgänge nach Datum neu nummerieren? Der älteste bekommt #$start.';
+  }
+
+  @override
+  String get settingsRenumberAction => 'Neu nummerieren';
+
+  @override
+  String settingsRenumbered(int count) {
+    return '$count Tauchgänge neu nummeriert';
+  }
+
+  @override
+  String get settingsNoDevices => 'Noch kein Tauchcomputer verbunden.';
+
+  @override
+  String settingsLastDive(String date) {
+    return 'Zuletzt: $date';
+  }
+
+  @override
+  String get settingsNoDivesYet => 'Noch keine Tauchgänge';
+
+  @override
+  String settingsForgetTooltip(String name) {
+    return '$name vergessen';
+  }
+
+  @override
+  String settingsForgetTitle(String name) {
+    return '$name vergessen?';
+  }
+
+  @override
+  String get settingsForgetBody =>
+      'Beim nächsten Übertragen werden alle Tauchgänge erneut gelesen; Duplikate werden erkannt.';
+
+  @override
+  String get settingsForget => 'Vergessen';
+
+  @override
+  String get settingsThemeSystem => 'System';
+
+  @override
+  String get settingsThemeLight => 'Hell';
+
+  @override
+  String get settingsThemeDark => 'Dunkel';
+
+  @override
+  String settingsVersion(String version, String build) {
+    return 'Version $version (Build $build)';
+  }
+
+  @override
+  String settingsLibdc(String version) {
+    return 'libdivecomputer $version';
+  }
+
+  @override
+  String get settingsLicence => 'Lizenz: GPL-3.0-or-later';
+
+  @override
+  String get settingsPrivacy => 'Datenschutzerklärung';
+
+  @override
+  String get settingsSource => 'Quellcode';
+
+  @override
   String siteUseNew(String name) {
     return '‚$name‘ als neuen Tauchplatz verwenden';
   }
@@ -90,11 +202,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get logbookTileUnderwater => 'unter Wasser';
-
-  @override
-  String diverAvatarSpoken(String name) {
-    return 'Taucher $name';
-  }
 
   @override
   String diveNumber(int number) {
@@ -502,11 +609,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get errorO2 => 'Der O₂-Anteil muss zwischen 1 und 100 % liegen.';
-
-  @override
-  String importFor(String name) {
-    return 'Importieren für: $name';
-  }
 
   @override
   String get importSourceComputer => 'Tauchcomputer';

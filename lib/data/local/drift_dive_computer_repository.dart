@@ -13,11 +13,22 @@ class DriftDiveComputerRepository implements DiveComputerRepository {
   final AppDatabase _db;
 
   @override
-  Future<List<KnownDiveComputer>> listAll() =>
-      throw UnimplementedError('listAll');
+  Future<List<KnownDiveComputer>> listAll() async {
+    final rows =
+        await (_db.select(_db.diveComputers)
+              ..where((t) => t.deletedAt.isNull())
+              ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]))
+            .get();
+    return rows.map(_fromRow).toList();
+  }
 
   @override
-  Future<void> forget(String id) => throw UnimplementedError('forget');
+  Future<void> forget(String id) {
+    final now = clock.now().toUtc();
+    return (_db.update(_db.diveComputers)..where((t) => t.id.equals(id))).write(
+      DiveComputersCompanion(deletedAt: Value(now), updatedAt: Value(now)),
+    );
+  }
 
   @override
   Future<KnownDiveComputer?> findById(String id) =>

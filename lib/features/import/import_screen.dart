@@ -33,8 +33,6 @@ class ImportScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const ImportForLine(),
-          const SizedBox(height: 16),
           _SourceCard(
             icon: Icons.watch_outlined,
             title: l10n.importSourceComputer,
@@ -85,32 +83,6 @@ Future<void> showFitGuide(BuildContext context) => showDialog<void>(
     );
   },
 );
-
-/// „Importieren für: **Anna**“ (ui-spec §2).
-class ImportForLine extends ConsumerWidget {
-  const ImportForLine({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final name = ref.watch(activeDiverProvider).value?.name;
-    if (name == null) return const SizedBox.shrink();
-    final text = AppLocalizations.of(context).importFor(name);
-    final at = text.lastIndexOf(name);
-    return Text.rich(
-      TextSpan(
-        children: [
-          TextSpan(text: text.substring(0, at)),
-          TextSpan(
-            text: name,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          TextSpan(text: text.substring(at + name.length)),
-        ],
-      ),
-      style: Theme.of(context).textTheme.titleMedium,
-    );
-  }
-}
 
 class _SourceCard extends StatelessWidget {
   const _SourceCard({

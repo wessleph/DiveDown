@@ -23,7 +23,6 @@ class LogbookScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final dives = ref.watch(logbookProvider);
-    final diver = ref.watch(activeDiverProvider).value;
 
     return Scaffold(
       appBar: AppBar(
@@ -31,10 +30,6 @@ class LogbookScreen extends ConsumerWidget {
           l10n.navLogbook,
           style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w800),
         ),
-        actions: [
-          if (diver != null) _DiverAvatar(name: diver.name),
-          const SizedBox(width: 12),
-        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.go(ManualDiveScreen.newPath),
@@ -414,37 +409,6 @@ class _Tile extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Initial of the active diver; the switcher (ui-spec §2) follows with the
-/// settings package.
-class _DiverAvatar extends StatelessWidget {
-  const _DiverAvatar({required this.name});
-
-  final String name;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final scheme = Theme.of(context).colorScheme;
-    final trimmed = name.trim();
-    final initial = trimmed.isEmpty
-        ? '?'
-        : trimmed.characters.first.toUpperCase();
-    return Semantics(
-      label: l10n.diverAvatarSpoken(name),
-      excludeSemantics: true,
-      child: CircleAvatar(
-        radius: 18,
-        backgroundColor: scheme.primary,
-        foregroundColor: scheme.onPrimary,
-        child: Text(
-          initial,
-          style: const TextStyle(fontWeight: FontWeight.w700),
         ),
       ),
     );

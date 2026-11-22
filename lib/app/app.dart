@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../domain/settings/app_settings.dart';
 import '../features/import/fit_import_screen.dart';
 import '../l10n/app_localizations.dart';
 import 'providers.dart';
@@ -23,6 +24,11 @@ class DiveDownApp extends ConsumerWidget {
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       theme: buildLightTheme(),
       darkTheme: buildDarkTheme(),
+      themeMode: switch (ref.watch(themeModeProvider).value) {
+        AppThemeMode.light => ThemeMode.light,
+        AppThemeMode.dark => ThemeMode.dark,
+        _ => ThemeMode.system,
+      },
       // German only for now (constitution, rule 2).
       locale: const Locale('de'),
       supportedLocales: AppLocalizations.supportedLocales,

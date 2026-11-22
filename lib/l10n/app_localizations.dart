@@ -166,6 +166,192 @@ abstract class AppLocalizations {
   /// **'Open-Source-Lizenzen'**
   String get settingsLicences;
 
+  /// No description provided for @settingsSectionDiver.
+  ///
+  /// In de, this message translates to:
+  /// **'TAUCHER'**
+  String get settingsSectionDiver;
+
+  /// No description provided for @settingsSectionDevices.
+  ///
+  /// In de, this message translates to:
+  /// **'GERÄTE'**
+  String get settingsSectionDevices;
+
+  /// No description provided for @settingsSectionAppearance.
+  ///
+  /// In de, this message translates to:
+  /// **'DARSTELLUNG'**
+  String get settingsSectionAppearance;
+
+  /// No description provided for @settingsSectionAbout.
+  ///
+  /// In de, this message translates to:
+  /// **'ÜBER DIVEDOWN'**
+  String get settingsSectionAbout;
+
+  /// No description provided for @settingsName.
+  ///
+  /// In de, this message translates to:
+  /// **'Name'**
+  String get settingsName;
+
+  /// No description provided for @settingsRenameTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Name ändern'**
+  String get settingsRenameTitle;
+
+  /// No description provided for @settingsStartNumber.
+  ///
+  /// In de, this message translates to:
+  /// **'Nummerierung beginnt bei'**
+  String get settingsStartNumber;
+
+  /// No description provided for @settingsStartNumberHint.
+  ///
+  /// In de, this message translates to:
+  /// **'Für Tauchgänge aus früheren Logbüchern'**
+  String get settingsStartNumberHint;
+
+  /// No description provided for @settingsStartNumberInvalid.
+  ///
+  /// In de, this message translates to:
+  /// **'Bitte eine Zahl von 1 bis 9999 eingeben.'**
+  String get settingsStartNumberInvalid;
+
+  /// No description provided for @settingsShiftTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Nummern verschieben?'**
+  String get settingsShiftTitle;
+
+  /// No description provided for @settingsShiftBody.
+  ///
+  /// In de, this message translates to:
+  /// **'Aus #{from}–#{to} werden #{newFrom}–#{newTo}.'**
+  String settingsShiftBody(int from, int to, int newFrom, int newTo);
+
+  /// No description provided for @settingsShift.
+  ///
+  /// In de, this message translates to:
+  /// **'Verschieben'**
+  String get settingsShift;
+
+  /// No description provided for @settingsRenumber.
+  ///
+  /// In de, this message translates to:
+  /// **'Nummern nach Datum neu vergeben'**
+  String get settingsRenumber;
+
+  /// No description provided for @settingsRenumberBody.
+  ///
+  /// In de, this message translates to:
+  /// **'Alle Tauchgänge nach Datum neu nummerieren? Der älteste bekommt #{start}.'**
+  String settingsRenumberBody(int start);
+
+  /// No description provided for @settingsRenumberAction.
+  ///
+  /// In de, this message translates to:
+  /// **'Neu nummerieren'**
+  String get settingsRenumberAction;
+
+  /// No description provided for @settingsRenumbered.
+  ///
+  /// In de, this message translates to:
+  /// **'{count} Tauchgänge neu nummeriert'**
+  String settingsRenumbered(int count);
+
+  /// No description provided for @settingsNoDevices.
+  ///
+  /// In de, this message translates to:
+  /// **'Noch kein Tauchcomputer verbunden.'**
+  String get settingsNoDevices;
+
+  /// No description provided for @settingsLastDive.
+  ///
+  /// In de, this message translates to:
+  /// **'Zuletzt: {date}'**
+  String settingsLastDive(String date);
+
+  /// No description provided for @settingsNoDivesYet.
+  ///
+  /// In de, this message translates to:
+  /// **'Noch keine Tauchgänge'**
+  String get settingsNoDivesYet;
+
+  /// No description provided for @settingsForgetTooltip.
+  ///
+  /// In de, this message translates to:
+  /// **'{name} vergessen'**
+  String settingsForgetTooltip(String name);
+
+  /// No description provided for @settingsForgetTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'{name} vergessen?'**
+  String settingsForgetTitle(String name);
+
+  /// No description provided for @settingsForgetBody.
+  ///
+  /// In de, this message translates to:
+  /// **'Beim nächsten Übertragen werden alle Tauchgänge erneut gelesen; Duplikate werden erkannt.'**
+  String get settingsForgetBody;
+
+  /// No description provided for @settingsForget.
+  ///
+  /// In de, this message translates to:
+  /// **'Vergessen'**
+  String get settingsForget;
+
+  /// No description provided for @settingsThemeSystem.
+  ///
+  /// In de, this message translates to:
+  /// **'System'**
+  String get settingsThemeSystem;
+
+  /// No description provided for @settingsThemeLight.
+  ///
+  /// In de, this message translates to:
+  /// **'Hell'**
+  String get settingsThemeLight;
+
+  /// No description provided for @settingsThemeDark.
+  ///
+  /// In de, this message translates to:
+  /// **'Dunkel'**
+  String get settingsThemeDark;
+
+  /// No description provided for @settingsVersion.
+  ///
+  /// In de, this message translates to:
+  /// **'Version {version} (Build {build})'**
+  String settingsVersion(String version, String build);
+
+  /// No description provided for @settingsLibdc.
+  ///
+  /// In de, this message translates to:
+  /// **'libdivecomputer {version}'**
+  String settingsLibdc(String version);
+
+  /// No description provided for @settingsLicence.
+  ///
+  /// In de, this message translates to:
+  /// **'Lizenz: GPL-3.0-or-later'**
+  String get settingsLicence;
+
+  /// No description provided for @settingsPrivacy.
+  ///
+  /// In de, this message translates to:
+  /// **'Datenschutzerklärung'**
+  String get settingsPrivacy;
+
+  /// No description provided for @settingsSource.
+  ///
+  /// In de, this message translates to:
+  /// **'Quellcode'**
+  String get settingsSource;
+
   /// No description provided for @siteUseNew.
   ///
   /// In de, this message translates to:
@@ -249,12 +435,6 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'unter Wasser'**
   String get logbookTileUnderwater;
-
-  /// No description provided for @diverAvatarSpoken.
-  ///
-  /// In de, this message translates to:
-  /// **'Taucher {name}'**
-  String diverAvatarSpoken(String name);
 
   /// No description provided for @diveNumber.
   ///
@@ -969,12 +1149,6 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Der O₂-Anteil muss zwischen 1 und 100 % liegen.'**
   String get errorO2;
-
-  /// Above every import screen; the name is shown bold
-  ///
-  /// In de, this message translates to:
-  /// **'Importieren für: {name}'**
-  String importFor(String name);
 
   /// No description provided for @importSourceComputer.
   ///

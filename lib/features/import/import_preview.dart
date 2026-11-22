@@ -12,7 +12,6 @@ import '../../domain/units/unit_formatter.dart';
 import '../../l10n/app_localizations.dart';
 import '../logbook/dive_texts.dart';
 import '../logbook/logbook_screen.dart';
-import 'import_screen.dart';
 
 /// Saves the dives at [selected] (indices into the previewed dives), those
 /// in [confirmed] although they need confirmation. Returns how many were
@@ -128,7 +127,6 @@ class _ImportPreviewState extends ConsumerState<ImportPreview> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(widget.source),
-                      const ImportForLine(),
                       for (final note in widget.notes) ...[
                         const SizedBox(height: 8),
                         Text(note),

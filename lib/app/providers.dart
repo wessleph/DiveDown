@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:libdivecomputer_plugin/libdivecomputer_plugin.dart' as dc;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -62,15 +64,74 @@ class AppInfo {
   final String libdivecomputer;
 }
 
-final appInfoProvider = FutureProvider<AppInfo>(
-  (ref) => throw UnimplementedError('appInfoProvider'),
+final appInfoProvider = FutureProvider<AppInfo>((ref) async {
+  final info = await PackageInfo.fromPlatform();
+  var libdc = '–';
+  try {
+    libdc = await dc.DiveComputerHostApi().getLibdivecomputerVersion();
+  } on Exception {
+    // Shown as „–“; the rest of the page still works.
+  }
+  return AppInfo(
+    version: info.version,
+    build: info.buildNumber,
+    libdivecomputer: libdc,
+  );
+});
+
+/// Opens a web address in the browser (ui-spec §5.11, `url_launcher`). The
+/// app itself needs no internet permission for that.
+final urlOpenerProvider = Provider<Future<void> Function(Uri)>(
+  (ref) => (uri) async {
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  },
 );
 
-/// Opens a web address outside the app (ui-spec §5.11, `url_launcher`).
-final urlOpenerProvider = Provider<Future<void> Function(Uri)>(
-  (ref) =>
-      (uri) => throw UnimplementedError('urlOpenerProvider'),
+/// „Darstellung“ (ui-spec §5.11), read from and written to [AppSettings].
+final themeModeProvider = AsyncNotifierProvider<ThemeModeSetting, AppThemeMode>(
+  ThemeModeSetting.new,
 );
+
+class ThemeModeSetting extends AsyncNotifier<AppThemeMode> {
+  @override
+  Future<AppThemeMode> build() => ref.watch(appSettingsProvider).themeMode();
+
+  Future<void> set(AppThemeMode mode) async {
+    state = AsyncData(mode);
+    await ref.read(appSettingsProvider).setThemeMode(mode);
+  }
+}
+
+/// Known dive computers with the start of their newest dive in the
+/// logbook (ui-spec §5.11 „Zuletzt: …“).
+final knownComputersProvider =
+    FutureProvider<List<({KnownDiveComputer computer, DateTime? lastDive})>>((
+      ref,
+    ) async {
+      final computers = await ref
+          .watch(diveComputerRepositoryProvider)
+          .listAll();
+      final dives = await ref.watch(logbookProvider.future);
+      DateTime? last(String id) {
+        DateTime? newest;
+        for (final d in dives) {
+          if (d.diveComputerId != id) continue;
+          if (newest == null || d.start.isAfter(newest)) newest = d.start;
+        }
+        return newest;
+      }
+
+      return [for (final c in computers) (computer: c, lastDive: last(c.id))];
+    });
+
+/// Whether the active diver's numbers already follow the dates; hides
+/// „Nummern nach Datum neu vergeben“ (ui-spec §5.11).
+final numbersFollowDatesProvider = FutureProvider<bool>((ref) async {
+  final diver = await ref.watch(activeDiverProvider.future);
+  ref.watch(logbookProvider);
+  if (diver == null) return true;
+  return ref.watch(diveNumberingProvider).numbersFollowDates(diver.id!);
+});
 
 /// Renumbering and shifting of dive numbers (ui-spec §5.11).
 final diveNumberingProvider = Provider<DiveNumbering>(

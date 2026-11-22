@@ -26,6 +26,64 @@
 
   "startupError": "Das Logbuch konnte nicht geöffnet werden.",
   "settingsLicences": "Open-Source-Lizenzen",
+  "settingsSectionDiver": "TAUCHER",
+  "settingsSectionDevices": "GERÄTE",
+  "settingsSectionAppearance": "DARSTELLUNG",
+  "settingsSectionAbout": "ÜBER DIVEDOWN",
+  "settingsName": "Name",
+  "settingsRenameTitle": "Name ändern",
+  "settingsStartNumber": "Nummerierung beginnt bei",
+  "settingsStartNumberHint": "Für Tauchgänge aus früheren Logbüchern",
+  "settingsStartNumberInvalid": "Bitte eine Zahl von 1 bis 9999 eingeben.",
+  "settingsShiftTitle": "Nummern verschieben?",
+  "settingsShiftBody": "Aus #{from}–#{to} werden #{newFrom}–#{newTo}.",
+  "@settingsShiftBody": {
+    "placeholders": {
+      "from": {"type": "int"}, "to": {"type": "int"},
+      "newFrom": {"type": "int"}, "newTo": {"type": "int"}
+    }
+  },
+  "settingsShift": "Verschieben",
+  "settingsRenumber": "Nummern nach Datum neu vergeben",
+  "settingsRenumberBody": "Alle Tauchgänge nach Datum neu nummerieren? Der älteste bekommt #{start}.",
+  "@settingsRenumberBody": {
+    "placeholders": {"start": {"type": "int"}}
+  },
+  "settingsRenumberAction": "Neu nummerieren",
+  "settingsRenumbered": "{count} Tauchgänge neu nummeriert",
+  "@settingsRenumbered": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "settingsNoDevices": "Noch kein Tauchcomputer verbunden.",
+  "settingsLastDive": "Zuletzt: {date}",
+  "@settingsLastDive": {
+    "placeholders": {"date": {"type": "String"}}
+  },
+  "settingsNoDivesYet": "Noch keine Tauchgänge",
+  "settingsForgetTooltip": "{name} vergessen",
+  "@settingsForgetTooltip": {
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "settingsForgetTitle": "{name} vergessen?",
+  "@settingsForgetTitle": {
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "settingsForgetBody": "Beim nächsten Übertragen werden alle Tauchgänge erneut gelesen; Duplikate werden erkannt.",
+  "settingsForget": "Vergessen",
+  "settingsThemeSystem": "System",
+  "settingsThemeLight": "Hell",
+  "settingsThemeDark": "Dunkel",
+  "settingsVersion": "Version {version} (Build {build})",
+  "@settingsVersion": {
+    "placeholders": {"version": {"type": "String"}, "build": {"type": "String"}}
+  },
+  "settingsLibdc": "libdivecomputer {version}",
+  "@settingsLibdc": {
+    "placeholders": {"version": {"type": "String"}}
+  },
+  "settingsLicence": "Lizenz: GPL-3.0-or-later",
+  "settingsPrivacy": "Datenschutzerklärung",
+  "settingsSource": "Quellcode",
   "siteUseNew": "‚{name}‘ als neuen Tauchplatz verwenden",
   "@siteUseNew": {
     "placeholders": { "name": { "type": "String" } }
@@ -45,12 +103,6 @@
   "noSite": "Ohne Tauchplatz",
   "logbookTileDives": "Tauchgänge",
   "logbookTileUnderwater": "unter Wasser",
-  "diverAvatarSpoken": "Taucher {name}",
-  "@diverAvatarSpoken": {
-    "placeholders": {
-      "name": {"type": "String"}
-    }
-  },
   "diveNumber": "#{number}",
   "@diveNumber": {
     "placeholders": { "number": { "type": "int", "format": "decimalPattern" } }
@@ -221,11 +273,6 @@
   "errorEndPressure": "Der Enddruck muss kleiner als der Startdruck sein.",
   "errorO2": "Der O₂-Anteil muss zwischen 1 und 100 % liegen.",
 
-  "importFor": "Importieren für: {name}",
-  "@importFor": {
-    "description": "Above every import screen; the name is shown bold",
-    "placeholders": { "name": { "type": "String" } }
-  },
   "importSourceComputer": "Tauchcomputer",
   "importSourceComputerHint": "Per Bluetooth übertragen",
   "importSourceFit": "FIT-Datei",
