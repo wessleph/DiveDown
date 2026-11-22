@@ -1,6 +1,7 @@
 # UI-Spezifikation: DiveDown 1.0
 
 > Phase 30 · Stand: 2026-11-22 · Status: **abgenommen (2026-11-18)**, Mockups: https://claude.ai/artifact/7LP8HdXzTK33X75euzkU9X
+> **Änderung 2026-11-22c (abgenommen 2026-11-22):** Sichern/Wiederherstellen für einen Taucher, Texte ergänzt (§5.2, §5.12).
 > **Änderung 2026-11-22b (abgenommen 2026-11-22):** ein Taucher pro App, Einstellungen neu (§2, §5.2, §5.5, §5.9, §5.11).
 > **Änderung 2026-11-22 (abgenommen 2026-11-22):** neuer Stil „Riff“ nach dem Rundgang am Handy (§1, §5.2, §5.3, §6). Entwurf: https://claude.ai/artifact/GUDfte5Mocx1SPnTG478RQ
 > Grundlage: `design.md`, `security.md` (§10 Checkliste Phase 30), `docs/roadmap.md` (Muss-Umfang 1–9)
@@ -105,7 +106,7 @@ Monatsüberschrift fett in `onSurfaceMuted` mit etwas Laufweite, neuester oben. 
 | Erfolg | Liste |
 | zu viele Daten (> 500) | Lazy-Liste, Monatsüberschriften bleiben beim Scrollen oben, Schnellscroll-Leiste mit Jahr und Monat |
 | nach Import | Neue Einträge 3 s hervorgehoben, Snackbar: „3 Tauchgänge importiert“ |
-| Sicherungs-Erinnerung (> 30 Tage) | Dezente Karte oben: „Letzte Sicherung vor 34 Tagen.“ · **„Jetzt sichern“** · ✕ (für 7 Tage ausblenden) |
+| Sicherungs-Erinnerung (> 30 Tage) | Dezente Karte oben: „Letzte Sicherung vor 34 Tagen.“ bzw. ohne Sicherung „Noch keine Sicherung.“ · **„Jetzt sichern“** (öffnet „Logbuch sichern“) · ✕ „Erinnerung ausblenden“ (für 7 Tage). Gezählt wird ab der letzten Sicherung, ohne Sicherung ab dem ersten Start der App; ohne Tauchgänge keine Karte. |
 
 ### 5.3 Tauchgang-Detail
 **Aufbau (Hochformat, Änderung 2026-11-22):**
@@ -226,17 +227,20 @@ Gruppen als Abschnitte mit kleiner Überschrift in Großbuchstaben (Stil „Riff
 6. **Über DiveDown:** „Version 1.0.0 (Build 42)“ · „libdivecomputer 0.9.0“ · „Lizenz: GPL-3.0-or-later“ · „Open-Source-Lizenzen“ (Lizenzseite, mit ODbL-Hinweis und Manrope-Lizenz) · „Datenschutzerklärung“ und „Quellcode“ öffnen den Browser (`url_launcher`; die App selbst braucht dafür kein Internet-Recht): https://wessleph.github.io/DiveDown/datenschutz/ und https://github.com/wessleph/DiveDown
 
 ### 5.12 Logbuch sichern / wiederherstellen
-**Sichern:** Info: „Erstellt eine Datei mit allen Tauchgängen aller Taucher. Speichere sie z. B. in ‚Dateien‘ oder schicke sie dir per Mail.“
+Einstieg: Einstellungen, Abschnitt **DATEN** mit „Logbuch sichern“ und „Logbuch wiederherstellen“ (§5.11).
+
+**Sichern:** Info: „Erstellt eine Datei mit allen Tauchgängen. Speichere sie z. B. in „Dateien“ oder schicke sie dir per Mail.“ Dateiname „DiveDown-Sicherung-2026-11-22.divedown“.
 Warnung (`warning`): „Die Datei ist nicht verschlüsselt und enthält Gesundheitsdaten (Puls).“ · **„Sicherung erstellen“** → System-Teilen-Dialog → „Sicherung erstellt“.
 
-**Wiederherstellen:** Datei wählen → Prüfen → Zusammenfassung: „Sicherung vom 20.12.2026 · 3 Taucher · 128 Tauchgänge“ → Dialog: „Dein aktuelles Logbuch wird ersetzt. Vorher wird automatisch eine Kopie angelegt.“ · **„Wiederherstellen“** / „Abbrechen“ → Fortschritt → „Wiederhergestellt“.
+**Wiederherstellen:** Datei wählen (bis 200 MB) → Prüfen → Zusammenfassung: „Sicherung vom 20.12.2026 · 128 Tauchgänge“ → Dialog: „Dein aktuelles Logbuch wird ersetzt. Vorher wird automatisch eine Kopie angelegt.“ · **„Wiederherstellen“** / „Abbrechen“ → Fortschritt → „Wiederhergestellt“.
 
 | Zustand | Text |
 |---|---|
 | keine/fehlerhafte Sicherungsdatei | „Diese Datei ist keine gültige DiveDown-Sicherung.“ |
 | Prüfsumme falsch | „Die Sicherung ist beschädigt und kann nicht verwendet werden.“ |
 | neuere App-Version | „Diese Sicherung stammt aus einer neueren DiveDown-Version. Bitte aktualisiere die App zuerst.“ |
-| Fehler beim Ersetzen | „Wiederherstellen fehlgeschlagen. Dein bisheriges Logbuch ist unverändert.“ · „Logs senden“ |
+| Datei über 200 MB | „Die Datei ist zu groß für eine DiveDown-Sicherung.“ |
+| Fehler beim Ersetzen | „Wiederherstellen fehlgeschlagen. Dein bisheriges Logbuch ist unverändert.“ · „Logs senden“ kommt mit T10 |
 
 ### 5.13 Diagnose-Logs teilen
 Info: „Hilf bei der Fehlersuche: Schicke das Protokoll an den Entwickler. Es enthält keine Orte, Namen oder Gesundheitswerte.“

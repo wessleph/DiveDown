@@ -267,17 +267,25 @@ Festlegungen: Eigene Namen kommen von **allen Tauchern auf dem Gerät**. Leere E
 ## T11: Sichern und Wiederherstellen (`data/backup/`, security O1)
 | ID | A | W | D | Rot gesehen |
 |---|---|---|---|---|
-| T11.1 | Logbuch mit 3 Tauchern, 10 Tauchgängen | Sicherung erstellt | `.divedown`-ZIP mit DB-Kopie und Manifest (App-Version, Schema-Version, Zeit, SHA-256) | |
-| T11.2 | Sicherung aus T11.1 | in leere App wiederhergestellt | identische Daten | |
-| T11.3 | Sicherung mit falscher Prüfsumme | wiederhergestellt | `CorruptBackup`, aktuelle DB unverändert | |
-| T11.4 | Sicherung mit Schema-Version > aktuell | wiederhergestellt | `BackupFromNewerVersion` | |
-| T11.5 | ZIP mit Eintrag `../evil` | wiederhergestellt | `InvalidBackup`, nichts außerhalb des Zielordners geschrieben | |
-| T11.6 | gültige Sicherung, Ersetzen schlägt fehl (simuliert) | wiederhergestellt | alte DB aus automatischer Kopie zurück, `RestoreFailed` | |
-| T11.7 | Datei > 200 MB | gewählt | `FileTooLarge` | |
-| T11.8 | letzte Sicherung vor 31 Tagen | Logbuch geöffnet | Erinnerung sichtbar. Nach „✕“ 7 Tage unsichtbar. | |
+| T11.1 | Logbuch mit 1 Taucher, 10 Tauchgängen (ein Taucher pro App, 2026-11-22) | Sicherung erstellt | `.divedown`-ZIP mit genau `manifest.json` und `divedown.sqlite` (SQLite-Kopf); Manifest mit Format 1, App-Version, Schema-Version, Zeit (UTC), SHA-256 der DB, Anzahl Tauchgänge | ✅ 2026-11-22: rot wegen `UnimplementedError` (`LogbookBackup.create`) |
+| T11.2 | Sicherung aus T11.1 | in leere App wiederhergestellt | gleicher Taucher (Name, Startnummer 101), 10 Tauchgänge mit Nummern, Plätzen und Samples; die DB wurde vorher geschlossen | ✅ 2026-11-22: rot, wie T11.1 |
+| T11.3 | Sicherung mit falscher Prüfsumme | geprüft bzw. wiederhergestellt | `corrupt`, die DB wird nicht geschlossen, aktuelle DB unverändert | ✅ 2026-11-22: rot, wie T11.1 |
+| T11.4 | Sicherung mit Schema-Version > aktuell | geprüft | `newerVersion` | ✅ 2026-11-22: rot, wie T11.1 |
+| T11.5 | ZIP mit Eintrag `../evil`; kein ZIP; ZIP ohne Manifest | wiederhergestellt bzw. geprüft | `invalid`, nichts außerhalb des Ordners geschrieben | ✅ 2026-11-22: rot wegen `UnimplementedError` (`create` bzw. `inspect`) |
+| T11.6 | gültige Sicherung, Schreiben bricht nach einem Drittel ab (simuliert) | wiederhergestellt | `RestoreFailed`, die vorherige DB (Lena, 1 Tauchgang) ist wieder da | ✅ 2026-11-22: rot, wie T11.1 |
+| T11.7 | Datei > Grenze (200 MB, im Test 1.000 Bytes) | geprüft | `tooLarge`, ohne zu entpacken | ✅ 2026-11-22: rot wegen `UnimplementedError` (`inspect`) |
+| T11.8 | letzte Sicherung vor 31/29 Tagen; nie gesichert, erster Start vor 34/3 Tagen; ✕ bis morgen; ohne Tauchgänge | `backupReminderDue` | fällig / nicht / fällig / nicht / nicht / nicht | ✅ 2026-11-22: rot wegen `UnimplementedError` (`backupReminderDue`) |
 | T11.9 | DB-Datei | Pfad geprüft (iOS) | `NSURLIsExcludedFromBackupKey` gesetzt (Integrationstest auf iOS bzw. Prüfung der Plattform-Methode) | ✅ 2026-11-20: rot wegen `UnimplementedError` (`BackupExclusion`, `openAppDatabase` fehlen), Testaufbau ok. Geprüft wird der Aufruf aus Dart, die Swift-Seite läuft erst auf iOS (CI/TestFlight) |
 | T11.10 | DB-Datei | Android-Manifest geprüft | `dataExtractionRules` schließt den Ordner `db/` aus `cloud-backup` **und** `device-transfer` aus, `fullBackupContent` (Android 8–11, minSdk 26) aus dem Voll-Backup. Kein Kanalaufruf unter Android | ✅ 2026-11-20: rot, Manifest-Attribute und `res/xml/*.xml` fehlen bzw. `UnimplementedError` |
 
+| T11.11 | Einstellungen | angezeigt | Abschnitt DATEN mit „Logbuch sichern“ und „Logbuch wiederherstellen“ | ✅ 2026-11-22: rot, Abschnitt fehlt |
+| T11.12 | „Logbuch sichern“ | „Sicherung erstellen“ | Info- und Warntext (§5.12), Teilen-Dialog mit `DiveDown-Sicherung-….divedown`, „Sicherung erstellt“, Zeitpunkt gemerkt | ✅ 2026-11-22: rot, Eintrag fehlt |
+| T11.13 | gültige Sicherung (20.12.2026, 128 Tauchgänge) | „Logbuch wiederherstellen“ | „Sicherung vom 20.12.2026 · 128 Tauchgänge“, Ersetzen-Hinweis, „Wiederherstellen“ → „Wiederhergestellt“; „Abbrechen“ bzw. kein Dateiwahl ändert nichts | ✅ 2026-11-22: rot, Eintrag fehlt |
+| T11.14 | ungültig / beschädigt / neuere Version / über 200 MB / Ersetzen schlägt fehl | wiederherstellen | die Texte aus §5.12, ersetzt wird nur im letzten Fall versucht | ✅ 2026-11-22: rot, Eintrag fehlt |
+| T11.15 | nie gesichert, erster Start vor 40 Tagen; Sicherung vor 34 Tagen; Sicherung heute | Logbuch | „Noch keine Sicherung.“ + „Jetzt sichern“, ✕ blendet 7 Tage aus; „Letzte Sicherung vor 34 Tagen.“, „Jetzt sichern“ öffnet Sichern; keine Karte | ✅ 2026-11-22: rot, Karte fehlt bzw. `UnimplementedError` (`setLastBackupAt`) |
+
+Abgenommen am 2026-11-22. Tests T11.1–T11.8: `test/data/backup/logbook_backup_test.dart` (echte DB-Dateien in einem Temp-Ordner), T11.11–T11.15: `test/features/settings/backup_test.dart`. Stubs: `LogbookBackup`, `backupReminderDue`, `BackupActions`, Einstellungen `lastBackupAt`, `backupBaseline`, `backupReminderSnoozedUntil`, Provider `backupActionsProvider`, `shareFileProvider`, `backupFilePickerProvider`. T23.6 prüft „sichern“ nicht mehr (kam mit T11).
+Neue Abhängigkeiten (Lizenzen am 2026-11-22 geprüft): `archive` 4.7.1 (MIT, dazu `posix` 6.5.4 MIT), `crypto` 3.0.6 (BSD-3, war schon transitiv), `share_plus` 13.3.1 (BSD-3, `share_plus_platform_interface` 7.2.0 BSD-3; `mime`, `file`, `cross_file` BSD-3 schon vorhanden).
 Tests T11.9/T11.10: `test/data/platform/backup_exclusion_test.dart`, `test/app/startup_test.dart`. Die DB liegt in einem **eigenen Ordner** `db/`, damit auch die `-wal`/`-journal`-Dateien vom Ausschluss erfasst sind. Der Ausschluss wird bei jedem Start erneut gesetzt.
 
 ## T12: UI-Zustände (Widget-Tests, `ui-spec.md`)

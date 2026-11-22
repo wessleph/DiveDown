@@ -8,6 +8,7 @@ import 'package:libdivecomputer_plugin/libdivecomputer_plugin.dart' as dc;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import '../data/backup/logbook_backup.dart';
 import '../data/import/divecomputer/plugin_dive_computer_source.dart';
 import '../data/import/fit/fit_dive_parser.dart';
 
@@ -132,6 +133,23 @@ final numbersFollowDatesProvider = FutureProvider<bool>((ref) async {
   if (diver == null) return true;
   return ref.watch(diveNumberingProvider).numbersFollowDates(diver.id!);
 });
+
+/// Backup and restore (ui-spec §5.12, T11).
+final backupActionsProvider = Provider<BackupActions>(
+  (ref) => throw UnimplementedError('backupActionsProvider'),
+);
+
+/// Opens the system share dialog for a file (`share_plus`).
+final shareFileProvider =
+    Provider<Future<void> Function(String name, Uint8List bytes)>(
+      (ref) =>
+          (name, bytes) => throw UnimplementedError('shareFileProvider'),
+    );
+
+/// The file dialog for „Logbuch wiederherstellen“ (up to 200 MB).
+final backupFilePickerProvider = Provider<ImportFilePicker>(
+  (ref) => throw UnimplementedError('backupFilePickerProvider'),
+);
 
 /// Renumbering and shifting of dive numbers (ui-spec §5.11).
 final diveNumberingProvider = Provider<DiveNumbering>(

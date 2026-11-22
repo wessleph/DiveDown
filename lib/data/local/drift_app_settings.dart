@@ -34,6 +34,25 @@ class DriftAppSettings implements AppSettings {
   }
 
   @override
+  Future<DateTime?> lastBackupAt() => throw UnimplementedError('lastBackupAt');
+
+  @override
+  Future<void> setLastBackupAt(DateTime at) =>
+      throw UnimplementedError('setLastBackupAt');
+
+  @override
+  Future<DateTime> backupBaseline() =>
+      throw UnimplementedError('backupBaseline');
+
+  @override
+  Future<DateTime?> backupReminderSnoozedUntil() =>
+      throw UnimplementedError('backupReminderSnoozedUntil');
+
+  @override
+  Future<void> setBackupReminderSnoozedUntil(DateTime until) =>
+      throw UnimplementedError('setBackupReminderSnoozedUntil');
+
+  @override
   Future<void> setThemeMode(AppThemeMode mode) => _db
       .into(_db.appMeta)
       .insertOnConflictUpdate(

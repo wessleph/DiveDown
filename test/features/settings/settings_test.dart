@@ -50,7 +50,7 @@ void main() {
     expect(find.text('ÜBER DIVEDOWN'), findsOneWidget);
     // Not in v1.0 resp. not yet (ui-spec §5.11).
     expect(find.textContaining('Einheiten'), findsNothing);
-    expect(find.textContaining('sichern'), findsNothing);
+    // „Logbuch sichern“ arrived with T11 (backup_test.dart).
     expect(find.textContaining('hinzufügen'), findsNothing);
   });
 
