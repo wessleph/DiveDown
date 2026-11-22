@@ -106,7 +106,7 @@ void main() {
       expect(pubspec, contains('family: Manrope'));
       final fonts = Directory('assets/fonts');
       expect(fonts.existsSync(), isTrue, reason: 'assets/fonts missing');
-      final files = fonts.listSync().map((f) => f.path.replaceAll(r'', '/'));
+      final files = fonts.listSync().map((f) => f.uri.pathSegments.last);
       expect(
         files.where((f) => f.contains('Manrope') && f.endsWith('.ttf')),
         isNotEmpty,

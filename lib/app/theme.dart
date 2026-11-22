@@ -4,65 +4,111 @@ import 'package:flutter/material.dart';
 
 ThemeData buildLightTheme() => _buildTheme(
   brightness: Brightness.light,
-  surface: const Color(0xFFF6F8FA),
-  onSurface: const Color(0xFF0E1B26),
-  primary: const Color(0xFF0B5C8A),
-  error: const Color(0xFFB91C1C),
+  surface: const Color(0xFFF2F8F8),
+  onSurface: const Color(0xFF13303A),
+  primary: const Color(0xFF0B7A80),
+  onPrimary: const Color(0xFFFFFFFF),
+  error: const Color(0xFFB42318),
   dive: const DiveColors(
     surfaceRaised: Color(0xFFFFFFFF),
-    onSurfaceMuted: Color(0xFF4A5C6B),
-    depth: Color(0xFF1676B8),
-    temperature: Color(0xFFC2410C),
-    pressure: Color(0xFF047857),
-    sac: Color(0xFF7C3AED),
-    warning: Color(0xFFB45309),
+    onSurfaceMuted: Color(0xFF55727A),
+    depth: Color(0xFF0B7A80),
+    temperature: Color(0xFFA35C00),
+    pressure: Color(0xFFB9412A),
+    sac: Color(0xFF6D4BC4),
+    warning: Color(0xFF9A5B00),
+    surfaceTint: Color(0xFFDDEFF0),
+    outline: Color(0xFFD6E7E8),
+    accent: Color(0xFFB9412A),
+    ndl: Color(0xFF3B5BCC),
   ),
+  onAccent: const Color(0xFFFFFFFF),
 );
 
 ThemeData buildDarkTheme() => _buildTheme(
   brightness: Brightness.dark,
-  surface: const Color(0xFF0B1620),
-  onSurface: const Color(0xFFE6EEF4),
-  primary: const Color(0xFF5CB8E8),
-  error: const Color(0xFFF87171),
+  surface: const Color(0xFF0D1E22),
+  onSurface: const Color(0xFFE3F1F2),
+  primary: const Color(0xFF4CC9CE),
+  onPrimary: const Color(0xFF0D1E22),
+  error: const Color(0xFFFF8A80),
   dive: const DiveColors(
-    surfaceRaised: Color(0xFF13212E),
-    onSurfaceMuted: Color(0xFF9AB0C0),
-    depth: Color(0xFF3FA3E0),
-    temperature: Color(0xFFFB923C),
-    pressure: Color(0xFF34D399),
-    sac: Color(0xFFA78BFA),
-    warning: Color(0xFFFBBF24),
+    surfaceRaised: Color(0xFF15292F),
+    onSurfaceMuted: Color(0xFF9BB5BA),
+    depth: Color(0xFF4CC9CE),
+    temperature: Color(0xFFF2B14C),
+    pressure: Color(0xFFFF8D6E),
+    sac: Color(0xFFB49BFF),
+    warning: Color(0xFFF5B83D),
+    surfaceTint: Color(0xFF123139),
+    outline: Color(0xFF21393F),
+    accent: Color(0xFFFF8D6E),
+    ndl: Color(0xFF8FA8FF),
   ),
+  onAccent: const Color(0xFF0D1E22),
 );
+
+/// Bundled font (ui-spec §1, assets/fonts/, SIL OFL 1.1).
+const appFontFamily = 'Manrope';
 
 ThemeData _buildTheme({
   required Brightness brightness,
   required Color surface,
   required Color onSurface,
   required Color primary,
+  required Color onPrimary,
   required Color error,
   required DiveColors dive,
+  required Color onAccent,
 }) {
   final scheme =
       ColorScheme.fromSeed(seedColor: primary, brightness: brightness).copyWith(
         primary: primary,
+        onPrimary: onPrimary,
         error: error,
         surface: surface,
         onSurface: onSurface,
         onSurfaceVariant: dive.onSurfaceMuted,
+        outline: dive.outline,
+        outlineVariant: dive.outline,
         surfaceContainerLowest: dive.surfaceRaised,
         surfaceContainerLow: dive.surfaceRaised,
         surfaceContainer: dive.surfaceRaised,
+        surfaceContainerHigh: dive.surfaceRaised,
+        surfaceContainerHighest: dive.surfaceTint,
+        tertiary: dive.accent,
+        onTertiary: onAccent,
       );
-  final base = ThemeData(colorScheme: scheme, extensions: [dive]);
+  final base = ThemeData(
+    colorScheme: scheme,
+    fontFamily: appFontFamily,
+    extensions: [dive],
+  );
   return base.copyWith(
     scaffoldBackgroundColor: surface,
     textTheme: _withTabularFigures(base.textTheme),
-    cardTheme: const CardThemeData(
+    cardTheme: CardThemeData(
+      elevation: 0,
+      color: dive.surfaceRaised,
+      surfaceTintColor: Colors.transparent,
+      margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(12)),
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(color: dive.outline),
       ),
+    ),
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: dive.accent,
+      foregroundColor: onAccent,
+    ),
+    chipTheme: ChipThemeData(
+      shape: const StadiumBorder(),
+      side: BorderSide(color: dive.outline),
+      selectedColor: primary.withValues(alpha: 0.16),
+    ),
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: dive.surfaceRaised,
+      indicatorColor: primary.withValues(alpha: 0.16),
     ),
   );
 }
@@ -99,10 +145,10 @@ class DiveColors extends ThemeExtension<DiveColors> {
     required this.pressure,
     required this.sac,
     required this.warning,
-    this.surfaceTint = const Color(0xFFF6F8FA),
-    this.outline = const Color(0xFF4A5C6B),
-    this.accent = const Color(0xFF0B5C8A),
-    this.ndl = const Color(0xFF1676B8),
+    required this.surfaceTint,
+    required this.outline,
+    required this.accent,
+    required this.ndl,
   });
 
   final Color surfaceRaised;

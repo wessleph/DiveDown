@@ -86,6 +86,17 @@ class AppLocalizationsDe extends AppLocalizations {
   String get noSite => 'Ohne Tauchplatz';
 
   @override
+  String get logbookTileDives => 'Tauchgänge';
+
+  @override
+  String get logbookTileUnderwater => 'unter Wasser';
+
+  @override
+  String diverAvatarSpoken(String name) {
+    return 'Taucher $name';
+  }
+
+  @override
   String diveNumber(int number) {
     final intl.NumberFormat numberNumberFormat =
         intl.NumberFormat.decimalPattern(localeName);
@@ -195,9 +206,96 @@ class AppLocalizationsDe extends AppLocalizations {
   String get estimatedProfile => 'Geschätztes Profil';
 
   @override
-  String profileSemantics(String depth, String duration) {
-    return 'Tiefenprofil: max. $depth, Dauer $duration';
+  String profileSemantics(String depth, String time, String duration) {
+    return 'Tiefenprofil: max. $depth nach $time, Dauer $duration';
   }
+
+  @override
+  String get metricWater => 'Wasser';
+
+  @override
+  String get metricTank => 'Flasche';
+
+  @override
+  String get sacMeasured => 'gemessen';
+
+  @override
+  String sacEstimatedFrom(String pressure) {
+    return 'geschätzt aus $pressure';
+  }
+
+  @override
+  String get chipTemperature => 'Temperatur';
+
+  @override
+  String get chipAir => 'Luft';
+
+  @override
+  String get chipAirEstimated => 'Luft (geschätzt)';
+
+  @override
+  String get chipNdl => 'NDL';
+
+  @override
+  String get chipSac => 'SAC';
+
+  @override
+  String get chipLayersSpoken => 'Ebenen im Diagramm';
+
+  @override
+  String profileAxesLimit(String name) {
+    return 'Höchstens zwei Werte mit eigener Achse. „$name“ ist jetzt aus.';
+  }
+
+  @override
+  String get valueTime => 'Zeit';
+
+  @override
+  String get valueDepth => 'Tiefe';
+
+  @override
+  String get valueTemperature => 'Temperatur';
+
+  @override
+  String get valueNdl => 'NDL';
+
+  @override
+  String get valueAmbient => 'Umgebung';
+
+  @override
+  String get valueAirNow => 'Luft jetzt';
+
+  @override
+  String get valueTankLeft => 'Noch in der Flasche';
+
+  @override
+  String get valueUsed => 'Bisher verbraucht';
+
+  @override
+  String valueAbout(String value) {
+    return 'ca. $value';
+  }
+
+  @override
+  String airEstimateNote(String pressure, String volume) {
+    return 'Luftwerte geschätzt aus Start- und Enddruck ($pressure, $volume)';
+  }
+
+  @override
+  String get airEnterPressure => 'Start- und Enddruck eintragen';
+
+  @override
+  String get profileDisclaimer => 'Werte vom Tauchcomputer, nur zur Anzeige.';
+
+  @override
+  String get profileDisclaimerEstimated =>
+      'Werte vom Tauchcomputer, nur zur Anzeige. Luft ist geschätzt, weil kein Flaschendruck aufgezeichnet wurde.';
+
+  @override
+  String get profileShowTable => 'Als Tabelle anzeigen';
+
+  @override
+  String get profileTableTitle => 'Minutenwerte';
 
   @override
   String get tanksTitle => 'Flaschen';
@@ -221,6 +319,62 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get eventDeco => 'Dekostopp';
+
+  @override
+  String get eventDeepStop => 'Tiefenstopp';
+
+  @override
+  String get eventCeiling => 'Deko-Grenze verletzt';
+
+  @override
+  String get eventViolation => 'Grenzwert überschritten';
+
+  @override
+  String get eventBookmark => 'Markierung';
+
+  @override
+  String get eventSurface => 'Aufgetaucht';
+
+  @override
+  String get eventRbt => 'Restgrundzeit';
+
+  @override
+  String get eventAirTime => 'Luftzeit';
+
+  @override
+  String get eventMaxDepth => 'Maximaltiefe';
+
+  @override
+  String get eventDiveTime => 'Tauchzeit';
+
+  @override
+  String get eventWorkload => 'Hohe Atemarbeit';
+
+  @override
+  String get eventTransmitter => 'Sender-Warnung';
+
+  @override
+  String get eventTissueLevel => 'Gewebesättigung';
+
+  @override
+  String get eventHeading => 'Kompass-Richtung';
+
+  @override
+  String get eventFloor => 'Tiefengrenze';
+
+  @override
+  String get eventOlf => 'Sauerstoffbelastung';
+
+  @override
+  String get eventPo2 => 'Sauerstoff-Partialdruck';
+
+  @override
+  String get eventRgbm => 'RGBM-Warnung';
+
+  @override
+  String eventUnknown(String code) {
+    return 'Ereignis ($code)';
+  }
 
   @override
   String get notesTitle => 'Notizen';

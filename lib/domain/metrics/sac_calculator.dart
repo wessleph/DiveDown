@@ -20,10 +20,6 @@ class SacResult {
 class SacCalculator {
   const SacCalculator();
 
-  static const _surfaceBar = 1.0;
-  static const _saltBarPerM = 0.1005;
-  static const _freshBarPerM = 0.0981;
-
   /// Average SAC of one tank from its start and end pressure.
   /// The mean depth is [Dive.avgDepthM], else the mean of the samples.
   SacResult average(Dive dive, {int tankIndex = 0}) {
@@ -43,11 +39,13 @@ class SacCalculator {
     final meanDepth = dive.avgDepthM ?? meanDepthFromSamples(dive.samples);
     if (meanDepth == null) return const SacResult.missing(SacMissing.depth);
 
-    final perMetre = dive.waterType == WaterType.fresh
-        ? _freshBarPerM
-        : _saltBarPerM;
-    final ambient = _surfaceBar + meanDepth * perMetre;
+    final ambient = ambientPressureBar(meanDepth, dive.waterType);
     final minutes = dive.durationS / 60;
     return SacResult.value((start - end) * volume / (minutes * ambient));
   }
 }
+
+/// Ambient pressure at [depthM]: 1,0 bar at the surface plus 10,05 kPa/m in
+/// salt water (also when unknown) or 9,81 kPa/m in fresh water.
+double ambientPressureBar(double depthM, WaterType? water) =>
+    1.0 + depthM * (water == WaterType.fresh ? 0.0981 : 0.1005);

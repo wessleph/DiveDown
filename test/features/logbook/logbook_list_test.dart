@@ -83,8 +83,8 @@ void main() {
     expect(find.text('#42'), findsOneWidget);
     expect(find.text('SS Thistlegorm'), findsOneWidget);
     expect(find.text('18,4 m'), findsOneWidget);
-    expect(find.textContaining('14.11.2026'), findsOneWidget);
-    expect(find.textContaining('47 min'), findsOneWidget);
+    // Since T21 the header also shows the time under water („47 min“).
+    expect(find.text('14.11.2026 · 10:42 · 47 min'), findsOneWidget);
 
     // Read as one element (ui-spec §7).
     expect(find.bySemanticsLabel(RegExp(r'^Tauchgang 42')), findsOneWidget);

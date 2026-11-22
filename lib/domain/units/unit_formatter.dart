@@ -13,7 +13,14 @@ class UnitFormatter {
 
   /// Time under water in the logbook header (ui-spec §5.2): „61 h“ from
   /// 10 h on, below that „7 h 40 min“ or „40 min“.
-  String underwater(int seconds) => throw UnimplementedError('underwater');
+  String underwater(int seconds) {
+    final minutes = (seconds / 60).round();
+    if (minutes >= 600) return '${(minutes / 60).round()} h';
+    final h = minutes ~/ 60;
+    final m = minutes % 60;
+    if (h == 0) return '$m min';
+    return m == 0 ? '$h h' : '$h h $m min';
+  }
 
   /// `21 °C`
   String temperature(double celsius) => '${celsius.round()} °C';

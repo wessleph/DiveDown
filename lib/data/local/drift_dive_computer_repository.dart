@@ -13,6 +13,10 @@ class DriftDiveComputerRepository implements DiveComputerRepository {
   final AppDatabase _db;
 
   @override
+  Future<KnownDiveComputer?> findById(String id) =>
+      _findOne((t) => t.id.equals(id));
+
+  @override
   Future<KnownDiveComputer?> findByAddress(String address) =>
       _findOne((t) => t.address.equals(address));
 

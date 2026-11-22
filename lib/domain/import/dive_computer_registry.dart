@@ -28,6 +28,7 @@ class KnownDiveComputer {
 }
 
 abstract interface class DiveComputerRepository {
+  Future<KnownDiveComputer?> findById(String id);
   Future<KnownDiveComputer?> findByAddress(String address);
   Future<KnownDiveComputer?> findBySerial(String vendor, String serial);
   Future<KnownDiveComputer> create(KnownDiveComputer computer);

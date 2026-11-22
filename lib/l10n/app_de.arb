@@ -43,6 +43,14 @@
   "logbookManualEntry": "Manuell eintragen",
   "logbookLoadError": "Das Logbuch konnte nicht geladen werden.",
   "noSite": "Ohne Tauchplatz",
+  "logbookTileDives": "Tauchgänge",
+  "logbookTileUnderwater": "unter Wasser",
+  "diverAvatarSpoken": "Taucher {name}",
+  "@diverAvatarSpoken": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
   "diveNumber": "#{number}",
   "@diveNumber": {
     "placeholders": { "number": { "type": "int", "format": "decimalPattern" } }
@@ -89,10 +97,48 @@
   "sacNeedsPressure": "Für den Luftverbrauch werden Flaschendruck und Flaschengröße benötigt.",
   "sacAddTankSize": "Flaschengröße eintragen",
   "estimatedProfile": "Geschätztes Profil",
-  "profileSemantics": "Tiefenprofil: max. {depth}, Dauer {duration}",
+  "profileSemantics": "Tiefenprofil: max. {depth} nach {time}, Dauer {duration}",
   "@profileSemantics": {
-    "placeholders": { "depth": { "type": "String" }, "duration": { "type": "String" } }
+    "placeholders": { "depth": { "type": "String" }, "time": { "type": "String" }, "duration": { "type": "String" } }
   },
+  "metricWater": "Wasser",
+  "metricTank": "Flasche",
+  "sacMeasured": "gemessen",
+  "sacEstimatedFrom": "geschätzt aus {pressure}",
+  "@sacEstimatedFrom": {
+    "placeholders": { "pressure": { "type": "String" } }
+  },
+  "chipTemperature": "Temperatur",
+  "chipAir": "Luft",
+  "chipAirEstimated": "Luft (geschätzt)",
+  "chipNdl": "NDL",
+  "chipSac": "SAC",
+  "chipLayersSpoken": "Ebenen im Diagramm",
+  "profileAxesLimit": "Höchstens zwei Werte mit eigener Achse. „{name}“ ist jetzt aus.",
+  "@profileAxesLimit": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "valueTime": "Zeit",
+  "valueDepth": "Tiefe",
+  "valueTemperature": "Temperatur",
+  "valueNdl": "NDL",
+  "valueAmbient": "Umgebung",
+  "valueAirNow": "Luft jetzt",
+  "valueTankLeft": "Noch in der Flasche",
+  "valueUsed": "Bisher verbraucht",
+  "valueAbout": "ca. {value}",
+  "@valueAbout": {
+    "placeholders": { "value": { "type": "String" } }
+  },
+  "airEstimateNote": "Luftwerte geschätzt aus Start- und Enddruck ({pressure}, {volume})",
+  "@airEstimateNote": {
+    "placeholders": { "pressure": { "type": "String" }, "volume": { "type": "String" } }
+  },
+  "airEnterPressure": "Start- und Enddruck eintragen",
+  "profileDisclaimer": "Werte vom Tauchcomputer, nur zur Anzeige.",
+  "profileDisclaimerEstimated": "Werte vom Tauchcomputer, nur zur Anzeige. Luft ist geschätzt, weil kein Flaschendruck aufgezeichnet wurde.",
+  "profileShowTable": "Als Tabelle anzeigen",
+  "profileTableTitle": "Minutenwerte",
   "tanksTitle": "Flaschen",
   "tankNumber": "Flasche {number}",
   "@tankNumber": {
@@ -103,6 +149,29 @@
   "eventAscent": "Aufstieg zu schnell",
   "eventSafetyStop": "Sicherheitsstopp",
   "eventDeco": "Dekostopp",
+  "eventDeepStop": "Tiefenstopp",
+  "eventCeiling": "Deko-Grenze verletzt",
+  "eventViolation": "Grenzwert überschritten",
+  "eventBookmark": "Markierung",
+  "eventSurface": "Aufgetaucht",
+  "eventRbt": "Restgrundzeit",
+  "eventAirTime": "Luftzeit",
+  "eventMaxDepth": "Maximaltiefe",
+  "eventDiveTime": "Tauchzeit",
+  "eventWorkload": "Hohe Atemarbeit",
+  "eventTransmitter": "Sender-Warnung",
+  "eventTissueLevel": "Gewebesättigung",
+  "eventHeading": "Kompass-Richtung",
+  "eventFloor": "Tiefengrenze",
+  "eventOlf": "Sauerstoffbelastung",
+  "eventPo2": "Sauerstoff-Partialdruck",
+  "eventRgbm": "RGBM-Warnung",
+  "eventUnknown": "Ereignis ({code})",
+  "@eventUnknown": {
+    "placeholders": {
+      "code": {"type": "String"}
+    }
+  },
   "notesTitle": "Notizen",
   "ratingSpoken": "Bewertung: {stars} von 5 Sternen",
   "@ratingSpoken": {

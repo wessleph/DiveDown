@@ -494,3 +494,12 @@ Tests: `test/domain/metrics/air_profile_test.dart` (T22.1–T22.6), `test/featur
 Vertrag für die Oberfläche: Zeichenfläche `ValueKey('profile-plot')` bildet 0 … Dauer auf ihre volle Breite ab, Tippen springt zum nächsten Sample; Werte-Feld `ValueKey('profile-values')`.
 Nicht in diesem Paket: Vollbild mit Zoom, Merken der Chips über App-Starts, Ereignis-Tooltips im Diagramm, Taucher-Wechsel über den Avatar (kommt mit den Einstellungen).
 Diagramm ohne neue Abhängigkeit: Der bestehende `CustomPainter` wird ausgebaut, statt `fl_chart` einzubinden (ADR 0005 nannte es). So lässt sich das Antippen genau testen, und es gibt keine weitere Lizenz.
+
+**Umgesetzt (Phase 50, 2026-11-22), T21, T22:**
+- [x] Theme „Riff“ (`lib/app/theme.dart`): Tokens hell/dunkel, `DiveColors` um `surfaceTint`, `outline`, `accent`, `ndl` erweitert, Karten mit 20 dp und Rand, FAB in `accent`. Schrift Manrope (Medium, SemiBold, Bold, ExtraBold) aus `googlefonts/manrope` Commit `468c0db`, OFL-1.1 in `assets/fonts/OFL.txt`, in `THIRD_PARTY.md` und auf der Lizenzseite → T21.1–T21.4 grün.
+- [x] `UnitFormatter.underwater`, `groupEvents`, `isWarningEvent`, deutsche Texte für alle 25 Ereignistypen, `ambientPressureBar` (gemeinsam mit `SacCalculator`), `AirProfile` (gemessen aus Samples, sonst nach Zeit × Umgebungsdruck verteilt) → T21.5, T21.9, T21.10, T22.1–T22.6 grün.
+- [x] Logbuch: Avatar, Kacheln „Tauchgänge“ und „unter Wasser“, Karten mit `DiveSparkline`, Datum · Uhrzeit · Dauer. Bei großer Schrift steht die Tiefe unter dem Text → T21.6–T21.8 grün.
+- [x] Detail: Kopf mit Verlauf und „Suunto EON Core ••3F7A“ (`DiveComputerRepository.findById`, `computerLabel`), Kennzahlen 3-spaltig mit Kachel „Flasche“ und Ø-SAC über die volle Breite („gemessen“ bzw. „geschätzt aus …“), Ereignisse gruppiert. `ProfileChart` (eigener `CustomPainter`, kein `fl_chart`): Chips, Tippen und Ziehen, Werte-Feld, Hinweis, Minutentabelle, höchstens zwei rechte Achsen → T21.11–T21.13, T22.7–T22.13 grün.
+- Testaufbau korrigiert, Aussage unverändert: T21.3 (Pfadvergleich war fehlerhaft), T15.2/T15.3 (Zeile jetzt „14.11.2026 · 10:42 · 47 min“, weil der Kopf ebenfalls „47 min“ zeigt), T15.7 (Link liegt seit T22.12 im Werte-Feld, der Test scrollt hin). Die Monatsüberschrift bleibt in normaler Schreibweise (ui-spec §5.2 angepasst).
+- Gesamt: `flutter test` 337/337, `flutter analyze` ohne Befund, Debug-APK baut.
+- Noch nicht auf dem Handy geprüft.

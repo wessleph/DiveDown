@@ -40,13 +40,33 @@ String waterTypeLabel(AppLocalizations l10n, WaterType type) => switch (type) {
   WaterType.fresh => l10n.waterFresh,
 };
 
-/// libdivecomputer event names (`DiveEvent.type`) in German.
+/// libdivecomputer event names (`DiveEvent.type`) in German (ui-spec §5.3).
 String eventLabel(AppLocalizations l10n, String type) => switch (type) {
   'gaschange' || 'gaschange2' => l10n.eventGasChange,
   'ascent' => l10n.eventAscent,
-  'safetystop' || 'safetystop_mandatory' => l10n.eventSafetyStop,
+  'safetystop' ||
+  'safetystop_mandatory' ||
+  'safetystop_voluntary' ||
+  'ceiling_safetystop' => l10n.eventSafetyStop,
   'decostop' => l10n.eventDeco,
-  _ => type,
+  'deepstop' => l10n.eventDeepStop,
+  'ceiling' => l10n.eventCeiling,
+  'violation' => l10n.eventViolation,
+  'bookmark' => l10n.eventBookmark,
+  'surface' => l10n.eventSurface,
+  'rbt' => l10n.eventRbt,
+  'airtime' => l10n.eventAirTime,
+  'maxdepth' => l10n.eventMaxDepth,
+  'divetime' => l10n.eventDiveTime,
+  'workload' => l10n.eventWorkload,
+  'transmitter' => l10n.eventTransmitter,
+  'tissuelevel' => l10n.eventTissueLevel,
+  'heading' => l10n.eventHeading,
+  'floor' => l10n.eventFloor,
+  'olf' => l10n.eventOlf,
+  'po2' => l10n.eventPo2,
+  'rgbm' => l10n.eventRgbm,
+  _ => l10n.eventUnknown(type),
 };
 
 /// Events of one type within 60 s of the first, shown as one row with a
@@ -63,9 +83,41 @@ class EventGroup {
   final int count;
 }
 
-/// Groups [events] (sorted by time) for the detail list.
-List<EventGroup> groupEvents(List<DiveEvent> events) =>
-    throw UnimplementedError('groupEvents');
+/// Groups [events] (sorted by time) for the detail list. An event joins the
+/// latest group of its type when it is at most [windowS] after that group's
+/// first event.
+List<EventGroup> groupEvents(List<DiveEvent> events, {int windowS = 60}) {
+  final groups = <EventGroup>[];
+  final latest = <String, int>{}; // type -> index in groups
+  for (final e in events) {
+    final i = latest[e.type];
+    if (i != null && e.timeS - groups[i].timeS <= windowS) {
+      final g = groups[i];
+      groups[i] = EventGroup(timeS: g.timeS, type: g.type, count: g.count + 1);
+    } else {
+      latest[e.type] = groups.length;
+      groups.add(EventGroup(timeS: e.timeS, type: e.type, count: 1));
+    }
+  }
+  return groups;
+}
+
+const _warningEvents = {
+  'ascent',
+  'ceiling',
+  'violation',
+  'decostop',
+  'transmitter',
+  'workload',
+  'rbt',
+  'maxdepth',
+  'divetime',
+  'airtime',
+  'po2',
+  'olf',
+  'floor',
+  'rgbm',
+};
 
 /// Events that warn the diver (red dot), the rest are information.
-bool isWarningEvent(String type) => throw UnimplementedError('isWarningEvent');
+bool isWarningEvent(String type) => _warningEvents.contains(type);

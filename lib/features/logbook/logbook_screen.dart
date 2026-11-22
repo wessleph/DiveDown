@@ -11,6 +11,7 @@ import '../import/import_screen.dart';
 import 'dive_detail_screen.dart';
 import 'dive_texts.dart';
 import 'manual_dive_screen.dart';
+import 'sparkline.dart';
 
 /// Logbuch (ui-spec §5.2): dives of the active diver by month, newest first.
 class LogbookScreen extends ConsumerWidget {
@@ -22,9 +23,19 @@ class LogbookScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final dives = ref.watch(logbookProvider);
+    final diver = ref.watch(activeDiverProvider).value;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.navLogbook)),
+      appBar: AppBar(
+        title: Text(
+          l10n.navLogbook,
+          style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w800),
+        ),
+        actions: [
+          if (diver != null) _DiverAvatar(name: diver.name),
+          const SizedBox(width: 12),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.go(ManualDiveScreen.newPath),
         icon: const Icon(Icons.edit_outlined),
@@ -139,7 +150,7 @@ class _DiveList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = <Object>[];
+    final items = <Object>[const _Header()];
     (int, int)? month;
     for (final dive in dives) {
       final m = (dive.start.year, dive.start.month);
@@ -157,6 +168,7 @@ class _DiveList extends StatelessWidget {
       itemBuilder: (context, i) => switch (items[i]) {
         final Dive dive => _DiveRow(dive: dive),
         final DateTime start => _MonthHeader(start: start),
+        _Header() => _SummaryTiles(dives: dives),
         _ => throw StateError('unexpected item'),
       },
     );
@@ -174,11 +186,13 @@ class _MonthHeader extends StatelessWidget {
     return Semantics(
       header: true,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 6),
         child: Text(
           monthFormat.format(start),
-          style: theme.textTheme.titleSmall?.copyWith(
+          style: theme.textTheme.labelMedium?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1,
           ),
         ),
       ),
@@ -212,73 +226,225 @@ class _DiveRow extends StatelessWidget {
     ].join(', ');
 
     void open() => context.go(DiveDetailScreen.pathFor(dive.id!));
+    final stacked = MediaQuery.textScalerOf(context).scale(10) > 13;
 
     return Semantics(
       label: label,
       button: true,
       onTap: open,
       excludeSemantics: true,
-      child: InkWell(
-        onTap: open,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.diveNumber(dive.number!),
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                    Text(
-                      site ?? l10n.noSite,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: site == null ? colors.onSurfaceMuted : null,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        Icon(
-                          sourceIcon(dive.source),
-                          size: 16,
-                          color: colors.onSurfaceMuted,
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            '${dateFormat.format(dive.start)} · '
-                            '${_units.duration(dive.durationS)}',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: colors.onSurfaceMuted,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+        child: Card(
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: open,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Flex(
+                    // Large text (ui-spec §4): depth moves below the text.
+                    direction: stacked ? Axis.vertical : Axis.horizontal,
+                    mainAxisSize: stacked ? MainAxisSize.min : MainAxisSize.max,
+                    crossAxisAlignment: stacked
+                        ? CrossAxisAlignment.start
+                        : CrossAxisAlignment.center,
+                    children: [
+                      Flexible(
+                        fit: stacked ? FlexFit.loose : FlexFit.tight,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.diveNumber(dive.number!),
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w800,
+                                color: theme.colorScheme.primary,
+                              ),
                             ),
-                          ),
+                            Text(
+                              site ?? l10n.noSite,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                fontStyle: site == null
+                                    ? FontStyle.italic
+                                    : null,
+                                color: site == null
+                                    ? colors.onSurfaceMuted
+                                    : null,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Row(
+                              children: [
+                                Icon(
+                                  sourceIcon(dive.source),
+                                  size: 15,
+                                  color: colors.onSurfaceMuted,
+                                ),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    '${dateFormat.format(dive.start)} · '
+                                    '${timeFormat.format(dive.start)} · '
+                                    '${_units.duration(dive.durationS)}',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      fontSize: 12.5,
+                                      color: colors.onSurfaceMuted,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                      const SizedBox(width: 12, height: 4),
+                      Text.rich(
+                        TextSpan(
+                          text: depth.replaceFirst(' m', ''),
+                          children: [
+                            TextSpan(
+                              text: ' m',
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: colors.onSurfaceMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                          color: colors.depth,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  DiveSparkline(dive: dive, color: colors.depth),
+                ],
               ),
-              const SizedBox(width: 12),
-              Text(
-                depth,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  color: colors.depth,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
+            ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Header {
+  const _Header();
+}
+
+/// Two tiles for the active diver (ui-spec §5.2): dives and time under water.
+class _SummaryTiles extends StatelessWidget {
+  const _SummaryTiles({required this.dives});
+
+  final List<Dive> dives;
+
+  static const _units = UnitFormatter.metric();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final total = dives.fold<int>(0, (sum, d) => sum + d.durationS);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 4, 14, 0),
+      child: Row(
+        children: [
+          Expanded(
+            child: _Tile(
+              value: '${dives.length}',
+              label: l10n.logbookTileDives,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _Tile(
+              value: _units.underwater(total),
+              label: l10n.logbookTileUnderwater,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Tile extends StatelessWidget {
+  const _Tile({required this.value, required this.label});
+
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.extension<DiveColors>()!;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colors.surfaceRaised,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: colors.outline),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              value,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            Text(
+              label,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: colors.onSurfaceMuted,
+                letterSpacing: 0.6,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Initial of the active diver; the switcher (ui-spec §2) follows with the
+/// settings package.
+class _DiverAvatar extends StatelessWidget {
+  const _DiverAvatar({required this.name});
+
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    final trimmed = name.trim();
+    final initial = trimmed.isEmpty
+        ? '?'
+        : trimmed.characters.first.toUpperCase();
+    return Semantics(
+      label: l10n.diverAvatarSpoken(name),
+      excludeSemantics: true,
+      child: CircleAvatar(
+        radius: 18,
+        backgroundColor: scheme.primary,
+        foregroundColor: scheme.onPrimary,
+        child: Text(
+          initial,
+          style: const TextStyle(fontWeight: FontWeight.w700),
         ),
       ),
     );

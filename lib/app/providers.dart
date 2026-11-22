@@ -65,14 +65,40 @@ final logbookProvider = FutureProvider<List<Dive>>((ref) async {
 
 /// One dive with all samples, and the name of its diver.
 final diveDetailProvider = FutureProvider.autoDispose
-    .family<({Dive dive, String? diverName})?, String>((ref, id) async {
+    .family<({Dive dive, String? diverName, String? computerLabel})?, String>((
+      ref,
+      id,
+    ) async {
       final dive = await ref.watch(diveRepositoryProvider).findById(id);
       if (dive == null) return null;
       final diver = await ref
           .watch(diverRepositoryProvider)
           .findById(dive.diverId);
-      return (dive: dive, diverName: diver?.name);
+      final computerId = dive.diveComputerId;
+      final computer = computerId == null
+          ? null
+          : await ref
+                .watch(diveComputerRepositoryProvider)
+                .findById(computerId);
+      return (
+        dive: dive,
+        diverName: diver?.name,
+        computerLabel: computer == null ? null : computerLabel(computer),
+      );
     });
+
+/// „Suunto EON Core ••3F7A“ (ui-spec §5.3): model and the last four hex
+/// digits of the address, else of the serial.
+String computerLabel(KnownDiveComputer c) {
+  String lastFour(String s) {
+    final hex = s.replaceAll(RegExp('[^0-9A-Za-z]'), '').toUpperCase();
+    return hex.length <= 4 ? hex : hex.substring(hex.length - 4);
+  }
+
+  final id = c.address ?? c.serial;
+  final name = '${c.vendor} ${c.product}';
+  return id == null || id.isEmpty ? name : '$name ••${lastFour(id)}';
+}
 
 final siteRepositoryProvider = Provider<SiteRepository>(
   (ref) => DriftSiteRepository(ref.watch(appDatabaseProvider)),

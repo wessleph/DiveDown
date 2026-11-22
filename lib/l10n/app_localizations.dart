@@ -238,6 +238,24 @@ abstract class AppLocalizations {
   /// **'Ohne Tauchplatz'**
   String get noSite;
 
+  /// No description provided for @logbookTileDives.
+  ///
+  /// In de, this message translates to:
+  /// **'Tauchgänge'**
+  String get logbookTileDives;
+
+  /// No description provided for @logbookTileUnderwater.
+  ///
+  /// In de, this message translates to:
+  /// **'unter Wasser'**
+  String get logbookTileUnderwater;
+
+  /// No description provided for @diverAvatarSpoken.
+  ///
+  /// In de, this message translates to:
+  /// **'Taucher {name}'**
+  String diverAvatarSpoken(String name);
+
   /// No description provided for @diveNumber.
   ///
   /// In de, this message translates to:
@@ -421,8 +439,164 @@ abstract class AppLocalizations {
   /// No description provided for @profileSemantics.
   ///
   /// In de, this message translates to:
-  /// **'Tiefenprofil: max. {depth}, Dauer {duration}'**
-  String profileSemantics(String depth, String duration);
+  /// **'Tiefenprofil: max. {depth} nach {time}, Dauer {duration}'**
+  String profileSemantics(String depth, String time, String duration);
+
+  /// No description provided for @metricWater.
+  ///
+  /// In de, this message translates to:
+  /// **'Wasser'**
+  String get metricWater;
+
+  /// No description provided for @metricTank.
+  ///
+  /// In de, this message translates to:
+  /// **'Flasche'**
+  String get metricTank;
+
+  /// No description provided for @sacMeasured.
+  ///
+  /// In de, this message translates to:
+  /// **'gemessen'**
+  String get sacMeasured;
+
+  /// No description provided for @sacEstimatedFrom.
+  ///
+  /// In de, this message translates to:
+  /// **'geschätzt aus {pressure}'**
+  String sacEstimatedFrom(String pressure);
+
+  /// No description provided for @chipTemperature.
+  ///
+  /// In de, this message translates to:
+  /// **'Temperatur'**
+  String get chipTemperature;
+
+  /// No description provided for @chipAir.
+  ///
+  /// In de, this message translates to:
+  /// **'Luft'**
+  String get chipAir;
+
+  /// No description provided for @chipAirEstimated.
+  ///
+  /// In de, this message translates to:
+  /// **'Luft (geschätzt)'**
+  String get chipAirEstimated;
+
+  /// No description provided for @chipNdl.
+  ///
+  /// In de, this message translates to:
+  /// **'NDL'**
+  String get chipNdl;
+
+  /// No description provided for @chipSac.
+  ///
+  /// In de, this message translates to:
+  /// **'SAC'**
+  String get chipSac;
+
+  /// No description provided for @chipLayersSpoken.
+  ///
+  /// In de, this message translates to:
+  /// **'Ebenen im Diagramm'**
+  String get chipLayersSpoken;
+
+  /// No description provided for @profileAxesLimit.
+  ///
+  /// In de, this message translates to:
+  /// **'Höchstens zwei Werte mit eigener Achse. „{name}“ ist jetzt aus.'**
+  String profileAxesLimit(String name);
+
+  /// No description provided for @valueTime.
+  ///
+  /// In de, this message translates to:
+  /// **'Zeit'**
+  String get valueTime;
+
+  /// No description provided for @valueDepth.
+  ///
+  /// In de, this message translates to:
+  /// **'Tiefe'**
+  String get valueDepth;
+
+  /// No description provided for @valueTemperature.
+  ///
+  /// In de, this message translates to:
+  /// **'Temperatur'**
+  String get valueTemperature;
+
+  /// No description provided for @valueNdl.
+  ///
+  /// In de, this message translates to:
+  /// **'NDL'**
+  String get valueNdl;
+
+  /// No description provided for @valueAmbient.
+  ///
+  /// In de, this message translates to:
+  /// **'Umgebung'**
+  String get valueAmbient;
+
+  /// No description provided for @valueAirNow.
+  ///
+  /// In de, this message translates to:
+  /// **'Luft jetzt'**
+  String get valueAirNow;
+
+  /// No description provided for @valueTankLeft.
+  ///
+  /// In de, this message translates to:
+  /// **'Noch in der Flasche'**
+  String get valueTankLeft;
+
+  /// No description provided for @valueUsed.
+  ///
+  /// In de, this message translates to:
+  /// **'Bisher verbraucht'**
+  String get valueUsed;
+
+  /// No description provided for @valueAbout.
+  ///
+  /// In de, this message translates to:
+  /// **'ca. {value}'**
+  String valueAbout(String value);
+
+  /// No description provided for @airEstimateNote.
+  ///
+  /// In de, this message translates to:
+  /// **'Luftwerte geschätzt aus Start- und Enddruck ({pressure}, {volume})'**
+  String airEstimateNote(String pressure, String volume);
+
+  /// No description provided for @airEnterPressure.
+  ///
+  /// In de, this message translates to:
+  /// **'Start- und Enddruck eintragen'**
+  String get airEnterPressure;
+
+  /// No description provided for @profileDisclaimer.
+  ///
+  /// In de, this message translates to:
+  /// **'Werte vom Tauchcomputer, nur zur Anzeige.'**
+  String get profileDisclaimer;
+
+  /// No description provided for @profileDisclaimerEstimated.
+  ///
+  /// In de, this message translates to:
+  /// **'Werte vom Tauchcomputer, nur zur Anzeige. Luft ist geschätzt, weil kein Flaschendruck aufgezeichnet wurde.'**
+  String get profileDisclaimerEstimated;
+
+  /// No description provided for @profileShowTable.
+  ///
+  /// In de, this message translates to:
+  /// **'Als Tabelle anzeigen'**
+  String get profileShowTable;
+
+  /// No description provided for @profileTableTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Minutenwerte'**
+  String get profileTableTitle;
 
   /// No description provided for @tanksTitle.
   ///
@@ -465,6 +639,114 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Dekostopp'**
   String get eventDeco;
+
+  /// No description provided for @eventDeepStop.
+  ///
+  /// In de, this message translates to:
+  /// **'Tiefenstopp'**
+  String get eventDeepStop;
+
+  /// No description provided for @eventCeiling.
+  ///
+  /// In de, this message translates to:
+  /// **'Deko-Grenze verletzt'**
+  String get eventCeiling;
+
+  /// No description provided for @eventViolation.
+  ///
+  /// In de, this message translates to:
+  /// **'Grenzwert überschritten'**
+  String get eventViolation;
+
+  /// No description provided for @eventBookmark.
+  ///
+  /// In de, this message translates to:
+  /// **'Markierung'**
+  String get eventBookmark;
+
+  /// No description provided for @eventSurface.
+  ///
+  /// In de, this message translates to:
+  /// **'Aufgetaucht'**
+  String get eventSurface;
+
+  /// No description provided for @eventRbt.
+  ///
+  /// In de, this message translates to:
+  /// **'Restgrundzeit'**
+  String get eventRbt;
+
+  /// No description provided for @eventAirTime.
+  ///
+  /// In de, this message translates to:
+  /// **'Luftzeit'**
+  String get eventAirTime;
+
+  /// No description provided for @eventMaxDepth.
+  ///
+  /// In de, this message translates to:
+  /// **'Maximaltiefe'**
+  String get eventMaxDepth;
+
+  /// No description provided for @eventDiveTime.
+  ///
+  /// In de, this message translates to:
+  /// **'Tauchzeit'**
+  String get eventDiveTime;
+
+  /// No description provided for @eventWorkload.
+  ///
+  /// In de, this message translates to:
+  /// **'Hohe Atemarbeit'**
+  String get eventWorkload;
+
+  /// No description provided for @eventTransmitter.
+  ///
+  /// In de, this message translates to:
+  /// **'Sender-Warnung'**
+  String get eventTransmitter;
+
+  /// No description provided for @eventTissueLevel.
+  ///
+  /// In de, this message translates to:
+  /// **'Gewebesättigung'**
+  String get eventTissueLevel;
+
+  /// No description provided for @eventHeading.
+  ///
+  /// In de, this message translates to:
+  /// **'Kompass-Richtung'**
+  String get eventHeading;
+
+  /// No description provided for @eventFloor.
+  ///
+  /// In de, this message translates to:
+  /// **'Tiefengrenze'**
+  String get eventFloor;
+
+  /// No description provided for @eventOlf.
+  ///
+  /// In de, this message translates to:
+  /// **'Sauerstoffbelastung'**
+  String get eventOlf;
+
+  /// No description provided for @eventPo2.
+  ///
+  /// In de, this message translates to:
+  /// **'Sauerstoff-Partialdruck'**
+  String get eventPo2;
+
+  /// No description provided for @eventRgbm.
+  ///
+  /// In de, this message translates to:
+  /// **'RGBM-Warnung'**
+  String get eventRgbm;
+
+  /// No description provided for @eventUnknown.
+  ///
+  /// In de, this message translates to:
+  /// **'Ereignis ({code})'**
+  String eventUnknown(String code);
 
   /// No description provided for @notesTitle.
   ///

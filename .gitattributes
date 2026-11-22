@@ -4,3 +4,4 @@
 *.gz binary
 *.fit binary
 *.bin binary
+*.ttf binary

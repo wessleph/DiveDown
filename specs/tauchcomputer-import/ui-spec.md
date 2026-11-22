@@ -96,7 +96,7 @@ Darunter **zwei Kacheln** für den aktiven Taucher: **Anzahl Tauchgänge** und *
 4. rechts über zwei Zeilen: **max. Tiefe** groß (28 sp, 800, Einheit klein in `onSurfaceMuted`)
 5. unten über die ganze Breite das **Mini-Tiefenprofil** (Sparkline, 34 dp hoch, Fläche `depth` mit 18 % Deckkraft). Manuell erfasste Tauchgänge ohne Samples zeigen das geschätzte Rechteckprofil gestrichelt.
 
-Monatsüberschrift in Großbuchstaben (`onSurfaceMuted`), neuester oben. FAB **„Manuell eintragen“** in `accent`.
+Monatsüberschrift fett in `onSurfaceMuted` mit etwas Laufweite, neuester oben. Bei großer Schrift (über 130 %) steht die Tiefe unter dem Text statt daneben. FAB **„Manuell eintragen“** in `accent`.
 
 | Zustand | Darstellung / Text |
 |---|---|

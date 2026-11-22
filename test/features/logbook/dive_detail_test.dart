@@ -99,6 +99,9 @@ void main() {
 
     expect(find.text('200 → 50 bar'), findsOneWidget);
     expect(find.text('—'), findsOneWidget);
+    // Since T22.12 the link sits in the value panel under the profile.
+    await tester.ensureVisible(find.text('Flaschengröße eintragen'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Flaschengröße eintragen'));
     await tester.pumpAndSettle();
 
