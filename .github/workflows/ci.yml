@@ -113,17 +113,12 @@ jobs:
       # T4.5 (EON Core fixtures through libdivecomputer built for iOS) and
       # T20.12 (Swift side of the backup exclusion).
       - name: Integration tests on the simulator
-        timeout-minutes: 15
+        timeout-minutes: 30
         env:
           UDID: ${{ steps.sim.outputs.udid }}
-        run: |
-          # -v: the first runs hung after the app started (VM service up,
-          # no test output); the verbose log shows where the tool waits.
-          for test in integration_test/*_test.dart; do
-            echo "::group::$test"
-            flutter test "$test" -d "$UDID" -r expanded -v
-            echo "::endgroup::"
-          done
+        # Time limit and one retry per file: the tool sometimes loses the
+        # app's VM service on the CI simulator (see the script).
+        run: tool/ci/run_integration_tests.sh "$UDID"
 
       # T20.9-T20.11 (XCTest in ios/RunnerTests).
       - name: Swift unit tests
