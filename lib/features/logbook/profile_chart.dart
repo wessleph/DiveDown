@@ -122,7 +122,8 @@ class _ProfileChartState extends State<ProfileChart> {
     final hasAir = air != null && air.missing == null;
     final layers = [
       _Layer.temperature,
-      _Layer.air,
+      // Without any pressure the chip would switch nothing on.
+      if (_air.at(0).missing == null) _Layer.air,
       _Layer.ndl,
       if (_measured) _Layer.sac,
     ];
@@ -565,11 +566,12 @@ class _ProfilePainter extends CustomPainter {
     }
     final minutes = end / 60;
     final tick = minutes <= 20 ? 5 : (minutes <= 60 ? 15 : 30);
-    for (var m = 0; m <= minutes; m += tick) {
+    // Start at the first tick, so „0 min“ does not touch the depth labels.
+    for (var m = tick; m <= minutes; m += tick) {
       _text(
         canvas,
         '$m min',
-        Offset(x(m * 60), size.height - _bottom / 2),
+        Offset(x(m * 60), size.height - _bottom / 2 + 2),
         center: true,
       );
     }

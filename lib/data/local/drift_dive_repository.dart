@@ -115,7 +115,34 @@ class DriftDiveRepository implements DiveRepository {
                 (t) => OrderingTerm.desc(t.diveNumber),
               ]))
             .get();
-    return rows.map(_fromRow).toList();
+    final profiles = await _loadProfiles([for (final r in rows) r.id]);
+    return [
+      for (final r in rows)
+        _fromRow(r).copyWith(samples: profiles[r.id] ?? const []),
+    ];
+  }
+
+  /// Time and depth only, for the logbook sparklines (ui-spec §5.2, T21.14).
+  Future<Map<String, List<DiveSample>>> _loadProfiles(List<String> ids) async {
+    if (ids.isEmpty) return const {};
+    final t = _db.diveSamples;
+    final rows =
+        await (_db.selectOnly(t)
+              ..addColumns([t.diveId, t.timeS, t.depthM])
+              ..where(t.diveId.isIn(ids))
+              ..orderBy([
+                OrderingTerm.asc(t.diveId),
+                OrderingTerm.asc(t.timeS),
+              ]))
+            .get();
+    final out = <String, List<DiveSample>>{};
+    for (final r in rows) {
+      final String id = r.read(t.diveId)!;
+      (out[id] ??= []).add(
+        DiveSample(timeS: r.read(t.timeS)!, depthM: r.read(t.depthM)!),
+      );
+    }
+    return out;
   }
 
   @override

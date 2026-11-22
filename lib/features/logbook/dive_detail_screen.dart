@@ -439,7 +439,10 @@ class _Metrics extends StatelessWidget {
           );
           rows.add(const SizedBox(height: gap));
         }
-        return Column(children: [...rows, sacTile]);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [...rows, sacTile],
+        );
       },
     );
   }

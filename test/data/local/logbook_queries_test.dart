@@ -77,4 +77,25 @@ void main() {
     // A fresh instance reads it from the database, not from memory.
     expect(await DriftAppSettings(db).activeDiverId(), anna.id);
   });
+
+  test('T21.14 the list carries the depth profile for the sparkline', () async {
+    final anna = await divers.create(const Diver(name: 'Anna'));
+    await dives.save(
+      _dive(anna.id!).copyWith(
+        samples: [
+          for (var t = 0; t <= 600; t += 60)
+            DiveSample(timeS: t, depthM: t / 60, temperatureC: 21),
+        ],
+      ),
+    );
+    await dives.save(_dive(anna.id!)); // manual, no samples
+
+    final listed = await dives.listForDiver(anna.id!);
+    final withProfile = listed.firstWhere((d) => d.samples.isNotEmpty);
+    expect(withProfile.samples.map((s) => s.timeS), [
+      for (var t = 0; t <= 600; t += 60) t,
+    ]);
+    expect(withProfile.samples.last.depthM, 10);
+    expect(listed.where((d) => d.samples.isEmpty), hasLength(1));
+  });
 }
