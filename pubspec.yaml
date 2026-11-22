@@ -29,6 +29,8 @@ dependencies:
   permission_handler: ^13.0.2 # MIT (incl. 5 platform packages), BLE runtime permissions (security.md §4)
   sqlite3: ^3.5.1 # MIT, bundles SQLite via build hooks (no SQLCipher, security R4)
   uuid: ^4.5.0 # MIT (ADR 0004)
+  url_launcher: ^6.3.3 # BSD-3 (incl. platform packages), links under „Über DiveDown“ (ui-spec §5.11)
+  package_info_plus: ^10.2.2 # BSD-3 (http 1.6.0 BSD-3, web/win32/ffi BSD-3), version and build (ui-spec §5.11)
 
 dev_dependencies:
   build_runner: ^2.10.4 # BSD-3-Clause

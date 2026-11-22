@@ -1,6 +1,7 @@
 # UI-Spezifikation: DiveDown 1.0
 
 > Phase 30 · Stand: 2026-11-22 · Status: **abgenommen (2026-11-18)**, Mockups: https://claude.ai/artifact/7LP8HdXzTK33X75euzkU9X
+> **Änderung 2026-11-22b (abgenommen 2026-11-22):** ein Taucher pro App, Einstellungen neu (§2, §5.2, §5.5, §5.9, §5.11).
 > **Änderung 2026-11-22 (abgenommen 2026-11-22):** neuer Stil „Riff“ nach dem Rundgang am Handy (§1, §5.2, §5.3, §6). Entwurf: https://claude.ai/artifact/GUDfte5Mocx1SPnTG478RQ
 > Grundlage: `design.md`, `security.md` (§10 Checkliste Phase 30), `docs/roadmap.md` (Muss-Umfang 1–9)
 > DiveMate und Submersion dienen nur als Ablauf-Vorbild. Layout, Farben, Icons und Texte gestalten wir selbst.
@@ -58,8 +59,7 @@ Importieren → Tauchcomputer | FIT-Datei | Apple Health (nur iOS)
 Einstellungen → Taucher · Geräte · Einheiten · Darstellung · Logbuch sichern · Wiederherstellen · Diagnose-Logs · Über & Lizenzen
 ```
 
-- **Taucher-Wechsel:** Avatar oben rechts im Logbuch, tippen öffnet die Auswahl (Bottom Sheet).
-  Der aktive Taucher gilt für Logbuch und Import. Im Import steht deutlich „Importieren für: **Anna**“.
+- **Ein Taucher pro App (Entscheidung 2026-11-22):** Mehrere Taucher werden nicht gebraucht. Es gibt keinen Taucher-Wechsel, kein Anlegen oder Löschen weiterer Taucher. Der beim ersten Start angelegte Taucher lässt sich in den Einstellungen umbenennen. Das Datenmodell behält `diverId` (ADR 0004), damit ein späterer Ausbau möglich bleibt.
 - Geteilte Dateien („Teilen → DiveDown“) öffnen direkt die **FIT-Vorschau** (§5.6).
 
 ## 3. Einheiten
@@ -86,7 +86,7 @@ Gespeichert wird immer in SI (ADR 0004). Formatierung zentral (`UnitFormatter`),
 - Zustände: Name leer → Knopf deaktiviert, mit Hinweis „Bitte gib einen Namen ein.“
 
 ### 5.2 Logbuch (Liste)
-**Kopf** (Änderung 2026-11-22): Titel „Logbuch“, rechts der Avatar des aktiven Tauchers (Initiale auf `primary`, öffnet den Taucher-Wechsel §2).
+**Kopf** (Änderung 2026-11-22): Titel „Logbuch“. Kein Avatar (ein Taucher pro App, §2).
 Darunter **zwei Kacheln** für den aktiven Taucher: **Anzahl Tauchgänge** und **Zeit unter Wasser** (Summe der Dauer; ab 10 h als „61 h“, darunter als „7 h 40 min“). Kein „tiefster Tauchgang“ (Wunsch vom 2026-11-22).
 
 **Inhalt pro Eintrag** als Karte (`surfaceRaised`, Rand `outline`, 20 dp Ecken):
@@ -139,7 +139,7 @@ Drei große Karten (je 88 dp hoch):
 2. **FIT-Datei** · „Datei aus der Suunto-App oder Garmin“ · darunter klein: **„So exportierst du aus der Suunto-App“** (öffnet eine kurze Anleitung in 3 Schritten)
 3. **Apple Health** · „Tauchgänge der Apple Watch“ (nur iOS, unter Android ausgeblendet)
 
-Oben: „Importieren für: **Anna** ▾“
+Oben: kein Hinweis auf den Taucher (ein Taucher pro App, §2).
 
 ### 5.6 Tauchcomputer: Suche und Auswahl
 **Ablauf:** Rechte prüfen → Scan startet automatisch (max. 30 s) → Liste der gefundenen Geräte → antippen → Download (§5.7).
@@ -187,7 +187,7 @@ Vor der Suche ein kleiner Hinweis: „Aktiviere Bluetooth am Tauchcomputer: EON 
 
 ### 5.9 Import-Vorschau (für alle Quellen)
 Liste der gefundenen Tauchgänge, alle vorausgewählt (Checkbox, 48 dp). Pro Eintrag: Datum, Uhrzeit, max. Tiefe, Dauer, Sparkline.
-Oben: Quelle + „Importieren für: **Anna**“. Bei Dateien zusätzlich der Dateiname (security A2).
+Oben: Quelle. Bei Dateien zusätzlich der Dateiname (security A2).
 Die Vorschau zeigt die **Nummern, die die Tauchgänge bekommen** (z. B. „#43“). Unter der Liste steht die Aktion **„Tauchplatz für Ausgewählte setzen“**, weil Tauchcomputer, FIT und Apple Health keinen Tauchplatz-Namen mitliefern. Vorschläge kommen aus bereits verwendeten Namen und dem Tauchplatz-Katalog (ADR 0006).
 Knopf unten: **„3 Tauchgänge importieren“**, die Zahl passt sich an die Auswahl an.
 
@@ -213,12 +213,17 @@ Knopf unten: **„3 Tauchgänge importieren“**, die Zahl passt sich an die Aus
 
 ### 5.11 Einstellungen
 Gruppen:
-1. **Taucher:** Liste, hinzufügen, umbenennen, löschen. Pro Taucher gibt es die Einstellung **„Nummerierung beginnt bei“** (für Taucher mit früheren Tauchgängen in anderen Logbüchern) (Dialog: „Anna und ihre 42 Tauchgänge löschen?“). Dazu der Hinweis: „Alle Taucher auf diesem Gerät können alle Logbücher sehen.“ (security G4)
-2. **Geräte:** bekannte Tauchcomputer (Name, ••Seriennummer, letzter Import), „Vergessen“
-3. **Einheiten**, **Darstellung** (System/Hell/Dunkel)
-4. **Daten:** „Logbuch sichern“, „Logbuch wiederherstellen“ (§5.12)
-5. **Hilfe:** „Diagnose-Logs teilen“ (§5.13)
-6. **Über DiveDown:** Version, Build, libdivecomputer-Version, Lizenz GPL-3, „Open-Source-Lizenzen“ (mit dem ODbL-Hinweis zu OpenStreetMap für den Tauchplatz-Katalog), Datenschutzerklärung (Link), Quellcode (Link)
+Gruppen als Abschnitte mit kleiner Überschrift in Großbuchstaben (Stil „Riff“, §1). Neu gefasst am 2026-11-22.
+1. **Taucher** (ein Taucher pro App, §2):
+   - **Name**: zeigt den Namen, Antippen öffnet einen Dialog „Name ändern“ (Pflichtfeld, wie §5.1) · **„Speichern“** / „Abbrechen“.
+   - **„Nummerierung beginnt bei“**: zeigt die Startnummer, Antippen öffnet einen Dialog mit Zahlenfeld (1–9999). Gibt es schon Tauchgänge, fragt die App vorher: „Nummern verschieben? Aus #1–#42 werden #101–#142.“ · **„Verschieben“** / „Abbrechen“. Alle Nummern des Tauchers verschieben sich um die Differenz.
+   - **„Nummern nach Datum neu vergeben“**: Dialog „Alle Tauchgänge nach Datum neu nummerieren? Der älteste bekommt #101.“ (die Startnummer) · **„Neu nummerieren“** / „Abbrechen“. Danach Snackbar „73 Tauchgänge neu nummeriert“. Nur sichtbar, wenn die Reihenfolge der Nummern nicht schon der Reihenfolge nach Datum entspricht. Importe vergeben weiterhin die nächste freie Nummer, neu nummeriert wird nur auf Wunsch (Entscheidung 2026-11-22).
+2. **Geräte:** bekannte Tauchcomputer als Liste: „Suunto EON Core ••CC2D“, darunter „Zuletzt: 13.11.2026“ (Datum des neuesten Tauchgangs von diesem Gerät, sonst „Noch keine Tauchgänge“). Menü „Vergessen“ → Dialog „EON Core vergessen? Beim nächsten Übertragen werden alle Tauchgänge erneut gelesen; Duplikate werden erkannt.“ · **„Vergessen“** / „Abbrechen“. Die Tauchgänge bleiben. Ohne Geräte: „Noch kein Tauchcomputer verbunden.“
+3. **Darstellung:** „System“ / „Hell“ / „Dunkel“ als Segmentknopf, sofort wirksam und gemerkt.
+   **Einheiten** entfallen in v1.0, es gilt metrisch (Entscheidung 2026-11-22, §3 bleibt für später).
+4. **Daten:** „Logbuch sichern“, „Logbuch wiederherstellen“ (§5.12) – erscheinen mit T11.
+5. **Hilfe:** „Diagnose-Logs teilen“ (§5.13) – erscheint mit T10.
+6. **Über DiveDown:** „Version 1.0.0 (Build 42)“ · „libdivecomputer 0.9.0“ · „Lizenz: GPL-3.0-or-later“ · „Open-Source-Lizenzen“ (Lizenzseite, mit ODbL-Hinweis und Manrope-Lizenz) · „Datenschutzerklärung“ und „Quellcode“ öffnen den Browser (`url_launcher`; die App selbst braucht dafür kein Internet-Recht): https://wessleph.github.io/DiveDown/datenschutz/ und https://github.com/wessleph/DiveDown
 
 ### 5.12 Logbuch sichern / wiederherstellen
 **Sichern:** Info: „Erstellt eine Datei mit allen Tauchgängen aller Taucher. Speichere sie z. B. in ‚Dateien‘ oder schicke sie dir per Mail.“

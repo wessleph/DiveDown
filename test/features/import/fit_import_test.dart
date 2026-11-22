@@ -101,7 +101,8 @@ void main() {
     await _pickFit(tester);
 
     expect(find.text('Aus Datei: Tauchgang.fit'), findsOneWidget);
-    expect(find.text('Importieren für: Anna'), findsOneWidget);
+    // One diver per app since 2026-11-22 (ui-spec §2, T23.13).
+    expect(find.textContaining('Importieren für'), findsNothing);
     expect(find.text('18,4 m · 47 min'), findsOneWidget);
     await tester.tap(find.text('1 Tauchgang importieren'));
     await tester.pumpAndSettle();

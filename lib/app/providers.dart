@@ -49,6 +49,34 @@ final appSettingsProvider = Provider<AppSettings>(
   (ref) => DriftAppSettings(ref.watch(appDatabaseProvider)),
 );
 
+/// What „Über DiveDown“ shows (ui-spec §5.11).
+class AppInfo {
+  const AppInfo({
+    required this.version,
+    required this.build,
+    required this.libdivecomputer,
+  });
+
+  final String version;
+  final String build;
+  final String libdivecomputer;
+}
+
+final appInfoProvider = FutureProvider<AppInfo>(
+  (ref) => throw UnimplementedError('appInfoProvider'),
+);
+
+/// Opens a web address outside the app (ui-spec §5.11, `url_launcher`).
+final urlOpenerProvider = Provider<Future<void> Function(Uri)>(
+  (ref) =>
+      (uri) => throw UnimplementedError('urlOpenerProvider'),
+);
+
+/// Renumbering and shifting of dive numbers (ui-spec §5.11).
+final diveNumberingProvider = Provider<DiveNumbering>(
+  (ref) => DriftDiveRepository(ref.watch(appDatabaseProvider)),
+);
+
 /// The diver logbook and import work for (ui-spec §2); null before §5.1.
 final activeDiverProvider = FutureProvider<Diver?>((ref) async {
   final id = await ref.watch(appSettingsProvider).activeDiverId();

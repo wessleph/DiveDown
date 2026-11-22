@@ -83,7 +83,8 @@ void main() {
       final h = await _setUp(tester);
       await _pump(tester, h, location: ImportScreen.path);
 
-      expect(find.text('Importieren für: Anna'), findsOneWidget);
+      // One diver per app since 2026-11-22 (ui-spec §2, T23.13).
+      expect(find.textContaining('Importieren für'), findsNothing);
       expect(find.text('Tauchcomputer'), findsOneWidget);
       expect(find.text('Per Bluetooth übertragen'), findsOneWidget);
       expect(find.text('FIT-Datei'), findsOneWidget);
@@ -453,7 +454,8 @@ void main() {
         ),
       );
 
-      expect(find.text('Importieren für: Anna'), findsOneWidget);
+      // One diver per app since 2026-11-22 (ui-spec §2, T23.13).
+      expect(find.textContaining('Importieren für'), findsNothing);
       expect(
         find.text('Ähnlicher Tauchgang vorhanden (13.11., 18,4 m, 47 min)'),
         findsOneWidget,

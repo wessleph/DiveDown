@@ -13,6 +13,13 @@ class DriftDiveComputerRepository implements DiveComputerRepository {
   final AppDatabase _db;
 
   @override
+  Future<List<KnownDiveComputer>> listAll() =>
+      throw UnimplementedError('listAll');
+
+  @override
+  Future<void> forget(String id) => throw UnimplementedError('forget');
+
+  @override
   Future<KnownDiveComputer?> findById(String id) =>
       _findOne((t) => t.id.equals(id));
 

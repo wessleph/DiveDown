@@ -23,4 +23,12 @@ class DriftAppSettings implements AppSettings {
       .insertOnConflictUpdate(
         AppMetaCompanion.insert(key: activeDiverKey, value: id),
       );
+
+  @override
+  Future<AppThemeMode> themeMode() =>
+      throw UnimplementedError('DriftAppSettings.themeMode');
+
+  @override
+  Future<void> setThemeMode(AppThemeMode mode) =>
+      throw UnimplementedError('DriftAppSettings.setThemeMode');
 }

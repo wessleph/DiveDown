@@ -16,7 +16,7 @@ Finder _inLogbook(Finder f) =>
 
 void main() {
   group('logbook (ui-spec §5.2)', () {
-    testWidgets('T21.6 header: avatar and two tiles, no deepest dive', (
+    testWidgets('T21.6 header: two tiles, no deepest dive, no avatar', (
       tester,
     ) async {
       final handle = tester.ensureSemantics();
@@ -35,8 +35,9 @@ void main() {
       }
       await pumpTestApp(tester, db: db);
 
-      expect(_inLogbook(find.text('A')), findsOneWidget); // avatar initial
-      expect(find.bySemanticsLabel(RegExp('Taucher Anna')), findsWidgets);
+      // One diver per app since 2026-11-22: no avatar (ui-spec §2, T23.13).
+      expect(_inLogbook(find.text('A')), findsNothing);
+      expect(find.bySemanticsLabel(RegExp('Taucher Anna')), findsNothing);
       expect(_inLogbook(find.text('Tauchgänge')), findsOneWidget);
       expect(_inLogbook(find.text('3')), findsOneWidget);
       expect(_inLogbook(find.text('unter Wasser')), findsOneWidget);

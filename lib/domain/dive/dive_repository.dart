@@ -21,6 +21,22 @@ abstract interface class DiverRepository {
 
   /// All divers that are not deleted, in the order they were created.
   Future<List<Diver>> list();
+
+  /// Stores name and start number (ui-spec §5.11).
+  Future<void> update(Diver diver);
+}
+
+/// Dive numbers of one diver (ui-spec §5.11, decision of 2026-11-22).
+abstract interface class DiveNumbering {
+  /// Adds [delta] to every dive number of the diver.
+  Future<void> shiftNumbers(String diverId, int delta);
+
+  /// Gives the diver's dives the numbers start, start + 1, … by start time
+  /// (ties: old number). Returns how many dives were numbered.
+  Future<int> renumberByDate(String diverId, {required int start});
+
+  /// True when sorting by number gives the same order as sorting by date.
+  Future<bool> numbersFollowDates(String diverId);
 }
 
 abstract interface class DiveRepository {

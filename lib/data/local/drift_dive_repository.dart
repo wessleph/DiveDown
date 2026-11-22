@@ -15,6 +15,10 @@ class DriftDiverRepository implements DiverRepository {
   final AppDatabase _db;
 
   @override
+  Future<void> update(Diver diver) =>
+      throw UnimplementedError('DriftDiverRepository.update');
+
+  @override
   Future<Diver> create(Diver diver) async {
     final now = clock.now().toUtc();
     final stored = diver.copyWith(id: _uuid.v4());
@@ -62,7 +66,7 @@ class DriftDiverRepository implements DiverRepository {
   }
 }
 
-class DriftDiveRepository implements DiveRepository {
+class DriftDiveRepository implements DiveRepository, DiveNumbering {
   DriftDiveRepository(this._db);
 
   final AppDatabase _db;
@@ -147,6 +151,18 @@ class DriftDiveRepository implements DiveRepository {
 
   @override
   Future<int> nextNumber(String diverId) => _nextNumber(diverId);
+
+  @override
+  Future<void> shiftNumbers(String diverId, int delta) =>
+      throw UnimplementedError('shiftNumbers');
+
+  @override
+  Future<int> renumberByDate(String diverId, {required int start}) =>
+      throw UnimplementedError('renumberByDate');
+
+  @override
+  Future<bool> numbersFollowDates(String diverId) =>
+      throw UnimplementedError('numbersFollowDates');
 
   @override
   Future<Dive?> findBySource(

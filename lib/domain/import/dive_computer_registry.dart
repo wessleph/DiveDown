@@ -29,6 +29,12 @@ class KnownDiveComputer {
 
 abstract interface class DiveComputerRepository {
   Future<KnownDiveComputer?> findById(String id);
+
+  /// Known dive computers that are not forgotten, newest first (§5.11).
+  Future<List<KnownDiveComputer>> listAll();
+
+  /// „Vergessen“ (ui-spec §5.11): soft delete, the dives stay.
+  Future<void> forget(String id);
   Future<KnownDiveComputer?> findByAddress(String address);
   Future<KnownDiveComputer?> findBySerial(String vendor, String serial);
   Future<KnownDiveComputer> create(KnownDiveComputer computer);

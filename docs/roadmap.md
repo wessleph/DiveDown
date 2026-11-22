@@ -22,7 +22,7 @@
 3. **FIT-Import:** Suunto Ocean über die Suunto-App
 4. **Import aus Apple Health:** Apple Watch
 5. **Profil-Diagramm:** Tiefe, Temperatur, Flaschendruck, Luftverbrauch (SAC)
-6. **Taucherprofile:** mehrere Taucher pro App
+6. ~~**Taucherprofile:** mehrere Taucher pro App~~ entfällt (2026-11-22): ein Taucher pro App, umbenennbar, mit Startnummer
 7. **Diagnose-Logs teilen:** fest eingebaut, siehe `specs/tauchcomputer-import/design.md` §9
 8. Oberfläche auf Deutsch, eigener Stil, App-Icon
 9. **Logbuch sichern und wiederherstellen** als Datei, weil die Datenbank nicht im iCloud- bzw. Google-Backup liegt (security.md O1)
