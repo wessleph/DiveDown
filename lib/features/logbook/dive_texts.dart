@@ -48,3 +48,24 @@ String eventLabel(AppLocalizations l10n, String type) => switch (type) {
   'decostop' => l10n.eventDeco,
   _ => type,
 };
+
+/// Events of one type within 60 s of the first, shown as one row with a
+/// count (ui-spec §5.3): „Sicherheitsstopp 3×“.
+class EventGroup {
+  const EventGroup({
+    required this.timeS,
+    required this.type,
+    required this.count,
+  });
+
+  final int timeS;
+  final String type;
+  final int count;
+}
+
+/// Groups [events] (sorted by time) for the detail list.
+List<EventGroup> groupEvents(List<DiveEvent> events) =>
+    throw UnimplementedError('groupEvents');
+
+/// Events that warn the diver (red dot), the rest are information.
+bool isWarningEvent(String type) => throw UnimplementedError('isWarningEvent');

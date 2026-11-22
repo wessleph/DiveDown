@@ -33,4 +33,13 @@ void main() {
     expect(f.gas(const GasMix(o2: 0.32)), 'EAN32');
     expect(f.gas(const GasMix(o2: 0.21, he: 0.35)), 'Tx 21/35');
   });
+
+  test('T21.5: time under water for the logbook header (ui-spec §5.2)', () {
+    expect(f.underwater(0), '0 min');
+    expect(f.underwater(40 * 60), '40 min');
+    expect(f.underwater(7 * 3600 + 40 * 60), '7 h 40 min');
+    expect(f.underwater(9 * 3600 + 59 * 60 + 40), '10 h'); // rounds to minutes
+    expect(f.underwater(61 * 3600 + 29 * 60), '61 h');
+    expect(f.underwater(61 * 3600 + 31 * 60), '62 h');
+  });
 }

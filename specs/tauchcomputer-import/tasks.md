@@ -452,3 +452,45 @@ Test: `test/data/platform/share_channel_test.dart`.
 - Ungeprüft ohne Mac: ob Swift und das Podfile bauen, ob `com.garmin.fit` die Dateien aus der Suunto-App trifft, ob ein Kaltstart über „Öffnen in“ die Datei an `SharedFileReceiver` liefert (Scene-Verbindung vor der Plugin-Registrierung), ob `altool --upload-app` mit Xcode 26 noch hochlädt.
 - **Erste CI-Läufe auf macOS (2026-11-20/21, Branch `ci/ios-pipeline`):** Gerätebuild ohne Signatur grün (Xcode 26.3, iOS SDK 26.2), Swift, Podfile und libdivecomputer kompilieren. `Podfile.lock` aus der CI übernommen → T20.7 grün. CocoaPods verwaltet nur Flutter und das Plugin, alle anderen Plugins baut Flutter über Swift Package Manager, ohne entfernte Pakete. Folge: Die Makros von `permission_handler` kommen nicht aus dem Podfile, sondern aus `Info.plist` (Bluetooth); Benachrichtigungen schaltet die CI per `PERMISSION_NOTIFICATIONS=0` ab, ein eigener Schritt prüft, dass nur `PERMISSION_BLUETOOTH` an ist.
 - **CI-Lauf 44950959040 (2026-11-21, `8ff8204`) komplett grün:** Integrationstests auf dem iOS-Simulator (iPhone 17 Pro): T4.5 9/9 (alle drei EON-Core-Tauchgänge durch libdivecomputer, für iOS gebaut), T20.12 grün (Swift-Seite von T11.9). XCTest T20.9–T20.11 grün. Makros von `permission_handler`: nur `PERMISSION_BLUETOOTH=1`, alle anderen 0. Vorbehalte: (1) Der Hänger der Läufe 1–3 (App gestartet, keine Testausgabe) trat nicht mehr auf, die Ursache ist nicht geklärt; möglicherweise wackelig. (2) T20.9 und T20.12 wurden in der CI nie rot gesehen, weil die Umsetzung vor dem ersten erfolgreichen macOS-Lauf kam; der Stub hätte `nil` geliefert bzw. `isExcludedFromBackup` gefehlt.
+
+## T21: Stil „Riff“, Logbuch und Detail (ui-spec §1, §5.2, §5.3, Änderung 2026-11-22)
+| ID | A | W | D | Rot gesehen |
+|---|---|---|---|---|
+| T21.1 | helles Theme | gebaut | Riff-Tokens: `surface` `#F2F8F8`, `primary` `#0B7A80`, `accent` `#B9412A`, `temperature` `#A35C00` usw. (neu: `surfaceTint`, `outline`, `accent`, `ndl`) | ✅ 2026-11-22: rot, alte Farben („Tiefe“) |
+| T21.2 | dunkles Theme | gebaut | Riff-Tokens dunkel (`surface` `#0D1E22`, `primary` `#4CC9CE` …) | ✅ 2026-11-22: rot, alte Farben |
+| T21.3 | Theme, `pubspec.yaml`, `assets/fonts/` | geprüft | alle Textstile in **Manrope**; TTF-Dateien und `OFL.txt` liegen bei, Eintrag in `THIRD_PARTY.md` | ✅ 2026-11-22: rot, Systemschrift, kein Ordner `assets/fonts` |
+| T21.4 | Karten-Theme | gebaut | 20 dp Ecken, Rand `outline`, keine Erhebung | ✅ 2026-11-22: rot, 12 dp ohne Rand |
+| T21.5 | Summe der Dauer 0 / 40 min / 7 h 40 min / 9 h 59 min 40 s / 61 h 29 min / 61 h 31 min | `UnitFormatter.underwater` | „0 min“, „40 min“, „7 h 40 min“, „10 h“, „61 h“, „62 h“ | ✅ 2026-11-22: rot wegen `UnimplementedError` (`underwater`) |
+| T21.6 | Anna mit 3 Tauchgängen à 47 min | Logbuch | Avatar „A“ (vorgelesen „Taucher Anna“), Kacheln „Tauchgänge 3“ und „unter Wasser 2 h 21 min“, nichts mit „tiefst…“ | ✅ 2026-11-22: rot, Kopf fehlt (kein „A“) |
+| T21.7 | 2 Tauchgänge | Logbuch | je eine Karte mit Sparkline (`ValueKey('sparkline')`), Zeile „14.11.2026 · 10:42 · 47 min“ | ✅ 2026-11-22: rot, keine Sparkline |
+| T21.8 | Logbuch | angezeigt | FAB „Manuell eintragen“ in `accent` | ✅ 2026-11-22: rot, FAB ohne eigene Farbe (`primary`) |
+| T21.9 | alle libdivecomputer-Ereignistypen | `eventLabel`, `isWarningEvent` | deutscher Text für jeden Typ (`deepstop` → „Tiefenstopp“ …), unbekannt „Ereignis (xyz)“; Warnungen markiert | ✅ 2026-11-22: rot, „deepstop“ unübersetzt bzw. `UnimplementedError` (`isWarningEvent`) |
+| T21.10 | 9 Ereignisse, teils innerhalb 60 s | `groupEvents` | 5 Gruppen mit Anzahl, Abstand > 60 s beginnt neue Gruppe | ✅ 2026-11-22: rot wegen `UnimplementedError` (`groupEvents`) |
+| T21.11 | Tauchgang verweist auf Suunto EON Core mit Adresse `…:3F:7A` | Detail | Quelle „Suunto EON Core ••3F7A“ | ✅ 2026-11-22: rot, steht nur „Tauchcomputer“ |
+| T21.12 | Beispiel #42 (200 → 50 bar, 12 l, ohne Druck-Samples) bzw. mit Druck-Samples | Detail | Kachel „Flasche“ mit „12 l“ und „200 → 50 bar“; Ø-SAC „19,1 l/min“ mit „geschätzt aus 200 → 50 bar“ bzw. „gemessen“ | ✅ 2026-11-22: rot, Kachel „Flasche“ und Herkunft fehlen |
+| T21.13 | Ereignisse 2× `deepstop`, 3× `safetystop` | Detail | „Tiefenstopp“ „2×“, „Sicherheitsstopp“ „3×“, Zeit „22:19“, kein „deepstop“ | ✅ 2026-11-22: rot, „deepstop“ wird angezeigt |
+
+Abgenommen am 2026-11-22. Tests: `test/app/theme_test.dart` (T21.1–T21.4, angepasst), `test/domain/units/unit_formatter_test.dart` (T21.5), `test/features/logbook/riff_screens_test.dart` (T21.6–T21.8, T21.11–T21.13), `test/features/logbook/dive_texts_test.dart` (T21.9, T21.10).
+Stubs: `DiveColors` hat die neuen Tokens mit Platzhalterwerten, `UnitFormatter.underwater`, `groupEvents`, `isWarningEvent`.
+
+## T22: Profil zum Antippen und Luft zum Zeitpunkt (ui-spec §6, Wunsch vom 2026-11-22)
+| ID | A | W | D | Rot gesehen |
+|---|---|---|---|---|
+| T22.1 | 60 min konstant 10 m, 200 → 50 bar, 12 l, ohne Druck-Samples | `AirProfile.at` | geschätzt; Start 200 bar/0 l, Hälfte ≈ 125 bar/900 l, Ende 50 bar/1.800 l | ✅ 2026-11-22: rot wegen `UnimplementedError` (`AirProfile.at`) |
+| T22.2 | 30 min auf 20 m, 30 min auf 5 m | `at(30 min)` | verbraucht ≈ 1.800 × 3,01 / 4,5125 l (Zeit × Umgebungsdruck, Salzwasser wie `SacCalculator`) | ✅ 2026-11-22: rot, wie T22.1 |
+| T22.3 | wie T22.2; Zeit vor 0 bzw. nach Ende | `at` | „Luft jetzt“ = Ø-SAC × Umgebungsdruck; Zeiten außerhalb werden auf Start/Ende begrenzt | ✅ 2026-11-22: rot, wie T22.1 |
+| T22.4 | Druck-Samples 200 − 2,5 bar/min | `at(20 min)` | gemessen: 150 bar, 600 l, „Luft jetzt“ 30 l/min | ✅ 2026-11-22: rot, wie T22.1 |
+| T22.5 | Druck-Samples ab 210 bar, Flasche sagt 200 | `at(0)` | Samples gewinnen (210 bar, gemessen) | ✅ 2026-11-22: rot, wie T22.1 |
+| T22.6 | kein Druck / keine Flasche / kein Volumen / keine Samples | `at` | `AirMissing.pressure` bzw. `.volume` | ✅ 2026-11-22: rot, wie T22.1 |
+| T22.7 | Beispiel #42 (Minuten-Samples) | Detail geöffnet | Werte-Feld (`profile-values`) steht beim tiefsten Sample: „23:00“, „18,0 m“ | ✅ 2026-11-22: rot, Werte-Feld fehlt |
+| T22.8 | Beispiel #42 | Tippen bei 25 % bzw. 100 %, Ziehen 25 → 75 % auf `profile-plot` | nächstes Sample: „12:00“, „9,4 m“, „Umgebung 1,9 bar“; „47:00“; „35:00“, „10,0 m“ | ✅ 2026-11-22: rot, wie T22.7 |
+| T22.9 | Beispiel #42 ohne Druck-Samples | Tippen bei 100 % | „Noch in der Flasche ca. 50 bar“, „Bisher verbraucht ca. 1.800 l“, Schätz-Zeile, „Luft jetzt“, Hinweis „… Luft ist geschätzt …“ | ✅ 2026-11-22: rot, wie T22.7 |
+| T22.10 | mit Druck-Samples | Tippen bei 100 % | „50 bar“ ohne „ca.“, kein „geschätzt“; Chips „Luft“ und „SAC“ | ✅ 2026-11-22: rot, wie T22.7 |
+| T22.11 | ohne Druck-Samples | Detail | Chips „Temperatur“, „Luft (geschätzt)“, „NDL“, kein „SAC“; Tippen schaltet um | ✅ 2026-11-22: rot, keine Chips |
+| T22.12 | ohne Druck bzw. ohne Volumen | Detail | Link „Start- und Enddruck eintragen“ öffnet Bearbeiten bzw. „Flaschengröße eintragen“ | ✅ 2026-11-22: rot, wie T22.7 |
+| T22.13 | Beispiel #42 | Bildschirmleser, „Als Tabelle anzeigen“ | Label „Tiefenprofil: max. 18,4 m nach 23 min, Dauer 47 min“; Tabelle mit „0:00“ … „47:00“ | ✅ 2026-11-22: rot, Label und Link fehlen |
+
+Tests: `test/domain/metrics/air_profile_test.dart` (T22.1–T22.6), `test/features/logbook/profile_chart_test.dart` (T22.7–T22.13). Stub: `lib/domain/metrics/air_profile.dart`.
+Vertrag für die Oberfläche: Zeichenfläche `ValueKey('profile-plot')` bildet 0 … Dauer auf ihre volle Breite ab, Tippen springt zum nächsten Sample; Werte-Feld `ValueKey('profile-values')`.
+Nicht in diesem Paket: Vollbild mit Zoom, Merken der Chips über App-Starts, Ereignis-Tooltips im Diagramm, Taucher-Wechsel über den Avatar (kommt mit den Einstellungen).
+Diagramm ohne neue Abhängigkeit: Der bestehende `CustomPainter` wird ausgebaut, statt `fl_chart` einzubinden (ADR 0005 nannte es). So lässt sich das Antippen genau testen, und es gibt keine weitere Lizenz.

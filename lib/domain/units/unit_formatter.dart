@@ -11,6 +11,10 @@ class UnitFormatter {
   /// `47 min`, rounded to whole minutes.
   String duration(int seconds) => '${(seconds / 60).round()} min';
 
+  /// Time under water in the logbook header (ui-spec §5.2): „61 h“ from
+  /// 10 h on, below that „7 h 40 min“ or „40 min“.
+  String underwater(int seconds) => throw UnimplementedError('underwater');
+
   /// `21 °C`
   String temperature(double celsius) => '${celsius.round()} °C';
 

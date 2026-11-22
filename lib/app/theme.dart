@@ -99,6 +99,10 @@ class DiveColors extends ThemeExtension<DiveColors> {
     required this.pressure,
     required this.sac,
     required this.warning,
+    this.surfaceTint = const Color(0xFFF6F8FA),
+    this.outline = const Color(0xFF4A5C6B),
+    this.accent = const Color(0xFF0B5C8A),
+    this.ndl = const Color(0xFF1676B8),
   });
 
   final Color surfaceRaised;
@@ -109,6 +113,18 @@ class DiveColors extends ThemeExtension<DiveColors> {
   final Color sac;
   final Color warning;
 
+  /// Flat tint behind the detail header; only `onSurface` text on it.
+  final Color surfaceTint;
+
+  /// Card borders, dividers, chart grid.
+  final Color outline;
+
+  /// Coral accent: „Manuell eintragen“, air in the profile.
+  final Color accent;
+
+  /// NDL band in the profile.
+  final Color ndl;
+
   @override
   DiveColors copyWith({
     Color? surfaceRaised,
@@ -118,6 +134,10 @@ class DiveColors extends ThemeExtension<DiveColors> {
     Color? pressure,
     Color? sac,
     Color? warning,
+    Color? surfaceTint,
+    Color? outline,
+    Color? accent,
+    Color? ndl,
   }) => DiveColors(
     surfaceRaised: surfaceRaised ?? this.surfaceRaised,
     onSurfaceMuted: onSurfaceMuted ?? this.onSurfaceMuted,
@@ -126,6 +146,10 @@ class DiveColors extends ThemeExtension<DiveColors> {
     pressure: pressure ?? this.pressure,
     sac: sac ?? this.sac,
     warning: warning ?? this.warning,
+    surfaceTint: surfaceTint ?? this.surfaceTint,
+    outline: outline ?? this.outline,
+    accent: accent ?? this.accent,
+    ndl: ndl ?? this.ndl,
   );
 
   @override
@@ -139,6 +163,10 @@ class DiveColors extends ThemeExtension<DiveColors> {
       pressure: Color.lerp(pressure, other.pressure, t)!,
       sac: Color.lerp(sac, other.sac, t)!,
       warning: Color.lerp(warning, other.warning, t)!,
+      surfaceTint: Color.lerp(surfaceTint, other.surfaceTint, t)!,
+      outline: Color.lerp(outline, other.outline, t)!,
+      accent: Color.lerp(accent, other.accent, t)!,
+      ndl: Color.lerp(ndl, other.ndl, t)!,
     );
   }
 }
