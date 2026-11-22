@@ -1,40 +1,46 @@
 # UI-Spezifikation: DiveDown 1.0
 
-> Phase 30 · Stand: 2026-11-18 · Status: **abgenommen (2026-11-18)**, Mockups: https://claude.ai/artifact/7LP8HdXzTK33X75euzkU9X
+> Phase 30 · Stand: 2026-11-22 · Status: **abgenommen (2026-11-18)**, Mockups: https://claude.ai/artifact/7LP8HdXzTK33X75euzkU9X
+> **Änderung 2026-11-22 (abgenommen 2026-11-22):** neuer Stil „Riff“ nach dem Rundgang am Handy (§1, §5.2, §5.3, §6). Entwurf: https://claude.ai/artifact/GUDfte5Mocx1SPnTG478RQ
 > Grundlage: `design.md`, `security.md` (§10 Checkliste Phase 30), `docs/roadmap.md` (Muss-Umfang 1–9)
 > DiveMate und Submersion dienen nur als Ablauf-Vorbild. Layout, Farben, Icons und Texte gestalten wir selbst.
 
 ## 1. Visueller Stil
 
-**Leitidee „Tiefe“:** ruhig, dunkel, gut lesbar am Boot in grellem Sonnenlicht und abends auf dem Sofa.
-Der Tiefenverlauf ist das zentrale Motiv, Farbe trägt Bedeutung und ist keine Dekoration.
+**Leitidee „Riff“ (seit 2026-11-22, ersetzt „Tiefe“):** hell und freundlich wie klares Wasser über dem Riff, abgerundete Karten, eine kräftige runde Schrift.
+Der Tiefenverlauf bleibt das zentrale Motiv (Sparkline im Logbuch, Profil im Detail). Farbe trägt Bedeutung und ist keine Dekoration.
+Gewählt aus zwei Entwürfen („Tiefsee“ dunkel, „Riff“ hell) am 2026-11-22. Der helle Modus ist der Hauptmodus, der dunkle folgt derselben Logik.
 
 | Token | Hell | Dunkel | Verwendung |
 |---|---|---|---|
-| `surface` | `#F6F8FA` | `#0B1620` | Hintergrund |
-| `surfaceRaised` | `#FFFFFF` | `#13212E` | Karten, Listen |
-| `onSurface` | `#0E1B26` | `#E6EEF4` | Text |
-| `onSurfaceMuted` | `#4A5C6B` | `#9AB0C0` | Nebentext (beide ≥ 4,5:1 auf `surface`) |
-| `primary` | `#0B5C8A` | `#5CB8E8` | Aktionen, aktive Navigation |
-| `depth` | `#1676B8` | `#3FA3E0` | Tiefenkurve, Tiefenwerte |
-| `temperature` | `#C2410C` | `#FB923C` | Temperaturkurve |
-| `pressure` | `#047857` | `#34D399` | Flaschendruck |
-| `sac` | `#7C3AED` | `#A78BFA` | Luftverbrauch |
-| `warning` | `#B45309` | `#FBBF24` | Hinweise, mögliches Duplikat |
-| `error` | `#B91C1C` | `#F87171` | Fehler |
+| `surface` | `#F2F8F8` | `#0D1E22` | Hintergrund |
+| `surfaceRaised` | `#FFFFFF` | `#15292F` | Karten, Kacheln, Werte-Feld unter dem Diagramm |
+| `surfaceTint` | `#DDEFF0` | `#123139` | nur Fläche (Verlauf im Detail-Kopf); darauf nur Text in `onSurface` |
+| `outline` | `#D6E7E8` | `#21393F` | Kartenränder, Trennlinien, Gitter |
+| `onSurface` | `#13303A` | `#E3F1F2` | Text |
+| `onSurfaceMuted` | `#55727A` | `#9BB5BA` | Nebentext |
+| `primary` | `#0B7A80` | `#4CC9CE` | Aktionen, aktive Navigation, Nummern, Tiefenkurve |
+| `accent` | `#B9412A` | `#FF8D6E` | Koralle: Knopf „Manuell eintragen“, Luft im Diagramm |
+| `depth` | = `primary` | = `primary` | Tiefenkurve, Sparkline |
+| `temperature` | `#A35C00` | `#F2B14C` | Temperaturkurve (Bernstein) |
+| `pressure` | = `accent` | = `accent` | Flaschendruck / Luft |
+| `sac` | `#6D4BC4` | `#B49BFF` | SAC-Kurve (nur mit gemessenem Druck) |
+| `ndl` | `#3B5BCC` | `#8FA8FF` | NDL-Band |
+| `warning` | `#9A5B00` | `#F5B83D` | Hinweise, mögliches Duplikat |
+| `error` | `#B42318` | `#FF8A80` | Fehler |
 
-- **Kontrast nachgerechnet (WCAG 2.1, 2026-11-18):** Alle Tokens erreichen auf `surface` und `surfaceRaised` **mindestens 4,5:1**, in beiden Themes. Der knappste Wert ist `depth` hell auf `surface` mit 4,57:1. Damit sind alle Farben auch als Textfarbe zulässig.
-- **Design:** das Theme bauen wir selbst auf Basis von Material 3 (`ColorScheme` aus den Tokens), ohne Standard-Lila. Die App folgt der Systemeinstellung (hell/dunkel), das lässt sich in den Einstellungen ändern.
-- **Schrift:** Systemschrift (SF Pro bzw. Roboto). Ziffern mit **gleicher Breite** (`FontFeature.tabularFigures`), damit Werte beim Scrollen nicht springen.
-  Kennzahlen groß: 28–34 sp für Tiefe und Dauer.
-- **Icons:** Material Symbols Rounded. Das App-Icon ist eigenes Design: eine stilisierte, abfallende Tiefenkurve in `depth` auf `surface` (dunkel).
+- **Kontrast nachgerechnet (WCAG 2.1, 2026-11-22):** Alle Text- und Kurvenfarben erreichen auf `surface` und `surfaceRaised` **mindestens 4,5:1**, in beiden Themes. Knappste Werte hell: `primary` 4,76:1 und `temperature` 4,78:1 auf `surface`. Weiß auf `primary` 5,11:1, Weiß auf `accent` 5,45:1; dunkel `surface` auf `primary` 8,61:1 und auf `accent` 7,58:1. Auf `surfaceTint` liegt nur `onSurface`.
+- **Design:** eigenes Theme auf Basis von Material 3 (`ColorScheme` aus den Tokens), kein Standard-Blau oder -Lila. Die App folgt der Systemeinstellung (hell/dunkel), änderbar in den Einstellungen.
+- **Schrift:** **Manrope** (SIL Open Font License 1.1, GPL-3-verträglich), als Datei in der App mitgeliefert, nichts wird aus dem Netz geladen. Gewichte 500, 600, 700, 800. Ziffern mit **gleicher Breite** (`FontFeature.tabularFigures`).
+  Skala: Titel 30 sp/800 · Nummer im Detail 44 sp/800 · Kennzahl 21 sp/800 · Tiefe in der Liste 28 sp/800 · Tauchplatz 16–19 sp/700 · Text 14–16 sp/500 · Nebentext 12,5 sp/500 · kleine Abschnittsüberschriften 12 sp/700 in Großbuchstaben mit 1 sp Laufweite.
+- **Icons:** Material Symbols Rounded. Das App-Icon ist eigenes Design: eine stilisierte, abfallende Tiefenkurve. Mit „Riff“ werden nur die Farben angepasst (Kurve `primary`, Blase `accent`, Hintergrund `surface` hell), das Motiv bleibt.
   **Gewählt am 2026-11-18: Variante A „Tiefenkurve“** (Mockup-Fläche, Board 7). Vorlagen in `assets/icon/`:
   - `divedown_icon.svg`: iOS und Größen ab 60 px
   - `divedown_icon_small.svg`: unter 60 px, mit dickerer Kurve und nur einer Blase
   - `divedown_icon_android_foreground.svg`: Vordergrund des adaptiven Android-Icons, Motiv auf 66 % verkleinert, Hintergrund `#0B1620`
 
   Die PNG-Größen werden in Phase 50 erzeugt (z. B. mit `flutter_launcher_icons`).
-- **Ecken** 12 dp, **Abstände** im 8-dp-Raster, **Touch-Ziele mindestens 48 dp**. Hauptaktionen bekommen 56 dp, damit man sie auch mit nassen Fingern trifft.
+- **Ecken** 20 dp für Karten, 14 dp für Kacheln, Chips und Knöpfe ganz rund. Karten haben einen Rand in `outline` statt Schatten, nur der Knopf „Manuell eintragen“ hat einen Schatten. **Abstände** im 8-dp-Raster, **Touch-Ziele mindestens 48 dp**. Hauptaktionen bekommen 56 dp, damit man sie auch mit nassen Fingern trifft.
 - **Bedeutung nie nur durch Farbe:** Jede Kurve hat zusätzlich ein Icon bzw. Label in der Legende, Fehler zusätzlich ein Icon und Text.
 
 ## 2. Navigation
@@ -80,13 +86,17 @@ Gespeichert wird immer in SI (ADR 0004). Formatierung zentral (`UnitFormatter`),
 - Zustände: Name leer → Knopf deaktiviert, mit Hinweis „Bitte gib einen Namen ein.“
 
 ### 5.2 Logbuch (Liste)
-**Inhalt pro Eintrag** (Änderung vom 2026-11-18 nach dem Mockup-Review):
-1. **Tauchgangsnummer prominent**: `#42`, 20 sp, extra fett, in `primary`
-2. darunter der **Tauchplatz-Name**: 16 sp halbfett, einzeilig, sonst mit „…“ abgeschnitten. Ohne Tauchplatz steht dort in `onSurfaceMuted` „Ohne Tauchplatz“.
-3. darunter klein: Quelle als Icon (Tauchcomputer / Datei / Watch / Hand) · Datum · Dauer
+**Kopf** (Änderung 2026-11-22): Titel „Logbuch“, rechts der Avatar des aktiven Tauchers (Initiale auf `primary`, öffnet den Taucher-Wechsel §2).
+Darunter **zwei Kacheln** für den aktiven Taucher: **Anzahl Tauchgänge** und **Zeit unter Wasser** (Summe der Dauer; ab 10 h als „61 h“, darunter als „7 h 40 min“). Kein „tiefster Tauchgang“ (Wunsch vom 2026-11-22).
 
-Links das Mini-Tiefenprofil (Sparkline), rechts die max. Tiefe (groß, `depth`).
-Gruppiert nach Monat, neuester oben. FAB **„Manuell eintragen“**.
+**Inhalt pro Eintrag** als Karte (`surfaceRaised`, Rand `outline`, 20 dp Ecken):
+1. oben links die **Tauchgangsnummer** `#42`, 15 sp, extra fett, in `primary`
+2. darunter der **Tauchplatz-Name**: 16 sp, 600, einzeilig, sonst mit „…“ abgeschnitten. Ohne Tauchplatz in `onSurfaceMuted` kursiv „Ohne Tauchplatz“.
+3. darunter klein: Quelle als Icon (Tauchcomputer / Datei / Watch / Hand) · Datum · Startzeit · Dauer
+4. rechts über zwei Zeilen: **max. Tiefe** groß (28 sp, 800, Einheit klein in `onSurfaceMuted`)
+5. unten über die ganze Breite das **Mini-Tiefenprofil** (Sparkline, 34 dp hoch, Fläche `depth` mit 18 % Deckkraft). Manuell erfasste Tauchgänge ohne Samples zeigen das geschätzte Rechteckprofil gestrichelt.
+
+Monatsüberschrift in Großbuchstaben (`onSurfaceMuted`), neuester oben. FAB **„Manuell eintragen“** in `accent`.
 
 | Zustand | Darstellung / Text |
 |---|---|
@@ -98,12 +108,12 @@ Gruppiert nach Monat, neuester oben. FAB **„Manuell eintragen“**.
 | Sicherungs-Erinnerung (> 30 Tage) | Dezente Karte oben: „Letzte Sicherung vor 34 Tagen.“ · **„Jetzt sichern“** · ✕ (für 7 Tage ausblenden) |
 
 ### 5.3 Tauchgang-Detail
-**Aufbau (Hochformat):**
-1. Kopf: **Nummer groß** (`#42`, 34 sp, extra fett, `primary`; vorgelesen als „Tauchgang 42“) · darunter **Tauchplatz** (19 sp, fett; leer → Link „Tauchplatz hinzufügen“) · darunter klein Datum, Uhrzeit, Taucher, Quelle (z. B. „Suunto EON Core · ••3F7A“)
-2. **Kennzahlen-Raster** (2 Spalten): max. Tiefe · Dauer · Ø-Tiefe · Wassertemp. min · Start/Ende-Druck · **Ø-SAC** · Gas (z. B. „EAN32“) · Wassertyp
-3. **Profil-Diagramm** (§6), Höhe 280 dp, Knopf „Vollbild“
-4. Flaschen (Volumen, Druck, Gas) · Ereignisse (Liste mit Zeit)
-5. Notizen, Bewertung (1–5 Sterne)
+**Aufbau (Hochformat, Änderung 2026-11-22):**
+1. **Kopf** auf einem Verlauf von `surfaceTint` nach `surface`: **Nummer groß** (`#42`, 44 sp, 800, `primary`; vorgelesen als „Tauchgang 42“) · darunter **Tauchplatz** (19 sp, 700; leer → Link „Tauchplatz hinzufügen“) · darunter klein Datum, Uhrzeit, Taucher, Quelle mit Modell und Kurzkennung (z. B. „Suunto EON Core ••3F7A“; bisher stand dort nur „Tauchcomputer“)
+2. **Kennzahlen-Raster**, 3 Spalten gleicher Höhe: max. Tiefe · Dauer · Ø-Tiefe · Wasser (min. Temperatur) · Gas (z. B. „EAN32“) · Flasche (Volumen, darunter klein Start → Ende in bar). Darunter über die volle Breite **Ø-SAC** mit Herkunft: „gemessen“ oder „geschätzt aus 200 → 60 bar“.
+3. **Profil-Diagramm** (§6) mit Chips darüber und dem **Werte-Feld** darunter, Knopf „Vollbild“
+4. **Ereignisse** als kompakte Liste: Zeit · farbiger Punkt (Warnungen `error`, sonst `primary`) · deutscher Text. Gleiche Ereignisse innerhalb von 60 s werden zusammengefasst („Sicherheitsstopp 3×“). Jeder Ereignistyp hat einen deutschen Text (z. B. `deepstop` → „Tiefenstopp“), unbekannte Typen „Ereignis“ plus Code.
+5. Flaschen (falls mehrere), Notizen, Bewertung (1–5 Sterne)
 - Aktionen in der App-Leiste: **Bearbeiten**, Menü: „Löschen“
 
 | Zustand | Darstellung |
@@ -229,16 +239,19 @@ Info: „Hilf bei der Fehlersuche: Schicke das Protokoll an den Entwickler. Es e
 - leer: „Noch keine Einträge im Protokoll.“
 
 ## 6. Profil-Diagramm
-- **X-Achse:** Zeit (mm:ss bzw. h:mm). **Y-Achse:** Tiefe, **nach unten wachsend** (0 m oben), Gitter alle 5 m bzw. 10 m.
-- Tiefenkurve in `depth` als Fläche mit Verlauf (oben 40 %, unten 5 % Deckkraft).
-- **Zuschaltbare Ebenen** (Chips über dem Diagramm, Zustand wird gemerkt):
-  Temperatur (rechte Achse) · Flaschendruck (rechte Achse, pro Flasche eine Linie, gestrichelt ab Flasche 2) · **SAC** (eigene Achse, als Stufenlinie über 1-min-Abschnitte) · Puls (nur bei Watch) · NDL/Deko (Band unten).
+- **X-Achse:** Zeit (min). **Y-Achse:** Tiefe, **nach unten wachsend** (0 m oben), Gitter alle 10 m (bis 15 m max. Tiefe alle 5 m), Beschriftung in `onSurfaceMuted`.
+- Tiefenkurve in `depth` als Fläche mit Verlauf (oben 5 %, unten 42 % Deckkraft) und Linie 2 dp.
+- **Zuschaltbare Ebenen** (Chips über dem Diagramm, Zustand wird gemerkt): **Temperatur** (rechte Achse, `temperature`) · **Luft** (rechte Achse, `pressure`, gestrichelt wenn geschätzt; pro Flasche eine Linie) · **NDL** (Band unten, `ndl`, gestrichelt) · **SAC** (eigene Achse, Stufenlinie über 1-min-Abschnitte, **nur mit gemessenem Druck**; geschätzt wäre sie eine waagrechte Linie ohne Aussage) · Puls (nur bei Watch).
   Immer höchstens **zwei rechte Achsen** gleichzeitig. Bei einer dritten schaltet die älteste automatisch ab, mit kurzem Hinweis.
-- **Ereignisse** als kleine Marker auf der Kurve (Gaswechsel, Warnung „Aufstieg zu schnell“, Sicherheitsstopp). Antippen zeigt einen Tooltip.
-- **Antippen/Ziehen:** senkrechte Linie mit Werte-Box: „23:10 · 18,4 m · 21 °C · 142 bar · SAC 14,2 l/min“.
+- **Ereignisse** als Punkte auf der Kurve (Warnungen `error`, sonst `primary`). Antippen zeigt den Text.
+- **Antippen/Ziehen (Wunsch vom 2026-11-22):** senkrechte Linie und Punkt auf der Kurve. Das **Werte-Feld unter dem Diagramm** zeigt immer die Werte dieses Moments; vor dem ersten Tippen steht die Linie beim tiefsten Punkt.
+  Werte: **Zeit · Tiefe · Temperatur · NDL · Umgebungsdruck · Luft jetzt** (l/min in dieser Tiefe) und darunter zwei eigene Zeilen über die volle Breite: **„Noch in der Flasche“** (z. B. „ca. 142 bar“) und **„Bisher verbraucht“** (z. B. „ca. 696 l“, Liter an der Oberfläche). Bei Schätzung folgt eine kleine Zeile „Luftwerte geschätzt aus Start- und Enddruck (200 → 60 bar, 12 l)“.
+  - **Gemessen**, wenn der Tauchcomputer Druck-Samples liefert: Druck aus den Samples, verbraucht = (Startdruck − Druck) × Volumen, „Luft jetzt“ aus dem SAC der laufenden Minute × Umgebungsdruck.
+  - **Geschätzt**, wenn nur Start- und Enddruck bekannt sind (z. B. EON Core ohne Sender, Druck von Hand eingetragen): Der Gesamtverbrauch (Start − Ende) × Volumen wird nach **Zeit × Umgebungsdruck** (1 + Tiefe/10 bar) auf den Tauchgang verteilt. „Luft jetzt“ = Ø-SAC × Umgebungsdruck. Gekennzeichnet durch die kleine Zeile im Werte-Feld und „Luft (geschätzt)“ am Chip.
+  - **Ohne Druckangaben** steht im Werte-Feld statt der Luftwerte der Link **„Start- und Enddruck eintragen“** (öffnet Bearbeiten). Ohne Flaschengröße: „Flaschengröße eintragen“.
 - **Vollbild/Querformat:** Pinch-Zoom und Verschieben auf der Zeitachse, Doppeltipp setzt zurück.
-- **Barrierefreiheit:** Das Diagramm hat ein Semantics-Label mit Zusammenfassung („Tiefenprofil: max. 18,4 m nach 12 min, Dauer 47 min“). Darunter liegt der Link **„Als Tabelle anzeigen“** (Minutenwerte).
-- Nicht verbindliche Werte: Unter NDL/Deko steht „Werte vom Tauchcomputer, nur zur Anzeige.“ (Constitution §5)
+- **Barrierefreiheit:** Das Diagramm hat ein Semantics-Label mit Zusammenfassung („Tiefenprofil: max. 24,1 m nach 4 min, Dauer 60 min“). Das Werte-Feld ist eine Live-Region. Darunter liegt der Link **„Als Tabelle anzeigen“** (Minutenwerte).
+- Nicht verbindliche Werte: Unter dem Werte-Feld steht „Werte vom Tauchcomputer, nur zur Anzeige.“, bei Schätzung ergänzt um „Luft ist geschätzt, weil kein Flaschendruck aufgezeichnet wurde.“ (Constitution §5)
 
 ## 7. Barrierefreiheit (Pflicht)
 - Kontrast WCAG AA: Text ≥ 4,5:1, Kurven und Icons ≥ 3:1. Gilt für beide Themes und alle Tokens in §1.
