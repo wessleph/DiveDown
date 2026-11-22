@@ -10,6 +10,7 @@ import '../../l10n/app_localizations.dart';
 import '../import/import_screen.dart';
 import 'dive_detail_screen.dart';
 import 'dive_texts.dart';
+import '../settings/backup_flows.dart';
 import 'manual_dive_screen.dart';
 import 'sparkline.dart';
 
@@ -163,7 +164,12 @@ class _DiveList extends StatelessWidget {
       itemBuilder: (context, i) => switch (items[i]) {
         final Dive dive => _DiveRow(dive: dive),
         final DateTime start => _MonthHeader(start: start),
-        _Header() => _SummaryTiles(dives: dives),
+        _Header() => Column(
+          children: [
+            const _BackupReminder(),
+            _SummaryTiles(dives: dives),
+          ],
+        ),
         _ => throw StateError('unexpected item'),
       },
     );
@@ -409,6 +415,61 @@ class _Tile extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// „Letzte Sicherung vor 34 Tagen.“ with „Jetzt sichern“ and ✕ for 7 days
+/// (ui-spec §5.2, T11.15).
+class _BackupReminder extends ConsumerWidget {
+  const _BackupReminder();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(backupReminderProvider).value;
+    if (state == null || !state.due) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final colors = theme.extension<DiveColors>()!;
+    final last = state.lastBackup;
+    final text = last == null
+        ? l10n.reminderNever
+        : l10n.reminderLast(DateTime.now().toUtc().difference(last).inDays);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 4, 14, 8),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colors.surfaceRaised,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: colors.warning),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
+          child: Row(
+            children: [
+              Icon(Icons.save_alt, color: colors.warning),
+              const SizedBox(width: 10),
+              Expanded(child: Text(text)),
+              TextButton(
+                onPressed: () => showCreateBackup(context, ref),
+                child: Text(l10n.reminderAction),
+              ),
+              IconButton(
+                tooltip: l10n.reminderDismiss,
+                icon: const Icon(Icons.close),
+                onPressed: () async {
+                  await ref
+                      .read(appSettingsProvider)
+                      .setBackupReminderSnoozedUntil(
+                        DateTime.now().toUtc().add(const Duration(days: 7)),
+                      );
+                  ref.invalidate(backupReminderProvider);
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

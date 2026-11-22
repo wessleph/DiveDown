@@ -26,6 +26,9 @@ void main() {
     await seedActiveDiver(db);
     await pumpTestApp(tester, db: db, location: '/settings');
 
+    // Since T11 the entry sits below the section DATEN.
+    await tester.ensureVisible(find.text('Open-Source-Lizenzen'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Open-Source-Lizenzen'));
     await tester.pumpAndSettle();
 

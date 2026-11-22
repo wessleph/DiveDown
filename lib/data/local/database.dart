@@ -20,8 +20,12 @@ part 'database.g.dart';
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
+  /// Schema of this app version; backups from a newer one are refused
+  /// (T11.4).
+  static const latestSchemaVersion = 1;
+
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => latestSchemaVersion;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(

@@ -22,6 +22,14 @@ class AppStartupGate extends StatefulWidget {
 class _AppStartupGateState extends State<AppStartupGate> {
   late Future<AppDatabase> _opening = widget.openDatabase();
 
+  /// New after a restore, so every provider starts fresh (T11).
+  var _generation = 0;
+
+  void _restart() => setState(() {
+    _generation++;
+    _opening = widget.openDatabase();
+  });
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -29,7 +37,11 @@ class _AppStartupGateState extends State<AppStartupGate> {
       builder: (context, snapshot) {
         if (snapshot.data case final db?) {
           return ProviderScope(
-            overrides: [appDatabaseProvider.overrideWithValue(db)],
+            key: ValueKey(_generation),
+            overrides: [
+              appDatabaseProvider.overrideWithValue(db),
+              restartAppProvider.overrideWithValue(_restart),
+            ],
             child: const DiveDownApp(),
           );
         }

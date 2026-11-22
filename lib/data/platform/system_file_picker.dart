@@ -7,7 +7,10 @@ import '../../domain/import/file_import.dart';
 /// checked there); it is read into memory and the copy removed
 /// (security.md: caches).
 class SystemFilePicker implements ImportFilePicker {
-  const SystemFilePicker();
+  const SystemFilePicker({this.maxBytes = maxImportFileBytes});
+
+  /// Larger files are refused before reading (FIT 10 MB, backup 200 MB).
+  final int maxBytes;
 
   @override
   Future<PickResult?> pick() async {
@@ -19,7 +22,7 @@ class SystemFilePicker implements ImportFilePicker {
       if (size == null) {
         return PickFailed(file.name, FileImportFailure.unreadable);
       }
-      if (size > maxImportFileBytes) {
+      if (size > maxBytes) {
         return PickFailed(file.name, FileImportFailure.tooLarge);
       }
       return Picked(ImportFile(file.name, await file.readAsBytes()));

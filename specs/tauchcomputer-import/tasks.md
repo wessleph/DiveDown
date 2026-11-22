@@ -542,3 +542,12 @@ Neue Abhängigkeiten (Lizenzen am 2026-11-22 an den eingesetzten Versionen gepr�
 - [x] Avatar im Logbuch und „Importieren für“ in Quellenwahl und Vorschau entfernt, Texte `importFor`/`diverAvatarSpoken` gelöscht → T23.13 grün.
 - Gesamt: `flutter test` 357/357, `flutter analyze` ohne Befund, Debug-APK baut.
 - **Auf dem S25 Ultra geprüft, 2026-11-22:** Abschnitte wie in §5.11; Name „Test“, Startnummer 1, „Nummern nach Datum neu vergeben“ wird angeboten (März-Tauchgang #72); „Suunto EON Core ••CC2D · Zuletzt: 13.11.2026“; „Version 1.0.0 (Build 1)“, „libdivecomputer 0.10.0“. „Datenschutzerklärung“ öffnet Chrome, „Zurück“ führt in die App zurück; dafür ist kein `<queries>`-Eintrag nötig. `url_launcher` und `package_info_plus` bringen keine Berechtigungen mit (INTERNET steht nur im Debug-Manifest der Flutter-Vorlage).
+
+**Umgesetzt (Phase 50, 2026-11-22), T11.1–T11.8, T11.11–T11.15:**
+- [x] `LogbookBackup`: `create` per `VACUUM INTO` (konsistente Kopie, auch mit WAL) plus Manifest, `inspect` liest nur die zwei bekannten Einträge in den Speicher (keine Pfade, Größe vor dem Entpacken), prüft Format, SHA-256, SQLite-Kopf und `AppDatabase.latestSchemaVersion`; `restore` schließt die DB, legt `before-restore.sqlite` neben die DB, entfernt `-wal`/`-shm`/`-journal` und spielt bei einem Fehler die Kopie zurück. `backupReminderDue` → T11.1–T11.8 grün.
+- [x] Einstellungen speichern `last_backup_at`, `backup_baseline` (beim ersten Abruf gesetzt) und `backup_snoozed_until` in `app_meta`. `AppBackupActions` (Ordner `<support>/db/`, App-Version aus `package_info_plus`, Dateiname `DiveDown-Sicherung-JJJJ-MM-TT.divedown`), Teilen über `share_plus` aus `<cache>/share/` (Datei danach gelöscht), Dateiwahl mit 200-MB-Grenze (`SystemFilePicker(maxBytes:)`).
+- [x] Oberfläche: Abschnitt DATEN, `showCreateBackup` und `runRestore` (Zusammenfassung, Rückfrage, Fehlertexte aus §5.12), Erinnerungskarte im Logbuch mit „Jetzt sichern“ und ✕ → T11.11–T11.15 grün.
+- [x] Nach dem Wiederherstellen öffnet `AppStartupGate` die Datenbank neu (`restartAppProvider`, neuer `ProviderScope`), damit keine alten Daten in Providern hängen bleiben.
+- Testaufbau korrigiert, Aussage unverändert: T9.20 scrollt zu „Open-Source-Lizenzen“ (liegt jetzt unter DATEN).
+- Gesamt: `flutter test` 380/380, `flutter analyze` ohne Befund, Debug-APK baut.
+- Noch nicht auf dem Handy geprüft: Teilen-Dialog, Dateiwahl, Wiederherstellen mit Neustart.

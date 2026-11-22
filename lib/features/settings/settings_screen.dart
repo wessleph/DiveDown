@@ -8,6 +8,7 @@ import '../../domain/dive/diver.dart';
 import '../../domain/settings/app_settings.dart';
 import '../../l10n/app_localizations.dart';
 import '../logbook/dive_texts.dart';
+import 'backup_flows.dart';
 
 /// Einstellungen (ui-spec §5.11): one diver per app, devices, appearance
 /// and „Über DiveDown“. Backup (T11) and diagnostic logs (T10) follow.
@@ -42,6 +43,21 @@ class SettingsScreen extends ConsumerWidget {
           if (diver != null) _DiverGroup(diver: diver),
           _Section(l10n.settingsSectionDevices),
           const _Devices(),
+          _Section(l10n.settingsSectionData),
+          _Group(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.save_alt),
+                title: Text(l10n.backupEntry),
+                onTap: () => showCreateBackup(context, ref),
+              ),
+              ListTile(
+                leading: const Icon(Icons.restore),
+                title: Text(l10n.restoreEntry),
+                onTap: () => runRestore(context, ref),
+              ),
+            ],
+          ),
           _Section(l10n.settingsSectionAppearance),
           const _Appearance(),
           _Section(l10n.settingsSectionAbout),

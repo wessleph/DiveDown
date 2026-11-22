@@ -1,12 +1,15 @@
 import 'dart:io';
 
+import 'package:clock/clock.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart' show DateFormat;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:libdivecomputer_plugin/libdivecomputer_plugin.dart' as dc;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../data/backup/logbook_backup.dart';
 import '../data/import/divecomputer/plugin_dive_computer_source.dart';
@@ -33,6 +36,7 @@ import '../domain/import/import_service.dart';
 import '../domain/settings/app_settings.dart';
 import '../domain/sites/site_repository.dart';
 import '../domain/sites/site_suggestions.dart';
+import 'startup.dart' show databaseFolderName;
 
 /// The open database. Set by [AppStartupGate] once the file is open;
 /// tests override it with an in-memory database.
@@ -136,20 +140,90 @@ final numbersFollowDatesProvider = FutureProvider<bool>((ref) async {
 
 /// Backup and restore (ui-spec §5.12, T11).
 final backupActionsProvider = Provider<BackupActions>(
-  (ref) => throw UnimplementedError('backupActionsProvider'),
+  (ref) => AppBackupActions(ref.watch(appDatabaseProvider)),
 );
 
-/// Opens the system share dialog for a file (`share_plus`).
+/// Opens the system share dialog for a file (`share_plus`). The file is
+/// written to `<cache>/share/` and removed afterwards (security.md caches).
 final shareFileProvider =
     Provider<Future<void> Function(String name, Uint8List bytes)>(
-      (ref) =>
-          (name, bytes) => throw UnimplementedError('shareFileProvider'),
+      (ref) => (name, bytes) async {
+        final dir = Directory(
+          p.join((await getTemporaryDirectory()).path, 'share'),
+        );
+        await dir.create(recursive: true);
+        final file = File(p.join(dir.path, p.basename(name)));
+        await file.writeAsBytes(bytes, flush: true);
+        try {
+          await SharePlus.instance.share(
+            ShareParams(
+              files: [XFile(file.path, mimeType: 'application/zip')],
+              fileNameOverrides: [p.basename(name)],
+            ),
+          );
+        } finally {
+          if (file.existsSync()) file.deleteSync();
+        }
+      },
     );
 
 /// The file dialog for „Logbuch wiederherstellen“ (up to 200 MB).
 final backupFilePickerProvider = Provider<ImportFilePicker>(
-  (ref) => throw UnimplementedError('backupFilePickerProvider'),
+  (ref) => const SystemFilePicker(maxBytes: maxBackupBytes),
 );
+
+/// The backup reminder of the logbook (ui-spec §5.2, T11.8): whether it
+/// shows, and the last backup for its text.
+final backupReminderProvider =
+    FutureProvider<({bool due, DateTime? lastBackup})>((ref) async {
+      final settings = ref.watch(appSettingsProvider);
+      final dives = await ref.watch(logbookProvider.future);
+      final last = await settings.lastBackupAt();
+      final due = backupReminderDue(
+        now: clock.now().toUtc(),
+        lastBackup: last,
+        baseline: await settings.backupBaseline(),
+        snoozedUntil: await settings.backupReminderSnoozedUntil(),
+        hasDives: dives.isNotEmpty,
+      );
+      return (due: due, lastBackup: last);
+    });
+
+/// Reopens the database after a restore; [AppStartupGate] replaces it.
+final restartAppProvider = Provider<void Function()>((ref) => () {});
+
+/// [BackupActions] on the open database in `<support>/db/` (T11, T16.1).
+class AppBackupActions implements BackupActions {
+  AppBackupActions(this._db);
+
+  final AppDatabase _db;
+
+  Future<LogbookBackup> _backup() async {
+    final support = await getApplicationSupportDirectory();
+    final info = await PackageInfo.fromPlatform();
+    return LogbookBackup(
+      folder: Directory(p.join(support.path, databaseFolderName)),
+      appVersion: info.version,
+    );
+  }
+
+  @override
+  Future<BackupFile> create() async {
+    final bytes = await (await _backup()).create(_db);
+    final day = DateFormat('yyyy-MM-dd').format(clock.now());
+    return BackupFile('DiveDown-Sicherung-$day.$backupFileExtension', bytes);
+  }
+
+  @override
+  BackupCheck inspect(Uint8List bytes) => LogbookBackup(
+    folder: Directory.systemTemp,
+    appVersion: '',
+  ).inspect(bytes);
+
+  @override
+  Future<RestoreResult> restore(Uint8List bytes) async =>
+      (await _backup()).restore(bytes, closeDatabase: _db.close);
+}
 
 /// Renumbering and shifting of dive numbers (ui-spec §5.11).
 final diveNumberingProvider = Provider<DiveNumbering>(

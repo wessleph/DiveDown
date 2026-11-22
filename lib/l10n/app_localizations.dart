@@ -190,6 +190,132 @@ abstract class AppLocalizations {
   /// **'ÜBER DIVEDOWN'**
   String get settingsSectionAbout;
 
+  /// No description provided for @settingsSectionData.
+  ///
+  /// In de, this message translates to:
+  /// **'DATEN'**
+  String get settingsSectionData;
+
+  /// No description provided for @backupEntry.
+  ///
+  /// In de, this message translates to:
+  /// **'Logbuch sichern'**
+  String get backupEntry;
+
+  /// No description provided for @restoreEntry.
+  ///
+  /// In de, this message translates to:
+  /// **'Logbuch wiederherstellen'**
+  String get restoreEntry;
+
+  /// No description provided for @backupInfo.
+  ///
+  /// In de, this message translates to:
+  /// **'Erstellt eine Datei mit allen Tauchgängen. Speichere sie z. B. in „Dateien“ oder schicke sie dir per Mail.'**
+  String get backupInfo;
+
+  /// No description provided for @backupWarning.
+  ///
+  /// In de, this message translates to:
+  /// **'Die Datei ist nicht verschlüsselt und enthält Gesundheitsdaten (Puls).'**
+  String get backupWarning;
+
+  /// No description provided for @backupCreate.
+  ///
+  /// In de, this message translates to:
+  /// **'Sicherung erstellen'**
+  String get backupCreate;
+
+  /// No description provided for @backupCreated.
+  ///
+  /// In de, this message translates to:
+  /// **'Sicherung erstellt'**
+  String get backupCreated;
+
+  /// No description provided for @backupFailed.
+  ///
+  /// In de, this message translates to:
+  /// **'Die Sicherung konnte nicht erstellt werden.'**
+  String get backupFailed;
+
+  /// No description provided for @restoreSummary.
+  ///
+  /// In de, this message translates to:
+  /// **'Sicherung vom {date} · {count} Tauchgänge'**
+  String restoreSummary(String date, int count);
+
+  /// No description provided for @restoreReplaceInfo.
+  ///
+  /// In de, this message translates to:
+  /// **'Dein aktuelles Logbuch wird ersetzt. Vorher wird automatisch eine Kopie angelegt.'**
+  String get restoreReplaceInfo;
+
+  /// No description provided for @restoreAction.
+  ///
+  /// In de, this message translates to:
+  /// **'Wiederherstellen'**
+  String get restoreAction;
+
+  /// No description provided for @restoreDone.
+  ///
+  /// In de, this message translates to:
+  /// **'Wiederhergestellt'**
+  String get restoreDone;
+
+  /// No description provided for @restoreInvalid.
+  ///
+  /// In de, this message translates to:
+  /// **'Diese Datei ist keine gültige DiveDown-Sicherung.'**
+  String get restoreInvalid;
+
+  /// No description provided for @restoreCorrupt.
+  ///
+  /// In de, this message translates to:
+  /// **'Die Sicherung ist beschädigt und kann nicht verwendet werden.'**
+  String get restoreCorrupt;
+
+  /// No description provided for @restoreNewer.
+  ///
+  /// In de, this message translates to:
+  /// **'Diese Sicherung stammt aus einer neueren DiveDown-Version. Bitte aktualisiere die App zuerst.'**
+  String get restoreNewer;
+
+  /// No description provided for @restoreTooLarge.
+  ///
+  /// In de, this message translates to:
+  /// **'Die Datei ist zu groß für eine DiveDown-Sicherung.'**
+  String get restoreTooLarge;
+
+  /// No description provided for @restoreFailed.
+  ///
+  /// In de, this message translates to:
+  /// **'Wiederherstellen fehlgeschlagen. Dein bisheriges Logbuch ist unverändert.'**
+  String get restoreFailed;
+
+  /// No description provided for @reminderNever.
+  ///
+  /// In de, this message translates to:
+  /// **'Noch keine Sicherung.'**
+  String get reminderNever;
+
+  /// No description provided for @reminderLast.
+  ///
+  /// In de, this message translates to:
+  /// **'Letzte Sicherung vor {days} Tagen.'**
+  String reminderLast(int days);
+
+  /// No description provided for @reminderAction.
+  ///
+  /// In de, this message translates to:
+  /// **'Jetzt sichern'**
+  String get reminderAction;
+
+  /// No description provided for @reminderDismiss.
+  ///
+  /// In de, this message translates to:
+  /// **'Erinnerung ausblenden'**
+  String get reminderDismiss;
+
   /// No description provided for @settingsName.
   ///
   /// In de, this message translates to:

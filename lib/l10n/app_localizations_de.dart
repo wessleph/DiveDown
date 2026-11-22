@@ -58,6 +58,81 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsSectionAbout => 'ÜBER DIVEDOWN';
 
   @override
+  String get settingsSectionData => 'DATEN';
+
+  @override
+  String get backupEntry => 'Logbuch sichern';
+
+  @override
+  String get restoreEntry => 'Logbuch wiederherstellen';
+
+  @override
+  String get backupInfo =>
+      'Erstellt eine Datei mit allen Tauchgängen. Speichere sie z. B. in „Dateien“ oder schicke sie dir per Mail.';
+
+  @override
+  String get backupWarning =>
+      'Die Datei ist nicht verschlüsselt und enthält Gesundheitsdaten (Puls).';
+
+  @override
+  String get backupCreate => 'Sicherung erstellen';
+
+  @override
+  String get backupCreated => 'Sicherung erstellt';
+
+  @override
+  String get backupFailed => 'Die Sicherung konnte nicht erstellt werden.';
+
+  @override
+  String restoreSummary(String date, int count) {
+    return 'Sicherung vom $date · $count Tauchgänge';
+  }
+
+  @override
+  String get restoreReplaceInfo =>
+      'Dein aktuelles Logbuch wird ersetzt. Vorher wird automatisch eine Kopie angelegt.';
+
+  @override
+  String get restoreAction => 'Wiederherstellen';
+
+  @override
+  String get restoreDone => 'Wiederhergestellt';
+
+  @override
+  String get restoreInvalid =>
+      'Diese Datei ist keine gültige DiveDown-Sicherung.';
+
+  @override
+  String get restoreCorrupt =>
+      'Die Sicherung ist beschädigt und kann nicht verwendet werden.';
+
+  @override
+  String get restoreNewer =>
+      'Diese Sicherung stammt aus einer neueren DiveDown-Version. Bitte aktualisiere die App zuerst.';
+
+  @override
+  String get restoreTooLarge =>
+      'Die Datei ist zu groß für eine DiveDown-Sicherung.';
+
+  @override
+  String get restoreFailed =>
+      'Wiederherstellen fehlgeschlagen. Dein bisheriges Logbuch ist unverändert.';
+
+  @override
+  String get reminderNever => 'Noch keine Sicherung.';
+
+  @override
+  String reminderLast(int days) {
+    return 'Letzte Sicherung vor $days Tagen.';
+  }
+
+  @override
+  String get reminderAction => 'Jetzt sichern';
+
+  @override
+  String get reminderDismiss => 'Erinnerung ausblenden';
+
+  @override
   String get settingsName => 'Name';
 
   @override
