@@ -752,3 +752,19 @@ Abgenommen am 2026-11-23 (T30–T32).
 - [x] Logbuch: Import-Vorschau meldet die Ids der gespeicherten Tauchgänge (`recentlyImportedProvider`); die Liste hebt sie 3 s hervor (Hintergrund, Rand links, „Neu“, vorgelesen „Neu importiert“), scrollt zum ersten, blendet in 600 ms über (ohne bei „Animationen reduzieren“) und beendet die Markierung beim Tab-Wechsel → T32.1, T32.2 grün.
 - Testkorrekturen: T30.2 sortierte „apeks“/„Aqualung“ falsch erwartet (p vor q), jetzt „apeks“/„Mares“; T31.4 prüft beim Link „Ausrüstung anlegen“ die geöffnete Seite statt des Pfads, weil sie per `push` über dem Formular liegt.
 - Gesamt: `flutter test` 472/472, `flutter analyze` ohne Befund, Debug-APK baut. Noch nicht auf dem Handy angesehen.
+
+## T33: Release-APK mit eigenem Schlüssel (security.md S, A3; ADR 0005)
+
+Die Release-APK wird bisher mit dem Debug-Schlüssel signiert. Neu: eigener Upload-Schlüssel, nur auf dem PC (nie in der CI), Pfad und Passwörter in `android/key.properties` (in `.gitignore`), Keystore außerhalb des Repos. Fehlt die Datei, bricht **nur das Packen** eines Release-Builds mit einem Hinweis auf die Anleitung ab; Debug-Builds und die Manifest-Prüfung der CI (`processReleaseMainManifest`) laufen weiter.
+
+| Nr. | Ausgangslage | Aktion | Erwartet | Status |
+|---|---|---|---|---|
+| T33.1 | `android/app/build.gradle.kts` | gelesen | Build-Typ `release` nutzt `signingConfigs.getByName("release")`, nicht `"debug"` | ✅ 2026-11-23: rot, noch der Debug-Schlüssel |
+| T33.2 | dito | gelesen | Signatur `release` liest `storeFile`, `storePassword`, `keyAlias`, `keyPassword` aus `rootProject.file("key.properties")` | ✅ 2026-11-23: rot, fehlt |
+| T33.3 | ohne `key.properties` | gelesen | `GradleException` mit Verweis auf `docs/entwickler/android-release-einrichtung.md`, ausgelöst in `doFirst` (beim Packen, nicht beim Konfigurieren); die Anleitung existiert | ✅ 2026-11-23: rot, fehlt |
+| T33.4 | `android/.gitignore` | gelesen, `git check-ignore` | `key.properties`, `**/*.jks`, `**/*.keystore` ausgeschlossen | ✅ 2026-11-23: schon grün (Absicherung) |
+| T33.5 | von Hand auf dem PC | `flutter build apk --release` ohne bzw. mit `key.properties`; `gradlew :app:processReleaseMainManifest` | ohne: Abbruch mit Hinweis; mit: `apksigner verify --print-certs` zeigt das eigene Zertifikat; Manifest-Prüfung läuft ohne Schlüssel | offen (nach der Umsetzung) |
+
+Abgenommen am 2026-11-23.
+
+Test: `test/tool/android_signing_test.dart`. Nach dem Anlegen des Schlüssels kommt der SHA-256-Fingerabdruck des Zertifikats in die README (security.md, „Keine Prüfanleitung für die APK“). **Wichtig:** Eine mit dem Debug-Schlüssel installierte App lässt sich nicht durch die Release-APK ersetzen; vorher „Logbuch sichern“, App deinstallieren, Release-APK installieren, „Logbuch wiederherstellen“.
