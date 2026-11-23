@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Foreground of the adaptive icon: assets/icon/divedown_icon_android_foreground.svg
+     as vector (motif at 66 % inside the safe zone). GPL-3.0-or-later. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="1024"
+    android:viewportHeight="1024">
+    <group
+        android:pivotX="512"
+        android:pivotY="512"
+        android:scaleX="0.66"
+        android:scaleY="0.66">
+        <path android:pathData="M170,330 C270,330 300,730 430,750 S650,720 720,590 S800,330 860,330 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:type="linear"
+                    android:startX="0"
+                    android:startY="330"
+                    android:endX="0"
+                    android:endY="770"
+                    android:startColor="#0D0B7A80"
+                    android:endColor="#6B0B7A80" />
+            </aapt:attr>
+        </path>
+        <path
+            android:pathData="M150,330 H874"
+            android:strokeColor="#0B7A80"
+            android:strokeAlpha="0.27"
+            android:strokeWidth="20"
+            android:strokeLineCap="round" />
+        <path
+            android:pathData="M170,330 C270,330 300,730 430,750 S650,720 720,590 S800,330 860,330"
+            android:strokeColor="#0B7A80"
+            android:strokeWidth="60"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M740,230 a30,30 0 1,0 60,0 a30,30 0 1,0 -60,0"
+            android:fillColor="#B9412A" />
+        <path
+            android:pathData="M812,160 a18,18 0 1,0 36,0 a18,18 0 1,0 -36,0"
+            android:fillColor="#B9412A" />
+    </group>
+</vector>

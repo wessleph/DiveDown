@@ -595,3 +595,12 @@ Neue Abhängigkeiten (Lizenzen am 2026-11-22 an den eingesetzten Versionen gepr�
 | T24.4 | iOS `AppIcon.appiconset` | jede Größe aus `Contents.json` | Pixelgröße = Punkte × Faktor, RGB ohne Alphakanal (App Store lehnt Alpha im 1024er ab), Hintergrund `#F2F8F8` | ✅ 2026-11-23: rot, noch Flutter-Standard (Palette-PNG) |
 
 Test: `test/app/app_icon_test.dart`. Keine neue Abhängigkeit: statt `flutter_launcher_icons` zeichnet `tool/render_app_icons.py` (Pillow, nur auf dem PC) die PNGs aus denselben Formen wie die SVG-Vorlagen; die Ergebnisse werden eingecheckt.
+
+Abgenommen am 2026-11-23.
+
+**Umgesetzt (Phase 50, 2026-11-23), T24:**
+- [x] SVG-Vorlagen in Riff-Farben (Kurve `#0B7A80`, Blasen `#B9412A`, Hintergrund `#F2F8F8`, Fläche als Verlauf in `primary`) → T24.1 grün.
+- [x] Adaptives Android-Icon: `mipmap-anydpi-v26/ic_launcher.xml`, Hintergrund `@color/ic_launcher_background`, Vordergrund und einfarbige Ebene als Vektor → T24.2 grün.
+- [x] `tool/render_app_icons.py` zeichnet die alten Launcher-PNGs und alle 19 iOS-Größen (RGB ohne Alpha, unter 60 px die vereinfachte Variante) → T24.3, T24.4 grün.
+- Gesamt: `flutter test` 414/414, `flutter analyze` ohne Befund, Debug-APK baut.
+- **Auf dem S25 Ultra geprüft, 2026-11-23:** Icon im App-Menü hell mit Petrol-Kurve, Verlauf und Korallen-Blasen, nichts von der Samsung-Maske abgeschnitten. Themen-Icons (einfarbige Ebene) nicht eigens eingeschaltet.

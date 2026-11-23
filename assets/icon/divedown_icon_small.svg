@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-  <!-- DiveDown app icon, variant A, simplified for sizes below 60 px (notifications, settings lists).
-       Thicker curve, no gradient, no surface line, one bubble. GPL-3.0-or-later. -->
-  <rect width="1024" height="1024" fill="#0B1620"/>
-  <path d="M170 330 C 270 330, 300 730, 430 750 S 650 720, 720 590 S 800 330, 860 330" fill="none" stroke="#3FA3E0" stroke-width="70" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="770" cy="230" r="36" fill="#5CB8E8"/>
+  <!-- DiveDown app icon, variant A, simplified for sizes below 60 px (notifications, settings lists),
+       Riff colours. Thicker curve, no gradient, no surface line, one bubble. GPL-3.0-or-later. -->
+  <rect width="1024" height="1024" fill="#F2F8F8"/>
+  <path d="M170 330 C 270 330, 300 730, 430 750 S 650 720, 720 590 S 800 330, 860 330" fill="none" stroke="#0B7A80" stroke-width="70" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="770" cy="230" r="36" fill="#B9412A"/>
 </svg>

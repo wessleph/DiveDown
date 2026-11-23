@@ -39,9 +39,9 @@ Gewählt aus zwei Entwürfen („Tiefsee“ dunkel, „Riff“ hell) am 2026-11-
   **Gewählt am 2026-11-18: Variante A „Tiefenkurve“** (Mockup-Fläche, Board 7). Vorlagen in `assets/icon/`:
   - `divedown_icon.svg`: iOS und Größen ab 60 px
   - `divedown_icon_small.svg`: unter 60 px, mit dickerer Kurve und nur einer Blase
-  - `divedown_icon_android_foreground.svg`: Vordergrund des adaptiven Android-Icons, Motiv auf 66 % verkleinert, Hintergrund `#0B1620`
+  - `divedown_icon_android_foreground.svg`: Vordergrund des adaptiven Android-Icons, Motiv auf 66 % verkleinert, Hintergrund `#F2F8F8` (seit 2026-11-23 Riff; in der App als Vektor `res/drawable/ic_launcher_foreground.xml` plus einfarbige Ebene für Themen-Icons)
 
-  Die PNG-Größen werden in Phase 50 erzeugt (z. B. mit `flutter_launcher_icons`).
+  Die PNG-Größen (iOS, alte Android-Launcher) zeichnet `tool/render_app_icons.py` (Pillow, nur auf dem PC) aus denselben Formen; sie sind eingecheckt.
 - **Ecken** 20 dp für Karten, 14 dp für Kacheln, Chips und Knöpfe ganz rund. Karten haben einen Rand in `outline` statt Schatten, nur der Knopf „Manuell eintragen“ hat einen Schatten. **Abstände** im 8-dp-Raster, **Touch-Ziele mindestens 48 dp**. Hauptaktionen bekommen 56 dp, damit man sie auch mit nassen Fingern trifft.
 - **Bedeutung nie nur durch Farbe:** Jede Kurve hat zusätzlich ein Icon bzw. Label in der Legende, Fehler zusätzlich ein Icon und Text.
 

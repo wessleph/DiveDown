@@ -1,18 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-  <!-- DiveDown Android adaptive icon foreground (transparent). Background layer: solid #0B1620.
+  <!-- DiveDown Android adaptive icon foreground (transparent), Riff colours. Background layer: solid #F2F8F8.
        Motif of divedown_icon.svg scaled to 66 % around the centre, so it stays inside the safe zone
-       (furthest point, the small bubble, is ~313 px from the centre; limit ~338 px). GPL-3.0-or-later. -->
+       (furthest point, the small bubble, is ~313 px from the centre; limit ~338 px). GPL-3.0-or-later.
+       In the app: android/app/src/main/res/drawable/ic_launcher_foreground.xml (same shapes as vector). -->
   <defs>
     <linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#3FA3E0" stop-opacity="0.05"/>
-      <stop offset="1" stop-color="#3FA3E0" stop-opacity="0.55"/>
+      <stop offset="0" stop-color="#0B7A80" stop-opacity="0.05"/>
+      <stop offset="1" stop-color="#0B7A80" stop-opacity="0.42"/>
     </linearGradient>
   </defs>
   <g transform="translate(512 512) scale(0.66) translate(-512 -512)">
     <path d="M170 330 C 270 330, 300 730, 430 750 S 650 720, 720 590 S 800 330, 860 330 Z" fill="url(#fill)"/>
-    <path d="M150 330 H874" stroke="#2A3B4A" stroke-width="20" stroke-linecap="round"/>
-    <path d="M170 330 C 270 330, 300 730, 430 750 S 650 720, 720 590 S 800 330, 860 330" fill="none" stroke="#3FA3E0" stroke-width="60" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="770" cy="230" r="30" fill="#5CB8E8"/>
-    <circle cx="830" cy="160" r="18" fill="#5CB8E8"/>
+    <path d="M150 330 H874" stroke="#0B7A80" stroke-opacity="0.27" stroke-width="20" stroke-linecap="round"/>
+    <path d="M170 330 C 270 330, 300 730, 430 750 S 650 720, 720 590 S 800 330, 860 330" fill="none" stroke="#0B7A80" stroke-width="60" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="770" cy="230" r="30" fill="#B9412A"/>
+    <circle cx="830" cy="160" r="18" fill="#B9412A"/>
   </g>
 </svg>
