@@ -1,20 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-  <!-- DiveDown app icon, variant A "Tiefenkurve" (chosen 2026-11-18, ui-spec.md §1), Riff colours
-       since 2026-11-23: curve primary, bubbles accent, background surface. GPL-3.0-or-later.
-       Master for iOS and for sizes >= 60 px. Full square without corner radius: iOS applies its own mask.
-       Bubbles and curve ends lie outside Android's adaptive-icon safe zone (central circle, 66 % diameter);
-       for Android use divedown_icon_android_foreground.svg (motif scaled to 66 %) on background #F2F8F8.
-       The PNGs are drawn from these shapes by tool/render_app_icons.py. -->
-  <defs>
-    <linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#0B7A80" stop-opacity="0.05"/>
-      <stop offset="1" stop-color="#0B7A80" stop-opacity="0.42"/>
-    </linearGradient>
-  </defs>
-  <rect width="1024" height="1024" fill="#F2F8F8"/>
-  <path d="M170 330 C 270 330, 300 730, 430 750 S 650 720, 720 590 S 800 330, 860 330 Z" fill="url(#fill)"/>
-  <path d="M150 330 H874" stroke="#0B7A80" stroke-opacity="0.27" stroke-width="20" stroke-linecap="round"/>
-  <path d="M170 330 C 270 330, 300 730, 430 750 S 650 720, 720 590 S 800 330, 860 330" fill="none" stroke="#0B7A80" stroke-width="60" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="770" cy="230" r="30" fill="#B9412A"/>
-  <circle cx="830" cy="160" r="18" fill="#B9412A"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 160 160">
+  <!-- DiveDown app icon, variant D "Brille mit Clownfisch" (chosen 2026-11-23, ui-spec.md §1, T29).
+       Single-lens mask (frame #13303A, lens and strap #0B7A80) on surface #F2F8F8; a clownfish (#F26B1D,
+       white stripes) is reflected in the lens, three bubbles in primary above. GPL-3.0-or-later.
+       Master for iOS and sizes >= 60 px, 160 grid shown at 1024 px. Full square without corner radius:
+       iOS applies its own mask. Android: divedown_icon_android_foreground.svg (motif at 76 %).
+       The PNGs are drawn from the same path strings by tool/render_app_icons.py. -->
+  <defs><clipPath id="body"><path d="M101 83 Q88 67 68 80 Q88 97 101 83 Z"/></clipPath></defs>
+  <rect width="160" height="160" fill="#F2F8F8"/>
+  <rect x="12" y="80" width="24" height="12" rx="3" fill="#0B7A80"/>
+  <rect x="124" y="80" width="24" height="12" rx="3" fill="#0B7A80"/>
+  <path d="M34 70 Q34 58 48 58 H112 Q126 58 126 70 V96 Q126 116 108 116 H96 Q88 116 84 106 Q80 100 76 106 Q72 116 64 116 H52 Q34 116 34 96 Z" fill="#13303A"/>
+  <path d="M42 72 Q42 66 50 66 H110 Q118 66 118 72 V94 Q118 108 106 108 H98 Q92 108 88 100 Q80 90 72 100 Q68 108 62 108 H54 Q42 108 42 94 Z" fill="#0B7A80"/>
+  <path d="M54 100 L102 70" stroke="#22969B" stroke-width="10" stroke-linecap="round"/>
+  <path d="M48 78 Q49 71 55 70" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"/>
+  <path d="M69 81 L57 72 L60 81 L57 90 Z" fill="#F26B1D" stroke="#13303A" stroke-width="1.2" stroke-linejoin="round"/>
+  <path d="M101 83 Q88 67 68 80 Q88 97 101 83 Z" fill="#F26B1D"/>
+  <g clip-path="url(#body)">
+    <rect x="75" y="66" width="5" height="32" fill="#FFFFFF" stroke="#13303A" stroke-width="1.2"/>
+    <rect x="88" y="66" width="4.5" height="32" fill="#FFFFFF" stroke="#13303A" stroke-width="1.2"/>
+  </g>
+  <path d="M101 83 Q88 67 68 80 Q88 97 101 83 Z" fill="none" stroke="#13303A" stroke-width="1.2" stroke-linejoin="round"/>
+  <circle cx="96" cy="81" r="2" fill="#13303A"/>
+  <circle cx="106" cy="76" r="2" fill="none" stroke="#FFFFFF" stroke-width="1.5"/>
+  <circle cx="100" cy="44" r="6" fill="none" stroke="#0B7A80" stroke-width="3"/>
+  <circle cx="112" cy="30" r="4" fill="none" stroke="#0B7A80" stroke-width="2.5"/>
+  <circle cx="98" cy="22" r="3" fill="none" stroke="#0B7A80" stroke-width="2"/>
 </svg>

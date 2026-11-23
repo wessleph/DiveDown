@@ -1,9 +1,11 @@
-"""Renders the DiveDown app icon (variant A "Tiefenkurve", Riff colours,
-ui-spec §1) into the PNG sizes for iOS and the legacy Android mipmaps.
+"""Renders the DiveDown app icon (variant D "Brille mit Clownfisch",
+chosen 2026-11-23, ui-spec §1, T29) into the PNG sizes for iOS and the
+legacy Android mipmaps.
 
-The SVG files in assets/icon/ are the masters; this script draws the same
-shapes with Pillow (4x supersampling), because no SVG renderer is needed on
-the build PC. Android 8+ uses the vector layers in res/drawable instead.
+The shapes below are in the 160 x 160 grid of the SVG masters in
+assets/icon/ (same path strings). They are drawn with Pillow at 4x
+supersampling, because no SVG renderer is needed on the build PC.
+Android 8+ uses the vector layers in res/drawable instead.
 
     python tool/render_app_icons.py              # write all icons
     python tool/render_app_icons.py --preview X  # one preview sheet to X
@@ -12,6 +14,7 @@ GPL-3.0-or-later.
 """
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -19,78 +22,129 @@ from PIL import Image, ImageDraw
 
 SURFACE = (0xF2, 0xF8, 0xF8)
 PRIMARY = (0x0B, 0x7A, 0x80)
-ACCENT = (0xB9, 0x41, 0x2A)
+NAVY = (0x13, 0x30, 0x3A)
+STREAK = (0x22, 0x96, 0x9B)  # primaryLight #4CC9CE at 35 % over the lens
+ORANGE = (0xF2, 0x6B, 0x1D)
+WHITE = (0xFF, 0xFF, 0xFF)
 
-# The curve of divedown_icon.svg in its 1024 grid, "S" segments expanded.
-SEGMENTS = [
-    ((170, 330), (270, 330), (300, 730), (430, 750)),
-    ((430, 750), (560, 770), (650, 720), (720, 590)),
-    ((720, 590), (790, 460), (800, 330), (860, 330)),
-]
-WATERLINE_Y = 330
-
-
-def _curve_points(steps=60):
-    points = []
-    for p0, p1, p2, p3 in SEGMENTS:
-        for i in range(steps + 1):
-            t = i / steps
-            u = 1 - t
-            x = u**3 * p0[0] + 3 * u * u * t * p1[0] + 3 * u * t * t * p2[0] + t**3 * p3[0]
-            y = u**3 * p0[1] + 3 * u * u * t * p1[1] + 3 * u * t * t * p2[1] + t**3 * p3[1]
-            points.append((x, y))
-    return points
+FRAME = ("M34 70 Q34 58 48 58 H112 Q126 58 126 70 V96 Q126 116 108 116 H96 "
+         "Q88 116 84 106 Q80 100 76 106 Q72 116 64 116 H52 Q34 116 34 96 Z")
+LENS = ("M42 72 Q42 66 50 66 H110 Q118 66 118 72 V94 Q118 108 106 108 H98 "
+        "Q92 108 88 100 Q80 90 72 100 Q68 108 62 108 H54 Q42 108 42 94 Z")
+STREAK_LINE = "M54 100 L102 70"
+HIGHLIGHT = "M48 78 Q49 71 55 70"
+TAIL = "M69 81 L57 72 L60 81 L57 90 Z"
+BODY = "M101 83 Q88 67 68 80 Q88 97 101 83 Z"
+STRIPES = [(75, 66, 5, 32), (88, 66, 4.5, 32)]
+STRAPS = [(12, 80, 24, 12), (124, 80, 24, 12)]
+EYE = (96, 81, 2)
+BUBBLES = [(100, 44, 6, 3), (112, 30, 4, 2.5), (98, 22, 3, 2)]
+OUTLINE = 1.2
 
 
-def _polyline(draw, points, width, fill):
-    # A row of round dabs: round caps and joins without the gaps that
-    # ImageDraw.line leaves in thick curves.
+def _flatten(d, steps=24):
+    """Points of an absolute M/L/H/V/Q/Z path."""
+    tokens = re.findall(r"[MLHVQZ]|-?\d+(?:\.\d+)?", d)
+    pts, i, cmd = [], 0, None
+    x = y = 0.0
+    while i < len(tokens):
+        if tokens[i].isalpha():
+            cmd = tokens[i]
+            i += 1
+            if cmd == "Z":
+                pts.append(pts[0])
+                continue
+        n = lambda k: float(tokens[i + k])  # noqa: E731
+        if cmd in "ML":
+            x, y = n(0), n(1)
+            pts.append((x, y))
+            i += 2
+        elif cmd == "H":
+            x = n(0)
+            pts.append((x, y))
+            i += 1
+        elif cmd == "V":
+            y = n(0)
+            pts.append((x, y))
+            i += 1
+        elif cmd == "Q":
+            cx, cy, ex, ey = n(0), n(1), n(2), n(3)
+            for s in range(1, steps + 1):
+                t = s / steps
+                u = 1 - t
+                pts.append((u * u * x + 2 * u * t * cx + t * t * ex,
+                            u * u * y + 2 * u * t * cy + t * t * ey))
+            x, y = ex, ey
+            i += 4
+    return pts
+
+
+def _stroke(draw, points, width, fill):
+    # A row of round dabs: round caps and joins without gaps.
     r = width / 2
     for (x0, y0), (x1, y1) in zip(points, points[1:]):
-        n = max(1, int(((x1 - x0) ** 2 + (y1 - y0) ** 2) ** 0.5 / (r / 4)))
+        n = max(1, int(((x1 - x0) ** 2 + (y1 - y0) ** 2) ** 0.5 / (r / 3)))
         for i in range(n + 1):
             x = x0 + (x1 - x0) * i / n
             y = y0 + (y1 - y0) * i / n
             draw.ellipse((x - r, y - r, x + r, y + r), fill=fill)
 
 
+def _ring(draw, cx, cy, r, width, k, fill):
+    draw.ellipse(((cx - r - width / 2) * k, (cy - r - width / 2) * k,
+                  (cx + r + width / 2) * k, (cy + r + width / 2) * k), fill=fill)
+    draw.ellipse(((cx - r + width / 2) * k, (cy - r + width / 2) * k,
+                  (cx + r - width / 2) * k, (cy + r - width / 2) * k), fill=SURFACE)
+
+
 def render(size, small=False):
-    """RGB image of the icon at size x size pixels."""
+    """RGB image of the icon at size x size pixels; [small] drops the fine
+    details (outlines, highlight, smallest bubbles) for sizes below 60 px."""
     ss = 4
     big = size * ss
-    k = big / 1024
+    k = big / 160
+    sc = lambda pts: [(x * k, y * k) for x, y in pts]  # noqa: E731
     img = Image.new("RGB", (big, big), SURFACE)
-    pts = [(x * k, y * k) for x, y in _curve_points()]
+    draw = ImageDraw.Draw(img)
+
+    for x, y, w, h in STRAPS:
+        draw.rounded_rectangle((x * k, y * k, (x + w) * k, (y + h) * k), 3 * k, fill=PRIMARY)
+    draw.polygon(sc(_flatten(FRAME)), fill=NAVY)
+    draw.polygon(sc(_flatten(LENS)), fill=PRIMARY)
+    if not small:
+        _stroke(draw, sc(_flatten(STREAK_LINE)), 10 * k, STREAK)
+        _stroke(draw, sc(_flatten(HIGHLIGHT)), 3 * k, WHITE)
+
+    tail = sc(_flatten(TAIL))
+    body = sc(_flatten(BODY))
+    draw.polygon(tail, fill=ORANGE)
+    if not small:
+        _stroke(draw, tail, OUTLINE * k, NAVY)
+    draw.polygon(body, fill=ORANGE)
+
+    stripes = Image.new("RGB", (big, big), ORANGE)
+    sd = ImageDraw.Draw(stripes)
+    o = 0 if small else OUTLINE / 2
+    for x, y, w, h in STRIPES:
+        if not small:
+            sd.rectangle(((x - o) * k, (y - o) * k, (x + w + o) * k, (y + h + o) * k), fill=NAVY)
+        sd.rectangle(((x + o) * k, (y + o) * k, (x + w - o) * k, (y + h - o) * k), fill=WHITE)
+    mask = Image.new("L", (big, big), 0)
+    ImageDraw.Draw(mask).polygon(body, fill=255)
+    img.paste(stripes, (0, 0), mask)
+    draw = ImageDraw.Draw(img)
+    if not small:
+        _stroke(draw, body, OUTLINE * k, NAVY)
+    ex, ey, er = EYE
+    draw.ellipse(((ex - er) * k, (ey - er) * k, (ex + er) * k, (ey + er) * k), fill=NAVY)
 
     if not small:
-        # Area under the curve: primary fading in towards the depth.
-        layer = Image.new("RGBA", (big, big), (0, 0, 0, 0))
-        mask = Image.new("L", (big, big), 0)
-        ImageDraw.Draw(mask).polygon(pts, fill=255)
-        top, bottom = WATERLINE_Y * k, 770 * k
-        gradient = Image.new("L", (1, big), 0)
-        for y in range(big):
-            f = min(1, max(0, (y - top) / (bottom - top)))
-            gradient.putpixel((0, y), int(255 * (0.05 + 0.37 * f)))
-        alpha = gradient.resize((big, big))
-        alpha = Image.composite(alpha, Image.new("L", (big, big), 0), mask)
-        layer.paste(PRIMARY + (255,), (0, 0, big, big))
-        layer.putalpha(alpha)
-        img.paste(layer, (0, 0), layer)
-        # Waterline, light.
-        line = Image.new("RGBA", (big, big), (0, 0, 0, 0))
-        ImageDraw.Draw(line).line(
-            [(150 * k, WATERLINE_Y * k), (874 * k, WATERLINE_Y * k)],
-            fill=PRIMARY + (70,),
-            width=int(20 * k),
-        )
-        img.paste(line, (0, 0), line)
-
-    draw = ImageDraw.Draw(img)
-    _polyline(draw, pts, (70 if small else 60) * k, PRIMARY)
-    bubbles = [(770, 230, 36)] if small else [(770, 230, 30), (830, 160, 18)]
-    for cx, cy, r in bubbles:
-        draw.ellipse(((cx - r) * k, (cy - r) * k, (cx + r) * k, (cy + r) * k), fill=ACCENT)
+        cx, cy, r = 106, 76, 2
+        draw.ellipse(((cx - r - .75) * k, (cy - r - .75) * k, (cx + r + .75) * k, (cy + r + .75) * k), fill=WHITE)
+        draw.ellipse(((cx - r + .75) * k, (cy - r + .75) * k, (cx + r - .75) * k, (cy + r - .75) * k), fill=PRIMARY)
+    bubbles = BUBBLES if not small else [(100, 44, 6, 4), (112, 30, 4, 3.5)]
+    for cx, cy, r, w in bubbles:
+        _ring(draw, cx, cy, r, w, k, PRIMARY)
     return img.resize((size, size), Image.LANCZOS)
 
 
@@ -108,13 +162,12 @@ def write_all(root):
 
 
 def preview(path):
-    sizes = [1024, 180, 120, 58, 40]
-    sheet = Image.new("RGB", (1024 + 40 + 180 + 40 + 120 + 40, 1064), (255, 255, 255))
+    sizes = [180, 120, 58, 40]
+    sheet = Image.new("RGB", (1024 + 40 + 180 + 40, 1064), (255, 255, 255))
     sheet.paste(render(1024), (20, 20))
-    x = 1064
     y = 20
-    for s in sizes[1:]:
-        sheet.paste(render(s, small=s < 60), (x, y))
+    for s in sizes:
+        sheet.paste(render(s, small=s < 60), (1064, y))
         y += s + 30
     sheet.save(path)
 

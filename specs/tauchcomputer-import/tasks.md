@@ -694,9 +694,16 @@ Gewählt am 2026-11-23 aus den Entwürfen A–D: **Variante D**, eine Einglas-Ma
 |---|---|---|---|---|
 | T29.1 | Vorlagen in `assets/icon/` | gelesen | alle drei SVGs mit Rahmen `#13303A` und Fisch `#F26B1D`, ohne die alte Kurve | ✅ 2026-11-23: rot, noch die Tiefenkurve |
 | T29.2 | Android 8+ | `drawable/ic_launcher_foreground.xml`, `…_monochrome.xml` | Vordergrund-Vektor mit Rahmen, Glas, Fisch und Weiß; einfarbige Ebene als Silhouette mit ausgespartem Glas (`evenOdd`), ohne alte Kurve | ✅ 2026-11-23: rot, noch die Tiefenkurve |
-| T29.3 | iOS 1024 px | Pixel lesen | Rahmen (243, 576) navy, Glas (384, 512) petrol, Fisch (538, 531) orange, Streifen (496, 531) weiß, Band (128, 550) petrol, je ±24 pro Kanal | ✅ 2026-11-23: rot, dort ist noch Hintergrund |
+| T29.3 | iOS 1024 px | Pixel lesen | Rahmen (243, 576) navy, Glas (704, 576) petrol, Fisch (538, 531) orange, Streifen (496, 531) weiß, Band (128, 550) petrol, je ±24 pro Kanal | ✅ 2026-11-23: rot, dort ist noch Hintergrund |
 | T29.4 | kleine Größen | Pixel lesen | xxxhdpi 192 px: Fisch (101, 100) orange, Rahmen (46, 108) navy; iOS 58 px: Fisch (30, 30) orange | ✅ 2026-11-23: rot, Pixel zeigen die alte Kurve bzw. Hintergrund |
 
 Abgenommen am 2026-11-23.
 
 Test: `test/app/app_icon_test.dart` (Gruppe T29; die Prüfung auf die Korallen-Blase in T24.1/T24.2 ist gestrichen). Weiter keine neue Abhängigkeit: `tool/render_app_icons.py` zeichnet die PNGs. Auf Android liegt das Motiv auf ca. 76 % verkleinert in der Schutzzone, damit Band und Blasen nicht abgeschnitten werden.
+
+**Umgesetzt (Phase 50, 2026-11-23), T29:**
+- [x] SVG-Vorlagen neu im Raster 160 (Maske, Glas, Clownfisch mit per Clip-Pfad begrenzten Streifen, Blasen); kleine Variante ohne Feinheiten → T29.1 grün.
+- [x] Android: Vordergrund-Vektor mit denselben Pfaden (Viewport 160, Motiv 76 %), Streifen über `clip-path`; einfarbige Ebene als Silhouette (`evenOdd`) → T29.2 grün.
+- [x] `tool/render_app_icons.py` liest dieselben Pfad-Strings (eigener Parser für M/L/H/V/Q/Z) und zeichnet alle iOS-Größen und alten Launcher neu → T29.3, T29.4 grün.
+- Testkorrektur: Prüfpunkt fürs Glas von (384, 512) auf (704, 576) verlegt; der alte lag auf der Kerbe der Schwanzflosse.
+- Gesamt: `flutter test` 444/444, `flutter analyze` ohne Befund, Debug-APK baut. Noch nicht auf dem Handy angesehen.

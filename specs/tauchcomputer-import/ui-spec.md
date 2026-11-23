@@ -35,13 +35,13 @@ Gewählt aus zwei Entwürfen („Tiefsee“ dunkel, „Riff“ hell) am 2026-11-
 - **Design:** eigenes Theme auf Basis von Material 3 (`ColorScheme` aus den Tokens), kein Standard-Blau oder -Lila. Die App folgt der Systemeinstellung (hell/dunkel), änderbar in den Einstellungen.
 - **Schrift:** **Manrope** (SIL Open Font License 1.1, GPL-3-verträglich), als Datei in der App mitgeliefert, nichts wird aus dem Netz geladen. Gewichte 500, 600, 700, 800. Ziffern mit **gleicher Breite** (`FontFeature.tabularFigures`).
   Skala: Titel 30 sp/800 · Nummer im Detail 44 sp/800 · Kennzahl 21 sp/800 · Tiefe in der Liste 28 sp/800 · Tauchplatz 16–19 sp/700 · Text 14–16 sp/500 · Nebentext 12,5 sp/500 · kleine Abschnittsüberschriften 12 sp/700 in Großbuchstaben mit 1 sp Laufweite.
-- **Icons:** Material Symbols Rounded. Das App-Icon ist eigenes Design: eine stilisierte, abfallende Tiefenkurve. Mit „Riff“ werden nur die Farben angepasst (Kurve `primary`, Blase `accent`, Hintergrund `surface` hell), das Motiv bleibt.
-  **Gewählt am 2026-11-18: Variante A „Tiefenkurve“** (Mockup-Fläche, Board 7). Vorlagen in `assets/icon/`:
+- **Icons:** Material Symbols Rounded. Das App-Icon ist eigenes Design.
+  **Seit 2026-11-23: Variante D „Brille mit Clownfisch“** (ersetzt die „Tiefenkurve“ vom 2026-11-18, T29): Einglas-Maske mit Rahmen `#13303A`, Glas und Band `primary` `#0B7A80` auf `surface` `#F2F8F8`; im Glas spiegelt sich ein Clownfisch (`#F26B1D`, weiße, dunkel umrandete Streifen), dazu ein Lichtstreifen und drei Luftblasen in `primary`. Vorlagen in `assets/icon/` (Raster 160, als 1024 px):
   - `divedown_icon.svg`: iOS und Größen ab 60 px
-  - `divedown_icon_small.svg`: unter 60 px, mit dickerer Kurve und nur einer Blase
-  - `divedown_icon_android_foreground.svg`: Vordergrund des adaptiven Android-Icons, Motiv auf 66 % verkleinert, Hintergrund `#F2F8F8` (seit 2026-11-23 Riff; in der App als Vektor `res/drawable/ic_launcher_foreground.xml` plus einfarbige Ebene für Themen-Icons)
+  - `divedown_icon_small.svg`: unter 60 px, ohne Umrisse, Lichtstreifen und kleinste Blase
+  - `divedown_icon_android_foreground.svg`: Vordergrund des adaptiven Android-Icons, Motiv auf 76 % verkleinert, Hintergrund `#F2F8F8`; in der App als Vektor `res/drawable/ic_launcher_foreground.xml` plus einfarbige Ebene (Silhouette mit ausgespartem Glas) für Themen-Icons
 
-  Die PNG-Größen (iOS, alte Android-Launcher) zeichnet `tool/render_app_icons.py` (Pillow, nur auf dem PC) aus denselben Formen; sie sind eingecheckt.
+  Die PNG-Größen (iOS, alte Android-Launcher) zeichnet `tool/render_app_icons.py` (Pillow, nur auf dem PC) aus denselben Pfaden; sie sind eingecheckt.
 - **Ecken** 20 dp für Karten, 14 dp für Kacheln, Chips und Knöpfe ganz rund. Karten haben einen Rand in `outline` statt Schatten, nur der Knopf „Manuell eintragen“ hat einen Schatten. **Abstände** im 8-dp-Raster, **Touch-Ziele mindestens 48 dp**. Hauptaktionen bekommen 56 dp, damit man sie auch mit nassen Fingern trifft.
 - **Bedeutung nie nur durch Farbe:** Jede Kurve hat zusätzlich ein Icon bzw. Label in der Legende, Fehler zusätzlich ein Icon und Text.
 

@@ -153,7 +153,7 @@ void main() {
         'white stripe, strap petrol', () {
       final img = _decode(File('$ios/Icon-App-1024x1024@1x.png'));
       _near(img, 243, 576, 0x13303A, 'frame');
-      _near(img, 384, 512, 0x0B7A80, 'lens');
+      _near(img, 704, 576, 0x0B7A80, 'lens');
       _near(img, 538, 531, 0xF26B1D, 'fish');
       _near(img, 496, 531, 0xFFFFFF, 'stripe');
       _near(img, 128, 550, 0x0B7A80, 'strap');
