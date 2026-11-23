@@ -626,3 +626,13 @@ Abgenommen am 2026-11-23.
 - [x] Vorschau: Aktion unter der Liste, Blatt mit `SiteField`, „Übernehmen“, „Tauchplatz entfernen“, Platz mit Ort-Icon am Eintrag; `SaveSelected` reicht die Tauchgänge mit Platz an Tauchcomputer- und FIT-Seite → T25.4, T25.5 grün.
 - Gesamt: `flutter test` 424/424, `flutter analyze` ohne Befund, Debug-APK baut.
 - **Auf dem S25 Ultra geprüft, 2026-11-23:** Nutzer erlaubte, #72 (FIT-Testdatei, 26.03.) zu löschen und neu zu importieren. Bereits vorhandener Tauchgang → Aktion gesperrt. Nach dem Löschen: Blatt „Tauchplatz für 1 Tauchgang“, Katalog-Vorschlag „Elphinstone · Red Sea, Ägypten“, „Übernehmen“ erst mit Text, danach „Elphinstone“ am Eintrag und „Tauchplatz entfernen“ im Blatt; im Logbuch „Tauchgang 74, Elphinstone, 26. März“. Gefunden und behoben: Das Blatt lag unter der Navigationsleiste bzw. mit Tastatur unter der Statusleiste (`useSafeArea`, `SafeArea` unten); mit Tastatur ist „Übernehmen“ teils verdeckt, aber erreichbar (Blatt scrollt, Tastatur schließt nach Vorschlagswahl).
+
+## T26: Vorschau-Extras: Mini-Profil und „Vergleichen“ (ui-spec §5.9, Feinschliff 2026-11-23)
+
+| Nr. | Ausgangslage | Aktion | Erwartet | Status |
+|---|---|---|---|---|
+| T26.1 | Vorschau mit 3 Tauchgängen | angezeigt | jeder Eintrag mit Mini-Profil wie im Logbuch | ✅ 2026-11-23: rot, keine Sparkline in der Vorschau |
+| T26.2 | Tauchgang vom 13.11. schon im Logbuch (18,7 m, 45 min), neu 18,4 m, 47 min | „Vergleichen“ → „Importieren“ | „Vergleichen“ nur am ähnlichen Eintrag; Blatt „Tauchgänge vergleichen“ mit Spalten „Neu“ und „Im Logbuch“ (Datum, Tiefe, Dauer …) und beiden Profilen in einem Diagramm; „Importieren“ wählt ihn aus | ✅ 2026-11-23: rot, „Vergleichen“ fehlt |
+| T26.3 | wie T26.2, ähnlicher Eintrag ausgewählt | „Vergleichen“ → „Nicht importieren“ | wieder abgewählt, Knopf „2 Tauchgänge importieren“ | ✅ 2026-11-23: rot, „Vergleichen“ fehlt |
+
+Tests: `test/features/import/dive_computer_screen_test.dart` (FIT nutzt dieselbe Vorschau). Keine Stubs nötig, nur Oberfläche.

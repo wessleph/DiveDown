@@ -626,6 +626,75 @@ void main() {
       });
     });
 
+    group('T26 preview extras', () {
+      /// The dive of Nov 13 is already in the logbook from another
+      /// download: 18,7 m instead of 18,4 m, 45 instead of 47 min.
+      Future<_Harness> withSimilar(WidgetTester tester) => preview(
+        tester,
+        seed: (h) => seedDive(
+          h.db,
+          computerDive(
+            13,
+            fingerprint: 99,
+            maxDepthM: 18.7,
+            durationS: 2700,
+          ).toDive(diverId: h.anna.id!),
+        ),
+      );
+
+      testWidgets('T26.1 every entry shows its mini profile', (tester) async {
+        await preview(tester);
+
+        expect(find.byKey(const ValueKey('sparkline')), findsNWidgets(3));
+      });
+
+      testWidgets('T26.2 „Vergleichen“ only at the similar dive, shows both '
+          'side by side; „Importieren“ selects it', (tester) async {
+        await withSimilar(tester);
+
+        expect(find.text('Vergleichen'), findsOneWidget);
+        await _tapText(tester, 'Vergleichen');
+        await tester.pumpAndSettle();
+
+        expect(find.text('Tauchgänge vergleichen'), findsOneWidget);
+        expect(find.text('Neu'), findsOneWidget);
+        expect(find.text('Im Logbuch'), findsOneWidget);
+        expect(find.text('13.11.2026'), findsNWidgets(2));
+        expect(find.text('18,4 m'), findsOneWidget);
+        expect(find.text('18,7 m'), findsOneWidget);
+        expect(find.text('47 min'), findsOneWidget);
+        expect(find.text('45 min'), findsOneWidget);
+        expect(find.byKey(const ValueKey('compare-chart')), findsOneWidget);
+
+        await _tapText(tester, 'Importieren');
+        await tester.pumpAndSettle();
+
+        expect(find.text('Tauchgänge vergleichen'), findsNothing);
+        final boxes = tester
+            .widgetList<Checkbox>(find.byType(Checkbox))
+            .map((c) => c.value)
+            .toList();
+        expect(boxes, [true, true, true]);
+        expect(find.text('3 Tauchgänge importieren'), findsOneWidget);
+      });
+
+      testWidgets('T26.3 „Nicht importieren“ leaves it out again', (
+        tester,
+      ) async {
+        await withSimilar(tester);
+        await tester.tap(find.byType(Checkbox).at(1));
+        await _frames(tester);
+        expect(find.text('3 Tauchgänge importieren'), findsOneWidget);
+
+        await _tapText(tester, 'Vergleichen');
+        await tester.pumpAndSettle();
+        await _tapText(tester, 'Nicht importieren');
+        await tester.pumpAndSettle();
+
+        expect(find.text('2 Tauchgänge importieren'), findsOneWidget);
+      });
+    });
+
     testWidgets('T12.27 no tab bar while the dive computer flow runs', (
       tester,
     ) async {
