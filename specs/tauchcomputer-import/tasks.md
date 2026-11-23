@@ -636,3 +636,11 @@ Abgenommen am 2026-11-23.
 | T26.3 | wie T26.2, ähnlicher Eintrag ausgewählt | „Vergleichen“ → „Nicht importieren“ | wieder abgewählt, Knopf „2 Tauchgänge importieren“ | ✅ 2026-11-23: rot, „Vergleichen“ fehlt |
 
 Tests: `test/features/import/dive_computer_screen_test.dart` (FIT nutzt dieselbe Vorschau). Keine Stubs nötig, nur Oberfläche.
+
+Abgenommen am 2026-11-23.
+
+**Umgesetzt (Phase 50, 2026-11-23), T26:**
+- [x] Vorschau: `DiveSparkline` unter Tiefe und Dauer jedes Eintrags (ausgegraut, wenn nicht auswählbar) → T26.1 grün.
+- [x] `CompareSheet` (`features/import/compare_sheet.dart`): Tabelle „Neu“/„Im Logbuch“ mit fetten Abweichungen und „–“ für fehlende Werte, beide Profile auf gemeinsamen Achsen (ohne Messpunkte die geschätzte Form); die Spaltenköpfe mit Farbmuster sind die Legende (eine eigene Legende hätte „Neu“ doppelt gezeigt); „Importieren“/„Nicht importieren“ → T26.2, T26.3 grün.
+- Gesamt: `flutter test` 427/427, `flutter analyze` ohne Befund, Debug-APK baut.
+- **Auf dem S25 Ultra geprüft, 2026-11-23:** Mini-Profil in der FIT-Vorschau; Abstand rechts ergänzt, die Kurve reichte bis an den Rand. Mit Zustimmung des Nutzers #74 (FIT-Testdatei) gelöscht und einen ähnlichen Tauchgang von Hand eingetragen (26.03., 11:03, 58,7 m, 74 min): Vorschau zeigt „Ähnlicher Tauchgang vorhanden (26.03., 58,7 m, 74 min)“ und „Vergleichen“; das Blatt zeigt Datei gegen Von Hand mit fetten Abweichungen und beide Profile; „Importieren“ wählt aus, „Nicht importieren“ wählt ab. Danach FIT-Tauchgang mit Elphinstone als #75 importiert und den Testtauchgang wieder gelöscht.

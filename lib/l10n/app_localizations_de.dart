@@ -949,6 +949,27 @@ class AppLocalizationsDe extends AppLocalizations {
   String get previewSiteRemove => 'Tauchplatz entfernen';
 
   @override
+  String get previewCompare => 'Vergleichen';
+
+  @override
+  String get compareTitle => 'Tauchgänge vergleichen';
+
+  @override
+  String get compareNew => 'Neu';
+
+  @override
+  String get compareStored => 'Im Logbuch';
+
+  @override
+  String get compareSource => 'Quelle';
+
+  @override
+  String get compareImport => 'Importieren';
+
+  @override
+  String get compareSkip => 'Nicht importieren';
+
+  @override
   String importedSnack(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

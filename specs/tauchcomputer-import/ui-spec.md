@@ -195,7 +195,7 @@ Knopf unten: **„3 Tauchgänge importieren“**, die Zahl passt sich an die Aus
 
 | Zustand | Darstellung |
 |---|---|
-| mögliches Duplikat | Eintrag mit `warning`-Markierung: „Ähnlicher Tauchgang vorhanden (12.08., 18,4 m, 47 min)“. Standardmäßig **nicht** ausgewählt, mit der Aktion **„Vergleichen“** (zeigt beide nebeneinander). |
+| mögliches Duplikat | Eintrag mit `warning`-Markierung: „Ähnlicher Tauchgang vorhanden (12.08., 18,4 m, 47 min)“. Standardmäßig **nicht** ausgewählt, mit der Aktion **„Vergleichen“**: Blatt „Tauchgänge vergleichen“ mit Spalten „Neu“ und „Im Logbuch“ (Datum, Startzeit, Quelle, max. Tiefe, Dauer, Ø-Tiefe, Wassertemp.; abweichende Werte fett) und beiden Profilen in einem Diagramm (neu `depth` als Fläche, vorhandener als `accent`-Linie, gemeinsame Achsen; die Spaltenköpfe mit Farbmuster sind die Legende). Unten **„Importieren“** (wählt aus) und **„Nicht importieren“** (wählt ab). *(Ausgestaltet 2026-11-23, T26.)* |
 | exaktes Duplikat (gleiche Quelle + ID, gleicher Inhalt) | ausgegraut: „Bereits im Logbuch“, nicht auswählbar |
 | gleiche ID, anderer Inhalt | wie mögliches Duplikat, Text: „Gleiche Kennung, aber abweichende Daten“ |
 | ungültige Werte verworfen | Info-Zeile: „Bei 1 Tauchgang wurden unplausible Messwerte entfernt.“ |

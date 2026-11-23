@@ -1690,6 +1690,48 @@ abstract class AppLocalizations {
   /// **'Tauchplatz entfernen'**
   String get previewSiteRemove;
 
+  /// No description provided for @previewCompare.
+  ///
+  /// In de, this message translates to:
+  /// **'Vergleichen'**
+  String get previewCompare;
+
+  /// No description provided for @compareTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Tauchgänge vergleichen'**
+  String get compareTitle;
+
+  /// No description provided for @compareNew.
+  ///
+  /// In de, this message translates to:
+  /// **'Neu'**
+  String get compareNew;
+
+  /// No description provided for @compareStored.
+  ///
+  /// In de, this message translates to:
+  /// **'Im Logbuch'**
+  String get compareStored;
+
+  /// No description provided for @compareSource.
+  ///
+  /// In de, this message translates to:
+  /// **'Quelle'**
+  String get compareSource;
+
+  /// No description provided for @compareImport.
+  ///
+  /// In de, this message translates to:
+  /// **'Importieren'**
+  String get compareImport;
+
+  /// No description provided for @compareSkip.
+  ///
+  /// In de, this message translates to:
+  /// **'Nicht importieren'**
+  String get compareSkip;
+
   /// No description provided for @importedSnack.
   ///
   /// In de, this message translates to:

@@ -14,6 +14,8 @@ import '../../l10n/app_localizations.dart';
 import '../logbook/dive_texts.dart';
 import '../logbook/logbook_screen.dart';
 import '../logbook/site_field.dart';
+import '../logbook/sparkline.dart';
+import 'compare_sheet.dart';
 
 /// Saves the dives at [selected] (indices into [dives], the previewed dives
 /// with the sites set in the preview), those in [confirmed] although they
@@ -200,7 +202,7 @@ class _ImportPreviewState extends ConsumerState<ImportPreview> {
     return InkWell(
       onTap: selectable ? () => toggle(!_selected.contains(i)) : null,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        padding: const EdgeInsetsDirectional.fromSTEB(8, 4, 16, 4),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -230,6 +232,13 @@ class _ImportPreviewState extends ConsumerState<ImportPreview> {
                       '${_units.duration(dive.durationS)}',
                       style: TextStyle(color: colors.onSurfaceMuted),
                     ),
+                    const SizedBox(height: 6),
+                    DiveSparkline(
+                      dive: dive.toDive(diverId: ''),
+                      color: selectable ? colors.depth : colors.onSurfaceMuted,
+                      height: 28,
+                    ),
+                    const SizedBox(height: 4),
                     if (dive.siteName case final site?)
                       Padding(
                         padding: const EdgeInsets.only(top: 2),
@@ -266,6 +275,15 @@ class _ImportPreviewState extends ConsumerState<ImportPreview> {
                           Expanded(child: Text(note)),
                         ],
                       ),
+                    if (similar != null && check is NeedsConfirmation)
+                      Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: TextButton.icon(
+                          onPressed: _saving ? null : () => _compare(i),
+                          icon: const Icon(Icons.compare_arrows),
+                          label: Text(l10n.previewCompare),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -274,6 +292,22 @@ class _ImportPreviewState extends ConsumerState<ImportPreview> {
         ),
       ),
     );
+  }
+
+  /// „Vergleichen“ (ui-spec §5.9, T26).
+  Future<void> _compare(int i) async {
+    final take = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      builder: (_) => CompareSheet(
+        fresh: _dives[i].toDive(diverId: ''),
+        stored: _similar[i]!,
+      ),
+    );
+    if (take == null || !mounted) return;
+    setState(() => take ? _selected.add(i) : _selected.remove(i));
   }
 
   /// „Tauchplatz für Ausgewählte setzen“ (ui-spec §5.9, T25).
