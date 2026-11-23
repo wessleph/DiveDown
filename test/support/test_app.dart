@@ -6,6 +6,7 @@ import 'package:divedown/data/local/database.dart';
 import 'package:divedown/data/local/drift_app_settings.dart';
 import 'package:divedown/data/local/drift_dive_repository.dart';
 import 'package:divedown/domain/dive/dive.dart';
+import 'package:divedown/domain/diagnostics/diagnostic_log.dart';
 import 'package:divedown/domain/dive/diver.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
@@ -89,6 +90,7 @@ Future<void> pumpTestApp(
   double textScale = 1,
   String? location,
   List<Override> overrides = const [],
+  DiagnosticLog? diagnosticLog,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -98,7 +100,14 @@ Future<void> pumpTestApp(
 
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [appDatabaseProvider.overrideWithValue(db), ...overrides],
+      overrides: [
+        appDatabaseProvider.overrideWithValue(db),
+        diagnosticLogProvider.overrideWithValue(
+          diagnosticLog ?? MemoryDiagnosticLog(),
+        ),
+        diagnosticHeaderProvider.overrideWith((ref) async => testHeader),
+        ...overrides,
+      ],
       child: const DiveDownApp(),
     ),
   );
@@ -115,3 +124,32 @@ GoRouter router(WidgetTester tester) =>
 
 String currentLocation(WidgetTester tester) =>
     router(tester).routerDelegate.currentConfiguration.uri.toString();
+
+/// Header used by widget tests (T10.10).
+const testHeader = DiagnosticHeader(
+  appVersion: '1.0.0',
+  build: '1',
+  os: 'Android 17 (SDK 37)',
+  model: 'samsung SM-S938B',
+  libdivecomputer: '0.10.0',
+);
+
+/// Diagnostic log in memory for widget tests: stores lines as given.
+class MemoryDiagnosticLog implements DiagnosticLog {
+  MemoryDiagnosticLog([List<String>? lines]) : stored = lines ?? [];
+
+  final List<String> stored;
+
+  @override
+  Future<void> log(String category, LogLevel level, String message) async =>
+      stored.add('${level.name.toUpperCase()} $category $message');
+
+  @override
+  Future<List<String>> lines() async => List.of(stored);
+
+  @override
+  Future<String> export(DiagnosticHeader header) async => [
+    'DiveDown ${header.appVersion} (Build ${header.build})',
+    ...stored,
+  ].join(String.fromCharCode(10));
+}

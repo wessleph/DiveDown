@@ -12,29 +12,41 @@ import android.util.Log
  */
 object NativeLogger {
     private var flutterApi: DiveComputerFlutterApi? = null
-    private val mainHandler = Handler(Looper.getMainLooper())
+    // DiveDown: lazy, so JUnit can use the logger without a main looper.
+    private val mainHandler by lazy { Handler(Looper.getMainLooper()) }
+
+    /** logcat output (DiveDown, security.md A4, T14.2); replaceable in tests. */
+    var logcat: (priority: Int, tag: String, message: String) -> Unit =
+        { priority, tag, message -> Log.println(priority, tag, message) }
+
+    /**
+     * DiveDown: true only in debuggable builds; set from the app's
+     * ApplicationInfo when the plugin is attached (T14.2).
+     */
+    @Volatile
+    var debuggable: Boolean = false
 
     fun setFlutterApi(api: DiveComputerFlutterApi?) {
         flutterApi = api
     }
 
     fun d(tag: String, category: String, message: String) {
-        Log.d(tag, message)
+        logcat(Log.DEBUG, tag, message)
         sendToFlutter(category, "DEBUG", message)
     }
 
     fun i(tag: String, category: String, message: String) {
-        Log.i(tag, message)
+        logcat(Log.INFO, tag, message)
         sendToFlutter(category, "INFO", message)
     }
 
     fun w(tag: String, category: String, message: String) {
-        Log.w(tag, message)
+        logcat(Log.WARN, tag, message)
         sendToFlutter(category, "WARN", message)
     }
 
     fun e(tag: String, category: String, message: String) {
-        Log.e(tag, message)
+        logcat(Log.ERROR, tag, message)
         sendToFlutter(category, "ERROR", message)
     }
 

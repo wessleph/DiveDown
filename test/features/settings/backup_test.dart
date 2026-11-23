@@ -249,6 +249,21 @@ void main() {
             'Dein bisheriges Logbuch ist unverändert.',
       );
     });
+
+    testWidgets('T10.14 replacing failed offers „Logs an Entwickler senden“', (
+      tester,
+    ) async {
+      await expectText(
+        tester,
+        result: const RestoreFailed('disk full'),
+        text:
+            'Wiederherstellen fehlgeschlagen. '
+            'Dein bisheriges Logbuch ist unverändert.',
+      );
+      await tester.tap(find.text('Logs an Entwickler senden'));
+      await tester.pumpAndSettle();
+      expect(find.text('Am besten per Mail.'), findsOneWidget);
+    });
   });
 
   group('T11.15 reminder in the logbook', () {

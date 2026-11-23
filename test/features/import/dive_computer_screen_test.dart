@@ -326,6 +326,23 @@ void main() {
       expect(find.textContaining('download_crashed'), findsOneWidget);
     });
 
+    testWidgets('T10.14 the error card offers „Logs an Entwickler senden“', (
+      tester,
+    ) async {
+      final h = await _setUp(tester);
+      await _pump(tester, h);
+      await _tapText(tester, 'EON Core');
+
+      h.source.emit(
+        const TransferFailed('download_crashed', 'x', connectionLost: false),
+      );
+      await _frames(tester);
+
+      await tester.tap(find.text('Logs an Entwickler senden'));
+      await tester.pumpAndSettle();
+      expect(find.text('Am besten per Mail.'), findsOneWidget);
+    });
+
     group('T12.9 PIN dialog', () {
       testWidgets('names the device, sends the code', (tester) async {
         final h = await _setUp(tester);

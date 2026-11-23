@@ -25,6 +25,7 @@ import '../data/platform/permission_bluetooth_access.dart';
 import '../data/platform/share_channel.dart';
 import '../data/platform/share_folder.dart';
 import '../data/platform/system_file_picker.dart';
+import '../domain/diagnostics/diagnostic_log.dart';
 import '../domain/dive/dive.dart';
 import '../domain/dive/dive_repository.dart';
 import '../domain/dive/diver.dart';
@@ -220,6 +221,16 @@ class AppBackupActions implements BackupActions {
   Future<RestoreResult> restore(Uint8List bytes) async =>
       (await _backup()).restore(bytes, closeDatabase: _db.close);
 }
+
+/// The diagnostic log of the app (design.md §9, T10).
+final diagnosticLogProvider = Provider<DiagnosticLog>(
+  (ref) => throw UnimplementedError('diagnosticLogProvider'),
+);
+
+/// Header of the exported log: versions, OS and device model (T10.10).
+final diagnosticHeaderProvider = FutureProvider<DiagnosticHeader>(
+  (ref) => throw UnimplementedError('diagnosticHeaderProvider'),
+);
 
 /// Renumbering and shifting of dive numbers (ui-spec §5.11).
 final diveNumberingProvider = Provider<DiveNumbering>(

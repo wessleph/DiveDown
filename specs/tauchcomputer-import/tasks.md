@@ -253,16 +253,24 @@ Festlegungen: Eigene Namen kommen von **allen Tauchern auf dem Gerät**. Leere E
 ## T10: Diagnose-Logs (`data/diagnostics/`, security A4, design §9)
 | ID | A | W | D | Rot gesehen |
 |---|---|---|---|---|
-| T10.1 | Log-Eintrag Kategorie `ble.connect`, Text mit MAC `AA:BB:CC:DD:EE:FF` | geschrieben | gespeichert als `••:EE:FF` | |
-| T10.2 | Eintrag mit `serial=12345678` | geschrieben | `serial=••5678` | |
-| T10.3 | libdivecomputer-HEXDUMP-Zeile | geschrieben (Release) | **verworfen** | |
-| T10.4 | „Unmatched device … (Annas AirPods)“ | geschrieben (Release) | verworfen | |
-| T10.5 | Eintrag mit Koordinaten „27.8123, 33.9201“ | geschrieben | Koordinaten durch `[Ort entfernt]` ersetzt | |
-| T10.6 | Eintrag mit E-Mail bzw. Pfad `C:\Users\anna\…` | geschrieben | ersetzt durch `[entfernt]` | |
-| T10.7 | Eintrag einer Kategorie, die **nicht** auf der Positivliste steht | geschrieben | verworfen | |
-| T10.8 | Log > 5 MB | neuer Eintrag | älteste Einträge entfernt, Datei ≤ 5 MB | |
-| T10.9 | Einträge älter als 7 Tage | App-Start | entfernt | |
-| T10.10 | Export | erzeugt | Kopf mit App-Version, Build, OS, Gerätemodell, libdivecomputer-Version. Danach Einträge. Kein Tauchplatz-Name, kein Taucher-Name. | |
+| T10.1 | Eintrag mit MAC `AA:BB:CC:DD:EE:FF` bzw. klein geschrieben | gefiltert | `••:EE:FF` | ✅ 2026-11-23: rot wegen `UnimplementedError` (`sanitizeLogEntry`) |
+| T10.2 | `serial=12345678`, `serial=0x2219801234`, `serial=123` | gefiltert | `serial=••5678`, `••1234`, `••` | ✅ 2026-11-23: rot, wie T10.1 |
+| T10.3 | libdivecomputer-HEXDUMP-Zeile (Kategorie `LDC`) | gefiltert (Release / Debug) | verworfen / bleibt | ✅ 2026-11-23: rot, wie T10.1 |
+| T10.4 | „Unmatched device … (Annas AirPods)“ | gefiltert (Release / Debug) | verworfen / bleibt | ✅ 2026-11-23: rot, wie T10.1 |
+| T10.5 | „27.8123, 33.9201“, `lat=-8.27512 lon=115.59341`; „18.4 m 47 min fw 1.2.3“ | gefiltert | Koordinaten → `[Ort entfernt]`, Tiefe/Zeit/Versionen bleiben | ✅ 2026-11-23: rot, wie T10.1 |
+| T10.6 | E-Mail, `C:\Users\anna\…`, `/Users/anna/…`, `/home/anna/…` | gefiltert | `[entfernt]` | ✅ 2026-11-23: rot, wie T10.1 |
+| T10.7 | Kategorie `health` bzw. `notes`; alle erlaubten | gefiltert | verworfen; erlaubte bleiben (Positivliste `BLE`, `SER`, `LDC`, `app`, `import`, `backup`, `error`) | ✅ 2026-11-23: rot, wie T10.1 |
+| T10.8 | Grenze 2.000 Bytes, 100 Einträge | geschrieben | Datei ≤ Grenze, älteste weg, neuester da (Standard 5 MB) | ✅ 2026-11-23: rot wegen `UnimplementedError` (`FileDiagnosticLog.log`) |
+| T10.9 | Einträge vom 1.11. und 20.11. | `prune` am 23.11. | nur der vom 20.11. bleibt (7 Tage) | ✅ 2026-11-23: rot, wie T10.8 |
+| T10.10 | ein Eintrag bzw. leeres Log | Export | Kopf „DiveDown 1.0.0 (Build 42)“, System, Gerät, libdivecomputer, dann die Einträge | ✅ 2026-11-23: rot, wie T10.8 |
+| T10.11 | Plugin meldet `BLE INFO connected`, ein „Unmatched device“, `LDC WARN timeout` | `connectPluginLogs` | zwei Zeilen, das fremde Gerät fehlt | ✅ 2026-11-23: rot wegen `UnimplementedError` (`connectPluginLogs`) |
+| T10.12 | Absturz `StateError` mit Stack in `C:/Users/anna/…` | `recordError` | `ERROR error Bad state: boom` mit Stack, ohne „anna“ | ✅ 2026-11-23: rot wegen `UnimplementedError` (`recordError`) |
+| T10.13 | 250 Zeilen bzw. leeres Log | Einstellungen → HILFE → „Diagnose-Logs teilen“ | Info-Text, Vorschau der ersten 200 Zeilen, „… 50 weitere Zeilen“, „Am besten per Mail.“, „Teilen“ teilt `DiveDown-Diagnose-JJJJ-MM-TT.txt` mit Kopf und allen Zeilen; leer: „Noch keine Einträge im Protokoll.“, „Teilen“ gesperrt | ✅ 2026-11-23: rot, Abschnitt HILFE fehlt |
+| T10.14 | Tauchcomputer-Fehlerkarte bzw. „Wiederherstellen fehlgeschlagen“ | „Logs an Entwickler senden“ | öffnet „Diagnose-Logs teilen“ | ✅ 2026-11-23: rot, Knopf fehlt |
+
+Abgenommen am 2026-11-23. Tests: `test/data/diagnostics/log_sanitizer_test.dart` (T10.1–T10.7), `test/data/diagnostics/file_diagnostic_log_test.dart` (T10.8–T10.12), `test/features/settings/diagnostics_test.dart` (T10.13), T10.14 in `dive_computer_screen_test.dart` und `backup_test.dart`. Stubs: `DiagnosticLog`, `sanitizeLogEntry`, `FileDiagnosticLog`, `connectPluginLogs`, `recordError`, Provider `diagnosticLogProvider`, `diagnosticHeaderProvider`. Widget-Tests bekommen über `pumpTestApp` ein `MemoryDiagnosticLog`.
+Festlegungen: Das Log liegt im **Cache** der App (`<cache>/logs/diagnostic.log`) und ist damit in keinem Backup. Positivliste nach **Kategorie** plus Filter für Inhalte (MAC, Seriennummer, Koordinaten, E-Mail, Pfade); HEXDUMP und fremde BLE-Geräte nur im Release verworfen, damit Debug-Builds beim Entwickeln alles zeigen. Gesundheitswerte, Namen und Notizen schreibt die App gar nicht erst ins Log (keine Kategorie dafür).
+Neue Abhängigkeit (Lizenz am 2026-11-23 geprüft): `device_info_plus` 13.3.0 (BSD-3, `device_info_plus_platform_interface` 8.1.0 BSD-3, `win32_registry` 3.0.3 BSD-3) für Gerätemodell und Systemversion im Kopf.
 
 ## T11: Sichern und Wiederherstellen (`data/backup/`, security O1)
 | ID | A | W | D | Rot gesehen |
@@ -346,8 +354,8 @@ Tests: `test/features/logbook/` (Liste, Detail, Formular). In diesem Paket nur d
 ## T14: Plugin-Härtung (Phase 50, Kotlin/Swift, security A4/A5)
 | ID | A | W | D | Rot gesehen |
 |---|---|---|---|---|
-| T14.1 | Release-Build | Download-Session erstellt | `dc_context_set_loglevel(…, DC_LOGLEVEL_WARNING)` | |
-| T14.2 | Release-Build | `NativeLogger.d` | kein `Log.d`-Aufruf (logcat) | |
+| T14.1 | Release-Build | Download-Session erstellt | `dc_context_set_loglevel(…, DC_LOGLEVEL_WARNING)`, im Debug-Build `ALL` | ohne eigenen Test (C-Code, hier nicht testbar); abgesichert durch T10.3, geprüft am Handy über das Diagnose-Log |
+| T14.2 | Release-Build bzw. Debug-Build | `NativeLogger.d/i/w/e` | nichts nach logcat bzw. alles (JUnit `NativeLoggerTest` mit ersetzbarem logcat-Ziel) | ✅ 2026-11-23: rot, im Release kamen alle vier Zeilen in logcat an |
 | T14.3 | Access-Code gespeichert | gelesen | aus Keystore bzw. Keychain, nicht aus `SharedPreferences` (JUnit mit Fake-Speicher) | |
 | T14.4 | Android-Manifest der App (merged) | geprüft | kein `INTERNET`, `ACCESS_FINE_LOCATION` nur mit `maxSdkVersion=30`, `BLUETOOTH_SCAN` mit `neverForLocation` (Test über `aapt dump`/Manifest-Parser in CI) | |
 
