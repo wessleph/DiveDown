@@ -940,6 +940,22 @@ class AppLocalizationsDe extends AppLocalizations {
   String get previewNothing => 'Nichts ausgewählt';
 
   @override
+  String lastUsed(String product, String when) {
+    return 'Zuletzt: $product, $when';
+  }
+
+  @override
+  String get lastUsedToday => 'heute';
+
+  @override
+  String get lastUsedYesterday => 'gestern';
+
+  @override
+  String lastUsedDaysAgo(int days) {
+    return 'vor $days Tagen';
+  }
+
+  @override
   String get previewSetSite => 'Tauchplatz für Ausgewählte setzen';
 
   @override

@@ -4,9 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/providers.dart';
+import '../../app/theme.dart';
 import '../../l10n/app_localizations.dart';
 import 'dive_computer_screen.dart';
 import 'fit_import_screen.dart';
+import 'last_used.dart';
 
 /// Choose where dives come from (ui-spec §5.5).
 class ImportScreen extends ConsumerWidget {
@@ -28,6 +30,17 @@ class ImportScreen extends ConsumerWidget {
       context.go(FitImportScreen.path);
     }
 
+    // The known device with the newest dive (ui-spec §5.5, T28).
+    final known = ref.watch(knownComputersProvider).value ?? const [];
+    final newest = known
+        .where((k) => k.lastDive != null)
+        .fold<({String product, DateTime lastDive})?>(
+          null,
+          (best, k) => best == null || k.lastDive!.isAfter(best.lastDive)
+              ? (product: k.computer.product, lastDive: k.lastDive!)
+              : best,
+        );
+
     return Scaffold(
       appBar: AppBar(title: Text(l10n.navImport)),
       body: ListView(
@@ -37,6 +50,14 @@ class ImportScreen extends ConsumerWidget {
             icon: Icons.watch_outlined,
             title: l10n.importSourceComputer,
             subtitle: l10n.importSourceComputerHint,
+            note: newest == null
+                ? null
+                : lastUsedText(
+                    l10n,
+                    newest.product,
+                    newest.lastDive,
+                    DateTime.now(),
+                  ),
             onTap: () => context.go(DiveComputerScreen.path),
           ),
           _SourceCard(
@@ -89,12 +110,16 @@ class _SourceCard extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.subtitle,
+    this.note,
     required this.onTap,
   });
 
   final IconData icon;
   final String title;
   final String subtitle;
+
+  /// A third, quieter line, e.g. „Zuletzt: EON Core, vor 3 Tagen“.
+  final String? note;
   final VoidCallback onTap;
 
   @override
@@ -120,6 +145,15 @@ class _SourceCard extends StatelessWidget {
                     children: [
                       Text(title, style: theme.textTheme.titleMedium),
                       Text(subtitle, style: theme.textTheme.bodyMedium),
+                      if (note case final n?)
+                        Text(
+                          n,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme
+                                .extension<DiveColors>()
+                                ?.onSurfaceMuted,
+                          ),
+                        ),
                     ],
                   ),
                 ),

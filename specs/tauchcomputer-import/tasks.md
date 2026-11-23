@@ -676,3 +676,12 @@ Abgenommen am 2026-11-23.
 | T28.3 | EON Core mit Tauchgang vor 3 Tagen, D5 mit Tauchgang vor 40 Tagen; bzw. EON Core ohne Tauchgänge | Import-Seite | Karte „Tauchcomputer“ zeigt unter „Per Bluetooth übertragen“ „Zuletzt: EON Core, vor 3 Tagen“ (Gerät mit dem neuesten Tauchgang); ohne Tauchgänge keine Zeile | ✅ 2026-11-23: rot, Zeile fehlt (der Fall ohne Tauchgänge ist schon grün) |
 
 Grundlage ist wie in den Einstellungen (§5.11) der **neueste Tauchgang** des Geräts, nicht der Zeitpunkt der letzten Übertragung (der wird nicht gespeichert, wenn keine neuen Tauchgänge kamen). Tests: `test/features/import/last_used_test.dart` (T28.1, T28.2), `dive_computer_screen_test.dart` (T28.3). Stub: `features/import/last_used.dart`.
+
+Abgenommen am 2026-11-23.
+
+**Umgesetzt (Phase 50, 2026-11-23), T28:**
+- [x] `daysSince` und `lastUsedText` (`features/import/last_used.dart`): Kalendertage als reine Daten in UTC (keine Verschiebung durch Sommerzeit), „heute“/„gestern“/„vor N Tagen“ bis 30, danach das Datum → T28.1, T28.2 grün.
+- [x] Import-Seite: dritte, leisere Zeile in der Karte „Tauchcomputer“ für das bekannte Gerät mit dem neuesten Tauchgang (aus `knownComputersProvider`) → T28.3 grün.
+- Testkorrektur: `last_used_test.dart` lädt die deutschen Datumsdaten (`initializeDateFormatting('de')`), wie es die App beim Start tut.
+- Gesamt: `flutter test` 440/440, `flutter analyze` ohne Befund, Debug-APK baut.
+- **Auf dem S25 Ultra geprüft, 2026-11-23:** „Tauchcomputer · Per Bluetooth übertragen · Zuletzt: EON Core, vor 10 Tagen“ (neuester EON-Core-Tauchgang vom 13.11.).

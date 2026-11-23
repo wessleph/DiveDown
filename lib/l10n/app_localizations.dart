@@ -1684,6 +1684,30 @@ abstract class AppLocalizations {
   /// **'Nichts ausgewählt'**
   String get previewNothing;
 
+  /// No description provided for @lastUsed.
+  ///
+  /// In de, this message translates to:
+  /// **'Zuletzt: {product}, {when}'**
+  String lastUsed(String product, String when);
+
+  /// No description provided for @lastUsedToday.
+  ///
+  /// In de, this message translates to:
+  /// **'heute'**
+  String get lastUsedToday;
+
+  /// No description provided for @lastUsedYesterday.
+  ///
+  /// In de, this message translates to:
+  /// **'gestern'**
+  String get lastUsedYesterday;
+
+  /// No description provided for @lastUsedDaysAgo.
+  ///
+  /// In de, this message translates to:
+  /// **'vor {days} Tagen'**
+  String lastUsedDaysAgo(int days);
+
   /// No description provided for @previewSetSite.
   ///
   /// In de, this message translates to:

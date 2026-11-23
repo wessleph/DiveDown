@@ -408,6 +408,16 @@
     "placeholders": { "count": { "type": "int" } }
   },
   "previewNothing": "Nichts ausgewählt",
+  "lastUsed": "Zuletzt: {product}, {when}",
+  "@lastUsed": {
+    "placeholders": { "product": { "type": "String" }, "when": { "type": "String" } }
+  },
+  "lastUsedToday": "heute",
+  "lastUsedYesterday": "gestern",
+  "lastUsedDaysAgo": "vor {days} Tagen",
+  "@lastUsedDaysAgo": {
+    "placeholders": { "days": { "type": "int" } }
+  },
   "previewSetSite": "Tauchplatz für Ausgewählte setzen",
   "previewSiteTitle": "{count, plural, =1{Tauchplatz für 1 Tauchgang} other{Tauchplatz für {count} Tauchgänge}}",
   "@previewSiteTitle": {
