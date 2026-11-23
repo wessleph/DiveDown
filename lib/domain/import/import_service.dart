@@ -213,6 +213,8 @@ class ImportService {
         waterType: old.waterType,
         notes: old.notes,
         rating: old.rating,
+        // Lead and equipment are the user's (ADR 0007); null keeps the links.
+        weightKg: old.weightKg,
         samples: fresh.samples,
         tanks: fresh.tanks,
         events: fresh.events,

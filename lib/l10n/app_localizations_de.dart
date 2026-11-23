@@ -1032,4 +1032,109 @@ class AppLocalizationsDe extends AppLocalizations {
   String previewSourceFile(String name) {
     return 'Aus Datei: $name';
   }
+
+  @override
+  String get settingsSectionEquipment => 'AUSRÜSTUNG';
+
+  @override
+  String get equipmentEmpty =>
+      'Noch keine Ausrüstung. Standard-Teile werden neuen Tauchgängen automatisch zugeordnet.';
+
+  @override
+  String get equipmentAdd => 'Ausrüstung hinzufügen';
+
+  @override
+  String get equipmentEditTitle => 'Ausrüstung bearbeiten';
+
+  @override
+  String get equipmentKindField => 'Art';
+
+  @override
+  String get equipmentNameField => 'Bezeichnung';
+
+  @override
+  String get equipmentNameHint => 'Scubapro Hydros Pro';
+
+  @override
+  String get equipmentNotesField => 'Notiz';
+
+  @override
+  String get equipmentDefault => 'Standard';
+
+  @override
+  String get equipmentDefaultHint =>
+      'Neue Tauchgänge bekommen dieses Teil automatisch.';
+
+  @override
+  String get equipmentNameMissing => 'Bitte eine Bezeichnung eingeben.';
+
+  @override
+  String get equipmentKindMissing => 'Bitte eine Art wählen.';
+
+  @override
+  String equipmentDeleteQuestion(String name) {
+    return '$name löschen? Bei bisherigen Tauchgängen bleibt es eingetragen.';
+  }
+
+  @override
+  String get equipmentKindSuit => 'Anzug';
+
+  @override
+  String get equipmentKindBcd => 'Jacket';
+
+  @override
+  String get equipmentKindRegulator => 'Atemregler';
+
+  @override
+  String get equipmentKindComputer => 'Tauchcomputer';
+
+  @override
+  String get equipmentKindTank => 'Flasche';
+
+  @override
+  String get equipmentKindMask => 'Maske';
+
+  @override
+  String get equipmentKindFins => 'Flossen';
+
+  @override
+  String get equipmentKindLight => 'Lampe';
+
+  @override
+  String get equipmentKindOther => 'Sonstiges';
+
+  @override
+  String get fieldWeight => 'Blei (kg)';
+
+  @override
+  String weightLastAt(String site, String kg) {
+    return 'Zuletzt bei $site: $kg kg';
+  }
+
+  @override
+  String get weightApply => 'Übernehmen';
+
+  @override
+  String get fieldEquipment => 'Ausrüstung';
+
+  @override
+  String get equipmentNoneInForm =>
+      'Noch keine Ausrüstung. Lege sie in den Einstellungen an.';
+
+  @override
+  String get equipmentCreateLink => 'Ausrüstung anlegen';
+
+  @override
+  String get detailWeight => 'Blei';
+
+  @override
+  String weightKg(String kg) {
+    return '$kg kg';
+  }
+
+  @override
+  String get importedNew => 'Neu';
+
+  @override
+  String get importedNewSemantics => 'Neu importiert';
 }

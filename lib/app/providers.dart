@@ -21,6 +21,7 @@ import '../data/local/database.dart';
 import '../data/local/drift_app_settings.dart';
 import '../data/local/drift_dive_computer_repository.dart';
 import '../data/local/drift_dive_repository.dart';
+import '../data/local/drift_equipment_repository.dart';
 import '../data/local/drift_site_repository.dart';
 import '../data/platform/device_channel.dart';
 import '../data/platform/permission_bluetooth_access.dart';
@@ -31,6 +32,7 @@ import '../domain/diagnostics/diagnostic_log.dart';
 import '../domain/dive/dive.dart';
 import '../domain/dive/dive_repository.dart';
 import '../domain/dive/diver.dart';
+import '../domain/equipment/equipment.dart';
 import '../domain/import/bluetooth_access.dart';
 import '../domain/import/dive_computer_import.dart';
 import '../domain/import/dive_computer_registry.dart';
@@ -316,6 +318,37 @@ String computerLabel(KnownDiveComputer c) {
   return id == null || id.isEmpty ? name : '$name ••${lastFour(id)}';
 }
 
+final equipmentRepositoryProvider = Provider<EquipmentRepository>(
+  (ref) => DriftEquipmentRepository(ref.watch(appDatabaseProvider)),
+);
+
+/// The active diver's equipment, not deleted (ui-spec §5.11, ADR 0007).
+final equipmentListProvider = FutureProvider<List<Equipment>>((ref) async {
+  final diver = await ref.watch(activeDiverProvider.future);
+  if (diver == null) return const [];
+  return ref.watch(equipmentRepositoryProvider).list(diver.id!);
+});
+
+/// The pieces used on one dive, deleted ones included (ui-spec §5.3).
+final diveEquipmentProvider = FutureProvider.autoDispose
+    .family<List<Equipment>, String>(
+      (ref, diveId) => ref.watch(equipmentRepositoryProvider).forDive(diveId),
+    );
+
+/// Ids of the dives saved by the last import; the logbook highlights them
+/// once and then clears the set (ui-spec §5.2, T32).
+final recentlyImportedProvider =
+    NotifierProvider<RecentlyImported, Set<String>>(RecentlyImported.new);
+
+class RecentlyImported extends Notifier<Set<String>> {
+  @override
+  Set<String> build() => const {};
+
+  void mark(Set<String> ids) => state = ids;
+
+  void clear() => state = const {};
+}
+
 final siteRepositoryProvider = Provider<SiteRepository>(
   (ref) => DriftSiteRepository(ref.watch(appDatabaseProvider)),
 );
@@ -429,7 +462,10 @@ extension RefreshDives on WidgetRef {
     invalidate(logbookProvider);
     invalidate(ownSitesProvider);
     invalidate(visitedCountriesProvider);
-    if (diveId != null) invalidate(diveDetailProvider(diveId));
+    if (diveId != null) {
+      invalidate(diveDetailProvider(diveId));
+      invalidate(diveEquipmentProvider(diveId));
+    }
   }
 }
 

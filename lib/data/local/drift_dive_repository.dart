@@ -94,6 +94,7 @@ class DriftDiveRepository implements DiveRepository, DiveNumbering {
             _toRow(stored, createdAt: existing?.createdAt ?? now, now: now),
           );
       await _replaceChildren(stored);
+      await _linkEquipment(stored, isNew: existing == null);
 
       final warnings = <DiveWarning>{
         if (await _numberTaken(stored)) DiveWarning.duplicateNumber,
@@ -108,7 +109,72 @@ class DriftDiveRepository implements DiveRepository, DiveNumbering {
     String? siteName,
     String? siteCatalogueId,
     String? excludeDiveId,
-  }) => throw UnimplementedError('T31.2');
+  }) async {
+    final name = siteName?.trim().toLowerCase() ?? '';
+    final byCatalogue = siteCatalogueId != null && siteCatalogueId.isNotEmpty;
+    if (name.isEmpty && !byCatalogue) return null;
+    final t = _db.dives;
+    final rows =
+        await (_db.select(t)
+              ..where((d) {
+                var where =
+                    d.diverId.equals(diverId) &
+                    d.deletedAt.isNull() &
+                    d.weightKg.isNotNull();
+                if (excludeDiveId != null) {
+                  where = where & d.id.equals(excludeDiveId).not();
+                }
+                final sameName = d.siteName.trim().lower().equals(name);
+                return where &
+                    (byCatalogue
+                        ? (d.siteCatalogueId.equals(siteCatalogueId) |
+                              (name.isEmpty ? const Constant(false) : sameName))
+                        : sameName);
+              })
+              ..orderBy([
+                (d) => OrderingTerm.desc(d.startLocal),
+                (d) => OrderingTerm.desc(d.diveNumber),
+              ])
+              ..limit(1))
+            .getSingleOrNull();
+    if (rows == null) return null;
+    return (weightKg: rows.weightKg!, siteName: rows.siteName!.trim());
+  }
+
+  /// [Dive.equipmentIds] null: a new dive gets the standard set, an existing
+  /// one keeps its links (ADR 0007).
+  Future<void> _linkEquipment(Dive dive, {required bool isNew}) async {
+    var ids = dive.equipmentIds;
+    if (ids == null) {
+      if (!isNew) return;
+      final defaults =
+          await (_db.select(_db.equipment)..where(
+                (e) =>
+                    e.diverId.equals(dive.diverId) &
+                    e.isDefault.equals(true) &
+                    e.deletedAt.isNull(),
+              ))
+              .get();
+      ids = [for (final e in defaults) e.id];
+    }
+    final linked = {...ids};
+    await (_db.delete(
+      _db.diveEquipment,
+    )..where((t) => t.diveId.equals(dive.id!))).go();
+    await _db.batch(
+      (b) => b.insertAll(_db.diveEquipment, [
+        for (final e in linked)
+          DiveEquipmentCompanion.insert(diveId: dive.id!, equipmentId: e),
+      ]),
+    );
+  }
+
+  Future<List<String>> _loadEquipmentIds(String diveId) async {
+    final rows = await (_db.select(
+      _db.diveEquipment,
+    )..where((t) => t.diveId.equals(diveId))).get();
+    return [for (final r in rows) r.equipmentId];
+  }
 
   @override
   Future<Dive?> findById(String id) async {
@@ -120,6 +186,7 @@ class DriftDiveRepository implements DiveRepository, DiveNumbering {
       samples: await _loadSamples(id),
       tanks: await _loadTanks(id),
       events: await _loadEvents(id),
+      equipmentIds: await _loadEquipmentIds(id),
     );
   }
 
@@ -482,6 +549,7 @@ DivesCompanion _toRow(
     waterType: Value(d.waterType?.name),
     notes: Value(d.notes),
     rating: Value(d.rating),
+    weightKg: Value(d.weightKg),
     createdAt: createdAt,
     updatedAt: now,
   );
@@ -511,5 +579,6 @@ Dive _fromRow(DiveRow r) {
         : WaterType.values.byName(r.waterType!),
     notes: r.notes,
     rating: r.rating,
+    weightKg: r.weightKg,
   );
 }

@@ -4,11 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/providers.dart';
+import '../../app/theme.dart';
 import '../../domain/dive/dive.dart';
 import '../../domain/dive/dive_repository.dart';
 import '../../domain/dive/manual_dive_draft.dart';
+import '../../domain/equipment/equipment.dart';
 import '../../domain/sites/site_suggestions.dart';
 import '../../l10n/app_localizations.dart';
+import '../settings/equipment_edit_screen.dart';
+import '../settings/equipment_texts.dart';
 import 'dive_detail_screen.dart';
 import 'dive_texts.dart';
 import 'logbook_screen.dart';
@@ -39,6 +43,7 @@ const _textFields = [
   ManualDiveField.startPressure,
   ManualDiveField.endPressure,
   ManualDiveField.o2,
+  ManualDiveField.weight,
 ];
 
 class _ManualDiveScreenState extends ConsumerState<ManualDiveScreen> {
@@ -55,6 +60,16 @@ class _ManualDiveScreenState extends ConsumerState<ManualDiveScreen> {
   late DateTime _start;
   WaterType? _waterType;
   int? _rating;
+
+  /// Selected equipment (ADR 0007); null until loaded.
+  Set<String>? _equipment;
+
+  /// Pieces of the edited dive that were deleted since (shown muted).
+  List<Equipment> _deletedOnDive = const [];
+
+  /// „Zuletzt bei Elphinstone: 6 kg“ for the current site (T31.3).
+  ({double weightKg, String siteName})? _lastWeight;
+  int _hintRequest = 0;
 
   /// Catalogue link and position of the chosen site (ADR 0006); cleared as
   /// soon as the name is typed over.
@@ -88,15 +103,24 @@ class _ManualDiveScreenState extends ConsumerState<ManualDiveScreen> {
       if (dive == null) return;
       _original = dive;
       draft = ManualDiveDraft.fromDive(dive);
+      _deletedOnDive = [
+        for (final e in await ref.read(equipmentRepositoryProvider).forDive(id))
+          if (e.deleted) e,
+      ];
     } else {
       final diver = await ref.read(activeDiverProvider.future);
       final next = await ref
           .read(diveRepositoryProvider)
           .nextNumber(diver!.id!);
       final now = clock.now();
+      final defaults = await ref.read(equipmentListProvider.future);
       draft = ManualDiveDraft(
         number: '$next',
         start: DateTime(now.year, now.month, now.day, now.hour, now.minute),
+        equipmentIds: {
+          for (final e in defaults)
+            if (e.isDefault) e.id!,
+        },
       );
     }
     if (!mounted) return;
@@ -104,6 +128,27 @@ class _ManualDiveScreenState extends ConsumerState<ManualDiveScreen> {
       _initial = draft;
       _fill(draft);
     });
+    _refreshWeightHint();
+  }
+
+  /// Looks up the lead of the last dive at the current site.
+  Future<void> _refreshWeightHint() async {
+    final request = ++_hintRequest;
+    final diver =
+        _original?.diverId ?? (await ref.read(activeDiverProvider.future))?.id;
+    final site = _site.text.trim();
+    final last = diver == null || (site.isEmpty && _siteLink.id == null)
+        ? null
+        : await ref
+              .read(diveRepositoryProvider)
+              .lastWeightAt(
+                diver,
+                siteName: site,
+                siteCatalogueId: _siteLink.id,
+                excludeDiveId: _original?.id,
+              );
+    if (!mounted || request != _hintRequest) return;
+    setState(() => _lastWeight = last);
   }
 
   void _fill(ManualDiveDraft d) {
@@ -117,6 +162,7 @@ class _ManualDiveScreenState extends ConsumerState<ManualDiveScreen> {
       ManualDiveField.startPressure: d.startPressure,
       ManualDiveField.endPressure: d.endPressure,
       ManualDiveField.o2: d.o2,
+      ManualDiveField.weight: d.weight,
     };
     for (final MapEntry(:key, :value) in texts.entries) {
       _controllers[key]!.text = value;
@@ -127,6 +173,7 @@ class _ManualDiveScreenState extends ConsumerState<ManualDiveScreen> {
     _start = d.start;
     _waterType = d.waterType;
     _rating = d.rating;
+    _equipment = d.equipmentIds == null ? null : {...d.equipmentIds!};
   }
 
   ManualDiveDraft get _draft {
@@ -146,6 +193,8 @@ class _ManualDiveScreenState extends ConsumerState<ManualDiveScreen> {
       startPressure: t(ManualDiveField.startPressure),
       endPressure: t(ManualDiveField.endPressure),
       o2: t(ManualDiveField.o2),
+      weight: t(ManualDiveField.weight),
+      equipmentIds: _equipment == null ? null : {..._equipment!},
       waterType: _waterType,
       notes: _notes.text,
       rating: _rating,
@@ -168,10 +217,16 @@ class _ManualDiveScreenState extends ConsumerState<ManualDiveScreen> {
         a.startPressure != b.startPressure ||
         a.endPressure != b.endPressure ||
         a.o2 != b.o2 ||
+        a.weight != b.weight ||
+        !_sameSet(a.equipmentIds, b.equipmentIds) ||
         a.waterType != b.waterType ||
         a.notes != b.notes ||
         a.rating != b.rating;
   }
+
+  static bool _sameSet(Set<String>? a, Set<String>? b) =>
+      (a ?? const {}).length == (b ?? const {}).length &&
+      (a ?? const {}).containsAll(b ?? const {});
 
   void _siteChosen(SiteSuggestion s) {
     _siteLink = switch (s) {
@@ -188,11 +243,13 @@ class _ManualDiveScreenState extends ConsumerState<ManualDiveScreen> {
       NewSiteSuggestion() => _noLink,
     };
     _changed();
+    _refreshWeightHint();
   }
 
   void _siteTyped(String _) {
     _siteLink = _noLink;
     _changed();
+    _refreshWeightHint();
   }
 
   /// Rebuilds for the dirty state and, after the first save, inline errors.
@@ -303,6 +360,97 @@ class _ManualDiveScreenState extends ConsumerState<ManualDiveScreen> {
     ManualDiveError.o2OutOfRange => l10n.errorO2,
     ManualDiveError.weightOutOfRange => l10n.errorWeight,
   };
+
+  /// „Zuletzt bei Elphinstone: 6 kg · Übernehmen“, unless the field already
+  /// has that value (ui-spec §5.4).
+  Widget? _weightHint(AppLocalizations l10n) {
+    final last = _lastWeight;
+    if (last == null) return null;
+    final typed = double.tryParse(
+      _controllers[ManualDiveField.weight]!.text.trim().replaceAll(',', '.'),
+    );
+    if (typed == last.weightKg) return null;
+    final colors = Theme.of(context).extension<DiveColors>()!;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Icon(Icons.history, size: 18, color: colors.onSurfaceMuted),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              l10n.weightLastAt(last.siteName, formatKg(last.weightKg)),
+              style: TextStyle(color: colors.onSurfaceMuted),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              _controllers[ManualDiveField.weight]!.text = formatKg(
+                last.weightKg,
+              );
+              _changed();
+            },
+            child: Text(l10n.weightApply),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Filter chips for the equipment (ui-spec §5.4, T31.4).
+  Widget _equipmentChips(AppLocalizations l10n) {
+    final theme = Theme.of(context);
+    final colors = theme.extension<DiveColors>()!;
+    final live = ref.watch(equipmentListProvider).value ?? const [];
+    final items = [
+      ...live,
+      for (final e in _deletedOnDive)
+        if (_equipment?.contains(e.id) ?? false) e,
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(l10n.fieldEquipment, style: theme.textTheme.bodySmall),
+        const SizedBox(height: 4),
+        if (items.isEmpty)
+          Row(
+            children: [
+              Expanded(child: Text(l10n.equipmentNoneInForm)),
+              TextButton(
+                onPressed: () => context.push(EquipmentEditScreen.newPath),
+                child: Text(l10n.equipmentCreateLink),
+              ),
+            ],
+          )
+        else
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final e in items)
+                FilterChip(
+                  avatar: _equipment?.contains(e.id) ?? false
+                      ? null
+                      : Icon(equipmentKindIcon(e.kind), size: 18),
+                  label: Text(
+                    e.name,
+                    style: e.deleted
+                        ? TextStyle(color: colors.onSurfaceMuted)
+                        : null,
+                  ),
+                  selected: _equipment?.contains(e.id) ?? false,
+                  onSelected: (on) {
+                    final next = {...?_equipment};
+                    on ? next.add(e.id!) : next.remove(e.id);
+                    _equipment = next;
+                    _changed();
+                  },
+                ),
+            ],
+          ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -450,6 +598,14 @@ class _ManualDiveScreenState extends ConsumerState<ManualDiveScreen> {
                   field(ManualDiveField.startPressure, l10n.fieldStartPressure),
                   field(ManualDiveField.endPressure, l10n.fieldEndPressure),
                   field(ManualDiveField.o2, l10n.fieldO2),
+                  field(
+                    ManualDiveField.weight,
+                    l10n.fieldWeight,
+                    decimal: true,
+                  ),
+                  ?_weightHint(l10n),
+                  _equipmentChips(l10n),
+                  const SizedBox(height: 12),
                   Text(
                     l10n.fieldWaterType,
                     style: Theme.of(context).textTheme.bodySmall,

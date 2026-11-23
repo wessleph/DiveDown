@@ -271,7 +271,7 @@ class _DiveComputerScreenState extends ConsumerState<DiveComputerScreen> {
     });
   }
 
-  Future<int> _save(
+  Future<Set<String>> _save(
     Set<int> selected,
     Set<int> confirmed,
     List<ImportedDive> dives,
@@ -293,7 +293,7 @@ class _DiveComputerScreenState extends ConsumerState<DiveComputerScreen> {
       confirmed: confirmed,
       asNewDevice: _asNewDevice,
     );
-    return saved.savedCount;
+    return {for (final r in saved.results.whereType<Saved>()) r.saved.id!};
   }
 
   @override

@@ -1821,6 +1821,198 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Aus Datei: {name}'**
   String previewSourceFile(String name);
+
+  /// No description provided for @settingsSectionEquipment.
+  ///
+  /// In de, this message translates to:
+  /// **'AUSRÜSTUNG'**
+  String get settingsSectionEquipment;
+
+  /// No description provided for @equipmentEmpty.
+  ///
+  /// In de, this message translates to:
+  /// **'Noch keine Ausrüstung. Standard-Teile werden neuen Tauchgängen automatisch zugeordnet.'**
+  String get equipmentEmpty;
+
+  /// No description provided for @equipmentAdd.
+  ///
+  /// In de, this message translates to:
+  /// **'Ausrüstung hinzufügen'**
+  String get equipmentAdd;
+
+  /// No description provided for @equipmentEditTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Ausrüstung bearbeiten'**
+  String get equipmentEditTitle;
+
+  /// No description provided for @equipmentKindField.
+  ///
+  /// In de, this message translates to:
+  /// **'Art'**
+  String get equipmentKindField;
+
+  /// No description provided for @equipmentNameField.
+  ///
+  /// In de, this message translates to:
+  /// **'Bezeichnung'**
+  String get equipmentNameField;
+
+  /// No description provided for @equipmentNameHint.
+  ///
+  /// In de, this message translates to:
+  /// **'Scubapro Hydros Pro'**
+  String get equipmentNameHint;
+
+  /// No description provided for @equipmentNotesField.
+  ///
+  /// In de, this message translates to:
+  /// **'Notiz'**
+  String get equipmentNotesField;
+
+  /// No description provided for @equipmentDefault.
+  ///
+  /// In de, this message translates to:
+  /// **'Standard'**
+  String get equipmentDefault;
+
+  /// No description provided for @equipmentDefaultHint.
+  ///
+  /// In de, this message translates to:
+  /// **'Neue Tauchgänge bekommen dieses Teil automatisch.'**
+  String get equipmentDefaultHint;
+
+  /// No description provided for @equipmentNameMissing.
+  ///
+  /// In de, this message translates to:
+  /// **'Bitte eine Bezeichnung eingeben.'**
+  String get equipmentNameMissing;
+
+  /// No description provided for @equipmentKindMissing.
+  ///
+  /// In de, this message translates to:
+  /// **'Bitte eine Art wählen.'**
+  String get equipmentKindMissing;
+
+  /// No description provided for @equipmentDeleteQuestion.
+  ///
+  /// In de, this message translates to:
+  /// **'{name} löschen? Bei bisherigen Tauchgängen bleibt es eingetragen.'**
+  String equipmentDeleteQuestion(String name);
+
+  /// No description provided for @equipmentKindSuit.
+  ///
+  /// In de, this message translates to:
+  /// **'Anzug'**
+  String get equipmentKindSuit;
+
+  /// No description provided for @equipmentKindBcd.
+  ///
+  /// In de, this message translates to:
+  /// **'Jacket'**
+  String get equipmentKindBcd;
+
+  /// No description provided for @equipmentKindRegulator.
+  ///
+  /// In de, this message translates to:
+  /// **'Atemregler'**
+  String get equipmentKindRegulator;
+
+  /// No description provided for @equipmentKindComputer.
+  ///
+  /// In de, this message translates to:
+  /// **'Tauchcomputer'**
+  String get equipmentKindComputer;
+
+  /// No description provided for @equipmentKindTank.
+  ///
+  /// In de, this message translates to:
+  /// **'Flasche'**
+  String get equipmentKindTank;
+
+  /// No description provided for @equipmentKindMask.
+  ///
+  /// In de, this message translates to:
+  /// **'Maske'**
+  String get equipmentKindMask;
+
+  /// No description provided for @equipmentKindFins.
+  ///
+  /// In de, this message translates to:
+  /// **'Flossen'**
+  String get equipmentKindFins;
+
+  /// No description provided for @equipmentKindLight.
+  ///
+  /// In de, this message translates to:
+  /// **'Lampe'**
+  String get equipmentKindLight;
+
+  /// No description provided for @equipmentKindOther.
+  ///
+  /// In de, this message translates to:
+  /// **'Sonstiges'**
+  String get equipmentKindOther;
+
+  /// No description provided for @fieldWeight.
+  ///
+  /// In de, this message translates to:
+  /// **'Blei (kg)'**
+  String get fieldWeight;
+
+  /// No description provided for @weightLastAt.
+  ///
+  /// In de, this message translates to:
+  /// **'Zuletzt bei {site}: {kg} kg'**
+  String weightLastAt(String site, String kg);
+
+  /// No description provided for @weightApply.
+  ///
+  /// In de, this message translates to:
+  /// **'Übernehmen'**
+  String get weightApply;
+
+  /// No description provided for @fieldEquipment.
+  ///
+  /// In de, this message translates to:
+  /// **'Ausrüstung'**
+  String get fieldEquipment;
+
+  /// No description provided for @equipmentNoneInForm.
+  ///
+  /// In de, this message translates to:
+  /// **'Noch keine Ausrüstung. Lege sie in den Einstellungen an.'**
+  String get equipmentNoneInForm;
+
+  /// No description provided for @equipmentCreateLink.
+  ///
+  /// In de, this message translates to:
+  /// **'Ausrüstung anlegen'**
+  String get equipmentCreateLink;
+
+  /// No description provided for @detailWeight.
+  ///
+  /// In de, this message translates to:
+  /// **'Blei'**
+  String get detailWeight;
+
+  /// No description provided for @weightKg.
+  ///
+  /// In de, this message translates to:
+  /// **'{kg} kg'**
+  String weightKg(String kg);
+
+  /// No description provided for @importedNew.
+  ///
+  /// In de, this message translates to:
+  /// **'Neu'**
+  String get importedNew;
+
+  /// No description provided for @importedNewSemantics.
+  ///
+  /// In de, this message translates to:
+  /// **'Neu importiert'**
+  String get importedNewSemantics;
 }
 
 class _AppLocalizationsDelegate

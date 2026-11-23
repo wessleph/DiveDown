@@ -31,6 +31,14 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        // Equipment and lead (ADR 0007).
+        await m.addColumn(dives, dives.weightKg);
+        await m.createTable(equipment);
+        await m.createTable(diveEquipment);
+      }
+    },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
     },

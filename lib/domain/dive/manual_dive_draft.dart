@@ -80,6 +80,8 @@ class ManualDiveDraft {
       startPressure: num(tank?.startPressureBar, 0),
       endPressure: num(tank?.endPressureBar, 0),
       o2: tank?.gas == null ? '' : (tank!.gas!.o2 * 100).round().toString(),
+      weight: num(dive.weightKg, 1),
+      equipmentIds: dive.equipmentIds?.toSet(),
       waterType: dive.waterType,
       notes: dive.notes ?? '',
       rating: dive.rating,
@@ -218,6 +220,12 @@ class ManualDiveDraft {
       (v) => v >= 1 && v <= 100,
       ManualDiveError.o2OutOfRange,
     );
+    check(
+      ManualDiveField.weight,
+      weight,
+      (v) => v >= 0 && v <= 40,
+      ManualDiveError.weightOutOfRange,
+    );
 
     return {
       for (final f in ManualDiveField.values)
@@ -285,6 +293,8 @@ class ManualDiveDraft {
       waterType: waterType,
       notes: notes.trim().isEmpty ? null : notes,
       rating: rating,
+      weightKg: value(weight, before?.weight, original?.weightKg),
+      equipmentIds: equipmentIds?.toList(),
       samples: original?.samples ?? const [],
       events: original?.events ?? const [],
       tanks: [

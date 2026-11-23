@@ -447,5 +447,46 @@
   "@previewSourceFile": {
     "description": "Shown above every file preview and error; the name is only shown, never used as a path",
     "placeholders": { "name": { "type": "String" } }
-  }
+  },
+  "settingsSectionEquipment": "AUSRÜSTUNG",
+  "equipmentEmpty": "Noch keine Ausrüstung. Standard-Teile werden neuen Tauchgängen automatisch zugeordnet.",
+  "equipmentAdd": "Ausrüstung hinzufügen",
+  "equipmentEditTitle": "Ausrüstung bearbeiten",
+  "equipmentKindField": "Art",
+  "equipmentNameField": "Bezeichnung",
+  "equipmentNameHint": "Scubapro Hydros Pro",
+  "equipmentNotesField": "Notiz",
+  "equipmentDefault": "Standard",
+  "equipmentDefaultHint": "Neue Tauchgänge bekommen dieses Teil automatisch.",
+  "equipmentNameMissing": "Bitte eine Bezeichnung eingeben.",
+  "equipmentKindMissing": "Bitte eine Art wählen.",
+  "equipmentDeleteQuestion": "{name} löschen? Bei bisherigen Tauchgängen bleibt es eingetragen.",
+  "@equipmentDeleteQuestion": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "equipmentKindSuit": "Anzug",
+  "equipmentKindBcd": "Jacket",
+  "equipmentKindRegulator": "Atemregler",
+  "equipmentKindComputer": "Tauchcomputer",
+  "equipmentKindTank": "Flasche",
+  "equipmentKindMask": "Maske",
+  "equipmentKindFins": "Flossen",
+  "equipmentKindLight": "Lampe",
+  "equipmentKindOther": "Sonstiges",
+  "fieldWeight": "Blei (kg)",
+  "weightLastAt": "Zuletzt bei {site}: {kg} kg",
+  "@weightLastAt": {
+    "placeholders": { "site": { "type": "String" }, "kg": { "type": "String" } }
+  },
+  "weightApply": "Übernehmen",
+  "fieldEquipment": "Ausrüstung",
+  "equipmentNoneInForm": "Noch keine Ausrüstung. Lege sie in den Einstellungen an.",
+  "equipmentCreateLink": "Ausrüstung anlegen",
+  "detailWeight": "Blei",
+  "weightKg": "{kg} kg",
+  "@weightKg": {
+    "placeholders": { "kg": { "type": "String" } }
+  },
+  "importedNew": "Neu",
+  "importedNewSemantics": "Neu importiert"
 }

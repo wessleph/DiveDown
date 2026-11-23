@@ -9,6 +9,7 @@ import '../../domain/metrics/air_profile.dart';
 import '../../domain/metrics/sac_calculator.dart';
 import '../../domain/units/unit_formatter.dart';
 import '../../l10n/app_localizations.dart';
+import '../settings/equipment_texts.dart';
 import 'dive_texts.dart';
 import 'logbook_screen.dart';
 import 'manual_dive_screen.dart';
@@ -246,6 +247,7 @@ class _DiveDetail extends StatelessWidget {
             ),
           ),
         ],
+        _EquipmentSection(dive: dive),
         if (dive.notes case final notes?) ...[
           const SizedBox(height: 16),
           Padding(padding: side, child: _SectionTitle(l10n.notesTitle)),
@@ -339,6 +341,69 @@ String? _pressureText(DiveTank? tank) {
   final end = tank?.endPressureBar;
   if (start == null || end == null) return null;
   return '${start.round()} → ${_units.pressure(end)}';
+}
+
+/// Lead and the pieces used (ui-spec §5.3 item 5, T31.5); hidden when the
+/// dive has neither.
+class _EquipmentSection extends ConsumerWidget {
+  const _EquipmentSection({required this.dive});
+
+  final Dive dive;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final colors = theme.extension<DiveColors>()!;
+    final items = ref.watch(diveEquipmentProvider(dive.id!)).value ?? const [];
+    final kg = dive.weightKg;
+    if (kg == null && items.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionTitle(l10n.settingsSectionEquipment),
+          if (kg != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Row(
+                children: [
+                  Icon(Icons.fitness_center, size: 18, color: colors.depth),
+                  const SizedBox(width: 8),
+                  Text(l10n.detailWeight),
+                  const SizedBox(width: 6),
+                  Text(
+                    l10n.weightKg(formatKg(kg)),
+                    style: const TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                ],
+              ),
+            ),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final e in items)
+                Chip(
+                  avatar: Icon(
+                    equipmentKindIcon(e.kind),
+                    size: 18,
+                    color: e.deleted ? colors.onSurfaceMuted : colors.depth,
+                  ),
+                  label: Text(
+                    e.name,
+                    style: e.deleted
+                        ? TextStyle(color: colors.onSurfaceMuted)
+                        : null,
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _SectionTitle extends StatelessWidget {

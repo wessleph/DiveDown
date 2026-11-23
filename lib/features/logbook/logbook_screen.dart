@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -138,14 +140,93 @@ class _LoadError extends StatelessWidget {
   }
 }
 
-class _DiveList extends StatelessWidget {
+class _DiveList extends ConsumerStatefulWidget {
   const _DiveList({required this.dives});
 
   /// Newest first, as the repository returns them.
   final List<Dive> dives;
 
   @override
+  ConsumerState<_DiveList> createState() => _DiveListState();
+}
+
+/// Highlights the dives of the last import for 3 s once the list is on
+/// screen (ui-spec §5.2, T32); leaving the tab ends it at once.
+class _DiveListState extends ConsumerState<_DiveList> {
+  static const _highlightFor = Duration(seconds: 3);
+
+  Set<String> _highlight = const {};
+  Timer? _timer;
+  bool _visible = false;
+  final _firstNewKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    _take(ref.read(recentlyImportedProvider));
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final visible = TickerMode.valuesOf(context).enabled;
+    if (visible == _visible) return;
+    _visible = visible;
+    if (visible) {
+      _start();
+    } else if (_timer != null) {
+      // Gone to another tab: the next visit shows no mark (T32.2).
+      _timer!.cancel();
+      _timer = null;
+      _highlight = const {};
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  /// Copies the ids of a new import and empties the provider.
+  void _take(Set<String> ids) {
+    if (ids.isEmpty) return;
+    _highlight = {...ids};
+    _timer?.cancel();
+    _timer = null;
+    Future.microtask(() {
+      if (mounted) ref.read(recentlyImportedProvider.notifier).clear();
+    });
+    if (_visible) _start();
+  }
+
+  void _start() {
+    if (_highlight.isEmpty || _timer != null) return;
+    _timer = Timer(_highlightFor, () {
+      if (mounted) setState(() => _highlight = const {});
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final target = _firstNewKey.currentContext;
+      if (target != null && target.mounted) {
+        Scrollable.ensureVisible(
+          target,
+          alignment: 0.2,
+          duration: MediaQuery.disableAnimationsOf(context)
+              ? Duration.zero
+              : const Duration(milliseconds: 300),
+        );
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    ref.listen(
+      recentlyImportedProvider,
+      (_, next) => setState(() => _take(next)),
+    );
+    final dives = widget.dives;
+    final firstNew = dives.where((d) => _highlight.contains(d.id)).firstOrNull;
     final items = <Object>[const _Header()];
     (int, int)? month;
     for (final dive in dives) {
@@ -162,7 +243,11 @@ class _DiveList extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 96),
       itemCount: items.length,
       itemBuilder: (context, i) => switch (items[i]) {
-        final Dive dive => _DiveRow(dive: dive),
+        final Dive dive => _DiveRow(
+          key: dive == firstNew ? _firstNewKey : null,
+          dive: dive,
+          highlighted: _highlight.contains(dive.id),
+        ),
         final DateTime start => _MonthHeader(start: start),
         _Header() => Column(
           children: [
@@ -172,6 +257,32 @@ class _DiveList extends StatelessWidget {
         ),
         _ => throw StateError('unexpected item'),
       },
+    );
+  }
+}
+
+/// „Neu“ next to the number of a just imported dive.
+class _NewBadge extends StatelessWidget {
+  const _NewBadge({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primary,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        text,
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: theme.colorScheme.onPrimary,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
     );
   }
 }
@@ -202,9 +313,12 @@ class _MonthHeader extends StatelessWidget {
 }
 
 class _DiveRow extends StatelessWidget {
-  const _DiveRow({required this.dive});
+  const _DiveRow({super.key, required this.dive, this.highlighted = false});
 
   final Dive dive;
+
+  /// Just imported (ui-spec §5.2, T32).
+  final bool highlighted;
 
   static const _units = UnitFormatter.metric();
 
@@ -218,6 +332,7 @@ class _DiveRow extends StatelessWidget {
 
     // Read as one element (ui-spec §7).
     final label = [
+      if (highlighted) l10n.importedNewSemantics,
       l10n.diveNumberSpoken(dive.number!),
       site ?? l10n.noSite,
       spokenDateFormat.format(dive.start),
@@ -240,8 +355,24 @@ class _DiveRow extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: open,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
+            child: AnimatedContainer(
+              duration: MediaQuery.disableAnimationsOf(context)
+                  ? Duration.zero
+                  : const Duration(milliseconds: 600),
+              decoration: BoxDecoration(
+                color: highlighted
+                    ? colors.surfaceTint
+                    : colors.surfaceTint.withValues(alpha: 0),
+                border: Border(
+                  left: BorderSide(
+                    width: 4,
+                    color: highlighted
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.primary.withValues(alpha: 0),
+                  ),
+                ),
+              ),
+              padding: const EdgeInsets.fromLTRB(10, 12, 14, 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -258,13 +389,21 @@ class _DiveRow extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              l10n.diveNumber(dive.number!),
-                              style: theme.textTheme.labelLarge?.copyWith(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w800,
-                                color: theme.colorScheme.primary,
-                              ),
+                            Row(
+                              children: [
+                                Text(
+                                  l10n.diveNumber(dive.number!),
+                                  style: theme.textTheme.labelLarge?.copyWith(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w800,
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                ),
+                                if (highlighted) ...[
+                                  const SizedBox(width: 6),
+                                  _NewBadge(text: l10n.importedNew),
+                                ],
+                              ],
                             ),
                             Text(
                               site ?? l10n.noSite,

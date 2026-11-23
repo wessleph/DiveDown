@@ -20,7 +20,8 @@ import 'compare_sheet.dart';
 /// Saves the dives at [selected] (indices into [dives], the previewed dives
 /// with the sites set in the preview), those in [confirmed] although they
 /// need confirmation. Returns how many were saved.
-typedef SaveSelected = Future<int> Function(
+/// Saves the selected dives; returns the ids of the dives saved.
+typedef SaveSelected = Future<Set<String>> Function(
   Set<int> selected,
   Set<int> confirmed,
   List<ImportedDive> dives,
@@ -105,8 +106,12 @@ class _ImportPreviewState extends ConsumerState<ImportPreview> {
       [..._dives],
     );
     ref.refreshDives();
+    // Highlighted once in the logbook (ui-spec §5.2, T32).
+    ref.read(recentlyImportedProvider.notifier).mark(saved);
     if (!mounted) return;
-    messenger.showSnackBar(SnackBar(content: Text(l10n.importedSnack(saved))));
+    messenger.showSnackBar(
+      SnackBar(content: Text(l10n.importedSnack(saved.length))),
+    );
     context.go(LogbookScreen.path);
   }
 

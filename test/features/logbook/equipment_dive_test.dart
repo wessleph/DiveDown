@@ -7,6 +7,7 @@ import 'package:divedown/data/local/drift_equipment_repository.dart';
 import 'package:divedown/domain/dive/dive.dart';
 import 'package:divedown/domain/equipment/equipment.dart';
 import 'package:divedown/features/logbook/dive_detail_screen.dart';
+import 'package:divedown/features/settings/equipment_edit_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -197,7 +198,8 @@ void main() {
       await tester.ensureVisible(hint);
       expect(hint, findsOneWidget);
       await _tap(tester, find.text('Ausrüstung anlegen'));
-      expect(currentLocation(tester), contains('/settings'));
+      // Pushed over the form, so what was typed stays (T31.4).
+      expect(find.byType(EquipmentEditScreen), findsOneWidget);
     });
   });
 

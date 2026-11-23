@@ -86,14 +86,15 @@ void main() {
       await equipment.save(_item(anna, 'Hydros Pro', kind: EquipmentKind.bcd));
       await equipment.save(_item(anna, 'Bare 5 mm', kind: EquipmentKind.suit));
       await equipment.save(
-        _item(anna, 'Aqualung', kind: EquipmentKind.regulator),
+        _item(anna, 'Mares', kind: EquipmentKind.regulator),
       );
       expect(lamp.id, isNotNull);
 
-      // Regulators by name ignoring case: Aqualung before apeks.
+      // Regulators by name ignoring case: apeks before Mares (with case,
+      // „M“ would come first).
       expect(
         [for (final e in await equipment.list(anna)) e.name],
-        ['Bare 5 mm', 'Hydros Pro', 'Aqualung', 'apeks XTX50', 'Tovatec'],
+        ['Bare 5 mm', 'Hydros Pro', 'apeks XTX50', 'Mares', 'Tovatec'],
       );
 
       await equipment.save(

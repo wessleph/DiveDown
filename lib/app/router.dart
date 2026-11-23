@@ -11,6 +11,7 @@ import '../features/logbook/manual_dive_screen.dart';
 import '../features/logbook/profile_fullscreen_screen.dart';
 import '../features/onboarding/welcome_screen.dart';
 import '../features/settings/diagnostics_screen.dart';
+import '../features/settings/equipment_edit_screen.dart';
 import '../features/settings/settings_screen.dart';
 import 'home_shell.dart';
 import 'providers.dart';
@@ -112,6 +113,20 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: SettingsScreen.path,
                 builder: (context, state) => const SettingsScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'equipment/new',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (context, state) => const EquipmentEditScreen(),
+                  ),
+                  GoRoute(
+                    path: 'equipment/:id',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (context, state) => EquipmentEditScreen(
+                      equipmentId: state.pathParameters['id'],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

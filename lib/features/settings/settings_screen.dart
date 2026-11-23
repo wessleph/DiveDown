@@ -11,6 +11,8 @@ import '../../l10n/app_localizations.dart';
 import '../logbook/dive_texts.dart';
 import 'backup_flows.dart';
 import 'diagnostics_screen.dart';
+import 'equipment_edit_screen.dart';
+import 'equipment_texts.dart';
 
 /// Einstellungen (ui-spec §5.11): one diver per app, devices, appearance
 /// and „Über DiveDown“. Backup (T11) and diagnostic logs (T10) follow.
@@ -43,6 +45,8 @@ class SettingsScreen extends ConsumerWidget {
         children: [
           _Section(l10n.settingsSectionDiver),
           if (diver != null) _DiverGroup(diver: diver),
+          _Section(l10n.settingsSectionEquipment),
+          const _EquipmentGroup(),
           _Section(l10n.settingsSectionDevices),
           const _Devices(),
           _Section(l10n.settingsSectionData),
@@ -359,6 +363,67 @@ class _TextDialogState extends State<_TextDialog> {
               ? () => Navigator.pop(context, _controller.text)
               : null,
           child: Text(l10n.save),
+        ),
+      ],
+    );
+  }
+}
+
+/// Equipment list with „Ausrüstung hinzufügen“ (ui-spec §5.11, T30).
+class _EquipmentGroup extends ConsumerWidget {
+  const _EquipmentGroup();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final colors = theme.extension<DiveColors>()!;
+    final items = ref.watch(equipmentListProvider).value ?? const [];
+    return _Group(
+      children: [
+        if (items.isEmpty) ListTile(title: Text(l10n.equipmentEmpty)),
+        for (final e in items)
+          ListTile(
+            leading: Icon(equipmentKindIcon(e.kind), color: colors.depth),
+            title: Text(e.name),
+            subtitle: Row(
+              children: [
+                Flexible(child: Text(equipmentKindLabel(l10n, e.kind))),
+                if (e.isDefault) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 1,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colors.surfaceTint,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      l10n.equipmentDefault,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push(EquipmentEditScreen.pathFor(e.id!)),
+          ),
+        ListTile(
+          leading: Icon(Icons.add, color: theme.colorScheme.primary),
+          title: Text(
+            l10n.equipmentAdd,
+            style: TextStyle(
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          onTap: () => context.push(EquipmentEditScreen.newPath),
         ),
       ],
     );

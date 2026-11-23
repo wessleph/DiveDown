@@ -103,7 +103,7 @@ class _FitImportScreenState extends ConsumerState<FitImportScreen> {
   }
 
   /// Oldest first, so the numbers follow the dive order.
-  Future<int> _save(
+  Future<Set<String>> _save(
     Set<int> selected,
     Set<int> confirmed,
     List<ImportedDive> dives,
@@ -121,7 +121,7 @@ class _FitImportScreenState extends ConsumerState<FitImportScreen> {
               if (confirmed.contains(i)) pos,
           },
         );
-    return results.whereType<Saved>().length;
+    return {for (final r in results.whereType<Saved>()) r.saved.id!};
   }
 
   @override
