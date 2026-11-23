@@ -91,6 +91,51 @@ void main() {
       expect(find.text('Apple Health'), findsNothing);
     });
 
+    group('T28.3 „Zuletzt: …“ under the dive computer card', () {
+      /// A dive from [computerId], [days] calendar days before today.
+      Future<void> seedFrom(_Harness h, String computerId, int days) {
+        final now = DateTime.now();
+        final day = DateTime(now.year, now.month, now.day - days, 9);
+        return seedDive(
+          h.db,
+          exampleDive(
+            h.anna.id!,
+            number: null,
+            start: DateTime.utc(day.year, day.month, day.day, 9),
+          ).copyWith(diveComputerId: computerId),
+        );
+      }
+
+      testWidgets('the device with the newest dive', (tester) async {
+        final h = await _setUp(tester);
+        final eon = await _seedKnown(h.db);
+        final d5 = await DriftDiveComputerRepository(h.db).create(
+          const KnownDiveComputer(
+            id: '',
+            vendor: 'Suunto',
+            product: 'D5',
+            address: 'AA:BB:CC:DD:EE:FF',
+          ),
+        );
+        await seedFrom(h, d5.id, 40);
+        await seedFrom(h, eon.id, 3);
+        await _pump(tester, h, location: ImportScreen.path);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Zuletzt: EON Core, vor 3 Tagen'), findsOneWidget);
+        expect(find.text('Per Bluetooth übertragen'), findsOneWidget);
+      });
+
+      testWidgets('nothing without dives from a known device', (tester) async {
+        final h = await _setUp(tester);
+        await _seedKnown(h.db);
+        await _pump(tester, h, location: ImportScreen.path);
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('Zuletzt'), findsNothing);
+      });
+    });
+
     testWidgets('„Tauchcomputer“ opens the search', (tester) async {
       final h = await _setUp(tester);
       await _pump(tester, h, location: ImportScreen.path);

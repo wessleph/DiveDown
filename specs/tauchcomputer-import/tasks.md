@@ -666,3 +666,13 @@ Abgenommen am 2026-11-23.
 - Beim Umsetzen gefunden: Im Vollbild kam ein einzelner Tipp nie an, weil die Doppeltipp-Erkennung ihn schluckte. Jetzt setzt das Aufsetzen des ersten Fingers den Zeitpunkt (`Listener`). Testkorrektur: Die Hilfsfunktion `_textOf` suchte nur unterhalb des Ausschnitt-Texts, nicht ihn selbst (`matchRoot: true`).
 - Gesamt: `flutter test` 436/436, `flutter analyze` ohne Befund, Debug-APK baut.
 - **Auf dem S25 Ultra geprüft, 2026-11-23:** #71 (EON Core) im Vollbild quer ohne Systemleisten; Tippen und Ziehen setzen den Zeitpunkt passend zur Position (38:50, 50:10). Zoomen mit zwei Fingern, Verschieben, Doppeltipp und Schließen hat der Nutzer selbst geprüft („Passt“).
+
+## T28: „Zuletzt: EON Core, vor 3 Tagen“ auf der Import-Seite (ui-spec §5.5, Feinschliff 2026-11-23)
+
+| Nr. | Ausgangslage | Aktion | Erwartet | Status |
+|---|---|---|---|---|
+| T28.1 | Tauchgangsstart (Wanduhrzeit), jetzt 23.11.2026 08:15 | `daysSince` | Kalendertage, nicht Stunden: heute 0, 22.11. 23:50 → 1, 20.11. → 3, über Monatsgrenze 23; Start in der Zukunft → 0 | ✅ 2026-11-23: rot wegen `UnimplementedError` |
+| T28.2 | EON Core, neuester Tauchgang heute / gestern / vor 3 / vor 30 / vor 45 Tagen | `lastUsedText` | „Zuletzt: EON Core, heute“ · „…, gestern“ · „…, vor 3 Tagen“ · „…, vor 30 Tagen“ · „…, 09.10.2026“ | ✅ 2026-11-23: rot wegen `UnimplementedError` |
+| T28.3 | EON Core mit Tauchgang vor 3 Tagen, D5 mit Tauchgang vor 40 Tagen; bzw. EON Core ohne Tauchgänge | Import-Seite | Karte „Tauchcomputer“ zeigt unter „Per Bluetooth übertragen“ „Zuletzt: EON Core, vor 3 Tagen“ (Gerät mit dem neuesten Tauchgang); ohne Tauchgänge keine Zeile | ✅ 2026-11-23: rot, Zeile fehlt (der Fall ohne Tauchgänge ist schon grün) |
+
+Grundlage ist wie in den Einstellungen (§5.11) der **neueste Tauchgang** des Geräts, nicht der Zeitpunkt der letzten Übertragung (der wird nicht gespeichert, wenn keine neuen Tauchgänge kamen). Tests: `test/features/import/last_used_test.dart` (T28.1, T28.2), `dive_computer_screen_test.dart` (T28.3). Stub: `features/import/last_used.dart`.
