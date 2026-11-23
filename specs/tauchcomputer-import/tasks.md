@@ -584,3 +584,14 @@ Neue Abhängigkeiten (Lizenzen am 2026-11-22 an den eingesetzten Versionen gepr�
 - [x] iOS (`darwin/.../BleIoStream.swift`): Keychain, `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, alte `UserDefaults`-Werte einmal übernommen. **Nicht testbar ohne Mac**, kompiliert erst im CI-Build.
 - [x] `checkAndroidManifest` und `tool/check_android_manifest.dart`; Schritt „Check the release manifest“ im CI-Job `android` (`processReleaseMainManifest`, kein Release-Build, keine Signatur) → T14.4 grün. Am PC gegen das echte Release-Manifest geprüft: OK.
 - Gesamt: `flutter test` 409/409, `flutter analyze` ohne Befund, Debug-APK startet auf dem S25 ohne Fehler. Die Übernahme alter Zugangscodes ließ sich am Handy nicht prüfen: der EON Core braucht keine PIN, es gab keinen gespeicherten Code.
+
+## T24: App-Icon in den Riff-Farben (ui-spec §1, Feinschliff 2026-11-23)
+
+| Nr. | Ausgangslage | Aktion | Erwartet | Status |
+|---|---|---|---|---|
+| T24.1 | Vorlagen in `assets/icon/` | gelesen | alle drei SVGs mit Kurve `#0B7A80`, keine alten Farben (`#0B1620`, `#3FA3E0`, `#5CB8E8`, `#2A3B4A`); Hauptvorlage mit Hintergrund `#F2F8F8` und Blase `#B9412A` | ✅ 2026-11-23: rot, Vorlagen noch in den alten Farben |
+| T24.2 | Android 8+ (minSdk 26) | `mipmap-anydpi-v26/ic_launcher.xml` | adaptives Icon: Hintergrund `@color/ic_launcher_background` (`#F2F8F8`), Vordergrund als Vektor mit Kurve `#0B7A80` und Blase `#B9412A`, einfarbige Ebene für Android 13+ | ✅ 2026-11-23: rot, Dateien fehlen |
+| T24.3 | alte Launcher | `mipmap-*dpi/ic_launcher.png` | 48/72/96/144/192 px, Hintergrund `#F2F8F8` | ✅ 2026-11-23: rot, noch das Flutter-Standard-Icon (transparent) |
+| T24.4 | iOS `AppIcon.appiconset` | jede Größe aus `Contents.json` | Pixelgröße = Punkte × Faktor, RGB ohne Alphakanal (App Store lehnt Alpha im 1024er ab), Hintergrund `#F2F8F8` | ✅ 2026-11-23: rot, noch Flutter-Standard (Palette-PNG) |
+
+Test: `test/app/app_icon_test.dart`. Keine neue Abhängigkeit: statt `flutter_launcher_icons` zeichnet `tool/render_app_icons.py` (Pillow, nur auf dem PC) die PNGs aus denselben Formen wie die SVG-Vorlagen; die Ergebnisse werden eingecheckt.
