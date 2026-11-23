@@ -551,6 +551,81 @@ void main() {
       expect(find.byType(Checkbox), findsNothing);
     });
 
+    group('T25 „Tauchplatz für Ausgewählte setzen“', () {
+      const action = 'Tauchplatz für Ausgewählte setzen';
+
+      ButtonStyleButton buttonWith(WidgetTester tester, String text) =>
+          tester.widget<ButtonStyleButton>(
+            find.ancestor(
+              of: find.text(text),
+              matching: find.bySubtype<ButtonStyleButton>(),
+            ),
+          );
+
+      Future<void> typeSite(WidgetTester tester, String name) async {
+        await tester.enterText(
+          find.descendant(
+            of: find.byType(BottomSheet),
+            matching: find.byType(TextField),
+          ),
+          name,
+        );
+        await _frames(tester);
+      }
+
+      testWidgets('T25.4 only the selected dives get the site, '
+          'it is shown and saved', (tester) async {
+        final h = await preview(tester);
+        await tester.tap(find.byType(Checkbox).first);
+        await _frames(tester);
+
+        await _tapText(tester, action);
+        expect(find.text('Tauchplatz für 2 Tauchgänge'), findsOneWidget);
+        await typeSite(tester, 'Hausriff');
+        await _tapText(tester, 'Übernehmen');
+        await tester.pumpAndSettle();
+
+        expect(find.byType(BottomSheet), findsNothing);
+        expect(find.text('Hausriff'), findsNWidgets(2));
+
+        await tester.tap(find.byType(Checkbox).first);
+        await _frames(tester);
+        await _tapText(tester, '3 Tauchgänge importieren');
+        await tester.pumpAndSettle();
+
+        final saved = await DriftDiveRepository(h.db).listForDiver(h.anna.id!);
+        saved.sort((a, b) => a.start.compareTo(b.start));
+        expect(saved.map((d) => d.siteName), [null, 'Hausriff', 'Hausriff']);
+      });
+
+      testWidgets('T25.5 blank name cannot be applied, the site can be '
+          'removed, nothing selected turns the action off', (tester) async {
+        await preview(tester);
+
+        await _tapText(tester, action);
+        expect(find.text('Tauchplatz für 3 Tauchgänge'), findsOneWidget);
+        expect(find.text('Tauchplatz entfernen'), findsNothing);
+        expect(buttonWith(tester, 'Übernehmen').onPressed, isNull);
+        await typeSite(tester, '   ');
+        expect(buttonWith(tester, 'Übernehmen').onPressed, isNull);
+        await typeSite(tester, 'Hausriff');
+        await _tapText(tester, 'Übernehmen');
+        await tester.pumpAndSettle();
+        expect(find.text('Hausriff'), findsNWidgets(3));
+
+        await _tapText(tester, action);
+        await _tapText(tester, 'Tauchplatz entfernen');
+        await tester.pumpAndSettle();
+        expect(find.text('Hausriff'), findsNothing);
+
+        for (var i = 0; i < 3; i++) {
+          await tester.tap(find.byType(Checkbox).at(i));
+          await _frames(tester);
+        }
+        expect(buttonWith(tester, action).onPressed, isNull);
+      });
+    });
+
     testWidgets('T12.27 no tab bar while the dive computer flow runs', (
       tester,
     ) async {

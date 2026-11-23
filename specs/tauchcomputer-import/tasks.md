@@ -604,3 +604,15 @@ Abgenommen am 2026-11-23.
 - [x] `tool/render_app_icons.py` zeichnet die alten Launcher-PNGs und alle 19 iOS-Größen (RGB ohne Alpha, unter 60 px die vereinfachte Variante) → T24.3, T24.4 grün.
 - Gesamt: `flutter test` 414/414, `flutter analyze` ohne Befund, Debug-APK baut.
 - **Auf dem S25 Ultra geprüft, 2026-11-23:** Icon im App-Menü hell mit Petrol-Kurve, Verlauf und Korallen-Blasen, nichts von der Samsung-Maske abgeschnitten. Themen-Icons (einfarbige Ebene) nicht eigens eingeschaltet.
+
+## T25: Tauchplatz für Ausgewählte (ui-spec §5.9, Feinschliff 2026-11-23)
+
+| Nr. | Ausgangslage | Aktion | Erwartet | Status |
+|---|---|---|---|---|
+| T25.1 | importierter Tauchgang, ggf. mit GPS vom Gerät | `withSite(Elphinstone)`, `withSite(Hausriff ohne Position)`, `withSite(null)` | Name, Katalog-Kennung und Position übernommen, `toDive` trägt sie weiter; ohne Position bleibt das GPS des Geräts; `null` entfernt Name und Kennung, GPS bleibt | ✅ 2026-11-23: rot wegen `UnimplementedError` (`withSite`) |
+| T25.2 | Vorschlag eigener Platz / Katalog / neuer Name; getippter Text | `ChosenSite.fromSuggestion`, `ChosenSite.typed` | Kennung und Position aus eigenem bzw. Katalog-Platz, neuer Name ohne; Text getrimmt, leer = kein Platz, höchstens 120 Zeichen | ✅ 2026-11-23: rot wegen `UnimplementedError` |
+| T25.3 | Import mit Tauchplatz; geänderter Tauchgang (gleiche Kennung) bestätigt | `importDives` | neuer Tauchgang mit Platz gespeichert; beim Ersetzen füllt der Platz nur einen leeren Platz, ein vorhandener bleibt | ✅ 2026-11-23: rot wegen `UnimplementedError` (`withSite`) |
+| T25.4 | Vorschau mit 3 Tauchgängen, der erste abgewählt | „Tauchplatz für Ausgewählte setzen“ → „Hausriff“ → „Übernehmen“, dann alle importieren | Blatt „Tauchplatz für 2 Tauchgänge“; „Hausriff“ an den beiden Einträgen; im Logbuch nur diese beiden mit „Hausriff“ | ✅ 2026-11-23: rot, Aktion fehlt |
+| T25.5 | Vorschau mit 3 Tauchgängen | leer bzw. nur Leerzeichen; „Tauchplatz entfernen“; alles abgewählt | „Übernehmen“ gesperrt; „Tauchplatz entfernen“ erst, wenn ein Ausgewählter einen Platz hat, danach kein Platz mehr; ohne Auswahl ist die Aktion gesperrt | ✅ 2026-11-23: rot, Aktion fehlt |
+
+Tests: `test/domain/import/import_site_test.dart` (T25.1, T25.2), `import_service_test.dart` (T25.3), `test/features/import/dive_computer_screen_test.dart` (T25.4, T25.5; die FIT-Vorschau ist dasselbe Widget). Stubs: `ChosenSite.fromSuggestion`/`typed`, `ImportedDive.withSite`. `SaveSelected` reicht jetzt die Tauchgänge mit den gesetzten Plätzen an beide Import-Seiten weiter.

@@ -8,6 +8,7 @@ import 'package:divedown/domain/dive/diver.dart';
 import 'package:divedown/domain/import/import_service.dart';
 import 'package:divedown/domain/import/imported_dive.dart';
 import 'package:divedown/domain/import/plausibility.dart';
+import 'package:divedown/domain/sites/site_suggestions.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -268,5 +269,47 @@ void main() {
 
     final saved = (results.single as Saved).saved;
     expect((await dives.findById(saved.id!))!.diveComputerId, 'dc-1');
+  });
+
+  group('T25.3 a site set in the preview', () {
+    const hausriff = ChosenSite(name: 'Hausriff', lat: 27.1, lon: 33.9);
+
+    test('is saved with the new dive', () async {
+      final results = await import([_imported().withSite(hausriff)]);
+
+      final stored = await dives.findById((results.single as Saved).saved.id!);
+      expect(stored!.siteName, 'Hausriff');
+      expect(stored.siteLat, 27.1);
+    });
+
+    test(
+      'fills an empty site when a changed dive replaces the old one',
+      () async {
+        await import([_imported()]);
+        final results = await import(
+          [_imported(maxDepthM: 19.9).withSite(hausriff)],
+          confirmed: {0},
+        );
+
+        final stored = await dives.findById(
+          (results.single as Saved).saved.id!,
+        );
+        expect(stored!.maxDepthM, 19.9);
+        expect(stored.siteName, 'Hausriff');
+      },
+    );
+
+    test('does not overwrite a site the logbook already has', () async {
+      await import([
+        _imported().withSite(const ChosenSite(name: 'Elphinstone')),
+      ]);
+      final results = await import(
+        [_imported(maxDepthM: 19.9).withSite(hausriff)],
+        confirmed: {0},
+      );
+
+      final stored = await dives.findById((results.single as Saved).saved.id!);
+      expect(stored!.siteName, 'Elphinstone');
+    });
   });
 }
