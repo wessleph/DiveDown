@@ -1310,19 +1310,14 @@ class BleIoStream(
         pinSemaphore.release()
     }
 
-    override fun getAccessCode(address: String): ByteArray? {
-        val deviceAddress = device.address
-        val prefs = context.getSharedPreferences("ble_access_codes", Context.MODE_PRIVATE)
-        val key = "ble_access_code_$deviceAddress"
-        val encoded = prefs.getString(key, null) ?: return null
-        return android.util.Base64.decode(encoded, android.util.Base64.NO_WRAP)
-    }
+    // DiveDown (security.md A5, T14.3): encrypted with a Keystore key and
+    // out of every backup, instead of plain Base64 in shared preferences.
+    private val accessCodes by lazy { AccessCodeStore.forContext(context) }
+
+    override fun getAccessCode(address: String): ByteArray? =
+        accessCodes.get(device.address)
 
     override fun setAccessCode(address: String, code: ByteArray) {
-        val deviceAddress = device.address
-        val prefs = context.getSharedPreferences("ble_access_codes", Context.MODE_PRIVATE)
-        val key = "ble_access_code_$deviceAddress"
-        val encoded = android.util.Base64.encodeToString(code, android.util.Base64.NO_WRAP)
-        prefs.edit().putString(key, encoded).apply()
+        accessCodes.set(device.address, code)
     }
 }

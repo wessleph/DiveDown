@@ -577,3 +577,10 @@ Neue Abhängigkeiten (Lizenzen am 2026-11-22 an den eingesetzten Versionen gepr�
 - Gesamt: `flutter test` 401/401, Plugin-JUnit 150/150, `flutter analyze` ohne Befund, Debug-APK baut.
 - Noch offen: T14.3 (Zugangscodes in den sicheren Speicher), T14.4 (Manifest-Prüfung in der CI); die Swift-Seite des Plugins loggt weiter über `print`/`os_log` (nur in Xcode-Konsole sichtbar, nicht für andere Apps).
 - **Am S25 Ultra geprüft, 2026-11-23:** HILFE → „Diagnose-Logs teilen“ zeigt die Einträge („App gestartet“), „Teilen“ bietet `DiveDown-Diagnose-2026-11-23.txt` an (ohne Ziel geschlossen). Gefunden und behoben: Zeilen waren abgeschnitten (jetzt Umbruch), der Kasten war auch bei einer Zeile 320 dp hoch (jetzt höchstens 320 dp), die Textdatei lief als ZIP (T10.15).
+
+**Umgesetzt (Phase 50, 2026-11-23), T14.3, T14.4:**
+- [x] `AccessCodeStore` (Plugin, Kotlin): AES-256-GCM, Schlüssel im Android Keystore, Werte in `ble_access_codes_v2`; alte Base64-Werte aus `ble_access_codes` werden beim ersten Lesen übernommen und gelöscht; unlesbare Werte verworfen. `BleIoStream.get/setAccessCode` nutzen ihn → JUnit `AccessCodeStoreTest` grün (Plugin-JUnit 154/154).
+- [x] Beide Dateien aus `data_extraction_rules.xml` (Cloud-Backup, Geräte-Transfer) und `backup_rules.xml` ausgeschlossen → T14.3b grün.
+- [x] iOS (`darwin/.../BleIoStream.swift`): Keychain, `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, alte `UserDefaults`-Werte einmal übernommen. **Nicht testbar ohne Mac**, kompiliert erst im CI-Build.
+- [x] `checkAndroidManifest` und `tool/check_android_manifest.dart`; Schritt „Check the release manifest“ im CI-Job `android` (`processReleaseMainManifest`, kein Release-Build, keine Signatur) → T14.4 grün. Am PC gegen das echte Release-Manifest geprüft: OK.
+- Gesamt: `flutter test` 409/409, `flutter analyze` ohne Befund, Debug-APK startet auf dem S25 ohne Fehler. Die Übernahme alter Zugangscodes ließ sich am Handy nicht prüfen: der EON Core braucht keine PIN, es gab keinen gespeicherten Code.

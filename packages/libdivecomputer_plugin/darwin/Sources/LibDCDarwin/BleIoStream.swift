@@ -2,6 +2,7 @@
 
 import CoreBluetooth
 import Foundation
+import Security
 
 /// Bridges CoreBluetooth BLE communication to libdivecomputer's synchronous
 /// iostream interface using semaphores.
@@ -699,14 +700,45 @@ class BleIoStream: NSObject, CBPeripheralDelegate {
 
     private static let accessCodeKeyPrefix = "ble_access_code_"
 
+    // DiveDown (security.md A5, T14.3): access codes live in the Keychain,
+    // this device only (no iCloud Keychain, not in other devices' backups),
+    // instead of UserDefaults. Old UserDefaults values move over once.
+    private static let keychainService = "io.github.wessleph.divedown.ble-access-codes"
+
+    private func keychainQuery(_ key: String) -> [String: Any] {
+        [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: Self.keychainService,
+            kSecAttrAccount as String: key,
+        ]
+    }
+
     private func loadAccessCode() -> Data? {
         let key = Self.accessCodeKeyPrefix + deviceAddress
-        return UserDefaults.standard.data(forKey: key)
+        var query = keychainQuery(key)
+        query[kSecReturnData as String] = true
+        query[kSecMatchLimit as String] = kSecMatchLimitOne
+        var result: AnyObject?
+        if SecItemCopyMatching(query as CFDictionary, &result) == errSecSuccess,
+            let data = result as? Data
+        {
+            return data
+        }
+        guard let old = UserDefaults.standard.data(forKey: key) else { return nil }
+        saveAccessCode(old)
+        UserDefaults.standard.removeObject(forKey: key)
+        return old
     }
 
     private func saveAccessCode(_ data: Data) {
         let key = Self.accessCodeKeyPrefix + deviceAddress
-        UserDefaults.standard.set(data, forKey: key)
+        let query = keychainQuery(key)
+        SecItemDelete(query as CFDictionary)
+        var item = query
+        item[kSecValueData as String] = data
+        item[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+        SecItemAdd(item as CFDictionary, nil)
+        UserDefaults.standard.removeObject(forKey: key)
     }
 
     private func performIoctl(request: UInt32, data: UnsafeMutableRawPointer?,

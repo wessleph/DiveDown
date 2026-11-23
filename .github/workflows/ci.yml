@@ -64,6 +64,13 @@ jobs:
       - run: flutter pub get
       # Release APKs are signed on the PC only; the keystore never enters CI (A3).
       - run: flutter build apk --debug
+      # T14.4: the merged release manifest follows security.md §4 (no
+      # INTERNET, location only up to SDK 30, BLUETOOTH_SCAN
+      # neverForLocation, backup rules). No release build or signing needed.
+      - name: Check the release manifest
+        run: |
+          (cd android && ./gradlew :app:processReleaseMainManifest)
+          dart run tool/check_android_manifest.dart
 
   ios:
     name: iOS build and tests (simulator, unsigned)
