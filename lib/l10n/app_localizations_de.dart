@@ -507,6 +507,17 @@ class AppLocalizationsDe extends AppLocalizations {
   String get profileShowTable => 'Als Tabelle anzeigen';
 
   @override
+  String get profileFullscreen => 'Vollbild';
+
+  @override
+  String get profileFullscreenClose => 'Schließen';
+
+  @override
+  String profileRange(String from, String to) {
+    return '$from – $to';
+  }
+
+  @override
   String get profileTableTitle => 'Minutenwerte';
 
   @override

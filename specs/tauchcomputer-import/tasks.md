@@ -656,3 +656,13 @@ Abgenommen am 2026-11-23.
 | T27.5 | Tauchgang ohne Messpunkte (geschätztes Profil) | Detail | kein „Vollbild“ | grün von Anfang an (es gibt noch keinen Knopf), sichert ab, dass er dort nicht auftaucht |
 
 Tests: `test/features/logbook/time_window_test.dart` (T27.1), `profile_fullscreen_test.dart` (T27.2–T27.5). Stub: `TimeWindow` (`features/logbook/time_window.dart`).
+
+Abgenommen am 2026-11-23.
+
+**Umgesetzt (Phase 50, 2026-11-23), T27:**
+- [x] `TimeWindow` (`features/logbook/time_window.dart`): Zoom um den Fingerpunkt, 2 min bis ganzer Tauchgang, Verschieben bis an die Ränder → T27.1 grün.
+- [x] `ProfileChart`: sichtbarer Zeitbereich statt immer 0 … Ende, Zeitachsen-Teilung passt sich an (1/2/5/15/30 min), Kurven auf das Diagramm beschnitten; Knopf „Vollbild“ neben „Als Tabelle anzeigen“ (nur mit Messpunkten); Vollbild-Layout quer nebeneinander, hoch untereinander; zwei Finger zoomen und verschieben, Doppeltipp setzt zurück, Ausschnitt „m:ss – m:ss“ über dem Diagramm.
+- [x] `ProfileFullscreenScreen` (Route `/logbook/dive/:id/profile` über der Tab-Leiste): Querformat und `immersiveSticky` beim Öffnen, beim Schließen freie Ausrichtung und `edgeToEdge`; „Start- und Enddruck eintragen“ schließt das Vollbild zuerst → T27.2–T27.4 grün, T27.5 weiter grün.
+- Beim Umsetzen gefunden: Im Vollbild kam ein einzelner Tipp nie an, weil die Doppeltipp-Erkennung ihn schluckte. Jetzt setzt das Aufsetzen des ersten Fingers den Zeitpunkt (`Listener`). Testkorrektur: Die Hilfsfunktion `_textOf` suchte nur unterhalb des Ausschnitt-Texts, nicht ihn selbst (`matchRoot: true`).
+- Gesamt: `flutter test` 436/436, `flutter analyze` ohne Befund, Debug-APK baut.
+- **Auf dem S25 Ultra geprüft, 2026-11-23:** #71 (EON Core) im Vollbild quer ohne Systemleisten; Tippen und Ziehen setzen den Zeitpunkt passend zur Position (38:50, 50:10). Zoomen mit zwei Fingern, Verschieben, Doppeltipp und Schließen hat der Nutzer selbst geprüft („Passt“).

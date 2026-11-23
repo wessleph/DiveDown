@@ -952,6 +952,24 @@ abstract class AppLocalizations {
   /// **'Als Tabelle anzeigen'**
   String get profileShowTable;
 
+  /// No description provided for @profileFullscreen.
+  ///
+  /// In de, this message translates to:
+  /// **'Vollbild'**
+  String get profileFullscreen;
+
+  /// No description provided for @profileFullscreenClose.
+  ///
+  /// In de, this message translates to:
+  /// **'Schließen'**
+  String get profileFullscreenClose;
+
+  /// No description provided for @profileRange.
+  ///
+  /// In de, this message translates to:
+  /// **'{from} – {to}'**
+  String profileRange(String from, String to);
+
   /// No description provided for @profileTableTitle.
   ///
   /// In de, this message translates to:

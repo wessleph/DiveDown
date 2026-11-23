@@ -13,6 +13,7 @@ import 'dive_texts.dart';
 import 'logbook_screen.dart';
 import 'manual_dive_screen.dart';
 import 'profile_chart.dart';
+import 'profile_fullscreen_screen.dart';
 
 const _units = UnitFormatter.metric();
 
@@ -210,7 +211,12 @@ class _DiveDetail extends StatelessWidget {
         const SizedBox(height: 16),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: ProfileChart(dive: dive, onEdit: onEdit),
+          child: ProfileChart(
+            dive: dive,
+            onEdit: onEdit,
+            onFullscreen: () =>
+                context.push(ProfileFullscreenScreen.pathFor(dive.id!)),
+          ),
         ),
         if (dive.tanks.length > 1) ...[
           const SizedBox(height: 16),

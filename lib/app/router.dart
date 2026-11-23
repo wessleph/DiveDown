@@ -8,6 +8,7 @@ import '../features/import/import_screen.dart';
 import '../features/logbook/dive_detail_screen.dart';
 import '../features/logbook/logbook_screen.dart';
 import '../features/logbook/manual_dive_screen.dart';
+import '../features/logbook/profile_fullscreen_screen.dart';
 import '../features/onboarding/welcome_screen.dart';
 import '../features/settings/diagnostics_screen.dart';
 import '../features/settings/settings_screen.dart';
@@ -65,6 +66,13 @@ final routerProvider = Provider<GoRouter>((ref) {
                     builder: (context, state) =>
                         DiveDetailScreen(diveId: state.pathParameters['id']!),
                     routes: [
+                      GoRoute(
+                        path: 'profile',
+                        parentNavigatorKey: _rootNavigatorKey,
+                        builder: (context, state) => ProfileFullscreenScreen(
+                          diveId: state.pathParameters['id']!,
+                        ),
+                      ),
                       GoRoute(
                         path: 'edit',
                         builder: (context, state) => ManualDiveScreen(

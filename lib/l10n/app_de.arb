@@ -229,6 +229,12 @@
   "profileDisclaimer": "Werte vom Tauchcomputer, nur zur Anzeige.",
   "profileDisclaimerEstimated": "Werte vom Tauchcomputer, nur zur Anzeige. Luft ist geschätzt, weil kein Flaschendruck aufgezeichnet wurde.",
   "profileShowTable": "Als Tabelle anzeigen",
+  "profileFullscreen": "Vollbild",
+  "profileFullscreenClose": "Schließen",
+  "profileRange": "{from} – {to}",
+  "@profileRange": {
+    "placeholders": { "from": { "type": "String" }, "to": { "type": "String" } }
+  },
   "profileTableTitle": "Minutenwerte",
   "tanksTitle": "Flaschen",
   "tankNumber": "Flasche {number}",
