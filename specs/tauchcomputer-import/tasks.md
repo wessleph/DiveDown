@@ -552,3 +552,4 @@ Neue Abhängigkeiten (Lizenzen am 2026-11-22 an den eingesetzten Versionen gepr�
 - Testaufbau korrigiert, Aussage unverändert: T9.20 scrollt zu „Open-Source-Lizenzen“ (liegt jetzt unter DATEN).
 - Gesamt: `flutter test` 380/380, `flutter analyze` ohne Befund, Debug-APK baut.
 - **Am S25 Ultra, 2026-11-22:** Abschnitt DATEN, Dialog „Logbuch sichern“ mit Hinweis und Warnung, Teilen-Dialog zeigt „DiveDown-Sicherung-2026-11-22.divedown“ (ohne Ziel geschlossen). Dabei T11.16 gefunden und behoben. `flutter test` 383/383.
+- **Vom Nutzer am S25 Ultra geprüft, 2026-11-23:** Sicherung erstellt und geteilt, mit derselben Datei wiederhergestellt; die App startete neu und zeigte das vollständige Logbuch.
