@@ -96,6 +96,8 @@ class Dive {
     this.waterType,
     this.notes,
     this.rating,
+    this.weightKg,
+    this.equipmentIds,
     this.samples = const [],
     this.tanks = const [],
     this.events = const [],
@@ -130,6 +132,14 @@ class Dive {
   final WaterType? waterType;
   final String? notes;
   final int? rating;
+
+  /// Lead in kg (ADR 0007).
+  final double? weightKg;
+
+  /// Ids of the equipment used. Null when saving means: a new dive gets the
+  /// standard set, an existing one keeps its links (ADR 0007). Filled by
+  /// `findById`; left null by the list queries.
+  final List<String>? equipmentIds;
   final List<DiveSample> samples;
   final List<DiveTank> tanks;
   final List<DiveEvent> events;
@@ -155,6 +165,8 @@ class Dive {
     WaterType? waterType,
     String? notes,
     int? rating,
+    double? weightKg,
+    List<String>? equipmentIds,
     List<DiveSample>? samples,
     List<DiveTank>? tanks,
     List<DiveEvent>? events,
@@ -179,6 +191,8 @@ class Dive {
     waterType: waterType ?? this.waterType,
     notes: notes ?? this.notes,
     rating: rating ?? this.rating,
+    weightKg: weightKg ?? this.weightKg,
+    equipmentIds: equipmentIds ?? this.equipmentIds,
     samples: samples ?? this.samples,
     tanks: tanks ?? this.tanks,
     events: events ?? this.events,

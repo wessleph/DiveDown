@@ -707,3 +707,39 @@ Test: `test/app/app_icon_test.dart` (Gruppe T29; die Prüfung auf die Korallen-B
 - [x] `tool/render_app_icons.py` liest dieselben Pfad-Strings (eigener Parser für M/L/H/V/Q/Z) und zeichnet alle iOS-Größen und alten Launcher neu → T29.3, T29.4 grün.
 - Testkorrektur: Prüfpunkt fürs Glas von (384, 512) auf (704, 576) verlegt; der alte lag auf der Kerbe der Schwanzflosse.
 - Gesamt: `flutter test` 444/444, `flutter analyze` ohne Befund, Debug-APK baut. Noch nicht auf dem Handy angesehen.
+
+## T30: Ausrüstung in den Einstellungen (ui-spec §5.11, ADR 0007, Wunsch vom 2026-11-23)
+
+| Nr. | Ausgangslage | Aktion | Erwartet | Status |
+|---|---|---|---|---|
+| T30.1 | Datenbankdatei in Schema v1 (`test/fixtures/db/schema_v1.sql`) mit Taucher und Tauchgang #7 „Elphinstone“ | öffnen | Migration auf v2: Tauchgang unverändert, Blei leer, keine Ausrüstung; Ausrüstung lässt sich speichern; `user_version` 2 | ✅ 2026-11-23: rot, keine Migrationsstrategie |
+| T30.2 | Lampe, zwei Atemregler („apeks XTX50“, „Aqualung“), Jacket, Anzug | speichern, auflisten, ändern, löschen | Liste nach Art (Anzug, Jacket, Atemregler … Lampe), dann Name ohne Groß-/Kleinschreibung; Änderung von Name und „Standard“ gespeichert; gelöschtes Teil fehlt in der Liste | ✅ 2026-11-23: rot wegen `UnimplementedError` |
+| T30.3 | Anzug und Jacket als Standard, ein gelöschtes Standard-Teil, eine Lampe | Tauchgang speichern | ohne Auswahl: nur die nicht gelöschten Standard-Teile; mit Auswahl (auch leer): genau diese; Aktualisieren ohne Auswahl (wie beim Ersetzen durch einen Import): Verknüpfungen bleiben, später angelegte Standard-Teile kommen nicht dazu; `forDive` liefert auch gelöschte Teile | ✅ 2026-11-23: rot wegen `UnimplementedError` |
+| T30.4 | drei Teile, zwei davon Standard; bzw. keine | Einstellungen | Abschnitt „AUSRÜSTUNG“ zwischen „TAUCHER“ und „GERÄTE“, sortiert nach Art, Zeile mit Art und Etikett „Standard“, dann „Ausrüstung hinzufügen“; ohne Teile der Hinweistext aus §5.11 | ✅ 2026-11-23: rot, Abschnitt fehlt |
+| T30.5 | keine Teile | „Ausrüstung hinzufügen“ | ohne Bezeichnung „Bitte eine Bezeichnung eingeben.“, ohne Art „Bitte eine Art wählen.“, nichts gespeichert; mit Jacket, Name, Notiz und „Standard“ gespeichert und zurück in den Einstellungen | ✅ 2026-11-23: rot, Knopf fehlt |
+| T30.6 | Jacket „Hydros Pro“ (Standard), Tauchgang damit | bearbeiten, umbenennen, über das Menü löschen | Titel „Ausrüstung bearbeiten“, neuer Name gespeichert; Dialog „… löschen? Bei bisherigen Tauchgängen bleibt es eingetragen.“; danach weg aus der Liste, im Tauchgang-Detail weiter sichtbar | ✅ 2026-11-23: rot wegen `UnimplementedError` |
+
+Tests: `test/data/local/equipment_data_test.dart` (T30.1–T30.3), `test/features/settings/equipment_settings_test.dart` (T30.4–T30.6). T23.6 prüft statt „kein …hinzufügen“ jetzt „kein Taucher hinzufügen“, weil „Ausrüstung hinzufügen“ dazukommt. Stubs: `domain/equipment/equipment.dart`, `DriftEquipmentRepository`; Tabellen `equipment`, `dive_equipment` und Spalte `dives.weight_kg` sind schon im Schema (v2, ohne Migration).
+
+## T31: Blei und Ausrüstung am Tauchgang (ui-spec §5.3, §5.4, ADR 0007)
+
+| Nr. | Ausgangslage | Aktion | Erwartet | Status |
+|---|---|---|---|---|
+| T31.1 | Formular-Entwurf | prüfen, `toDive`, `fromDive` | Blei leer oder 0–40 (Komma oder Punkt), sonst „außerhalb“ bzw. „keine Zahl“; `toDive` setzt kg und die Auswahl (nicht geladen → null, dann gilt das Standard-Set); `fromDive` zeigt „6“ bzw. „6,5“, unverändertes Formular behält Blei und Ausrüstung | ✅ 2026-11-23: rot, Feld wird nicht geprüft/übernommen |
+| T31.2 | Tauchgänge mit und ohne Blei an Elphinstone, Daedalus, Walensee | `lastWeightAt` | neuester mit Blei am selben Namen (ohne Groß-/Kleinschreibung, Leerzeichen am Rand) oder derselben Katalog-ID; bearbeiteter und gelöschte zählen nicht; sonst null | ✅ 2026-11-23: rot wegen `UnimplementedError` |
+| T31.3 | früherer Tauchgang an Elphinstone mit 6 kg | neuer Tauchgang, Tauchplatz „Elphinstone“ | Feld „Blei (kg)“ mit Dezimal-Tastatur; „Zuletzt bei Elphinstone: 6 kg“ · „Übernehmen“ setzt 6, danach verschwindet die Zeile; anderer Platz → keine Zeile; 45 kg → „Blei muss zwischen 0 und 40 kg liegen.“ | ✅ 2026-11-23: rot, Feld fehlt |
+| T31.4 | Standard-Set Anzug und Jacket, dazu Lampe; bzw. keine Ausrüstung | Formular | neue Tauchgänge: Standard vorausgewählt, Auswahl wird gespeichert; Bearbeiten: Teile des Tauchgangs, auch ein gelöschtes; ohne Ausrüstung Hinweis mit Link „Ausrüstung anlegen“ zu den Einstellungen | ✅ 2026-11-23: rot, Chips fehlen |
+| T31.5 | Tauchgang mit 6,5 kg, Anzug und Lampe; bzw. ohne beides | Detail | Abschnitt „AUSRÜSTUNG“ mit „6,5 kg“ und den Teilen; ohne Blei und Teile kein Abschnitt | ✅ 2026-11-23: rot, Abschnitt fehlt bzw. Stub wirft |
+
+Tests: `test/domain/dive/weight_draft_test.dart` (T31.1), `test/data/local/equipment_data_test.dart` (T31.2, Blei speichern), `test/features/logbook/equipment_dive_test.dart` (T31.3–T31.5). Stubs: `DiveRepository.lastWeightAt`, Felder `Dive.weightKg`/`equipmentIds`, `ManualDiveDraft.weight`/`equipmentIds`, `ManualDiveField.weight`, `ManualDiveError.weightOutOfRange` (Text schon in `app_de.arb`).
+
+## T32: Neue Importe hervorheben (ui-spec §5.2)
+
+| Nr. | Ausgangslage | Aktion | Erwartet | Status |
+|---|---|---|---|---|
+| T32.1 | Logbuch mit #1, FIT-Datei mit einem Tauchgang | importieren | Snackbar „1 Tauchgang importiert“; der neue Eintrag trägt „Neu“ (vorgelesen „Neu importiert“), #1 nicht; nach 2,5 s noch, nach 3,5 s und Überblendung nicht mehr | ✅ 2026-11-23: rot, keine Markierung |
+| T32.2 | direkt nach dem Import | zu „Einstellungen“ und zurück zum Logbuch | keine Markierung mehr | ✅ 2026-11-23: rot, schon die erste Markierung fehlt |
+
+Test: `test/features/logbook/import_highlight_test.dart`.
+
+Abgenommen am 2026-11-23 (T30–T32).

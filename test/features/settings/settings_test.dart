@@ -50,8 +50,9 @@ void main() {
     expect(find.text('ÜBER DIVEDOWN'), findsOneWidget);
     // Not in v1.0 resp. not yet (ui-spec §5.11).
     expect(find.textContaining('Einheiten'), findsNothing);
-    // „Logbuch sichern“ arrived with T11 (backup_test.dart).
-    expect(find.textContaining('hinzufügen'), findsNothing);
+    // „Logbuch sichern“ arrived with T11 (backup_test.dart); „Ausrüstung
+    // hinzufügen“ with T30 (equipment_settings_test.dart). No other diver.
+    expect(find.textContaining('Taucher hinzufügen'), findsNothing);
   });
 
   group('T23.7 rename the diver', () {

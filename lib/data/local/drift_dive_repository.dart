@@ -103,6 +103,14 @@ class DriftDiveRepository implements DiveRepository, DiveNumbering {
   }
 
   @override
+  Future<({double weightKg, String siteName})?> lastWeightAt(
+    String diverId, {
+    String? siteName,
+    String? siteCatalogueId,
+    String? excludeDiveId,
+  }) => throw UnimplementedError('T31.2');
+
+  @override
   Future<Dive?> findById(String id) async {
     final row = await (_db.select(
       _db.dives,

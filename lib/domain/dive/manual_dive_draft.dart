@@ -15,6 +15,7 @@ enum ManualDiveField {
   startPressure,
   endPressure,
   o2,
+  weight,
 }
 
 /// Validation errors, with the limits of the plausibility check (security G1).
@@ -31,6 +32,7 @@ enum ManualDiveError {
   pressureOutOfRange,
   endPressureNotBelowStart,
   o2OutOfRange,
+  weightOutOfRange,
 }
 
 /// What the user typed in the manual entry form. Numbers are kept as text
@@ -51,6 +53,8 @@ class ManualDiveDraft {
     this.startPressure = '',
     this.endPressure = '',
     this.o2 = '',
+    this.weight = '',
+    this.equipmentIds,
     this.waterType,
     this.notes = '',
     this.rating,
@@ -105,6 +109,13 @@ class ManualDiveDraft {
 
   /// Percent, e.g. `32`.
   final String o2;
+
+  /// Lead in kg, e.g. `6,5` (ADR 0007).
+  final String weight;
+
+  /// Selected equipment; null until the form has loaded it (then the
+  /// repository applies the standard set to a new dive, ADR 0007).
+  final Set<String>? equipmentIds;
   final WaterType? waterType;
   final String notes;
   final int? rating;

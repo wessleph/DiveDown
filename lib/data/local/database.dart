@@ -13,6 +13,8 @@ part 'database.g.dart';
     DiveTankPressures,
     DiveTanks,
     DiveEvents,
+    Equipment,
+    DiveEquipment,
     CatalogueSites,
     AppMeta,
   ],
@@ -22,7 +24,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Schema of this app version; backups from a newer one are refused
   /// (T11.4).
-  static const latestSchemaVersion = 1;
+  static const latestSchemaVersion = 2;
 
   @override
   int get schemaVersion => latestSchemaVersion;

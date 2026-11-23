@@ -71,6 +71,18 @@ class _FailingRepository implements DiveRepository {
     DateTime from,
     DateTime to,
   ) => _inner.listStartingBetween(diverId, from, to);
+  @override
+  Future<({double weightKg, String siteName})?> lastWeightAt(
+    String diverId, {
+    String? siteName,
+    String? siteCatalogueId,
+    String? excludeDiveId,
+  }) => _inner.lastWeightAt(
+    diverId,
+    siteName: siteName,
+    siteCatalogueId: siteCatalogueId,
+    excludeDiveId: excludeDiveId,
+  );
 }
 
 void main() {

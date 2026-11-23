@@ -727,6 +727,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get errorO2 => 'Der O₂-Anteil muss zwischen 1 und 100 % liegen.';
 
   @override
+  String get errorWeight => 'Blei muss zwischen 0 und 40 kg liegen.';
+
+  @override
   String get importSourceComputer => 'Tauchcomputer';
 
   @override

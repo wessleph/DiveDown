@@ -57,7 +57,7 @@ Start (erste Nutzung) → Taucher anlegen
 Logbuch → Tauchgang-Detail → (Bearbeiten | Profil Vollbild)
 Logbuch → FAB „Manuell eintragen“ → Formular
 Importieren → Tauchcomputer | FIT-Datei | Apple Health (nur iOS)
-Einstellungen → Taucher · Geräte · Einheiten · Darstellung · Logbuch sichern · Wiederherstellen · Diagnose-Logs · Über & Lizenzen
+Einstellungen → Taucher · Ausrüstung · Geräte · Einheiten · Darstellung · Logbuch sichern · Wiederherstellen · Diagnose-Logs · Über & Lizenzen
 ```
 
 - **Ein Taucher pro App (Entscheidung 2026-11-22):** Mehrere Taucher werden nicht gebraucht. Es gibt keinen Taucher-Wechsel, kein Anlegen oder Löschen weiterer Taucher. Der beim ersten Start angelegte Taucher lässt sich in den Einstellungen umbenennen. Das Datenmodell behält `diverId` (ADR 0004), damit ein späterer Ausbau möglich bleibt.
@@ -105,7 +105,7 @@ Monatsüberschrift fett in `onSurfaceMuted` mit etwas Laufweite, neuester oben. 
 | ladend | 6 Skeleton-Zeilen |
 | Erfolg | Liste |
 | zu viele Daten (> 500) | Lazy-Liste, Monatsüberschriften bleiben beim Scrollen oben, Schnellscroll-Leiste mit Jahr und Monat |
-| nach Import | Neue Einträge 3 s hervorgehoben, Snackbar: „3 Tauchgänge importiert“ |
+| nach Import | Die Liste scrollt zum neuesten importierten Eintrag. Neue Einträge haben 3 s lang den Hintergrund `surfaceTint`, einen 4 dp breiten Rand links in `primary` und das Etikett **„Neu“** neben der Nummer; danach blenden sie in 600 ms auf normal über (mit „Animationen reduzieren“ ohne Überblendung). Vorgelesen: „Neu importiert“. Snackbar: „3 Tauchgänge importiert“. *(Ausgestaltet 2026-11-23, T32.)* |
 | Sicherungs-Erinnerung (> 30 Tage) | Dezente Karte oben: „Letzte Sicherung vor 34 Tagen.“ bzw. ohne Sicherung „Noch keine Sicherung.“ · **„Jetzt sichern“** (öffnet „Logbuch sichern“) · ✕ „Erinnerung ausblenden“ (für 7 Tage). Gezählt wird ab der letzten Sicherung, ohne Sicherung ab dem ersten Start der App; ohne Tauchgänge keine Karte. |
 
 ### 5.3 Tauchgang-Detail
@@ -114,7 +114,8 @@ Monatsüberschrift fett in `onSurfaceMuted` mit etwas Laufweite, neuester oben. 
 2. **Kennzahlen-Raster**, 3 Spalten gleicher Höhe: max. Tiefe · Dauer · Ø-Tiefe · Wasser (min. Temperatur) · Gas (z. B. „EAN32“) · Flasche (Volumen, darunter klein Start → Ende in bar). Darunter über die volle Breite **Ø-SAC** mit Herkunft: „gemessen“ oder „geschätzt aus 200 → 60 bar“.
 3. **Profil-Diagramm** (§6) mit Chips darüber und dem **Werte-Feld** darunter, Knopf „Vollbild“
 4. **Ereignisse** als kompakte Liste: Zeit · farbiger Punkt (Warnungen `error`, sonst `primary`) · deutscher Text. Gleiche Ereignisse innerhalb von 60 s werden zusammengefasst („Sicherheitsstopp 3×“). Jeder Ereignistyp hat einen deutschen Text (z. B. `deepstop` → „Tiefenstopp“), unbekannte Typen „Ereignis“ plus Code.
-5. Flaschen (falls mehrere), Notizen, Bewertung (1–5 Sterne)
+5. **Ausrüstung** *(neu 2026-11-23, T31)*: Abschnitt mit kleiner Überschrift „AUSRÜSTUNG“. Erste Zeile **„Blei 6 kg“** (fehlt der Wert: „Blei —“), darunter die zugeordneten Teile als Chips mit Icon der Art. Gelöschte Teile erscheinen weiter, in `onSurfaceMuted`. Ohne Blei und ohne Teile entfällt der Abschnitt.
+6. Flaschen (falls mehrere), Notizen, Bewertung (1–5 Sterne)
 - Aktionen in der App-Leiste: **Bearbeiten**, Menü: „Löschen“
 
 | Zustand | Darstellung |
@@ -126,7 +127,9 @@ Monatsüberschrift fett in `onSurfaceMuted` mit etwas Laufweite, neuester oben. 
 | Löschen | Dialog: „Tauchgang löschen?“ · **„Löschen“** (rot) / „Abbrechen“. Danach Snackbar mit **„Rückgängig“** für 5 s (Soft Delete macht das möglich). Geändert am 2026-11-20: Der Satz „Das kann nicht rückgängig gemacht werden.“ ist entfallen, weil er der Snackbar widersprach. |
 
 ### 5.4 Manuell eintragen / Bearbeiten
-Felder: **Nr.** (vorbelegt mit der nächsten freien Nummer, änderbar), **Tauchplatz** (Freitext mit Vorschlägen: zuerst eigene Namen, dann der mitgelieferte Katalog mit „Name · Region, Land“. Eine Zeile „‚…‘ als neuen Tauchplatz verwenden“ gibt es immer, siehe ADR 0006), Datum*, Startzeit*, Dauer* (min), max. Tiefe*, Ø-Tiefe, Wassertemp., Flasche (Volumen, Start-/Enddruck, O₂-Anteil), Wassertyp (Salz/Süß), Notizen, Bewertung.
+Felder: **Nr.** (vorbelegt mit der nächsten freien Nummer, änderbar), **Tauchplatz** (Freitext mit Vorschlägen: zuerst eigene Namen, dann der mitgelieferte Katalog mit „Name · Region, Land“. Eine Zeile „‚…‘ als neuen Tauchplatz verwenden“ gibt es immer, siehe ADR 0006), Datum*, Startzeit*, Dauer* (min), max. Tiefe*, Ø-Tiefe, Wassertemp., Flasche (Volumen, Start-/Enddruck, O₂-Anteil), **Blei (kg)**, **Ausrüstung**, Wassertyp (Salz/Süß), Notizen, Bewertung.
+- **Blei** *(neu 2026-11-23, T31)*: Zahlenfeld in kg (0–40, Komma erlaubt, auf 0,5 gerundet angezeigt), Fehlertext „Blei muss zwischen 0 und 40 kg liegen.“. Gibt es einen früheren Tauchgang am selben Platz mit Blei (ADR 0007), steht unter dem Feld „Zuletzt bei Elphinstone: 6 kg“ mit dem Textknopf **„Übernehmen“**; die Zeile verschwindet, wenn das Feld schon diesen Wert hat. Sie aktualisiert sich, sobald der Tauchplatz geändert wird.
+- **Ausrüstung** *(neu 2026-11-23, T31)*: alle nicht gelöschten Teile als Filter-Chips (48 dp hoch, mit Icon der Art), mehrfach wählbar. Neuer Tauchgang: die Standard-Teile sind vorausgewählt. Bearbeiten: die zugeordneten Teile; ein inzwischen gelöschtes, aber zugeordnetes Teil erscheint als ausgewählter Chip in `onSurfaceMuted` und kann abgewählt werden. Ohne Ausrüstung: „Noch keine Ausrüstung. Lege sie in den Einstellungen an.“ mit Link **„Ausrüstung anlegen“**.
 `*` = Pflicht.
 - Validierung inline, mit denselben Grenzen wie die Plausibilitätsprüfung (security.md G1):
   „Tiefe muss zwischen 0 und 350 m liegen.“ · „Der Enddruck muss kleiner als der Startdruck sein.“ · „Das Datum darf nicht in der Zukunft liegen.“
@@ -220,12 +223,15 @@ Gruppen als Abschnitte mit kleiner Überschrift in Großbuchstaben (Stil „Riff
    - **Name**: zeigt den Namen, Antippen öffnet einen Dialog „Name ändern“ (Pflichtfeld, wie §5.1) · **„Speichern“** / „Abbrechen“.
    - **„Nummerierung beginnt bei“**: zeigt die Startnummer, Antippen öffnet einen Dialog mit Zahlenfeld (1–9999). Gibt es schon Tauchgänge, fragt die App vorher: „Nummern verschieben? Aus #1–#42 werden #101–#142.“ · **„Verschieben“** / „Abbrechen“. Alle Nummern des Tauchers verschieben sich um die Differenz.
    - **„Nummern nach Datum neu vergeben“**: Dialog „Alle Tauchgänge nach Datum neu nummerieren? Der älteste bekommt #101.“ (die Startnummer) · **„Neu nummerieren“** / „Abbrechen“. Danach Snackbar „73 Tauchgänge neu nummeriert“. Nur sichtbar, wenn die Reihenfolge der Nummern nicht schon der Reihenfolge nach Datum entspricht. Importe vergeben weiterhin die nächste freie Nummer, neu nummeriert wird nur auf Wunsch (Entscheidung 2026-11-22).
-2. **Geräte:** bekannte Tauchcomputer als Liste: „Suunto EON Core ••CC2D“, darunter „Zuletzt: 13.11.2026“ (Datum des neuesten Tauchgangs von diesem Gerät, sonst „Noch keine Tauchgänge“). Menü „Vergessen“ → Dialog „EON Core vergessen? Beim nächsten Übertragen werden alle Tauchgänge erneut gelesen; Duplikate werden erkannt.“ · **„Vergessen“** / „Abbrechen“. Die Tauchgänge bleiben. Ohne Geräte: „Noch kein Tauchcomputer verbunden.“
-3. **Darstellung:** „System“ / „Hell“ / „Dunkel“ als Segmentknopf, sofort wirksam und gemerkt.
+2. **Ausrüstung** *(neu 2026-11-23, T30, ADR 0007)*: Liste der Teile, sortiert nach Art (Reihenfolge wie unten) und Bezeichnung. Pro Zeile Icon der Art, **Bezeichnung**, darunter klein die Art und gegebenenfalls das Etikett **„Standard“**. Antippen öffnet „Ausrüstung bearbeiten“. Letzte Zeile **„+ Ausrüstung hinzufügen“**. Ohne Teile: „Noch keine Ausrüstung. Standard-Teile werden neuen Tauchgängen automatisch zugeordnet.“
+   - **Formular** (eigene Seite, Titel „Ausrüstung hinzufügen“ bzw. „Ausrüstung bearbeiten“): **Art*** als Auswahl ohne Vorgabe (Anzug · Jacket · Atemregler · Tauchcomputer · Flasche · Maske · Flossen · Lampe · Sonstiges; Fehler „Bitte eine Art wählen.“), **Bezeichnung*** (z. B. „Scubapro Hydros Pro“, höchstens 60 Zeichen, Fehler „Bitte eine Bezeichnung eingeben.“), **Notiz**, Schalter **„Standard“** mit Untertitel „Neue Tauchgänge bekommen dieses Teil automatisch.“ · **„Speichern“**. Verlassen mit Änderungen wie §5.4.
+   - **Löschen** (nur beim Bearbeiten, Menü): „Hydros Pro löschen? Bei bisherigen Tauchgängen bleibt es eingetragen.“ · **„Löschen“** (rot) / „Abbrechen“.
+3. **Geräte:** bekannte Tauchcomputer als Liste: „Suunto EON Core ••CC2D“, darunter „Zuletzt: 13.11.2026“ (Datum des neuesten Tauchgangs von diesem Gerät, sonst „Noch keine Tauchgänge“). Menü „Vergessen“ → Dialog „EON Core vergessen? Beim nächsten Übertragen werden alle Tauchgänge erneut gelesen; Duplikate werden erkannt.“ · **„Vergessen“** / „Abbrechen“. Die Tauchgänge bleiben. Ohne Geräte: „Noch kein Tauchcomputer verbunden.“
+4. **Darstellung:** „System“ / „Hell“ / „Dunkel“ als Segmentknopf, sofort wirksam und gemerkt.
    **Einheiten** entfallen in v1.0, es gilt metrisch (Entscheidung 2026-11-22, §3 bleibt für später).
-4. **Daten:** „Logbuch sichern“, „Logbuch wiederherstellen“ (§5.12) – erscheinen mit T11.
-5. **Hilfe:** „Diagnose-Logs teilen“ (§5.13) – erscheint mit T10.
-6. **Über DiveDown:** „Version 1.0.0 (Build 42)“ · „libdivecomputer 0.9.0“ · „Lizenz: GPL-3.0-or-later“ · „Open-Source-Lizenzen“ (Lizenzseite, mit ODbL-Hinweis und Manrope-Lizenz) · „Datenschutzerklärung“ und „Quellcode“ öffnen den Browser (`url_launcher`; die App selbst braucht dafür kein Internet-Recht): https://wessleph.github.io/DiveDown/datenschutz/ und https://github.com/wessleph/DiveDown
+5. **Daten:** „Logbuch sichern“, „Logbuch wiederherstellen“ (§5.12) – erscheinen mit T11.
+6. **Hilfe:** „Diagnose-Logs teilen“ (§5.13) – erscheint mit T10.
+7. **Über DiveDown:** „Version 1.0.0 (Build 42)“ · „libdivecomputer 0.9.0“ · „Lizenz: GPL-3.0-or-later“ · „Open-Source-Lizenzen“ (Lizenzseite, mit ODbL-Hinweis und Manrope-Lizenz) · „Datenschutzerklärung“ und „Quellcode“ öffnen den Browser (`url_launcher`; die App selbst braucht dafür kein Internet-Recht): https://wessleph.github.io/DiveDown/datenschutz/ und https://github.com/wessleph/DiveDown
 
 ### 5.12 Logbuch sichern / wiederherstellen
 Einstieg: Einstellungen, Abschnitt **DATEN** mit „Logbuch sichern“ und „Logbuch wiederherstellen“ (§5.11).

@@ -66,6 +66,17 @@ abstract interface class DiveRepository {
     DateTime to,
   );
 
+  /// Lead of the diver's newest other dive at the same site (ADR 0007):
+  /// same [siteCatalogueId], else the same [siteName] ignoring case and
+  /// surrounding spaces. Dives without lead, deleted dives and
+  /// [excludeDiveId] do not count. Null when there is none.
+  Future<({double weightKg, String siteName})?> lastWeightAt(
+    String diverId, {
+    String? siteName,
+    String? siteCatalogueId,
+    String? excludeDiveId,
+  });
+
   /// Marks the dive as deleted (soft delete, ADR 0004).
   Future<void> delete(String id);
 

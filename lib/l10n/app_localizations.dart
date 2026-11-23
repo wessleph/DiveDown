@@ -1348,6 +1348,12 @@ abstract class AppLocalizations {
   /// **'Der O₂-Anteil muss zwischen 1 und 100 % liegen.'**
   String get errorO2;
 
+  /// No description provided for @errorWeight.
+  ///
+  /// In de, this message translates to:
+  /// **'Blei muss zwischen 0 und 40 kg liegen.'**
+  String get errorWeight;
+
   /// No description provided for @importSourceComputer.
   ///
   /// In de, this message translates to:

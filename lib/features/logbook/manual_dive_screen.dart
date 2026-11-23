@@ -301,6 +301,7 @@ class _ManualDiveScreenState extends ConsumerState<ManualDiveScreen> {
     ManualDiveError.pressureOutOfRange => l10n.errorPressure,
     ManualDiveError.endPressureNotBelowStart => l10n.errorEndPressure,
     ManualDiveError.o2OutOfRange => l10n.errorO2,
+    ManualDiveError.weightOutOfRange => l10n.errorWeight,
   };
 
   @override

@@ -1344,6 +1344,17 @@ class $DivesTable extends Dives with TableInfo<$DivesTable, DiveRow> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _weightKgMeta = const VerificationMeta(
+    'weightKg',
+  );
+  @override
+  late final GeneratedColumn<double> weightKg = GeneratedColumn<double>(
+    'weight_kg',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1369,6 +1380,7 @@ class $DivesTable extends Dives with TableInfo<$DivesTable, DiveRow> {
     waterType,
     notes,
     rating,
+    weightKg,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1550,6 +1562,12 @@ class $DivesTable extends Dives with TableInfo<$DivesTable, DiveRow> {
         rating.isAcceptableOrUnknown(data['rating']!, _ratingMeta),
       );
     }
+    if (data.containsKey('weight_kg')) {
+      context.handle(
+        _weightKgMeta,
+        weightKg.isAcceptableOrUnknown(data['weight_kg']!, _weightKgMeta),
+      );
+    }
     return context;
   }
 
@@ -1651,6 +1669,10 @@ class $DivesTable extends Dives with TableInfo<$DivesTable, DiveRow> {
         DriftSqlType.int,
         data['${effectivePrefix}rating'],
       ),
+      weightKg: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}weight_kg'],
+      ),
     );
   }
 
@@ -1686,6 +1708,9 @@ class DiveRow extends DataClass implements Insertable<DiveRow> {
   final String? waterType;
   final String? notes;
   final int? rating;
+
+  /// Lead in kg (schema v2, ADR 0007).
+  final double? weightKg;
   const DiveRow({
     required this.id,
     required this.createdAt,
@@ -1710,6 +1735,7 @@ class DiveRow extends DataClass implements Insertable<DiveRow> {
     this.waterType,
     this.notes,
     this.rating,
+    this.weightKg,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1764,6 +1790,9 @@ class DiveRow extends DataClass implements Insertable<DiveRow> {
     }
     if (!nullToAbsent || rating != null) {
       map['rating'] = Variable<int>(rating);
+    }
+    if (!nullToAbsent || weightKg != null) {
+      map['weight_kg'] = Variable<double>(weightKg);
     }
     return map;
   }
@@ -1821,6 +1850,9 @@ class DiveRow extends DataClass implements Insertable<DiveRow> {
       rating: rating == null && nullToAbsent
           ? const Value.absent()
           : Value(rating),
+      weightKg: weightKg == null && nullToAbsent
+          ? const Value.absent()
+          : Value(weightKg),
     );
   }
 
@@ -1853,6 +1885,7 @@ class DiveRow extends DataClass implements Insertable<DiveRow> {
       waterType: serializer.fromJson<String?>(json['waterType']),
       notes: serializer.fromJson<String?>(json['notes']),
       rating: serializer.fromJson<int?>(json['rating']),
+      weightKg: serializer.fromJson<double?>(json['weightKg']),
     );
   }
   @override
@@ -1882,6 +1915,7 @@ class DiveRow extends DataClass implements Insertable<DiveRow> {
       'waterType': serializer.toJson<String?>(waterType),
       'notes': serializer.toJson<String?>(notes),
       'rating': serializer.toJson<int?>(rating),
+      'weightKg': serializer.toJson<double?>(weightKg),
     };
   }
 
@@ -1909,6 +1943,7 @@ class DiveRow extends DataClass implements Insertable<DiveRow> {
     Value<String?> waterType = const Value.absent(),
     Value<String?> notes = const Value.absent(),
     Value<int?> rating = const Value.absent(),
+    Value<double?> weightKg = const Value.absent(),
   }) => DiveRow(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -1941,6 +1976,7 @@ class DiveRow extends DataClass implements Insertable<DiveRow> {
     waterType: waterType.present ? waterType.value : this.waterType,
     notes: notes.present ? notes.value : this.notes,
     rating: rating.present ? rating.value : this.rating,
+    weightKg: weightKg.present ? weightKg.value : this.weightKg,
   );
   DiveRow copyWithCompanion(DivesCompanion data) {
     return DiveRow(
@@ -1981,6 +2017,7 @@ class DiveRow extends DataClass implements Insertable<DiveRow> {
       waterType: data.waterType.present ? data.waterType.value : this.waterType,
       notes: data.notes.present ? data.notes.value : this.notes,
       rating: data.rating.present ? data.rating.value : this.rating,
+      weightKg: data.weightKg.present ? data.weightKg.value : this.weightKg,
     );
   }
 
@@ -2009,7 +2046,8 @@ class DiveRow extends DataClass implements Insertable<DiveRow> {
           ..write('maxTemperatureC: $maxTemperatureC, ')
           ..write('waterType: $waterType, ')
           ..write('notes: $notes, ')
-          ..write('rating: $rating')
+          ..write('rating: $rating, ')
+          ..write('weightKg: $weightKg')
           ..write(')'))
         .toString();
   }
@@ -2039,6 +2077,7 @@ class DiveRow extends DataClass implements Insertable<DiveRow> {
     waterType,
     notes,
     rating,
+    weightKg,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -2066,7 +2105,8 @@ class DiveRow extends DataClass implements Insertable<DiveRow> {
           other.maxTemperatureC == this.maxTemperatureC &&
           other.waterType == this.waterType &&
           other.notes == this.notes &&
-          other.rating == this.rating);
+          other.rating == this.rating &&
+          other.weightKg == this.weightKg);
 }
 
 class DivesCompanion extends UpdateCompanion<DiveRow> {
@@ -2093,6 +2133,7 @@ class DivesCompanion extends UpdateCompanion<DiveRow> {
   final Value<String?> waterType;
   final Value<String?> notes;
   final Value<int?> rating;
+  final Value<double?> weightKg;
   final Value<int> rowid;
   const DivesCompanion({
     this.id = const Value.absent(),
@@ -2118,6 +2159,7 @@ class DivesCompanion extends UpdateCompanion<DiveRow> {
     this.waterType = const Value.absent(),
     this.notes = const Value.absent(),
     this.rating = const Value.absent(),
+    this.weightKg = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   DivesCompanion.insert({
@@ -2144,6 +2186,7 @@ class DivesCompanion extends UpdateCompanion<DiveRow> {
     this.waterType = const Value.absent(),
     this.notes = const Value.absent(),
     this.rating = const Value.absent(),
+    this.weightKg = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        createdAt = Value(createdAt),
@@ -2178,6 +2221,7 @@ class DivesCompanion extends UpdateCompanion<DiveRow> {
     Expression<String>? waterType,
     Expression<String>? notes,
     Expression<int>? rating,
+    Expression<double>? weightKg,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2204,6 +2248,7 @@ class DivesCompanion extends UpdateCompanion<DiveRow> {
       if (waterType != null) 'water_type': waterType,
       if (notes != null) 'notes': notes,
       if (rating != null) 'rating': rating,
+      if (weightKg != null) 'weight_kg': weightKg,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2232,6 +2277,7 @@ class DivesCompanion extends UpdateCompanion<DiveRow> {
     Value<String?>? waterType,
     Value<String?>? notes,
     Value<int?>? rating,
+    Value<double?>? weightKg,
     Value<int>? rowid,
   }) {
     return DivesCompanion(
@@ -2258,6 +2304,7 @@ class DivesCompanion extends UpdateCompanion<DiveRow> {
       waterType: waterType ?? this.waterType,
       notes: notes ?? this.notes,
       rating: rating ?? this.rating,
+      weightKg: weightKg ?? this.weightKg,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2334,6 +2381,9 @@ class DivesCompanion extends UpdateCompanion<DiveRow> {
     if (rating.present) {
       map['rating'] = Variable<int>(rating.value);
     }
+    if (weightKg.present) {
+      map['weight_kg'] = Variable<double>(weightKg.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2366,6 +2416,7 @@ class DivesCompanion extends UpdateCompanion<DiveRow> {
           ..write('waterType: $waterType, ')
           ..write('notes: $notes, ')
           ..write('rating: $rating, ')
+          ..write('weightKg: $weightKg, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4093,6 +4144,796 @@ class DiveEventsCompanion extends UpdateCompanion<DiveEventRow> {
   }
 }
 
+class $EquipmentTable extends Equipment
+    with TableInfo<$EquipmentTable, EquipmentRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $EquipmentTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _diverIdMeta = const VerificationMeta(
+    'diverId',
+  );
+  @override
+  late final GeneratedColumn<String> diverId = GeneratedColumn<String>(
+    'diver_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES divers (id)',
+    ),
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isDefaultMeta = const VerificationMeta(
+    'isDefault',
+  );
+  @override
+  late final GeneratedColumn<bool> isDefault = GeneratedColumn<bool>(
+    'is_default',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_default" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    diverId,
+    kind,
+    name,
+    notes,
+    isDefault,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'equipment';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<EquipmentRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('diver_id')) {
+      context.handle(
+        _diverIdMeta,
+        diverId.isAcceptableOrUnknown(data['diver_id']!, _diverIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_diverIdMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    if (data.containsKey('is_default')) {
+      context.handle(
+        _isDefaultMeta,
+        isDefault.isAcceptableOrUnknown(data['is_default']!, _isDefaultMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  EquipmentRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return EquipmentRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      diverId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}diver_id'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
+      isDefault: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_default'],
+      )!,
+    );
+  }
+
+  @override
+  $EquipmentTable createAlias(String alias) {
+    return $EquipmentTable(attachedDatabase, alias);
+  }
+}
+
+class EquipmentRow extends DataClass implements Insertable<EquipmentRow> {
+  final String id;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final String diverId;
+
+  /// `EquipmentKind.name`, e.g. `bcd`.
+  final String kind;
+  final String name;
+  final String? notes;
+  final bool isDefault;
+  const EquipmentRow({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.diverId,
+    required this.kind,
+    required this.name,
+    this.notes,
+    required this.isDefault,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['diver_id'] = Variable<String>(diverId);
+    map['kind'] = Variable<String>(kind);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    map['is_default'] = Variable<bool>(isDefault);
+    return map;
+  }
+
+  EquipmentCompanion toCompanion(bool nullToAbsent) {
+    return EquipmentCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      diverId: Value(diverId),
+      kind: Value(kind),
+      name: Value(name),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
+      isDefault: Value(isDefault),
+    );
+  }
+
+  factory EquipmentRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return EquipmentRow(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      diverId: serializer.fromJson<String>(json['diverId']),
+      kind: serializer.fromJson<String>(json['kind']),
+      name: serializer.fromJson<String>(json['name']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      isDefault: serializer.fromJson<bool>(json['isDefault']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'diverId': serializer.toJson<String>(diverId),
+      'kind': serializer.toJson<String>(kind),
+      'name': serializer.toJson<String>(name),
+      'notes': serializer.toJson<String?>(notes),
+      'isDefault': serializer.toJson<bool>(isDefault),
+    };
+  }
+
+  EquipmentRow copyWith({
+    String? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    String? diverId,
+    String? kind,
+    String? name,
+    Value<String?> notes = const Value.absent(),
+    bool? isDefault,
+  }) => EquipmentRow(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    diverId: diverId ?? this.diverId,
+    kind: kind ?? this.kind,
+    name: name ?? this.name,
+    notes: notes.present ? notes.value : this.notes,
+    isDefault: isDefault ?? this.isDefault,
+  );
+  EquipmentRow copyWithCompanion(EquipmentCompanion data) {
+    return EquipmentRow(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      diverId: data.diverId.present ? data.diverId.value : this.diverId,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      name: data.name.present ? data.name.value : this.name,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      isDefault: data.isDefault.present ? data.isDefault.value : this.isDefault,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EquipmentRow(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('diverId: $diverId, ')
+          ..write('kind: $kind, ')
+          ..write('name: $name, ')
+          ..write('notes: $notes, ')
+          ..write('isDefault: $isDefault')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    diverId,
+    kind,
+    name,
+    notes,
+    isDefault,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is EquipmentRow &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.diverId == this.diverId &&
+          other.kind == this.kind &&
+          other.name == this.name &&
+          other.notes == this.notes &&
+          other.isDefault == this.isDefault);
+}
+
+class EquipmentCompanion extends UpdateCompanion<EquipmentRow> {
+  final Value<String> id;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> diverId;
+  final Value<String> kind;
+  final Value<String> name;
+  final Value<String?> notes;
+  final Value<bool> isDefault;
+  final Value<int> rowid;
+  const EquipmentCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.diverId = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.name = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.isDefault = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  EquipmentCompanion.insert({
+    required String id,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    required String diverId,
+    required String kind,
+    required String name,
+    this.notes = const Value.absent(),
+    this.isDefault = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       diverId = Value(diverId),
+       kind = Value(kind),
+       name = Value(name);
+  static Insertable<EquipmentRow> custom({
+    Expression<String>? id,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? diverId,
+    Expression<String>? kind,
+    Expression<String>? name,
+    Expression<String>? notes,
+    Expression<bool>? isDefault,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (diverId != null) 'diver_id': diverId,
+      if (kind != null) 'kind': kind,
+      if (name != null) 'name': name,
+      if (notes != null) 'notes': notes,
+      if (isDefault != null) 'is_default': isDefault,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  EquipmentCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String>? diverId,
+    Value<String>? kind,
+    Value<String>? name,
+    Value<String?>? notes,
+    Value<bool>? isDefault,
+    Value<int>? rowid,
+  }) {
+    return EquipmentCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      diverId: diverId ?? this.diverId,
+      kind: kind ?? this.kind,
+      name: name ?? this.name,
+      notes: notes ?? this.notes,
+      isDefault: isDefault ?? this.isDefault,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (diverId.present) {
+      map['diver_id'] = Variable<String>(diverId.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (isDefault.present) {
+      map['is_default'] = Variable<bool>(isDefault.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EquipmentCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('diverId: $diverId, ')
+          ..write('kind: $kind, ')
+          ..write('name: $name, ')
+          ..write('notes: $notes, ')
+          ..write('isDefault: $isDefault, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $DiveEquipmentTable extends DiveEquipment
+    with TableInfo<$DiveEquipmentTable, DiveEquipmentRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DiveEquipmentTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _diveIdMeta = const VerificationMeta('diveId');
+  @override
+  late final GeneratedColumn<String> diveId = GeneratedColumn<String>(
+    'dive_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES dives (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _equipmentIdMeta = const VerificationMeta(
+    'equipmentId',
+  );
+  @override
+  late final GeneratedColumn<String> equipmentId = GeneratedColumn<String>(
+    'equipment_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES equipment (id)',
+    ),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [diveId, equipmentId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'dive_equipment';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DiveEquipmentRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('dive_id')) {
+      context.handle(
+        _diveIdMeta,
+        diveId.isAcceptableOrUnknown(data['dive_id']!, _diveIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_diveIdMeta);
+    }
+    if (data.containsKey('equipment_id')) {
+      context.handle(
+        _equipmentIdMeta,
+        equipmentId.isAcceptableOrUnknown(
+          data['equipment_id']!,
+          _equipmentIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_equipmentIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {diveId, equipmentId};
+  @override
+  DiveEquipmentRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DiveEquipmentRow(
+      diveId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}dive_id'],
+      )!,
+      equipmentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}equipment_id'],
+      )!,
+    );
+  }
+
+  @override
+  $DiveEquipmentTable createAlias(String alias) {
+    return $DiveEquipmentTable(attachedDatabase, alias);
+  }
+}
+
+class DiveEquipmentRow extends DataClass
+    implements Insertable<DiveEquipmentRow> {
+  final String diveId;
+  final String equipmentId;
+  const DiveEquipmentRow({required this.diveId, required this.equipmentId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['dive_id'] = Variable<String>(diveId);
+    map['equipment_id'] = Variable<String>(equipmentId);
+    return map;
+  }
+
+  DiveEquipmentCompanion toCompanion(bool nullToAbsent) {
+    return DiveEquipmentCompanion(
+      diveId: Value(diveId),
+      equipmentId: Value(equipmentId),
+    );
+  }
+
+  factory DiveEquipmentRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DiveEquipmentRow(
+      diveId: serializer.fromJson<String>(json['diveId']),
+      equipmentId: serializer.fromJson<String>(json['equipmentId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'diveId': serializer.toJson<String>(diveId),
+      'equipmentId': serializer.toJson<String>(equipmentId),
+    };
+  }
+
+  DiveEquipmentRow copyWith({String? diveId, String? equipmentId}) =>
+      DiveEquipmentRow(
+        diveId: diveId ?? this.diveId,
+        equipmentId: equipmentId ?? this.equipmentId,
+      );
+  DiveEquipmentRow copyWithCompanion(DiveEquipmentCompanion data) {
+    return DiveEquipmentRow(
+      diveId: data.diveId.present ? data.diveId.value : this.diveId,
+      equipmentId: data.equipmentId.present
+          ? data.equipmentId.value
+          : this.equipmentId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DiveEquipmentRow(')
+          ..write('diveId: $diveId, ')
+          ..write('equipmentId: $equipmentId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(diveId, equipmentId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DiveEquipmentRow &&
+          other.diveId == this.diveId &&
+          other.equipmentId == this.equipmentId);
+}
+
+class DiveEquipmentCompanion extends UpdateCompanion<DiveEquipmentRow> {
+  final Value<String> diveId;
+  final Value<String> equipmentId;
+  final Value<int> rowid;
+  const DiveEquipmentCompanion({
+    this.diveId = const Value.absent(),
+    this.equipmentId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DiveEquipmentCompanion.insert({
+    required String diveId,
+    required String equipmentId,
+    this.rowid = const Value.absent(),
+  }) : diveId = Value(diveId),
+       equipmentId = Value(equipmentId);
+  static Insertable<DiveEquipmentRow> custom({
+    Expression<String>? diveId,
+    Expression<String>? equipmentId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (diveId != null) 'dive_id': diveId,
+      if (equipmentId != null) 'equipment_id': equipmentId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DiveEquipmentCompanion copyWith({
+    Value<String>? diveId,
+    Value<String>? equipmentId,
+    Value<int>? rowid,
+  }) {
+    return DiveEquipmentCompanion(
+      diveId: diveId ?? this.diveId,
+      equipmentId: equipmentId ?? this.equipmentId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (diveId.present) {
+      map['dive_id'] = Variable<String>(diveId.value);
+    }
+    if (equipmentId.present) {
+      map['equipment_id'] = Variable<String>(equipmentId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DiveEquipmentCompanion(')
+          ..write('diveId: $diveId, ')
+          ..write('equipmentId: $equipmentId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $CatalogueSitesTable extends CatalogueSites
     with TableInfo<$CatalogueSitesTable, CatalogueSiteRow> {
   @override
@@ -4814,6 +5655,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $DiveTankPressuresTable(this);
   late final $DiveTanksTable diveTanks = $DiveTanksTable(this);
   late final $DiveEventsTable diveEvents = $DiveEventsTable(this);
+  late final $EquipmentTable equipment = $EquipmentTable(this);
+  late final $DiveEquipmentTable diveEquipment = $DiveEquipmentTable(this);
   late final $CatalogueSitesTable catalogueSites = $CatalogueSitesTable(this);
   late final $AppMetaTable appMeta = $AppMetaTable(this);
   late final Index divesByDiver = Index(
@@ -4832,6 +5675,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     diveTankPressures,
     diveTanks,
     diveEvents,
+    equipment,
+    diveEquipment,
     catalogueSites,
     appMeta,
     divesByDiver,
@@ -4865,6 +5710,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('dive_events', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'dives',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('dive_equipment', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -4906,6 +5758,24 @@ final class $$DiversTableReferences
     ).filter((f) => f.diverId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_divesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$EquipmentTable, List<EquipmentRow>>
+  _equipmentRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.equipment,
+    aliasName: 'divers__id__equipment__diver_id',
+  );
+
+  $$EquipmentTableProcessedTableManager get equipmentRefs {
+    final manager = $$EquipmentTableTableManager(
+      $_db,
+      $_db.equipment,
+    ).filter((f) => f.diverId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_equipmentRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -4967,6 +5837,31 @@ class $$DiversTableFilterComposer
           }) => $$DivesTableFilterComposer(
             $db: $db,
             $table: $db.dives,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> equipmentRefs(
+    Expression<bool> Function($$EquipmentTableFilterComposer f) f,
+  ) {
+    final $$EquipmentTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.equipment,
+      getReferencedColumn: (t) => t.diverId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EquipmentTableFilterComposer(
+            $db: $db,
+            $table: $db.equipment,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -5070,6 +5965,31 @@ class $$DiversTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> equipmentRefs<T extends Object>(
+    Expression<T> Function($$EquipmentTableAnnotationComposer a) f,
+  ) {
+    final $$EquipmentTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.equipment,
+      getReferencedColumn: (t) => t.diverId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EquipmentTableAnnotationComposer(
+            $db: $db,
+            $table: $db.equipment,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$DiversTableTableManager
@@ -5085,7 +6005,7 @@ class $$DiversTableTableManager
           $$DiversTableUpdateCompanionBuilder,
           (DiverRow, $$DiversTableReferences),
           DiverRow,
-          PrefetchHooks Function({bool divesRefs})
+          PrefetchHooks Function({bool divesRefs, bool equipmentRefs})
         > {
   $$DiversTableTableManager(_$AppDatabase db, $DiversTable table)
     : super(
@@ -5142,10 +6062,13 @@ class $$DiversTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({divesRefs = false}) {
+          prefetchHooksCallback: ({divesRefs = false, equipmentRefs = false}) {
             return PrefetchHooks(
               db: db,
-              explicitlyWatchedTables: [if (divesRefs) db.dives],
+              explicitlyWatchedTables: [
+                if (divesRefs) db.dives,
+                if (equipmentRefs) db.equipment,
+              ],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
                 return [
@@ -5162,6 +6085,22 @@ class $$DiversTableTableManager
                       ),
                       managerFromTypedResult: (p0) =>
                           $$DiversTableReferences(db, table, p0).divesRefs,
+                      currentColumn: 'id',
+                      referencedColumn: 'diver_id',
+                      typedResults: items,
+                    ),
+                  if (equipmentRefs)
+                    await $_getPrefetchedDataByColumns<
+                      DiverRow,
+                      $DiversTable,
+                      EquipmentRow,
+                      $EquipmentTable
+                    >(
+                      currentTable: table,
+                      referencedTable: $$DiversTableReferences
+                          ._equipmentRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$DiversTableReferences(db, table, p0).equipmentRefs,
                       currentColumn: 'id',
                       referencedColumn: 'diver_id',
                       typedResults: items,
@@ -5186,7 +6125,7 @@ typedef $$DiversTableProcessedTableManager =
       $$DiversTableUpdateCompanionBuilder,
       (DiverRow, $$DiversTableReferences),
       DiverRow,
-      PrefetchHooks Function({bool divesRefs})
+      PrefetchHooks Function({bool divesRefs, bool equipmentRefs})
     >;
 typedef $$DiveComputersTableCreateCompanionBuilder =
     DiveComputersCompanion Function({
@@ -5638,6 +6577,7 @@ typedef $$DivesTableCreateCompanionBuilder = DivesCompanion Function({
   Value<String?> waterType,
   Value<String?> notes,
   Value<int?> rating,
+  Value<double?> weightKg,
   Value<int> rowid,
 });
 typedef $$DivesTableUpdateCompanionBuilder = DivesCompanion Function({
@@ -5664,6 +6604,7 @@ typedef $$DivesTableUpdateCompanionBuilder = DivesCompanion Function({
   Value<String?> waterType,
   Value<String?> notes,
   Value<int?> rating,
+  Value<double?> weightKg,
   Value<int> rowid,
 });
 
@@ -5780,6 +6721,24 @@ final class $$DivesTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$DiveEquipmentTable, List<DiveEquipmentRow>>
+  _diveEquipmentRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.diveEquipment,
+    aliasName: 'dives__id__dive_equipment__dive_id',
+  );
+
+  $$DiveEquipmentTableProcessedTableManager get diveEquipmentRefs {
+    final manager = $$DiveEquipmentTableTableManager(
+      $_db,
+      $_db.diveEquipment,
+    ).filter((f) => f.diveId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_diveEquipmentRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$DivesTableFilterComposer extends Composer<_$AppDatabase, $DivesTable> {
@@ -5892,6 +6851,11 @@ class $$DivesTableFilterComposer extends Composer<_$AppDatabase, $DivesTable> {
 
   ColumnFilters<int> get rating => $composableBuilder(
     column: $table.rating,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get weightKg => $composableBuilder(
+    column: $table.weightKg,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6040,6 +7004,31 @@ class $$DivesTableFilterComposer extends Composer<_$AppDatabase, $DivesTable> {
     );
     return f(composer);
   }
+
+  Expression<bool> diveEquipmentRefs(
+    Expression<bool> Function($$DiveEquipmentTableFilterComposer f) f,
+  ) {
+    final $$DiveEquipmentTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.diveEquipment,
+      getReferencedColumn: (t) => t.diveId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DiveEquipmentTableFilterComposer(
+            $db: $db,
+            $table: $db.diveEquipment,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$DivesTableOrderingComposer
@@ -6153,6 +7142,11 @@ class $$DivesTableOrderingComposer
 
   ColumnOrderings<int> get rating => $composableBuilder(
     column: $table.rating,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get weightKg => $composableBuilder(
+    column: $table.weightKg,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -6286,6 +7280,9 @@ class $$DivesTableAnnotationComposer
 
   GeneratedColumn<int> get rating =>
       $composableBuilder(column: $table.rating, builder: (column) => column);
+
+  GeneratedColumn<double> get weightKg =>
+      $composableBuilder(column: $table.weightKg, builder: (column) => column);
 
   $$DiversTableAnnotationComposer get diverId {
     final $$DiversTableAnnotationComposer composer = $composerBuilder(
@@ -6433,6 +7430,31 @@ class $$DivesTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> diveEquipmentRefs<T extends Object>(
+    Expression<T> Function($$DiveEquipmentTableAnnotationComposer a) f,
+  ) {
+    final $$DiveEquipmentTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.diveEquipment,
+      getReferencedColumn: (t) => t.diveId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DiveEquipmentTableAnnotationComposer(
+            $db: $db,
+            $table: $db.diveEquipment,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$DivesTableTableManager
@@ -6455,6 +7477,7 @@ class $$DivesTableTableManager
             bool diveTankPressuresRefs,
             bool diveTanksRefs,
             bool diveEventsRefs,
+            bool diveEquipmentRefs,
           })
         > {
   $$DivesTableTableManager(_$AppDatabase db, $DivesTable table)
@@ -6493,6 +7516,7 @@ class $$DivesTableTableManager
                 Value<String?> waterType = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<int?> rating = const Value.absent(),
+                Value<double?> weightKg = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DivesCompanion(
                 id: id,
@@ -6518,6 +7542,7 @@ class $$DivesTableTableManager
                 waterType: waterType,
                 notes: notes,
                 rating: rating,
+                weightKg: weightKg,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -6545,6 +7570,7 @@ class $$DivesTableTableManager
                 Value<String?> waterType = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<int?> rating = const Value.absent(),
+                Value<double?> weightKg = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DivesCompanion.insert(
                 id: id,
@@ -6570,6 +7596,7 @@ class $$DivesTableTableManager
                 waterType: waterType,
                 notes: notes,
                 rating: rating,
+                weightKg: weightKg,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -6588,6 +7615,7 @@ class $$DivesTableTableManager
                 diveTankPressuresRefs = false,
                 diveTanksRefs = false,
                 diveEventsRefs = false,
+                diveEquipmentRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -6596,6 +7624,7 @@ class $$DivesTableTableManager
                     if (diveTankPressuresRefs) db.diveTankPressures,
                     if (diveTanksRefs) db.diveTanks,
                     if (diveEventsRefs) db.diveEvents,
+                    if (diveEquipmentRefs) db.diveEquipment,
                   ],
                   addJoins:
                       <
@@ -6720,6 +7749,26 @@ class $$DivesTableTableManager
                           referencedColumn: 'dive_id',
                           typedResults: items,
                         ),
+                      if (diveEquipmentRefs)
+                        await $_getPrefetchedDataByColumns<
+                          DiveRow,
+                          $DivesTable,
+                          DiveEquipmentRow,
+                          $DiveEquipmentTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$DivesTableReferences
+                              ._diveEquipmentRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$DivesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).diveEquipmentRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'dive_id',
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -6747,6 +7796,7 @@ typedef $$DivesTableProcessedTableManager =
         bool diveTankPressuresRefs,
         bool diveTanksRefs,
         bool diveEventsRefs,
+        bool diveEquipmentRefs,
       })
     >;
 typedef $$DiveSamplesTableCreateCompanionBuilder =
@@ -8126,6 +9176,834 @@ typedef $$DiveEventsTableProcessedTableManager =
       DiveEventRow,
       PrefetchHooks Function({bool diveId})
     >;
+typedef $$EquipmentTableCreateCompanionBuilder = EquipmentCompanion Function({
+  required String id,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<DateTime?> deletedAt,
+  required String diverId,
+  required String kind,
+  required String name,
+  Value<String?> notes,
+  Value<bool> isDefault,
+  Value<int> rowid,
+});
+typedef $$EquipmentTableUpdateCompanionBuilder = EquipmentCompanion Function({
+  Value<String> id,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<String> diverId,
+  Value<String> kind,
+  Value<String> name,
+  Value<String?> notes,
+  Value<bool> isDefault,
+  Value<int> rowid,
+});
+
+final class $$EquipmentTableReferences
+    extends BaseReferences<_$AppDatabase, $EquipmentTable, EquipmentRow> {
+  $$EquipmentTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $DiversTable _diverIdTable(_$AppDatabase db) =>
+      db.divers.createAlias('equipment__diver_id__divers__id');
+
+  $$DiversTableProcessedTableManager get diverId {
+    final $_column = $_itemColumn<String>('diver_id')!;
+
+    final manager = $$DiversTableTableManager(
+      $_db,
+      $_db.divers,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_diverIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$DiveEquipmentTable, List<DiveEquipmentRow>>
+  _diveEquipmentRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.diveEquipment,
+    aliasName: 'equipment__id__dive_equipment__equipment_id',
+  );
+
+  $$DiveEquipmentTableProcessedTableManager get diveEquipmentRefs {
+    final manager = $$DiveEquipmentTableTableManager(
+      $_db,
+      $_db.diveEquipment,
+    ).filter((f) => f.equipmentId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_diveEquipmentRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$EquipmentTableFilterComposer
+    extends Composer<_$AppDatabase, $EquipmentTable> {
+  $$EquipmentTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDefault => $composableBuilder(
+    column: $table.isDefault,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$DiversTableFilterComposer get diverId {
+    final $$DiversTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.diverId,
+      referencedTable: $db.divers,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DiversTableFilterComposer(
+            $db: $db,
+            $table: $db.divers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> diveEquipmentRefs(
+    Expression<bool> Function($$DiveEquipmentTableFilterComposer f) f,
+  ) {
+    final $$DiveEquipmentTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.diveEquipment,
+      getReferencedColumn: (t) => t.equipmentId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DiveEquipmentTableFilterComposer(
+            $db: $db,
+            $table: $db.diveEquipment,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$EquipmentTableOrderingComposer
+    extends Composer<_$AppDatabase, $EquipmentTable> {
+  $$EquipmentTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDefault => $composableBuilder(
+    column: $table.isDefault,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$DiversTableOrderingComposer get diverId {
+    final $$DiversTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.diverId,
+      referencedTable: $db.divers,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DiversTableOrderingComposer(
+            $db: $db,
+            $table: $db.divers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$EquipmentTableAnnotationComposer
+    extends Composer<_$AppDatabase, $EquipmentTable> {
+  $$EquipmentTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDefault =>
+      $composableBuilder(column: $table.isDefault, builder: (column) => column);
+
+  $$DiversTableAnnotationComposer get diverId {
+    final $$DiversTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.diverId,
+      referencedTable: $db.divers,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DiversTableAnnotationComposer(
+            $db: $db,
+            $table: $db.divers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> diveEquipmentRefs<T extends Object>(
+    Expression<T> Function($$DiveEquipmentTableAnnotationComposer a) f,
+  ) {
+    final $$DiveEquipmentTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.diveEquipment,
+      getReferencedColumn: (t) => t.equipmentId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DiveEquipmentTableAnnotationComposer(
+            $db: $db,
+            $table: $db.diveEquipment,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$EquipmentTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $EquipmentTable,
+          EquipmentRow,
+          $$EquipmentTableFilterComposer,
+          $$EquipmentTableOrderingComposer,
+          $$EquipmentTableAnnotationComposer,
+          $$EquipmentTableCreateCompanionBuilder,
+          $$EquipmentTableUpdateCompanionBuilder,
+          (EquipmentRow, $$EquipmentTableReferences),
+          EquipmentRow,
+          PrefetchHooks Function({bool diverId, bool diveEquipmentRefs})
+        > {
+  $$EquipmentTableTableManager(_$AppDatabase db, $EquipmentTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$EquipmentTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$EquipmentTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$EquipmentTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> diverId = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<bool> isDefault = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => EquipmentCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                diverId: diverId,
+                kind: kind,
+                name: name,
+                notes: notes,
+                isDefault: isDefault,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required String diverId,
+                required String kind,
+                required String name,
+                Value<String?> notes = const Value.absent(),
+                Value<bool> isDefault = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => EquipmentCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                diverId: diverId,
+                kind: kind,
+                name: name,
+                notes: notes,
+                isDefault: isDefault,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$EquipmentTable, EquipmentRow>(table),
+                  $$EquipmentTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({diverId = false, diveEquipmentRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (diveEquipmentRefs) db.diveEquipment,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (diverId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.diverId,
+                            referencedTable: $$EquipmentTableReferences
+                                ._diverIdTable(db),
+                            referencedColumn: $$EquipmentTableReferences
+                                ._diverIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (diveEquipmentRefs)
+                        await $_getPrefetchedDataByColumns<
+                          EquipmentRow,
+                          $EquipmentTable,
+                          DiveEquipmentRow,
+                          $DiveEquipmentTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$EquipmentTableReferences
+                              ._diveEquipmentRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$EquipmentTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).diveEquipmentRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'equipment_id',
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$EquipmentTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $EquipmentTable,
+      EquipmentRow,
+      $$EquipmentTableFilterComposer,
+      $$EquipmentTableOrderingComposer,
+      $$EquipmentTableAnnotationComposer,
+      $$EquipmentTableCreateCompanionBuilder,
+      $$EquipmentTableUpdateCompanionBuilder,
+      (EquipmentRow, $$EquipmentTableReferences),
+      EquipmentRow,
+      PrefetchHooks Function({bool diverId, bool diveEquipmentRefs})
+    >;
+typedef $$DiveEquipmentTableCreateCompanionBuilder =
+    DiveEquipmentCompanion Function({
+      required String diveId,
+      required String equipmentId,
+      Value<int> rowid,
+    });
+typedef $$DiveEquipmentTableUpdateCompanionBuilder =
+    DiveEquipmentCompanion Function({
+      Value<String> diveId,
+      Value<String> equipmentId,
+      Value<int> rowid,
+    });
+
+final class $$DiveEquipmentTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $DiveEquipmentTable, DiveEquipmentRow> {
+  $$DiveEquipmentTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $DivesTable _diveIdTable(_$AppDatabase db) =>
+      db.dives.createAlias('dive_equipment__dive_id__dives__id');
+
+  $$DivesTableProcessedTableManager get diveId {
+    final $_column = $_itemColumn<String>('dive_id')!;
+
+    final manager = $$DivesTableTableManager(
+      $_db,
+      $_db.dives,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_diveIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $EquipmentTable _equipmentIdTable(_$AppDatabase db) =>
+      db.equipment.createAlias('dive_equipment__equipment_id__equipment__id');
+
+  $$EquipmentTableProcessedTableManager get equipmentId {
+    final $_column = $_itemColumn<String>('equipment_id')!;
+
+    final manager = $$EquipmentTableTableManager(
+      $_db,
+      $_db.equipment,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_equipmentIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$DiveEquipmentTableFilterComposer
+    extends Composer<_$AppDatabase, $DiveEquipmentTable> {
+  $$DiveEquipmentTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$DivesTableFilterComposer get diveId {
+    final $$DivesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.diveId,
+      referencedTable: $db.dives,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DivesTableFilterComposer(
+            $db: $db,
+            $table: $db.dives,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$EquipmentTableFilterComposer get equipmentId {
+    final $$EquipmentTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.equipmentId,
+      referencedTable: $db.equipment,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EquipmentTableFilterComposer(
+            $db: $db,
+            $table: $db.equipment,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DiveEquipmentTableOrderingComposer
+    extends Composer<_$AppDatabase, $DiveEquipmentTable> {
+  $$DiveEquipmentTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$DivesTableOrderingComposer get diveId {
+    final $$DivesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.diveId,
+      referencedTable: $db.dives,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DivesTableOrderingComposer(
+            $db: $db,
+            $table: $db.dives,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$EquipmentTableOrderingComposer get equipmentId {
+    final $$EquipmentTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.equipmentId,
+      referencedTable: $db.equipment,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EquipmentTableOrderingComposer(
+            $db: $db,
+            $table: $db.equipment,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DiveEquipmentTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DiveEquipmentTable> {
+  $$DiveEquipmentTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$DivesTableAnnotationComposer get diveId {
+    final $$DivesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.diveId,
+      referencedTable: $db.dives,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DivesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.dives,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$EquipmentTableAnnotationComposer get equipmentId {
+    final $$EquipmentTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.equipmentId,
+      referencedTable: $db.equipment,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$EquipmentTableAnnotationComposer(
+            $db: $db,
+            $table: $db.equipment,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DiveEquipmentTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DiveEquipmentTable,
+          DiveEquipmentRow,
+          $$DiveEquipmentTableFilterComposer,
+          $$DiveEquipmentTableOrderingComposer,
+          $$DiveEquipmentTableAnnotationComposer,
+          $$DiveEquipmentTableCreateCompanionBuilder,
+          $$DiveEquipmentTableUpdateCompanionBuilder,
+          (DiveEquipmentRow, $$DiveEquipmentTableReferences),
+          DiveEquipmentRow,
+          PrefetchHooks Function({bool diveId, bool equipmentId})
+        > {
+  $$DiveEquipmentTableTableManager(_$AppDatabase db, $DiveEquipmentTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DiveEquipmentTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DiveEquipmentTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DiveEquipmentTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> diveId = const Value.absent(),
+                Value<String> equipmentId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DiveEquipmentCompanion(
+                diveId: diveId,
+                equipmentId: equipmentId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String diveId,
+                required String equipmentId,
+                Value<int> rowid = const Value.absent(),
+              }) => DiveEquipmentCompanion.insert(
+                diveId: diveId,
+                equipmentId: equipmentId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$DiveEquipmentTable, DiveEquipmentRow>(table),
+                  $$DiveEquipmentTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({diveId = false, equipmentId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (diveId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.diveId,
+                        referencedTable: $$DiveEquipmentTableReferences
+                            ._diveIdTable(db),
+                        referencedColumn: $$DiveEquipmentTableReferences
+                            ._diveIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+                    if (equipmentId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.equipmentId,
+                        referencedTable: $$DiveEquipmentTableReferences
+                            ._equipmentIdTable(db),
+                        referencedColumn: $$DiveEquipmentTableReferences
+                            ._equipmentIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$DiveEquipmentTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DiveEquipmentTable,
+      DiveEquipmentRow,
+      $$DiveEquipmentTableFilterComposer,
+      $$DiveEquipmentTableOrderingComposer,
+      $$DiveEquipmentTableAnnotationComposer,
+      $$DiveEquipmentTableCreateCompanionBuilder,
+      $$DiveEquipmentTableUpdateCompanionBuilder,
+      (DiveEquipmentRow, $$DiveEquipmentTableReferences),
+      DiveEquipmentRow,
+      PrefetchHooks Function({bool diveId, bool equipmentId})
+    >;
 typedef $$CatalogueSitesTableCreateCompanionBuilder =
     CatalogueSitesCompanion Function({
       required String id,
@@ -8555,6 +10433,10 @@ class $AppDatabaseManager {
       $$DiveTanksTableTableManager(_db, _db.diveTanks);
   $$DiveEventsTableTableManager get diveEvents =>
       $$DiveEventsTableTableManager(_db, _db.diveEvents);
+  $$EquipmentTableTableManager get equipment =>
+      $$EquipmentTableTableManager(_db, _db.equipment);
+  $$DiveEquipmentTableTableManager get diveEquipment =>
+      $$DiveEquipmentTableTableManager(_db, _db.diveEquipment);
   $$CatalogueSitesTableTableManager get catalogueSites =>
       $$CatalogueSitesTableTableManager(_db, _db.catalogueSites);
   $$AppMetaTableTableManager get appMeta =>

@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
 
-// Schema v1 (ADR 0004, ADR 0006). Values in SI units.
+// Schema v2 (ADR 0004, ADR 0006, ADR 0007). Values in SI units.
 // Logbook tables use UUID text keys and soft delete; child rows of a dive
 // (samples, tanks, pressures) are keyed by the dive and replaced with it.
 // Row classes end in `Row` so they never clash with the domain model.
@@ -61,8 +61,37 @@ class Dives extends Table with SyncColumns {
   TextColumn get notes => text().nullable()();
   IntColumn get rating => integer().nullable()();
 
+  /// Lead in kg (schema v2, ADR 0007).
+  RealColumn get weightKg => real().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
+}
+
+/// A piece of the diver's equipment (schema v2, ADR 0007).
+@DataClassName('EquipmentRow')
+class Equipment extends Table with SyncColumns {
+  TextColumn get diverId => text().references(Divers, #id)();
+
+  /// `EquipmentKind.name`, e.g. `bcd`.
+  TextColumn get kind => text()();
+  TextColumn get name => text()();
+  TextColumn get notes => text().nullable()();
+  BoolColumn get isDefault => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// Equipment used on a dive; child rows of the dive like its samples.
+@DataClassName('DiveEquipmentRow')
+class DiveEquipment extends Table {
+  TextColumn get diveId =>
+      text().references(Dives, #id, onDelete: KeyAction.cascade)();
+  TextColumn get equipmentId => text().references(Equipment, #id)();
+
+  @override
+  Set<Column> get primaryKey => {diveId, equipmentId};
 }
 
 @DataClassName('DiveSampleRow')
