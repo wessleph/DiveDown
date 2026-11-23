@@ -685,3 +685,18 @@ Abgenommen am 2026-11-23.
 - Testkorrektur: `last_used_test.dart` lädt die deutschen Datumsdaten (`initializeDateFormatting('de')`), wie es die App beim Start tut.
 - Gesamt: `flutter test` 440/440, `flutter analyze` ohne Befund, Debug-APK baut.
 - **Auf dem S25 Ultra geprüft, 2026-11-23:** „Tauchcomputer · Per Bluetooth übertragen · Zuletzt: EON Core, vor 10 Tagen“ (neuester EON-Core-Tauchgang vom 13.11.).
+
+## T29: Neues App-Icon „Brille mit Clownfisch“ (ui-spec §1, Wunsch vom 2026-11-23)
+
+Gewählt am 2026-11-23 aus den Entwürfen A–D: **Variante D**, eine Einglas-Maske (Rahmen `#13303A`, Glas und Band `#0B7A80`) auf hellem Grund `#F2F8F8`; im Glas spiegelt sich ein orangefarbener Clownfisch (`#F26B1D`, zwei weiße, dunkel umrandete Streifen), dazu ein heller Lichtstreifen und drei Luftblasen in Petrol über der Maske. Ersetzt das Motiv „Tiefenkurve“ von T24; Hintergrund, Größen und RGB ohne Alpha (T24.2–T24.4) bleiben. Die Korallen-Blase entfällt.
+
+| Nr. | Ausgangslage | Aktion | Erwartet | Status |
+|---|---|---|---|---|
+| T29.1 | Vorlagen in `assets/icon/` | gelesen | alle drei SVGs mit Rahmen `#13303A` und Fisch `#F26B1D`, ohne die alte Kurve | ✅ 2026-11-23: rot, noch die Tiefenkurve |
+| T29.2 | Android 8+ | `drawable/ic_launcher_foreground.xml`, `…_monochrome.xml` | Vordergrund-Vektor mit Rahmen, Glas, Fisch und Weiß; einfarbige Ebene als Silhouette mit ausgespartem Glas (`evenOdd`), ohne alte Kurve | ✅ 2026-11-23: rot, noch die Tiefenkurve |
+| T29.3 | iOS 1024 px | Pixel lesen | Rahmen (243, 576) navy, Glas (384, 512) petrol, Fisch (538, 531) orange, Streifen (496, 531) weiß, Band (128, 550) petrol, je ±24 pro Kanal | ✅ 2026-11-23: rot, dort ist noch Hintergrund |
+| T29.4 | kleine Größen | Pixel lesen | xxxhdpi 192 px: Fisch (101, 100) orange, Rahmen (46, 108) navy; iOS 58 px: Fisch (30, 30) orange | ✅ 2026-11-23: rot, Pixel zeigen die alte Kurve bzw. Hintergrund |
+
+Abgenommen am 2026-11-23.
+
+Test: `test/app/app_icon_test.dart` (Gruppe T29; die Prüfung auf die Korallen-Blase in T24.1/T24.2 ist gestrichen). Weiter keine neue Abhängigkeit: `tool/render_app_icons.py` zeichnet die PNGs. Auf Android liegt das Motiv auf ca. 76 % verkleinert in der Schutzzone, damit Band und Blasen nicht abgeschnitten werden.
