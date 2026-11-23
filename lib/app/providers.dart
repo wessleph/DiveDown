@@ -159,7 +159,7 @@ final shareFileProvider =
         );
         await SharePlus.instance.share(
           ShareParams(
-            files: [XFile(file.path, mimeType: 'application/zip')],
+            files: [XFile(file.path, mimeType: shareMimeType(file.path))],
             fileNameOverrides: [p.basename(file.path)],
           ),
         );

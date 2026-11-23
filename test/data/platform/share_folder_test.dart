@@ -50,4 +50,13 @@ void main() {
     await clearShareFolder(cache);
     expect(file.existsSync(), isFalse);
   });
+
+  test('T10.15 the media type follows the file', () {
+    expect(shareMimeType('DiveDown-Diagnose-2026-11-23.txt'), 'text/plain');
+    expect(
+      shareMimeType('DiveDown-Sicherung-2026-11-23.divedown'),
+      'application/zip',
+    );
+    expect(shareMimeType('x.bin'), 'application/octet-stream');
+  });
 }

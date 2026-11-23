@@ -29,3 +29,11 @@ Future<void> clearShareFolder(Directory cache) async {
   final dir = Directory(p.join(cache.path, shareFolderName));
   if (dir.existsSync()) await dir.delete(recursive: true);
 }
+
+/// Media type for the share dialog (T10.15): text for the diagnostic log,
+/// ZIP for a backup, otherwise generic.
+String shareMimeType(String name) => switch (p.extension(name).toLowerCase()) {
+  '.txt' => 'text/plain',
+  '.divedown' => 'application/zip',
+  _ => 'application/octet-stream',
+};

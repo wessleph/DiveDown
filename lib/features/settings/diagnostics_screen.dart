@@ -77,20 +77,24 @@ class _DiagnosticsScreenState extends ConsumerState<DiagnosticsScreen> {
                           style: TextStyle(color: colors.onSurfaceMuted),
                         )
                       // Own scroll area, so „Teilen“ stays in reach.
-                      : SizedBox(
-                          height: 320,
+                      // At most 320 dp, smaller with few lines; lines wrap.
+                      : ConstrainedBox(
+                          constraints: const BoxConstraints(maxHeight: 320),
                           child: SingleChildScrollView(
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
+                            child: SizedBox(
+                              width: double.infinity,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   for (final line in shown)
-                                    Text(
-                                      line,
-                                      style: const TextStyle(
-                                        fontFamily: 'monospace',
-                                        fontSize: 11.5,
+                                    Padding(
+                                      padding: const EdgeInsets.only(bottom: 4),
+                                      child: Text(
+                                        line,
+                                        style: const TextStyle(
+                                          fontFamily: 'monospace',
+                                          fontSize: 11.5,
+                                        ),
                                       ),
                                     ),
                                   if (more > 0)
