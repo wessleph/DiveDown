@@ -1,7 +1,19 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+// Release APKs are signed with the own upload key, on the PC only (T33,
+// security.md S and A3). android/key.properties (ignored by git) holds the
+// path of the keystore outside the repo and its passwords.
+val keystorePropertiesFile = rootProject.file("key.properties")
+val keystoreProperties = Properties().apply {
+    if (keystorePropertiesFile.exists()) {
+        keystorePropertiesFile.inputStream().use { load(it) }
+    }
 }
 
 android {
@@ -30,11 +42,39 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            if (keystorePropertiesFile.exists()) {
+                storeFile = file(keystoreProperties["storeFile"] as String)
+                storePassword = keystoreProperties["storePassword"] as String
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
+        }
+    }
+}
+
+// Without the key only packaging a release fails, with a pointer to the
+// guide. Configuring still works, so CI can check the release manifest
+// (processReleaseMainManifest) and build debug APKs without any key.
+tasks.configureEach {
+    if (name == "validateSigningRelease" || name == "packageRelease" ||
+        name == "bundleRelease"
+    ) {
+        doFirst {
+            if (!keystorePropertiesFile.exists()) {
+                throw GradleException(
+                    "android/key.properties fehlt: Release-APKs werden mit dem " +
+                        "eigenen Schlüssel signiert. Siehe " +
+                        "docs/entwickler/android-release-einrichtung.md",
+                )
+            }
         }
     }
 }

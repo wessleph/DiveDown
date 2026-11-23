@@ -763,8 +763,14 @@ Die Release-APK wird bisher mit dem Debug-Schlüssel signiert. Neu: eigener Uplo
 | T33.2 | dito | gelesen | Signatur `release` liest `storeFile`, `storePassword`, `keyAlias`, `keyPassword` aus `rootProject.file("key.properties")` | ✅ 2026-11-23: rot, fehlt |
 | T33.3 | ohne `key.properties` | gelesen | `GradleException` mit Verweis auf `docs/entwickler/android-release-einrichtung.md`, ausgelöst in `doFirst` (beim Packen, nicht beim Konfigurieren); die Anleitung existiert | ✅ 2026-11-23: rot, fehlt |
 | T33.4 | `android/.gitignore` | gelesen, `git check-ignore` | `key.properties`, `**/*.jks`, `**/*.keystore` ausgeschlossen | ✅ 2026-11-23: schon grün (Absicherung) |
-| T33.5 | von Hand auf dem PC | `flutter build apk --release` ohne bzw. mit `key.properties`; `gradlew :app:processReleaseMainManifest` | ohne: Abbruch mit Hinweis; mit: `apksigner verify --print-certs` zeigt das eigene Zertifikat; Manifest-Prüfung läuft ohne Schlüssel | offen (nach der Umsetzung) |
+| T33.5 | von Hand auf dem PC | `flutter build apk --release` ohne bzw. mit `key.properties`; `gradlew :app:processReleaseMainManifest` | ohne: Abbruch mit Hinweis; mit: `apksigner verify --print-certs` zeigt das eigene Zertifikat; Manifest-Prüfung läuft ohne Schlüssel | ✅ 2026-11-23: ohne Schlüssel Abbruch in `:app:packageRelease` mit Hinweis, Manifest-Prüfung ok; mit Wegwerf-Schlüssel (danach gelöscht) signiert, `key.properties` von Git ignoriert |
 
 Abgenommen am 2026-11-23.
 
 Test: `test/tool/android_signing_test.dart`. Nach dem Anlegen des Schlüssels kommt der SHA-256-Fingerabdruck des Zertifikats in die README (security.md, „Keine Prüfanleitung für die APK“). **Wichtig:** Eine mit dem Debug-Schlüssel installierte App lässt sich nicht durch die Release-APK ersetzen; vorher „Logbuch sichern“, App deinstallieren, Release-APK installieren, „Logbuch wiederherstellen“.
+
+**Umgesetzt (Phase 50, 2026-11-23), T33:**
+- [x] `build.gradle.kts`: Signatur `release` aus `android/key.properties`, Build-Typ `release` nutzt sie; ohne Datei bricht nur das Packen ab (`doFirst` an `validateSigningRelease`, `packageRelease`, `bundleRelease`) → T33.1–T33.3 grün, T33.4 weiter grün.
+- [x] Anleitung `docs/entwickler/android-release-einrichtung.md` (PKCS12-Keystore außerhalb des Repos, Fingerabdruck, Umstieg von der Debug-App über Sichern/Wiederherstellen).
+- [x] T33.5 von Hand geprüft (siehe Tabelle).
+- Offen beim Nutzer: Schlüssel erzeugen, Fingerabdruck melden; danach kommt er in die README.
