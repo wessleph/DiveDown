@@ -644,3 +644,15 @@ Abgenommen am 2026-11-23.
 - [x] `CompareSheet` (`features/import/compare_sheet.dart`): Tabelle „Neu“/„Im Logbuch“ mit fetten Abweichungen und „–“ für fehlende Werte, beide Profile auf gemeinsamen Achsen (ohne Messpunkte die geschätzte Form); die Spaltenköpfe mit Farbmuster sind die Legende (eine eigene Legende hätte „Neu“ doppelt gezeigt); „Importieren“/„Nicht importieren“ → T26.2, T26.3 grün.
 - Gesamt: `flutter test` 427/427, `flutter analyze` ohne Befund, Debug-APK baut.
 - **Auf dem S25 Ultra geprüft, 2026-11-23:** Mini-Profil in der FIT-Vorschau; Abstand rechts ergänzt, die Kurve reichte bis an den Rand. Mit Zustimmung des Nutzers #74 (FIT-Testdatei) gelöscht und einen ähnlichen Tauchgang von Hand eingetragen (26.03., 11:03, 58,7 m, 74 min): Vorschau zeigt „Ähnlicher Tauchgang vorhanden (26.03., 58,7 m, 74 min)“ und „Vergleichen“; das Blatt zeigt Datei gegen Von Hand mit fetten Abweichungen und beide Profile; „Importieren“ wählt aus, „Nicht importieren“ wählt ab. Danach FIT-Tauchgang mit Elphinstone als #75 importiert und den Testtauchgang wieder gelöscht.
+
+## T27: Profil im Vollbild mit Zoom (ui-spec §6, §8, Feinschliff 2026-11-23)
+
+| Nr. | Ausgangslage | Aktion | Erwartet | Status |
+|---|---|---|---|---|
+| T27.1 | Tauchgang 0 … 2800 s | `TimeWindow.full`, `zoom(2, 0,5)`, `zoom(4, 0)`, `zoom(1000, …)`, `zoom(0,1, …)`, `pan(±…)` | ganzer Tauchgang; Zoom hält den Moment unter den Fingern fest (700 … 2100 s); nie schmaler als 2 min, nie breiter als der Tauchgang, nie außerhalb; Verschieben um einen Teil der sichtbaren Länge, stoppt an den Rändern | ✅ 2026-11-23: rot wegen `UnimplementedError` |
+| T27.2 | Detail eines Tauchgangs mit Messpunkten | „Vollbild“, dann „Schließen“ | eigene Seite ohne Tab-Leiste mit Diagramm, Werte-Feld und „#42 …“; Querformat und ausgeblendete Systemleisten angefordert; nach „Schließen“ zurück im Detail, Ausrichtung frei und Systemleisten wieder da | ✅ 2026-11-23: rot, „Vollbild“ fehlt |
+| T27.3 | Vollbild | zwei Finger auseinander, dann Doppeltipp | Zeitachse gezoomt, Ausschnitt „m:ss – m:ss“ angezeigt (innerhalb des Tauchgangs); Doppeltipp zeigt wieder alles, Ausschnitt verschwindet | ✅ 2026-11-23: rot, „Vollbild“ fehlt |
+| T27.4 | Vollbild gezoomt | Tippen am linken Rand des Diagramms | Werte-Feld zeigt den Moment am Anfang des Ausschnitts (±1 min), nicht 0:00 | ✅ 2026-11-23: rot, „Vollbild“ fehlt |
+| T27.5 | Tauchgang ohne Messpunkte (geschätztes Profil) | Detail | kein „Vollbild“ | grün von Anfang an (es gibt noch keinen Knopf), sichert ab, dass er dort nicht auftaucht |
+
+Tests: `test/features/logbook/time_window_test.dart` (T27.1), `profile_fullscreen_test.dart` (T27.2–T27.5). Stub: `TimeWindow` (`features/logbook/time_window.dart`).
