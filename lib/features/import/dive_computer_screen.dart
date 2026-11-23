@@ -13,6 +13,7 @@ import '../../domain/import/dive_computer_import.dart';
 import '../../domain/import/dive_computer_source.dart';
 import '../../domain/import/import_service.dart';
 import '../../l10n/app_localizations.dart';
+import '../settings/diagnostics_screen.dart';
 import 'import_preview.dart';
 import 'import_screen.dart';
 
@@ -557,6 +558,11 @@ class _DiveComputerScreenState extends ConsumerState<DiveComputerScreen> {
               style: theme.textTheme.bodySmall,
             ),
           ],
+          const SizedBox(height: 8),
+          TextButton(
+            onPressed: () => context.push(DiagnosticsScreen.path),
+            child: Text(l10n.sendLogs),
+          ),
         ],
       ),
     };

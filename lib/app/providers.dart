@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:clock/clock.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart' show DateFormat;
@@ -12,6 +13,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../data/backup/logbook_backup.dart';
+import '../data/diagnostics/file_diagnostic_log.dart';
 import '../data/import/divecomputer/plugin_dive_computer_source.dart';
 import '../data/import/fit/fit_dive_parser.dart';
 
@@ -223,14 +225,40 @@ class AppBackupActions implements BackupActions {
 }
 
 /// The diagnostic log of the app (design.md §9, T10).
+/// `main` replaces it with the file log in the app cache; without that
+/// (some tests) nothing is kept.
 final diagnosticLogProvider = Provider<DiagnosticLog>(
-  (ref) => throw UnimplementedError('diagnosticLogProvider'),
+  (ref) => const DiscardingDiagnosticLog(),
 );
 
 /// Header of the exported log: versions, OS and device model (T10.10).
-final diagnosticHeaderProvider = FutureProvider<DiagnosticHeader>(
-  (ref) => throw UnimplementedError('diagnosticHeaderProvider'),
-);
+/// The device name the user gave (e.g. „Annas iPhone“) is never read.
+final diagnosticHeaderProvider = FutureProvider<DiagnosticHeader>((ref) async {
+  final app = await ref.watch(appInfoProvider.future);
+  final device = DeviceInfoPlugin();
+  var os = Platform.operatingSystem;
+  var model = '–';
+  try {
+    if (Platform.isAndroid) {
+      final a = await device.androidInfo;
+      os = 'Android ${a.version.release} (SDK ${a.version.sdkInt})';
+      model = '${a.manufacturer} ${a.model}';
+    } else if (Platform.isIOS) {
+      final i = await device.iosInfo;
+      os = 'iOS ${i.systemVersion}';
+      model = i.modelName;
+    }
+  } on Exception {
+    // The header still has the app versions.
+  }
+  return DiagnosticHeader(
+    appVersion: app.version,
+    build: app.build,
+    os: os,
+    model: model,
+    libdivecomputer: app.libdivecomputer,
+  );
+});
 
 /// Renumbering and shifting of dive numbers (ui-spec §5.11).
 final diveNumberingProvider = Provider<DiveNumbering>(
@@ -318,7 +346,13 @@ final diveComputerRepositoryProvider = Provider<DiveComputerRepository>(
 final diveComputerServiceProvider = Provider<dc.DiveComputerService>((ref) {
   final service = dc.DiveComputerService();
   dc.DiveComputerFlutterApi.setUp(service);
+  // BLE details for the diagnostic log, filtered there (design.md §9).
+  final logs = connectPluginLogs(
+    service.logEvents,
+    ref.read(diagnosticLogProvider),
+  );
   ref.onDispose(() {
+    logs.cancel();
     dc.DiveComputerFlutterApi.setUp(null);
     service.dispose();
   });

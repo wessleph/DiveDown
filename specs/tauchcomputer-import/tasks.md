@@ -561,3 +561,13 @@ Neue Abhängigkeiten (Lizenzen am 2026-11-22 an den eingesetzten Versionen gepr�
 - Gesamt: `flutter test` 380/380, `flutter analyze` ohne Befund, Debug-APK baut.
 - **Am S25 Ultra, 2026-11-22:** Abschnitt DATEN, Dialog „Logbuch sichern“ mit Hinweis und Warnung, Teilen-Dialog zeigt „DiveDown-Sicherung-2026-11-22.divedown“ (ohne Ziel geschlossen). Dabei T11.16 gefunden und behoben. `flutter test` 383/383.
 - **Vom Nutzer am S25 Ultra geprüft, 2026-11-23:** Sicherung erstellt und geteilt, mit derselben Datei wiederhergestellt; die App startete neu und zeigte das vollständige Logbuch.
+
+**Umgesetzt (Phase 50, 2026-11-23), T10, T14.1, T14.2:**
+- [x] `sanitizeLogEntry`/`sanitizeLogText` (Positivliste der Kategorien, MAC, Seriennummer, Koordinaten auch als Paar, E-Mail, Benutzerpfade; HEXDUMP und fremde BLE-Geräte nur im Release verworfen), `FileDiagnosticLog` (eine Zeile pro Eintrag, Schreiben nacheinander, über 5 MB auf drei Viertel gekürzt, `prune` nach 7 Tagen, Export mit Kopf), `connectPluginLogs`, `recordError` (Stack auf 20 Zeilen, Pfade gefiltert) → T10.1–T10.12 grün.
+- [x] App: Log in `<cache>/logs/diagnostic.log`, `main` öffnet es, kürzt es und hängt `FlutterError.onError` und `PlatformDispatcher.onError` an; `AppStartupGate` reicht es an `diagnosticLogProvider`; das Plugin schreibt über `connectPluginLogs` hinein; Sichern und Wiederherstellen schreiben Ergebnisse und Fehler. Kopf aus `package_info_plus`, `device_info_plus` (Hersteller und Modell, unter iOS `modelName`, nie der vom Nutzer vergebene Gerätename) und libdivecomputer.
+- [x] Oberfläche: `DiagnosticsScreen` (`/diagnostics` über dem Tab-Gerüst) mit Info, Vorschau in eigenem Scrollbereich, „… N weitere Zeilen“, „Teilen“ (Datei `DiveDown-Diagnose-JJJJ-MM-TT.txt`), „Am besten per Mail.“; Einstellungen → HILFE; „Logs an Entwickler senden“ auf der Fehlerkarte des Tauchcomputer-Imports und bei „Wiederherstellen fehlgeschlagen“ → T10.13, T10.14 grün.
+- [x] Plugin: `NativeLogger` schreibt nur in debuggable Builds nach logcat (Flag aus `ApplicationInfo` beim Anhängen, JUnit `NativeLoggerTest`) → T14.2 grün. libdivecomputer im Release (`NDEBUG`: Android RelWithDebInfo/Release, iOS Release/Profile über die Podspec) nur ab `WARNING` → T14.1 (ohne eigenen Test).
+- Testaufbau korrigiert, Aussage unverändert: T9.20 scrollt mit `scrollUntilVisible` zu „Open-Source-Lizenzen“ (liegt jetzt unter DATEN und HILFE).
+- Gesamt: `flutter test` 401/401, Plugin-JUnit 150/150, `flutter analyze` ohne Befund, Debug-APK baut.
+- Noch offen: T14.3 (Zugangscodes in den sicheren Speicher), T14.4 (Manifest-Prüfung in der CI); die Swift-Seite des Plugins loggt weiter über `print`/`os_log` (nur in Xcode-Konsole sichtbar, nicht für andere Apps).
+- Noch nicht auf dem Handy geprüft.

@@ -26,8 +26,9 @@ void main() {
     await seedActiveDiver(db);
     await pumpTestApp(tester, db: db, location: '/settings');
 
-    // Since T11 the entry sits below the section DATEN.
-    await tester.ensureVisible(find.text('Open-Source-Lizenzen'));
+    // Since T11/T10 the entry sits below DATEN and HILFE, outside the
+    // first screen; the list builds it only when scrolled there.
+    await tester.scrollUntilVisible(find.text('Open-Source-Lizenzen'), 200);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Open-Source-Lizenzen'));
     await tester.pumpAndSettle();

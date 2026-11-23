@@ -2,11 +2,15 @@
 
 package com.submersion.libdivecomputer
 
+import android.content.pm.ApplicationInfo
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 
 class LibdivecomputerPlugin : FlutterPlugin {
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         val context = binding.applicationContext
+        // DiveDown (security.md A4, T14.2): logcat only in debuggable builds.
+        NativeLogger.debuggable =
+            (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
         val messenger = binding.binaryMessenger
         val api = DiveComputerHostApiImpl(context, messenger)
         DiveComputerHostApi.setUp(messenger, api)

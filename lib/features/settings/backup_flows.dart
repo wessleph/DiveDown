@@ -1,13 +1,17 @@
 import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/providers.dart';
 import '../../app/theme.dart';
 import '../../data/backup/logbook_backup.dart';
+import '../../data/diagnostics/log_sanitizer.dart';
+import '../../domain/diagnostics/diagnostic_log.dart';
 import '../../domain/import/file_import.dart';
 import '../../l10n/app_localizations.dart';
 import '../logbook/dive_texts.dart';
+import 'diagnostics_screen.dart';
 
 /// „Logbuch sichern“ (ui-spec §5.12): hint and warning, then the share
 /// dialog with the backup file.
@@ -62,7 +66,10 @@ Future<void> showCreateBackup(BuildContext context, WidgetRef ref) async {
     await ref.read(appSettingsProvider).setLastBackupAt(clock.now().toUtc());
     ref.invalidate(backupReminderProvider);
     messenger.showSnackBar(SnackBar(content: Text(l10n.backupCreated)));
-  } on Exception {
+  } on Exception catch (e) {
+    await ref
+        .read(diagnosticLogProvider)
+        .log(backupLogCategory, LogLevel.error, 'backup failed: $e');
     messenger.showSnackBar(SnackBar(content: Text(l10n.backupFailed)));
   }
 }
@@ -75,18 +82,28 @@ Future<void> runRestore(BuildContext context, WidgetRef ref) async {
   if (picked == null || !context.mounted) return;
   final actions = ref.read(backupActionsProvider);
 
-  Future<void> tell(String text) => showDialog<void>(
-    context: context,
-    builder: (context) => AlertDialog(
-      content: Text(text),
-      actions: [
-        FilledButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(l10n.ok),
-        ),
-      ],
-    ),
-  );
+  Future<void> tell(String text, {bool offerLogs = false}) async {
+    final logs = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: Text(text),
+        actions: [
+          if (offerLogs)
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(l10n.sendLogs),
+            ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.ok),
+          ),
+        ],
+      ),
+    );
+    if (logs == true && context.mounted) {
+      await context.push(DiagnosticsScreen.path);
+    }
+  }
 
   String problemText(BackupProblem problem) => switch (problem) {
     BackupProblem.tooLarge => l10n.restoreTooLarge,
@@ -148,6 +165,9 @@ Future<void> runRestore(BuildContext context, WidgetRef ref) async {
   if (ok != true || !context.mounted) return;
 
   final result = await actions.restore(file.bytes);
+  await ref
+      .read(diagnosticLogProvider)
+      .log(backupLogCategory, LogLevel.info, 'restore: ${result.runtimeType}');
   if (!context.mounted) return;
   switch (result) {
     case Restored():
@@ -157,7 +177,11 @@ Future<void> runRestore(BuildContext context, WidgetRef ref) async {
       restart();
     case RestoreRejected(:final problem):
       await tell(problemText(problem));
-    case RestoreFailed():
-      await tell(l10n.restoreFailed);
+    case RestoreFailed(:final error):
+      await ref
+          .read(diagnosticLogProvider)
+          .log(backupLogCategory, LogLevel.error, 'restore failed: $error');
+      if (!context.mounted) return;
+      await tell(l10n.restoreFailed, offerLogs: true);
   }
 }

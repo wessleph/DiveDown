@@ -9,6 +9,7 @@ import '../features/logbook/dive_detail_screen.dart';
 import '../features/logbook/logbook_screen.dart';
 import '../features/logbook/manual_dive_screen.dart';
 import '../features/onboarding/welcome_screen.dart';
+import '../features/settings/diagnostics_screen.dart';
 import '../features/settings/settings_screen.dart';
 import 'home_shell.dart';
 import 'providers.dart';
@@ -39,6 +40,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: WelcomeScreen.path,
         builder: (context, state) => const WelcomeScreen(),
+      ),
+      // Above the tab shell, reachable from settings and error states.
+      GoRoute(
+        path: DiagnosticsScreen.path,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const DiagnosticsScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => HomeShell(shell: shell),

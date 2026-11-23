@@ -31,22 +31,22 @@ object NativeLogger {
     }
 
     fun d(tag: String, category: String, message: String) {
-        logcat(Log.DEBUG, tag, message)
+        if (debuggable) logcat(Log.DEBUG, tag, message)
         sendToFlutter(category, "DEBUG", message)
     }
 
     fun i(tag: String, category: String, message: String) {
-        logcat(Log.INFO, tag, message)
+        if (debuggable) logcat(Log.INFO, tag, message)
         sendToFlutter(category, "INFO", message)
     }
 
     fun w(tag: String, category: String, message: String) {
-        logcat(Log.WARN, tag, message)
+        if (debuggable) logcat(Log.WARN, tag, message)
         sendToFlutter(category, "WARN", message)
     }
 
     fun e(tag: String, category: String, message: String) {
-        logcat(Log.ERROR, tag, message)
+        if (debuggable) logcat(Log.ERROR, tag, message)
         sendToFlutter(category, "ERROR", message)
     }
 

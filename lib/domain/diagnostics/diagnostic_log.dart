@@ -60,3 +60,18 @@ abstract interface class DiagnosticLog {
   /// Header and lines as one text for the share dialog.
   Future<String> export(DiagnosticHeader header);
 }
+
+/// Keeps nothing; used where no log file is set up.
+class DiscardingDiagnosticLog implements DiagnosticLog {
+  const DiscardingDiagnosticLog();
+
+  @override
+  Future<void> log(String category, LogLevel level, String message) async {}
+
+  @override
+  Future<List<String>> lines() async => const [];
+
+  @override
+  Future<String> export(DiagnosticHeader header) async =>
+      'DiveDown ${header.appVersion} (Build ${header.build})';
+}

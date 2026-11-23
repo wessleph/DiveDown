@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/local/database.dart';
+import '../domain/diagnostics/diagnostic_log.dart';
 import '../l10n/app_localizations.dart';
 import 'app.dart';
 import 'providers.dart';
@@ -10,10 +11,17 @@ import 'theme.dart';
 /// Opens the database before the app starts. While opening it shows
 /// nothing, on failure an error card with „Erneut versuchen“ (ui-spec §4).
 class AppStartupGate extends StatefulWidget {
-  const AppStartupGate({super.key, required this.openDatabase});
+  const AppStartupGate({
+    super.key,
+    required this.openDatabase,
+    this.diagnosticLog,
+  });
 
   /// Opens the database and loads the catalogue; may throw.
   final Future<AppDatabase> Function() openDatabase;
+
+  /// The app's diagnostic log (T10); null keeps nothing.
+  final DiagnosticLog? diagnosticLog;
 
   @override
   State<AppStartupGate> createState() => _AppStartupGateState();
@@ -41,6 +49,8 @@ class _AppStartupGateState extends State<AppStartupGate> {
             overrides: [
               appDatabaseProvider.overrideWithValue(db),
               restartAppProvider.overrideWithValue(_restart),
+              if (widget.diagnosticLog case final log?)
+                diagnosticLogProvider.overrideWithValue(log),
             ],
             child: const DiveDownApp(),
           );

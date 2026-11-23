@@ -918,7 +918,15 @@ libdc_download_session_t *libdc_download_session_new(void) {
     // Route libdivecomputer's internal diagnostic messages through the
     // registered log callback if one has been set, and capture the last
     // error-level message for failure reporting either way.
+    // DiveDown (security.md A4, T14.1): release builds stop at warnings, so
+    // protocol hexdumps (dive data, serials, sometimes GPS) never reach
+    // the log. NDEBUG: Android RelWithDebInfo/Release, iOS Release/Profile
+    // (podspec). Errors still arrive for failure reporting.
+#ifdef NDEBUG
+    dc_context_set_loglevel(session->context, DC_LOGLEVEL_WARNING);
+#else
     dc_context_set_loglevel(session->context, DC_LOGLEVEL_ALL);
+#endif
     dc_context_set_logfunc(session->context, libdc_logfunc_wrapper, session);
 
     return session;

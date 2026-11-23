@@ -31,6 +31,18 @@
   "settingsSectionAppearance": "DARSTELLUNG",
   "settingsSectionAbout": "ÜBER DIVEDOWN",
   "settingsSectionData": "DATEN",
+  "settingsSectionHelp": "HILFE",
+  "diagnosticsTitle": "Diagnose-Logs teilen",
+  "diagnosticsInfo": "Hilf bei der Fehlersuche: Schicke das Protokoll an den Entwickler. Es enthält keine Orte, Namen oder Gesundheitswerte.",
+  "diagnosticsEmpty": "Noch keine Einträge im Protokoll.",
+  "diagnosticsMore": "… {count} weitere Zeilen",
+  "@diagnosticsMore": {
+    "placeholders": {"count": {"type": "String"}}
+  },
+  "diagnosticsShare": "Teilen",
+  "diagnosticsHint": "Am besten per Mail.",
+  "diagnosticsFailed": "Das Protokoll konnte nicht geteilt werden.",
+  "sendLogs": "Logs an Entwickler senden",
   "backupEntry": "Logbuch sichern",
   "restoreEntry": "Logbuch wiederherstellen",
   "backupInfo": "Erstellt eine Datei mit allen Tauchgängen. Speichere sie z. B. in „Dateien“ oder schicke sie dir per Mail.",

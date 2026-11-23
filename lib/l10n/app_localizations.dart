@@ -196,6 +196,60 @@ abstract class AppLocalizations {
   /// **'DATEN'**
   String get settingsSectionData;
 
+  /// No description provided for @settingsSectionHelp.
+  ///
+  /// In de, this message translates to:
+  /// **'HILFE'**
+  String get settingsSectionHelp;
+
+  /// No description provided for @diagnosticsTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Diagnose-Logs teilen'**
+  String get diagnosticsTitle;
+
+  /// No description provided for @diagnosticsInfo.
+  ///
+  /// In de, this message translates to:
+  /// **'Hilf bei der Fehlersuche: Schicke das Protokoll an den Entwickler. Es enthält keine Orte, Namen oder Gesundheitswerte.'**
+  String get diagnosticsInfo;
+
+  /// No description provided for @diagnosticsEmpty.
+  ///
+  /// In de, this message translates to:
+  /// **'Noch keine Einträge im Protokoll.'**
+  String get diagnosticsEmpty;
+
+  /// No description provided for @diagnosticsMore.
+  ///
+  /// In de, this message translates to:
+  /// **'… {count} weitere Zeilen'**
+  String diagnosticsMore(String count);
+
+  /// No description provided for @diagnosticsShare.
+  ///
+  /// In de, this message translates to:
+  /// **'Teilen'**
+  String get diagnosticsShare;
+
+  /// No description provided for @diagnosticsHint.
+  ///
+  /// In de, this message translates to:
+  /// **'Am besten per Mail.'**
+  String get diagnosticsHint;
+
+  /// No description provided for @diagnosticsFailed.
+  ///
+  /// In de, this message translates to:
+  /// **'Das Protokoll konnte nicht geteilt werden.'**
+  String get diagnosticsFailed;
+
+  /// No description provided for @sendLogs.
+  ///
+  /// In de, this message translates to:
+  /// **'Logs an Entwickler senden'**
+  String get sendLogs;
+
   /// No description provided for @backupEntry.
   ///
   /// In de, this message translates to:

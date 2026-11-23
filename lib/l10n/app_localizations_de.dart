@@ -61,6 +61,36 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsSectionData => 'DATEN';
 
   @override
+  String get settingsSectionHelp => 'HILFE';
+
+  @override
+  String get diagnosticsTitle => 'Diagnose-Logs teilen';
+
+  @override
+  String get diagnosticsInfo =>
+      'Hilf bei der Fehlersuche: Schicke das Protokoll an den Entwickler. Es enthält keine Orte, Namen oder Gesundheitswerte.';
+
+  @override
+  String get diagnosticsEmpty => 'Noch keine Einträge im Protokoll.';
+
+  @override
+  String diagnosticsMore(String count) {
+    return '… $count weitere Zeilen';
+  }
+
+  @override
+  String get diagnosticsShare => 'Teilen';
+
+  @override
+  String get diagnosticsHint => 'Am besten per Mail.';
+
+  @override
+  String get diagnosticsFailed => 'Das Protokoll konnte nicht geteilt werden.';
+
+  @override
+  String get sendLogs => 'Logs an Entwickler senden';
+
+  @override
   String get backupEntry => 'Logbuch sichern';
 
   @override

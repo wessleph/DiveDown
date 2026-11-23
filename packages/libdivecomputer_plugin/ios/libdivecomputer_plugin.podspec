@@ -31,6 +31,9 @@ Pod::Spec.new do |s|
     'LIBRARY_SEARCH_PATHS' => '"$(PODS_TARGET_SRCROOT)/build"',
     'OTHER_LDFLAGS' => '-ldivecomputer',
     'CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES' => 'YES',
+    # DiveDown (T14.1): libdivecomputer logs only warnings in release builds.
+    'GCC_PREPROCESSOR_DEFINITIONS[config=Release]' => '$(inherited) NDEBUG=1',
+    'GCC_PREPROCESSOR_DEFINITIONS[config=Profile]' => '$(inherited) NDEBUG=1',
   }
 
   # Build libdivecomputer from source before compiling Swift.
