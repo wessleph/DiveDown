@@ -8,17 +8,20 @@ import '../../app/theme.dart';
 import '../../domain/dive/dive.dart';
 import '../../domain/import/import_service.dart';
 import '../../domain/import/imported_dive.dart';
+import '../../domain/sites/site_suggestions.dart';
 import '../../domain/units/unit_formatter.dart';
 import '../../l10n/app_localizations.dart';
 import '../logbook/dive_texts.dart';
 import '../logbook/logbook_screen.dart';
+import '../logbook/site_field.dart';
 
-/// Saves the dives at [selected] (indices into the previewed dives), those
-/// in [confirmed] although they need confirmation. Returns how many were
-/// saved.
+/// Saves the dives at [selected] (indices into [dives], the previewed dives
+/// with the sites set in the preview), those in [confirmed] although they
+/// need confirmation. Returns how many were saved.
 typedef SaveSelected = Future<int> Function(
   Set<int> selected,
   Set<int> confirmed,
+  List<ImportedDive> dives,
 );
 
 /// The import preview for every source (ui-spec §5.9): duplicates marked,
@@ -57,6 +60,9 @@ class _ImportPreviewState extends ConsumerState<ImportPreview> {
       if (c is Saved) i,
   };
   final _similar = <int, Dive>{};
+
+  /// The previewed dives with the sites set here (T25).
+  late final List<ImportedDive> _dives = [...widget.dives];
   int _firstNumber = 1;
   bool _saving = false;
 
@@ -94,6 +100,7 @@ class _ImportPreviewState extends ConsumerState<ImportPreview> {
         for (final i in _selected)
           if (widget.checks[i] is NeedsConfirmation) i,
       },
+      [..._dives],
     );
     ref.refreshDives();
     if (!mounted) return;
@@ -104,7 +111,7 @@ class _ImportPreviewState extends ConsumerState<ImportPreview> {
   /// Numbers the selected dives get, in the order of their start.
   Map<int, int> _numbers() {
     final order = _selected.toList()
-      ..sort((a, b) => widget.dives[a].start.compareTo(widget.dives[b].start));
+      ..sort((a, b) => _dives[a].start.compareTo(_dives[b].start));
     return {for (final (rank, i) in order.indexed) i: _firstNumber + rank};
   }
 
@@ -135,8 +142,24 @@ class _ImportPreviewState extends ConsumerState<ImportPreview> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                for (final (i, dive) in widget.dives.indexed)
+                for (final (i, dive) in _dives.indexed)
                   _row(l10n, theme, i, dive, numbers[i]),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 8,
+                  ),
+                  child: Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: TextButton.icon(
+                      onPressed: _selected.isEmpty || _saving
+                          ? null
+                          : _chooseSite,
+                      icon: const Icon(Icons.add_location_alt_outlined),
+                      label: Text(l10n.previewSetSite),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -207,6 +230,27 @@ class _ImportPreviewState extends ConsumerState<ImportPreview> {
                       '${_units.duration(dive.durationS)}',
                       style: TextStyle(color: colors.onSurfaceMuted),
                     ),
+                    if (dive.siteName case final site?)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.place_outlined,
+                              size: 18,
+                              color: theme.colorScheme.primary,
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                site,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     if (note != null)
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -232,6 +276,27 @@ class _ImportPreviewState extends ConsumerState<ImportPreview> {
     );
   }
 
+  /// „Tauchplatz für Ausgewählte setzen“ (ui-spec §5.9, T25).
+  Future<void> _chooseSite() async {
+    final targets = {..._selected};
+    final result = await showModalBottomSheet<({ChosenSite? site})>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      builder: (_) => _SiteSheet(
+        count: targets.length,
+        canRemove: targets.any((i) => _dives[i].siteName != null),
+      ),
+    );
+    if (result == null || !mounted) return;
+    setState(() {
+      for (final i in targets) {
+        _dives[i] = _dives[i].withSite(result.site);
+      }
+    });
+  }
+
   Widget _button(AppLocalizations l10n) {
     final count = _selected.length;
     return SafeArea(
@@ -253,6 +318,87 @@ class _ImportPreviewState extends ConsumerState<ImportPreview> {
                         ? l10n.previewNothing
                         : l10n.previewImport(count),
                   ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The sheet behind „Tauchplatz für Ausgewählte setzen“. Pops with the
+/// chosen site, with `site: null` for „Tauchplatz entfernen“, or nothing.
+class _SiteSheet extends StatefulWidget {
+  const _SiteSheet({required this.count, required this.canRemove});
+
+  final int count;
+  final bool canRemove;
+
+  @override
+  State<_SiteSheet> createState() => _SiteSheetState();
+}
+
+class _SiteSheetState extends State<_SiteSheet> {
+  final _name = TextEditingController();
+
+  /// A tapped suggestion, as long as the text was not changed afterwards.
+  ChosenSite? _chosen;
+
+  @override
+  void dispose() {
+    _name.dispose();
+    super.dispose();
+  }
+
+  ChosenSite? get _site => _chosen ?? ChosenSite.typed(_name.text);
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final site = _site;
+    // Above the keyboard and the system navigation bar.
+    final bottom = MediaQuery.viewInsetsOf(context).bottom;
+    return Padding(
+      padding: EdgeInsets.only(left: 16, right: 16, bottom: 16 + bottom),
+      child: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l10n.previewSiteTitle(widget.count),
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 16),
+              SiteField(
+                controller: _name,
+                onChosen: (s) =>
+                    setState(() => _chosen = ChosenSite.fromSuggestion(s)),
+                onTyped: (_) => setState(() => _chosen = null),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 48,
+                child: FilledButton(
+                  onPressed: site == null
+                      ? null
+                      : () => Navigator.pop(context, (site: site)),
+                  child: Text(l10n.previewSiteApply),
+                ),
+              ),
+              if (widget.canRemove) ...[
+                const SizedBox(height: 8),
+                SizedBox(
+                  height: 48,
+                  child: TextButton(
+                    onPressed: () =>
+                        Navigator.pop(context, (site: null as ChosenSite?)),
+                    child: Text(l10n.previewSiteRemove),
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
       ),

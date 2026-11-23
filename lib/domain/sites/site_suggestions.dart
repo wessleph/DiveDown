@@ -272,3 +272,39 @@ class SiteSuggester {
     return [...suggestions, if (!known) NewSiteSuggestion(typed)];
   }
 }
+
+/// The site picked for several dives at once in the import preview
+/// (ui-spec §5.9, T25): name and, from the catalogue or an own site, the
+/// catalogue link and position.
+class ChosenSite {
+  const ChosenSite({required this.name, this.catalogueId, this.lat, this.lon});
+
+  /// From a tapped suggestion.
+  factory ChosenSite.fromSuggestion(SiteSuggestion suggestion) =>
+      switch (suggestion) {
+        OwnSiteSuggestion(:final site, :final name) => ChosenSite(
+          name: name,
+          catalogueId: site.catalogueId,
+          lat: site.lat,
+          lon: site.lon,
+        ),
+        CatalogueSiteSuggestion(:final site, :final name) => ChosenSite(
+          name: name,
+          catalogueId: site.id,
+          lat: site.lat,
+          lon: site.lon,
+        ),
+        NewSiteSuggestion(:final name) => ChosenSite(name: _cut(name.trim())),
+      };
+
+  /// From text typed without choosing a suggestion; null when blank.
+  static ChosenSite? typed(String text) {
+    final name = text.trim();
+    return name.isEmpty ? null : ChosenSite(name: _cut(name));
+  }
+
+  final String name;
+  final String? catalogueId;
+  final double? lat;
+  final double? lon;
+}

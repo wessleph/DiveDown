@@ -103,8 +103,11 @@ class _FitImportScreenState extends ConsumerState<FitImportScreen> {
   }
 
   /// Oldest first, so the numbers follow the dive order.
-  Future<int> _save(Set<int> selected, Set<int> confirmed) async {
-    final dives = _dives!;
+  Future<int> _save(
+    Set<int> selected,
+    Set<int> confirmed,
+    List<ImportedDive> dives,
+  ) async {
     final indices = selected.toList()
       ..sort((a, b) => dives[a].start.compareTo(dives[b].start));
     final diverId = (await ref.read(activeDiverProvider.future))!.id!;

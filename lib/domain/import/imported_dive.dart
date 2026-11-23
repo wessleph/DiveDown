@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import '../dive/dive.dart';
+import '../sites/site_suggestions.dart';
 
 /// One dive from an import source, before checks and saving (ADR 0003).
 /// Values in SI units like [Dive].
@@ -20,9 +21,11 @@ class ImportedDive {
     this.tanks = const [],
     this.events = const [],
     this.fingerprint,
-    this.siteLat,
-    this.siteLon,
-  });
+    double? siteLat,
+    double? siteLon,
+    this.site,
+  }) : _deviceLat = siteLat,
+       _deviceLon = siteLon;
 
   final DiveSource source;
 
@@ -48,8 +51,44 @@ class ImportedDive {
 
   /// Raw libdivecomputer fingerprint, dive computers only (T3).
   final Uint8List? fingerprint;
-  final double? siteLat;
-  final double? siteLon;
+
+  /// Position the device recorded (FIT, Apple Health); kept apart, so
+  /// removing a chosen site brings it back (T25.1).
+  final double? _deviceLat;
+  final double? _deviceLon;
+
+  /// Set in the preview with „Tauchplatz für Ausgewählte setzen“ (T25);
+  /// no import source delivers a site name.
+  final ChosenSite? site;
+
+  String? get siteName => site?.name;
+  String? get siteCatalogueId => site?.catalogueId;
+
+  /// The position of the chosen site, else the one from the device.
+  double? get siteLat => site?.lat ?? _deviceLat;
+  double? get siteLon => site?.lon ?? _deviceLon;
+
+  /// This dive at [site]; null removes a site set before. A position from
+  /// the device stays when [site] has none (T25.1).
+  ImportedDive withSite(ChosenSite? site) => ImportedDive(
+    source: source,
+    sourceId: sourceId,
+    start: start,
+    startInstant: startInstant,
+    utcOffsetS: utcOffsetS,
+    durationS: durationS,
+    maxDepthM: maxDepthM,
+    avgDepthM: avgDepthM,
+    minTemperatureC: minTemperatureC,
+    maxTemperatureC: maxTemperatureC,
+    samples: samples,
+    tanks: tanks,
+    events: events,
+    fingerprint: fingerprint,
+    siteLat: _deviceLat,
+    siteLon: _deviceLon,
+    site: site,
+  );
 
   ImportedDive copyWith({
     int? durationS,
@@ -71,8 +110,9 @@ class ImportedDive {
     tanks: tanks,
     events: events,
     fingerprint: fingerprint,
-    siteLat: siteLat,
-    siteLon: siteLon,
+    siteLat: _deviceLat,
+    siteLon: _deviceLon,
+    site: site,
   );
 
   /// The dive to store for [diverId]; the number is assigned on save.
@@ -88,6 +128,8 @@ class ImportedDive {
     avgDepthM: avgDepthM,
     minTemperatureC: minTemperatureC,
     maxTemperatureC: maxTemperatureC,
+    siteName: siteName,
+    siteCatalogueId: siteCatalogueId,
     siteLat: siteLat,
     siteLon: siteLon,
     samples: samples,

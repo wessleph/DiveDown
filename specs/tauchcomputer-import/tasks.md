@@ -616,3 +616,13 @@ Abgenommen am 2026-11-23.
 | T25.5 | Vorschau mit 3 Tauchgängen | leer bzw. nur Leerzeichen; „Tauchplatz entfernen“; alles abgewählt | „Übernehmen“ gesperrt; „Tauchplatz entfernen“ erst, wenn ein Ausgewählter einen Platz hat, danach kein Platz mehr; ohne Auswahl ist die Aktion gesperrt | ✅ 2026-11-23: rot, Aktion fehlt |
 
 Tests: `test/domain/import/import_site_test.dart` (T25.1, T25.2), `import_service_test.dart` (T25.3), `test/features/import/dive_computer_screen_test.dart` (T25.4, T25.5; die FIT-Vorschau ist dasselbe Widget). Stubs: `ChosenSite.fromSuggestion`/`typed`, `ImportedDive.withSite`. `SaveSelected` reicht jetzt die Tauchgänge mit den gesetzten Plätzen an beide Import-Seiten weiter.
+
+Abgenommen am 2026-11-23.
+
+**Umgesetzt (Phase 50, 2026-11-23), T25:**
+- [x] `ChosenSite` (`fromSuggestion`, `typed`) in `domain/sites/site_suggestions.dart` → T25.2 grün.
+- [x] `ImportedDive.site` mit `withSite`; die Geräteposition wird getrennt gehalten, sodass „Tauchplatz entfernen“ sie zurückbringt; `toDive` und `copyWith` tragen den Platz weiter → T25.1 grün.
+- [x] `ImportService`: beim Ersetzen füllt der Platz aus der Vorschau nur einen leeren → T25.3 grün.
+- [x] Vorschau: Aktion unter der Liste, Blatt mit `SiteField`, „Übernehmen“, „Tauchplatz entfernen“, Platz mit Ort-Icon am Eintrag; `SaveSelected` reicht die Tauchgänge mit Platz an Tauchcomputer- und FIT-Seite → T25.4, T25.5 grün.
+- Gesamt: `flutter test` 424/424, `flutter analyze` ohne Befund, Debug-APK baut.
+- **Auf dem S25 Ultra geprüft, 2026-11-23:** Nutzer erlaubte, #72 (FIT-Testdatei, 26.03.) zu löschen und neu zu importieren. Bereits vorhandener Tauchgang → Aktion gesperrt. Nach dem Löschen: Blatt „Tauchplatz für 1 Tauchgang“, Katalog-Vorschlag „Elphinstone · Red Sea, Ägypten“, „Übernehmen“ erst mit Text, danach „Elphinstone“ am Eintrag und „Tauchplatz entfernen“ im Blatt; im Logbuch „Tauchgang 74, Elphinstone, 26. März“. Gefunden und behoben: Das Blatt lag unter der Navigationsleiste bzw. mit Tastatur unter der Statusleiste (`useSafeArea`, `SafeArea` unten); mit Tastatur ist „Übernehmen“ teils verdeckt, aber erreichbar (Blatt scrollt, Tastatur schließt nach Vorschlagswahl).

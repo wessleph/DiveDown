@@ -1666,6 +1666,30 @@ abstract class AppLocalizations {
   /// **'Nichts ausgewählt'**
   String get previewNothing;
 
+  /// No description provided for @previewSetSite.
+  ///
+  /// In de, this message translates to:
+  /// **'Tauchplatz für Ausgewählte setzen'**
+  String get previewSetSite;
+
+  /// No description provided for @previewSiteTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'{count, plural, =1{Tauchplatz für 1 Tauchgang} other{Tauchplatz für {count} Tauchgänge}}'**
+  String previewSiteTitle(int count);
+
+  /// No description provided for @previewSiteApply.
+  ///
+  /// In de, this message translates to:
+  /// **'Übernehmen'**
+  String get previewSiteApply;
+
+  /// No description provided for @previewSiteRemove.
+  ///
+  /// In de, this message translates to:
+  /// **'Tauchplatz entfernen'**
+  String get previewSiteRemove;
+
   /// No description provided for @importedSnack.
   ///
   /// In de, this message translates to:

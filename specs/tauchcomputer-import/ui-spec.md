@@ -190,6 +190,7 @@ Vor der Suche ein kleiner Hinweis: „Aktiviere Bluetooth am Tauchcomputer: EON 
 Liste der gefundenen Tauchgänge, alle vorausgewählt (Checkbox, 48 dp). Pro Eintrag: Datum, Uhrzeit, max. Tiefe, Dauer, Sparkline.
 Oben: Quelle. Bei Dateien zusätzlich der Dateiname (security A2).
 Die Vorschau zeigt die **Nummern, die die Tauchgänge bekommen** (z. B. „#43“). Unter der Liste steht die Aktion **„Tauchplatz für Ausgewählte setzen“**, weil Tauchcomputer, FIT und Apple Health keinen Tauchplatz-Namen mitliefern. Vorschläge kommen aus bereits verwendeten Namen und dem Tauchplatz-Katalog (ADR 0006).
+Die Aktion öffnet ein Blatt von unten: Titel „Tauchplatz für 2 Tauchgänge“, das Tauchplatz-Feld mit Vorschlägen wie in §5.4, Knopf **„Übernehmen“** (gesperrt, solange das Feld leer ist) und, wenn ein ausgewählter Tauchgang schon einen Platz hat, **„Tauchplatz entfernen“**. Danach steht der Platz mit Ort-Icon unter Tiefe und Dauer des Eintrags. Ohne Auswahl ist die Aktion gesperrt. Ersetzt ein geänderter Tauchgang einen vorhandenen, bleibt dessen Platz; der neue füllt nur einen leeren. *(Ergänzt 2026-11-23, T25.)*
 Knopf unten: **„3 Tauchgänge importieren“**, die Zahl passt sich an die Auswahl an.
 
 | Zustand | Darstellung |

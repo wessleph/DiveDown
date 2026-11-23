@@ -929,6 +929,26 @@ class AppLocalizationsDe extends AppLocalizations {
   String get previewNothing => 'Nichts ausgewählt';
 
   @override
+  String get previewSetSite => 'Tauchplatz für Ausgewählte setzen';
+
+  @override
+  String previewSiteTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Tauchplatz für $count Tauchgänge',
+      one: 'Tauchplatz für 1 Tauchgang',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get previewSiteApply => 'Übernehmen';
+
+  @override
+  String get previewSiteRemove => 'Tauchplatz entfernen';
+
+  @override
   String importedSnack(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

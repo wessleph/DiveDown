@@ -193,8 +193,11 @@ class ImportService {
         id: old.id,
         diverId: old.diverId,
         number: old.number,
-        siteName: old.siteName,
-        siteCatalogueId: old.siteCatalogueId,
+        // A site set in the preview only fills an empty one (T25.3).
+        siteName: old.siteName ?? fresh.siteName,
+        siteCatalogueId: old.siteName != null
+            ? old.siteCatalogueId
+            : fresh.siteCatalogueId,
         siteLat: old.siteLat ?? fresh.siteLat,
         siteLon: old.siteLon ?? fresh.siteLon,
         diveComputerId: fresh.diveComputerId,

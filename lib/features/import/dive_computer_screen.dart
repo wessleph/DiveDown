@@ -12,6 +12,7 @@ import '../../domain/import/bluetooth_access.dart';
 import '../../domain/import/dive_computer_import.dart';
 import '../../domain/import/dive_computer_source.dart';
 import '../../domain/import/import_service.dart';
+import '../../domain/import/imported_dive.dart';
 import '../../l10n/app_localizations.dart';
 import '../settings/diagnostics_screen.dart';
 import 'import_preview.dart';
@@ -270,11 +271,24 @@ class _DiveComputerScreenState extends ConsumerState<DiveComputerScreen> {
     });
   }
 
-  Future<int> _save(Set<int> selected, Set<int> confirmed) async {
+  Future<int> _save(
+    Set<int> selected,
+    Set<int> confirmed,
+    List<ImportedDive> dives,
+  ) async {
     final diverId = (await ref.read(activeDiverProvider.future))!.id!;
+    final r = _result!;
     final saved = await _import.save(
       diverId,
-      _result!,
+      DownloadResult(
+        session: r.session,
+        dives: dives,
+        end: r.end,
+        errorCode: r.errorCode,
+        serial: r.serial,
+        firmware: r.firmware,
+        serialMismatch: r.serialMismatch,
+      ),
       selected: selected,
       confirmed: confirmed,
       asNewDevice: _asNewDevice,
