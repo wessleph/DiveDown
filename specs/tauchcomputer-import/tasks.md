@@ -357,8 +357,13 @@ Tests: `test/features/logbook/` (Liste, Detail, Formular). In diesem Paket nur d
 |---|---|---|---|---|
 | T14.1 | Release-Build | Download-Session erstellt | `dc_context_set_loglevel(…, DC_LOGLEVEL_WARNING)`, im Debug-Build `ALL` | ohne eigenen Test (C-Code, hier nicht testbar); abgesichert durch T10.3, geprüft am Handy über das Diagnose-Log |
 | T14.2 | Release-Build bzw. Debug-Build | `NativeLogger.d/i/w/e` | nichts nach logcat bzw. alles (JUnit `NativeLoggerTest` mit ersetzbarem logcat-Ziel) | ✅ 2026-11-23: rot, im Release kamen alle vier Zeilen in logcat an |
-| T14.3 | Access-Code gespeichert | gelesen | aus Keystore bzw. Keychain, nicht aus `SharedPreferences` (JUnit mit Fake-Speicher) | |
-| T14.4 | Android-Manifest der App (merged) | geprüft | kein `INTERNET`, `ACCESS_FINE_LOCATION` nur mit `maxSdkVersion=30`, `BLUETOOTH_SCAN` mit `neverForLocation` (Test über `aapt dump`/Manifest-Parser in CI) | |
+| T14.3 | BLE-Zugangscode gespeichert / unbekanntes Gerät / alter Klartext-Eintrag / unlesbarer Eintrag (anderes Handy) | `AccessCodeStore.set/get` | verschlüsselt gespeichert und zurückgelesen / `null` / einmal übernommen, alter Eintrag gelöscht / verworfen, PIN wird neu abgefragt (JUnit `AccessCodeStoreTest` mit Fake-Speicher und Fake-Verschlüsselung) | ✅ 2026-11-23: rot wegen `NotImplementedError` (`AccessCodeStore`) |
+| T14.3b | `data_extraction_rules.xml`, `backup_rules.xml` | geprüft | `ble_access_codes.xml` und `ble_access_codes_v2.xml` aus Cloud-Backup, Geräte-Transfer und Voll-Backup ausgeschlossen | ✅ 2026-11-23: rot, Ausschluss fehlt |
+| T14.4 | Beispiel-Manifeste | `checkAndroidManifest` | M1 kein `INTERNET`; M2 Standort und alte Bluetooth-Rechte nur mit `maxSdkVersion` ≤ 30; M3 `BLUETOOTH_SCAN` mit `neverForLocation`; M4 nie Hintergrund-Standort, Kamera, Kontakte, Mikrofon, Speicher; M5 Backup-Regeln gesetzt | ✅ 2026-11-23: rot wegen `UnimplementedError` (`checkAndroidManifest`) |
+
+Abgenommen am 2026-11-23. Tests T14: `packages/libdivecomputer_plugin/android/src/test/.../AccessCodeStoreTest.kt`, `NativeLoggerTest.kt`, `test/app/startup_test.dart` (T14.3b), `test/tool/android_manifest_policy_test.dart` (T14.4). Stubs: `AccessCodeStore`, `KeyValueStore`, `SecretCipher`, `checkAndroidManifest`.
+Ansatz T14.3 **ohne neue Abhängigkeit**: Android verschlüsselt mit AES-GCM, der Schlüssel liegt im Android Keystore (verlässt das Gerät nie, ist in keinem Backup); die Werte stehen in `ble_access_codes_v2` und alte Klartext-Werte werden beim ersten Lesen übernommen. iOS: Keychain mit `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly` statt `UserDefaults`, Übernahme alter Werte genauso; dafür gibt es hier keinen Test (Swift im Plugin, nur über den CI-Build geprüft). `flutter_secure_storage` wird damit nicht gebraucht.
+Ansatz T14.4: Die CI erzeugt im Job `android` das zusammengeführte Release-Manifest (`./gradlew :app:processReleaseMainManifest`, ohne ganzen Release-Build) und prüft es mit `dart run tool/check_android_manifest.dart`.
 
 ## T15: Logbuch (ui-spec §5.1–5.4, KW 48)
 | ID | A | W | D | Rot gesehen |

@@ -202,5 +202,20 @@ void main() {
         matches(excludeDb),
       );
     });
+
+    // T14.3: BLE access codes never go into any backup, old or new file.
+    final excludeCodes = [
+      for (final f in ['ble_access_codes.xml', 'ble_access_codes_v2.xml'])
+        RegExp(r'<exclude\s+domain="sharedpref"\s+path="' + f + r'"\s*/>'),
+    ];
+
+    test('T14.3 access codes excluded from all backups and transfers', () {
+      final rules = xml('data_extraction_rules');
+      for (final r in excludeCodes) {
+        expect(section(rules, 'cloud-backup'), matches(r));
+        expect(section(rules, 'device-transfer'), matches(r));
+        expect(section(xml('backup_rules'), 'full-backup-content'), matches(r));
+      }
+    });
   });
 }
