@@ -250,7 +250,8 @@ void main() {
     test('ci.yml builds iOS only on main or by hand (ADR 0005)', () {
       final jobs = load('ci.yml')['jobs'] as YamlMap;
       final ios = jobs['ios'] as YamlMap;
-      expect(ios['runs-on'].toString(), startsWith('macos-'));
+      // A macOS image; since T34 the dedicated Xcode image `xcode-27`.
+      expect(ios['runs-on'].toString(), matches(RegExp(r'^(macos|xcode)-')));
       expect(ios['if'].toString(), contains("refs/heads/main"));
       expect(ios['if'].toString(), contains('workflow_dispatch'));
     });

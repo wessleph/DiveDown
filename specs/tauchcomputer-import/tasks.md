@@ -774,3 +774,18 @@ Test: `test/tool/android_signing_test.dart`. Nach dem Anlegen des Schlüssels ko
 - [x] Anleitung `docs/entwickler/android-release-einrichtung.md` (PKCS12-Keystore außerhalb des Repos, Fingerabdruck, Umstieg von der Debug-App über Sichern/Wiederherstellen).
 - [x] T33.5 von Hand geprüft (siehe Tabelle).
 - Offen beim Nutzer: Schlüssel erzeugen, Fingerabdruck melden; danach kommt er in die README.
+
+## T34: iOS-Builds mit Xcode 27 (ITMS-90725, Mail von Apple vom 2026-11-24)
+
+Build 85 wurde mit Xcode 26 (iOS 26.2 SDK) gebaut. Ab April 2027 nimmt App Store Connect nur noch Builds mit Xcode 27 / iOS-27-SDK an. GitHub bietet seit Oktober 2026 das Runner-Image `xcode-27` (macOS 27, Xcode 27) an. Die Umstellung wird zuerst auf einem Branch `ci/xcode-27` in der CI geprüft (der iOS-Job läuft auf `ci/*`), erst danach geht sie nach `main`.
+
+| Nr. | Ausgangslage | Aktion | Erwartet | Status |
+|---|---|---|---|---|
+| T34.1 | `ci.yml` (Job `ios`), `ios-release.yml` (Job `testflight`) | gelesen | `runs-on: xcode-27` | ✅ 2026-11-24: rot, `macos-15` |
+| T34.2 | dito | gelesen | Schritt „Select Xcode 27“ ruft `tool/ci/select_xcode.sh` | ✅ 2026-11-24: rot, „Select Xcode 26“ |
+| T34.3 | `tool/ci/select_xcode.sh` | gelesen | wählt `/Applications/Xcode_27*`, bricht ohne mit „No Xcode 27“ ab, kein Xcode 26 mehr | ✅ 2026-11-24: rot, wählt Xcode 26 |
+| T34.4 | Branch `ci/xcode-27` gepusht | CI-Lauf | Job `ios` grün: Build für das Gerät ohne Signatur, Simulator-Integrationstests, XCTest; Protokoll zeigt Xcode 27 und iOS-SDK 27 | offen |
+
+Abgenommen am 2026-11-24.
+
+Test: `test/tool/xcode_version_test.dart`. T19.12 erlaubt für den iOS-Job jetzt `macos-…` oder `xcode-…` als Runner (vorher nur `macos-…`).
