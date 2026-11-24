@@ -85,9 +85,7 @@ void main() {
       );
       await equipment.save(_item(anna, 'Hydros Pro', kind: EquipmentKind.bcd));
       await equipment.save(_item(anna, 'Bare 5 mm', kind: EquipmentKind.suit));
-      await equipment.save(
-        _item(anna, 'Mares', kind: EquipmentKind.regulator),
-      );
+      await equipment.save(_item(anna, 'Mares', kind: EquipmentKind.regulator));
       expect(lamp.id, isNotNull);
 
       // Regulators by name ignoring case: apeks before Mares (with case,
