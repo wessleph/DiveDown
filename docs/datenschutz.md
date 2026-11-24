@@ -41,6 +41,8 @@ Die Logbuch-Datenbank wird **nicht** in iCloud- bzw. Google-Backups aufgenommen,
    Ich (Abschnitt 2) erhalte dann deine Nachricht samt Absender und Protokoll. Ich nutze das ausschließlich zur Fehlersuche und lösche es, sobald der Fehler behoben ist, spätestens nach 6 Monaten.
    Das geschieht freiwillig und auf deine Initiative. Für Nutzerinnen und Nutzer in der EU gilt als Rechtsgrundlage deine Einwilligung durch das aktive Senden (Art. 6 Abs. 1 lit. a DSGVO).
    Die Nachricht liegt beim Anbieter meines E-Mail-Postfachs, der seinen Sitz auch außerhalb der Schweiz haben kann.
+3. **Fehler melden und Verbesserung vorschlagen:** Die App bereitet eine Mail an mich (Abschnitt 2) vor, mit deinem Text und technischen Angaben (App-Version, Betriebssystem, Gerätemodell), beim Fehlermelden auf Wunsch mit dem Diagnose-Protokoll. Gesendet wird erst, wenn du in deiner Mail-App auf Senden tippst.
+   Ich nutze die Nachricht nur, um Fehler zu beheben und die App zu verbessern, und lösche sie, sobald sie erledigt ist, spätestens nach 12 Monaten. Rechtsgrundlage und Speicherort wie unter Punkt 2.
 
 ## 5. Verteilung der App
 - **iPhone (TestFlight):** Die App wird über Apples TestFlight verteilt. Apple verarbeitet dabei Daten nach den eigenen Bedingungen ([Apple-Datenschutzrichtlinie](https://www.apple.com/legal/privacy/)).

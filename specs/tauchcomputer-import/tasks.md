@@ -794,3 +794,20 @@ Test: `test/tool/xcode_version_test.dart`. T19.12 erlaubt für den iOS-Job jetzt
 - [x] `ci.yml` (Job `ios`) und `ios-release.yml` laufen auf `xcode-27`, `select_xcode.sh` wählt Xcode 27 → T34.1–T34.3 grün.
 - [x] Eigener Schritt „Simulator build“ vor den Integrationstests, `pkill -f xcodebuild` vor dem zweiten Versuch → T34.4 grün (Xcode 27.2, SDK 27.2).
 - Der nächste TestFlight-Build wird mit dem iOS-27-SDK gebaut; die Warnung ITMS-90725 entfällt dann.
+
+## T35: Feedback in der App (ui-spec §5.14, Wunsch vom 2026-11-24)
+
+Entschieden am 2026-11-24: zwei Einträge unter „Hilfe“, Diagnose-Protokoll wählbar (Standard an), nur E-Mail an `divedown-app@proton.ch`. Die App sendet nichts selbst (keine Internet-Berechtigung), sie öffnet einen Mail-Entwurf. Dafür vorgesehen: Paket **`flutter_email_sender` 11.2.0** (Apache-2.0, GPL-3-verträglich; Uploader nicht verifiziert; öffnet unter Android die Mail-App per Intent, unter iOS `MFMailComposeViewController`). Lizenzen der Unterpakete und das zusammengeführte Android-Manifest (keine INTERNET-Berechtigung, T14.4) werden beim Einbau geprüft; besteht eines davon nicht, bauen wir den Entwurf über die eigenen Plattform-Kanäle.
+
+| Nr. | Ausgangslage | Aktion | Erwartet | Status |
+|---|---|---|---|---|
+| T35.1 | Text und Gerätedaten (Kopf des Diagnose-Protokolls) | `buildFeedbackMail` | an `divedown-app@proton.ch`; Betreff „DiveDown: Fehler“ bzw. „DiveDown: Verbesserungsvorschlag“; Text ohne Leerraum am Rand, Leerzeile, `--`, „DiveDown 1.0.0 (Build 85)“, „iOS 27.1 · iPhone17,1“, „libdivecomputer 0.10.0“; Anhang unverändert durchgereicht | ✅ 2026-11-24: rot wegen `UnimplementedError` |
+| T35.2 | Einstellungen | angezeigt | unter „HILFE“: „Fehler melden“, „Verbesserung vorschlagen“, dann „Diagnose-Logs teilen“ | ✅ 2026-11-24: rot, Einträge fehlen |
+| T35.3 | Protokoll mit einer Zeile; bzw. leer | „Fehler melden“ | ohne Text Fehlermeldung und keine Mail; Schalter „Diagnose-Protokoll anhängen“ an, Hinweistexte aus §5.14; Mail mit Text, Gerätedaten und Anhang `DiveDown-Diagnose-<Datum>.txt` (Inhalt wie „Diagnose-Logs teilen“); Schalter aus → kein Anhang; leeres Protokoll → kein Schalter, kein Anhang; „Protokoll ansehen“ öffnet §5.13; nach der Mail bleibt die Seite mit dem Text offen | ✅ 2026-11-24: rot, Seite fehlt |
+| T35.4 | – | „Verbesserung vorschlagen“ | ohne Text „Bitte beschreibe deine Idee kurz.“; Mail mit eigenem Betreff, ohne Anhang und ohne Schalter | ✅ 2026-11-24: rot, Seite fehlt |
+| T35.5 | keine Mail-App | „Mail vorbereiten“ | Dialog „Keine Mail-App gefunden“ / „Schreib an divedown-app@proton.ch.“; „Adresse kopieren“ legt die Adresse in die Zwischenablage, Snackbar „Adresse kopiert“ | ✅ 2026-11-24: rot, Seite fehlt |
+| T35.6 | von Hand auf dem S25 Ultra | „Fehler melden“ mit Protokoll | Gmail (o. ä.) öffnet sich mit Empfänger, Betreff, Text und Anhang | offen (nach der Umsetzung) |
+
+Abgenommen am 2026-11-24.
+
+Tests: `test/domain/feedback/feedback_mail_test.dart` (T35.1), `test/features/settings/feedback_test.dart` (T35.2–T35.5). Stubs: `domain/feedback/feedback_mail.dart` (`buildFeedbackMail`, `FeedbackMailer`), `feedbackMailerProvider`. Der Dateiname des Anhangs folgt dem bestehenden „Diagnose-Logs teilen“ (`DiveDown-Diagnose-<Datum>.txt`), §5.14 ist entsprechend angepasst.

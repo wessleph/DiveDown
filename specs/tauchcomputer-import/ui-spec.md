@@ -230,7 +230,7 @@ Gruppen als Abschnitte mit kleiner Überschrift in Großbuchstaben (Stil „Riff
 4. **Darstellung:** „System“ / „Hell“ / „Dunkel“ als Segmentknopf, sofort wirksam und gemerkt.
    **Einheiten** entfallen in v1.0, es gilt metrisch (Entscheidung 2026-11-22, §3 bleibt für später).
 5. **Daten:** „Logbuch sichern“, „Logbuch wiederherstellen“ (§5.12) – erscheinen mit T11.
-6. **Hilfe:** „Diagnose-Logs teilen“ (§5.13) – erscheint mit T10.
+6. **Hilfe:** **„Fehler melden“** und **„Verbesserung vorschlagen“** (§5.14, ab 2026-11-24), „Diagnose-Logs teilen“ (§5.13) – erscheint mit T10.
 7. **Über DiveDown:** „Version 1.0.0 (Build 42)“ · „libdivecomputer 0.9.0“ · „Lizenz: GPL-3.0-or-later“ · „Open-Source-Lizenzen“ (Lizenzseite, mit ODbL-Hinweis und Manrope-Lizenz) · „Datenschutzerklärung“ und „Quellcode“ öffnen den Browser (`url_launcher`; die App selbst braucht dafür kein Internet-Recht): https://wessleph.github.io/DiveDown/datenschutz/ und https://github.com/wessleph/DiveDown
 
 ### 5.12 Logbuch sichern / wiederherstellen
@@ -253,6 +253,25 @@ Warnung (`warning`): „Die Datei ist nicht verschlüsselt und enthält Gesundhe
 Info: „Hilf bei der Fehlersuche: Schicke das Protokoll an den Entwickler. Es enthält keine Orte, Namen oder Gesundheitswerte.“
 **Vorschau** (scrollbar, Monospace, die ersten 200 Zeilen und „… 1.240 weitere Zeilen“) · **„Teilen“** (öffnet den System-Dialog) · klein: „Am besten per Mail.“
 - leer: „Noch keine Einträge im Protokoll.“
+
+### 5.14 Feedback: Fehler melden, Verbesserung vorschlagen *(neu 2026-11-24, T35)*
+Die App hat keine Internet-Berechtigung (security.md §4): Sie **sendet nichts selbst**, sondern bereitet einen **Mail-Entwurf** an `divedown-app@proton.ch` vor, den die Mail-App des Handys öffnet. Der Nutzer sieht ihn vor dem Senden und kann ihn ändern oder verwerfen.
+
+**„Fehler melden“** (eigene Seite, Titel „Fehler melden“):
+- Textfeld **„Was ist passiert?“*** (mehrzeilig, Hinweis „z. B. Beim Übertragen vom EON Core bricht die App nach drei Tauchgängen ab.“; leer → „Bitte beschreibe kurz, was passiert ist.“)
+- Schalter **„Diagnose-Protokoll anhängen“** (Standard an), darunter klein „Enthält keine Orte, Namen oder Gesundheitswerte.“ und der Link **„Protokoll ansehen“** (öffnet §5.13)
+- Knopf **„Mail vorbereiten“**. Kleiner Text darunter: „Deine Mail-App öffnet sich mit der Nachricht an divedown-app@proton.ch. Gesendet wird erst, wenn du dort auf Senden tippst.“
+- Mail: Betreff „DiveDown: Fehler“, Text = Beschreibung, darunter eine Trennlinie und die Gerätedaten wie im Kopf des Diagnose-Protokolls (App-Version und Build, Betriebssystem, Modell, libdivecomputer). Mit Protokoll hängt die Datei `DiveDown-Diagnose-<Datum>.txt` an (wie bei „Diagnose-Logs teilen“).
+
+**„Verbesserung vorschlagen“** (eigene Seite, Titel „Verbesserung vorschlagen“):
+- Textfeld **„Deine Idee“*** (mehrzeilig, Hinweis „z. B. Ich würde gern die Sichtweite pro Tauchgang eintragen.“; leer → „Bitte beschreibe deine Idee kurz.“)
+- Knopf **„Mail vorbereiten“** mit demselben kleinen Text. Mail: Betreff „DiveDown: Verbesserungsvorschlag“, Text = Idee plus Gerätedaten, kein Anhang.
+
+| Zustand | Darstellung |
+|---|---|
+| keine Mail-App | Dialog „Keine Mail-App gefunden“ · „Schreib an divedown-app@proton.ch.“ · **„Adresse kopieren“** (Snackbar „Adresse kopiert“) / „Schließen“ |
+| Protokoll leer | Schalter ausgeblendet, Mail ohne Anhang |
+| zurück aus der Mail-App | Die Seite bleibt mit dem Text offen (man weiß nicht, ob gesendet wurde) |
 
 ## 6. Profil-Diagramm
 - **X-Achse:** Zeit (min). **Y-Achse:** Tiefe, **nach unten wachsend** (0 m oben), Gitter alle 10 m (bis 15 m max. Tiefe alle 5 m), Beschriftung in `onSurfaceMuted`.

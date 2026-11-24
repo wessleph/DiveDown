@@ -33,6 +33,7 @@ import '../domain/dive/dive.dart';
 import '../domain/dive/dive_repository.dart';
 import '../domain/dive/diver.dart';
 import '../domain/equipment/equipment.dart';
+import '../domain/feedback/feedback_mail.dart';
 import '../domain/import/bluetooth_access.dart';
 import '../domain/import/dive_computer_import.dart';
 import '../domain/import/dive_computer_registry.dart';
@@ -317,6 +318,11 @@ String computerLabel(KnownDiveComputer c) {
   final name = '${c.vendor} ${c.product}';
   return id == null || id.isEmpty ? name : '$name ••${lastFour(id)}';
 }
+
+/// Opens the mail app with a feedback draft (ui-spec §5.14, T35).
+final feedbackMailerProvider = Provider<FeedbackMailer>(
+  (ref) => throw UnimplementedError('T35: mail app'),
+);
 
 final equipmentRepositoryProvider = Provider<EquipmentRepository>(
   (ref) => DriftEquipmentRepository(ref.watch(appDatabaseProvider)),
