@@ -811,3 +811,10 @@ Entschieden am 2026-11-24: zwei Einträge unter „Hilfe“, Diagnose-Protokoll 
 Abgenommen am 2026-11-24.
 
 Tests: `test/domain/feedback/feedback_mail_test.dart` (T35.1), `test/features/settings/feedback_test.dart` (T35.2–T35.5). Stubs: `domain/feedback/feedback_mail.dart` (`buildFeedbackMail`, `FeedbackMailer`), `feedbackMailerProvider`. Der Dateiname des Anhangs folgt dem bestehenden „Diagnose-Logs teilen“ (`DiveDown-Diagnose-<Datum>.txt`), §5.14 ist entsprechend angepasst.
+
+**Umgesetzt (2026-11-24), T35:**
+- [x] Neue Abhängigkeit `flutter_email_sender` 11.2.0 mit `…_method_channel` 2.0.1, `…_platform_interface` 1.1.0, `…_linux` 1.0.0, `…_web` 1.0.1, `…_windows` 1.0.0: alle Apache-2.0 (LICENSE-Dateien im Pub-Cache geprüft), dazu `plugin_platform_interface` und `ffi` (BSD-3) sowie `url_launcher` (schon vorhanden). Zusammengeführtes Release-Manifest: keine INTERNET-Berechtigung (`check_android_manifest.dart` OK), neu nur der Provider `${applicationId}.file_provider` für den Anhang.
+- [x] `buildFeedbackMail` → T35.1 grün. `EmailSenderFeedbackMailer` übergibt den Anhang direkt aus dem Speicher (`EmailAttachment.data`); jede Ausnahme des Pakets gilt als „keine Mail-App“.
+- [x] Seiten „Fehler melden“ und „Verbesserung vorschlagen“ (`/feedback/bug`, `/feedback/idea`, ohne Tab-Leiste), Einträge unter „HILFE“ → T35.2–T35.5 grün.
+- Testkorrektur: T23.12 scrollt vor dem Tippen auf „Datenschutzerklärung“ und „Quellcode“ (`ensureVisible`), weil die Links durch die zwei neuen Zeilen unter 1600 px liegen.
+- Gesamt: `flutter test` 489/489, `flutter analyze` ohne Befund, Format sauber, Debug-APK baut. T35.6 (am Handy mit echter Mail-App) offen.

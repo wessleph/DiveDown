@@ -13,6 +13,7 @@ import 'backup_flows.dart';
 import 'diagnostics_screen.dart';
 import 'equipment_edit_screen.dart';
 import 'equipment_texts.dart';
+import 'feedback_screen.dart';
 
 /// Einstellungen (ui-spec §5.11): one diver per app, devices, appearance
 /// and „Über DiveDown“. Backup (T11) and diagnostic logs (T10) follow.
@@ -67,6 +68,18 @@ class SettingsScreen extends ConsumerWidget {
           _Section(l10n.settingsSectionHelp),
           _Group(
             children: [
+              ListTile(
+                leading: const Icon(Icons.report_outlined),
+                title: Text(l10n.feedbackBugEntry),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push(FeedbackScreen.bugPath),
+              ),
+              ListTile(
+                leading: const Icon(Icons.lightbulb_outline),
+                title: Text(l10n.feedbackIdeaEntry),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push(FeedbackScreen.ideaPath),
+              ),
               ListTile(
                 leading: const Icon(Icons.bug_report_outlined),
                 title: Text(l10n.diagnosticsTitle),

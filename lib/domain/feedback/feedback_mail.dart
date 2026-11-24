@@ -31,7 +31,20 @@ FeedbackMail buildFeedbackMail(
   String text,
   DiagnosticHeader header, {
   ({String name, Uint8List bytes})? attachment,
-}) => throw UnimplementedError('T35.1');
+}) => FeedbackMail(
+  subject: switch (kind) {
+    FeedbackKind.bug => 'DiveDown: Fehler',
+    FeedbackKind.idea => 'DiveDown: Verbesserungsvorschlag',
+  },
+  body:
+      '${text.trim()}\n'
+      '\n'
+      '--\n'
+      'DiveDown ${header.appVersion} (Build ${header.build})\n'
+      '${header.os} · ${header.model}\n'
+      'libdivecomputer ${header.libdivecomputer}\n',
+  attachment: attachment,
+);
 
 enum MailResult { opened, noMailApp }
 

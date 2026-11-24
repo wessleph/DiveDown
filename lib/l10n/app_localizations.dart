@@ -2013,6 +2013,114 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Neu importiert'**
   String get importedNewSemantics;
+
+  /// No description provided for @feedbackBugEntry.
+  ///
+  /// In de, this message translates to:
+  /// **'Fehler melden'**
+  String get feedbackBugEntry;
+
+  /// No description provided for @feedbackIdeaEntry.
+  ///
+  /// In de, this message translates to:
+  /// **'Verbesserung vorschlagen'**
+  String get feedbackIdeaEntry;
+
+  /// No description provided for @feedbackBugField.
+  ///
+  /// In de, this message translates to:
+  /// **'Was ist passiert?'**
+  String get feedbackBugField;
+
+  /// No description provided for @feedbackBugHint.
+  ///
+  /// In de, this message translates to:
+  /// **'z. B. Beim Übertragen vom EON Core bricht die App nach drei Tauchgängen ab.'**
+  String get feedbackBugHint;
+
+  /// No description provided for @feedbackBugMissing.
+  ///
+  /// In de, this message translates to:
+  /// **'Bitte beschreibe kurz, was passiert ist.'**
+  String get feedbackBugMissing;
+
+  /// No description provided for @feedbackIdeaField.
+  ///
+  /// In de, this message translates to:
+  /// **'Deine Idee'**
+  String get feedbackIdeaField;
+
+  /// No description provided for @feedbackIdeaHint.
+  ///
+  /// In de, this message translates to:
+  /// **'z. B. Ich würde gern die Sichtweite pro Tauchgang eintragen.'**
+  String get feedbackIdeaHint;
+
+  /// No description provided for @feedbackIdeaMissing.
+  ///
+  /// In de, this message translates to:
+  /// **'Bitte beschreibe deine Idee kurz.'**
+  String get feedbackIdeaMissing;
+
+  /// No description provided for @feedbackAttachLog.
+  ///
+  /// In de, this message translates to:
+  /// **'Diagnose-Protokoll anhängen'**
+  String get feedbackAttachLog;
+
+  /// No description provided for @feedbackAttachLogHint.
+  ///
+  /// In de, this message translates to:
+  /// **'Enthält keine Orte, Namen oder Gesundheitswerte.'**
+  String get feedbackAttachLogHint;
+
+  /// No description provided for @feedbackViewLog.
+  ///
+  /// In de, this message translates to:
+  /// **'Protokoll ansehen'**
+  String get feedbackViewLog;
+
+  /// No description provided for @feedbackPrepare.
+  ///
+  /// In de, this message translates to:
+  /// **'Mail vorbereiten'**
+  String get feedbackPrepare;
+
+  /// No description provided for @feedbackPrepareNote.
+  ///
+  /// In de, this message translates to:
+  /// **'Deine Mail-App öffnet sich mit der Nachricht an {address}. Gesendet wird erst, wenn du dort auf Senden tippst.'**
+  String feedbackPrepareNote(String address);
+
+  /// No description provided for @feedbackNoMailTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Keine Mail-App gefunden'**
+  String get feedbackNoMailTitle;
+
+  /// No description provided for @feedbackNoMailBody.
+  ///
+  /// In de, this message translates to:
+  /// **'Schreib an {address}.'**
+  String feedbackNoMailBody(String address);
+
+  /// No description provided for @feedbackCopyAddress.
+  ///
+  /// In de, this message translates to:
+  /// **'Adresse kopieren'**
+  String get feedbackCopyAddress;
+
+  /// No description provided for @feedbackAddressCopied.
+  ///
+  /// In de, this message translates to:
+  /// **'Adresse kopiert'**
+  String get feedbackAddressCopied;
+
+  /// No description provided for @feedbackClose.
+  ///
+  /// In de, this message translates to:
+  /// **'Schließen'**
+  String get feedbackClose;
 }
 
 class _AppLocalizationsDelegate

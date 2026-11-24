@@ -290,8 +290,11 @@ void main() {
     expect(find.text('Lizenz: GPL-3.0-or-later'), findsOneWidget);
     expect(find.text('Open-Source-Lizenzen'), findsOneWidget);
 
+    // Since T35 (two feedback rows) the links lie below 1600 px.
+    await tester.ensureVisible(find.text('Datenschutzerklärung'));
     await tester.tap(find.text('Datenschutzerklärung'));
     await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Quellcode'));
     await tester.tap(find.text('Quellcode'));
     await tester.pumpAndSettle();
     expect(opened, [

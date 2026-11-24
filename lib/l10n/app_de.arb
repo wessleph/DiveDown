@@ -488,5 +488,29 @@
     "placeholders": { "kg": { "type": "String" } }
   },
   "importedNew": "Neu",
-  "importedNewSemantics": "Neu importiert"
+  "importedNewSemantics": "Neu importiert",
+  "feedbackBugEntry": "Fehler melden",
+  "feedbackIdeaEntry": "Verbesserung vorschlagen",
+  "feedbackBugField": "Was ist passiert?",
+  "feedbackBugHint": "z. B. Beim Übertragen vom EON Core bricht die App nach drei Tauchgängen ab.",
+  "feedbackBugMissing": "Bitte beschreibe kurz, was passiert ist.",
+  "feedbackIdeaField": "Deine Idee",
+  "feedbackIdeaHint": "z. B. Ich würde gern die Sichtweite pro Tauchgang eintragen.",
+  "feedbackIdeaMissing": "Bitte beschreibe deine Idee kurz.",
+  "feedbackAttachLog": "Diagnose-Protokoll anhängen",
+  "feedbackAttachLogHint": "Enthält keine Orte, Namen oder Gesundheitswerte.",
+  "feedbackViewLog": "Protokoll ansehen",
+  "feedbackPrepare": "Mail vorbereiten",
+  "feedbackPrepareNote": "Deine Mail-App öffnet sich mit der Nachricht an {address}. Gesendet wird erst, wenn du dort auf Senden tippst.",
+  "@feedbackPrepareNote": {
+    "placeholders": { "address": { "type": "String" } }
+  },
+  "feedbackNoMailTitle": "Keine Mail-App gefunden",
+  "feedbackNoMailBody": "Schreib an {address}.",
+  "@feedbackNoMailBody": {
+    "placeholders": { "address": { "type": "String" } }
+  },
+  "feedbackCopyAddress": "Adresse kopieren",
+  "feedbackAddressCopied": "Adresse kopiert",
+  "feedbackClose": "Schließen"
 }

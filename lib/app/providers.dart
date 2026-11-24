@@ -24,6 +24,7 @@ import '../data/local/drift_dive_repository.dart';
 import '../data/local/drift_equipment_repository.dart';
 import '../data/local/drift_site_repository.dart';
 import '../data/platform/device_channel.dart';
+import '../data/platform/email_feedback_mailer.dart';
 import '../data/platform/permission_bluetooth_access.dart';
 import '../data/platform/share_channel.dart';
 import '../data/platform/share_folder.dart';
@@ -321,7 +322,7 @@ String computerLabel(KnownDiveComputer c) {
 
 /// Opens the mail app with a feedback draft (ui-spec §5.14, T35).
 final feedbackMailerProvider = Provider<FeedbackMailer>(
-  (ref) => throw UnimplementedError('T35: mail app'),
+  (ref) => const EmailSenderFeedbackMailer(),
 );
 
 final equipmentRepositoryProvider = Provider<EquipmentRepository>(

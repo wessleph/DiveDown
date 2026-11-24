@@ -1137,4 +1137,65 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get importedNewSemantics => 'Neu importiert';
+
+  @override
+  String get feedbackBugEntry => 'Fehler melden';
+
+  @override
+  String get feedbackIdeaEntry => 'Verbesserung vorschlagen';
+
+  @override
+  String get feedbackBugField => 'Was ist passiert?';
+
+  @override
+  String get feedbackBugHint =>
+      'z. B. Beim Übertragen vom EON Core bricht die App nach drei Tauchgängen ab.';
+
+  @override
+  String get feedbackBugMissing => 'Bitte beschreibe kurz, was passiert ist.';
+
+  @override
+  String get feedbackIdeaField => 'Deine Idee';
+
+  @override
+  String get feedbackIdeaHint =>
+      'z. B. Ich würde gern die Sichtweite pro Tauchgang eintragen.';
+
+  @override
+  String get feedbackIdeaMissing => 'Bitte beschreibe deine Idee kurz.';
+
+  @override
+  String get feedbackAttachLog => 'Diagnose-Protokoll anhängen';
+
+  @override
+  String get feedbackAttachLogHint =>
+      'Enthält keine Orte, Namen oder Gesundheitswerte.';
+
+  @override
+  String get feedbackViewLog => 'Protokoll ansehen';
+
+  @override
+  String get feedbackPrepare => 'Mail vorbereiten';
+
+  @override
+  String feedbackPrepareNote(String address) {
+    return 'Deine Mail-App öffnet sich mit der Nachricht an $address. Gesendet wird erst, wenn du dort auf Senden tippst.';
+  }
+
+  @override
+  String get feedbackNoMailTitle => 'Keine Mail-App gefunden';
+
+  @override
+  String feedbackNoMailBody(String address) {
+    return 'Schreib an $address.';
+  }
+
+  @override
+  String get feedbackCopyAddress => 'Adresse kopieren';
+
+  @override
+  String get feedbackAddressCopied => 'Adresse kopiert';
+
+  @override
+  String get feedbackClose => 'Schließen';
 }

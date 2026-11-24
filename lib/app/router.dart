@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../domain/feedback/feedback_mail.dart';
+
 import '../features/import/dive_computer_screen.dart';
 import '../features/import/fit_import_screen.dart';
 import '../features/import/import_screen.dart';
@@ -12,6 +14,7 @@ import '../features/logbook/profile_fullscreen_screen.dart';
 import '../features/onboarding/welcome_screen.dart';
 import '../features/settings/diagnostics_screen.dart';
 import '../features/settings/equipment_edit_screen.dart';
+import '../features/settings/feedback_screen.dart';
 import '../features/settings/settings_screen.dart';
 import 'home_shell.dart';
 import 'providers.dart';
@@ -48,6 +51,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: DiagnosticsScreen.path,
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const DiagnosticsScreen(),
+      ),
+      GoRoute(
+        path: FeedbackScreen.bugPath,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) =>
+            const FeedbackScreen(kind: FeedbackKind.bug),
+      ),
+      GoRoute(
+        path: FeedbackScreen.ideaPath,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) =>
+            const FeedbackScreen(kind: FeedbackKind.idea),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => HomeShell(shell: shell),
