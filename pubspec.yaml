@@ -35,7 +35,7 @@ dependencies:
   crypto: ^3.0.6 # BSD-3, SHA-256 in the backup manifest (T11)
   share_plus: ^13.3.1 # BSD-3 (platform interface BSD-3, mime/file/cross_file BSD-3), share the backup file (T11)
   device_info_plus: ^13.3.0 # BSD-3 (platform interface BSD-3, win32_registry BSD-3), model and OS in the diagnostic log (T10.10)
-  flutter_email_sender: 11.2.0
+  flutter_email_sender: ^11.2.0 # Apache-2.0 (method_channel, platform_interface, linux, web, windows Apache-2.0; plugin_platform_interface, ffi BSD-3), mail draft for feedback (T35)
 
 dev_dependencies:
   build_runner: ^2.10.4 # BSD-3-Clause
