@@ -806,7 +806,7 @@ Entschieden am 2026-11-24: zwei Einträge unter „Hilfe“, Diagnose-Protokoll 
 | T35.3 | Protokoll mit einer Zeile; bzw. leer | „Fehler melden“ | ohne Text Fehlermeldung und keine Mail; Schalter „Diagnose-Protokoll anhängen“ an, Hinweistexte aus §5.14; Mail mit Text, Gerätedaten und Anhang `DiveDown-Diagnose-<Datum>.txt` (Inhalt wie „Diagnose-Logs teilen“); Schalter aus → kein Anhang; leeres Protokoll → kein Schalter, kein Anhang; „Protokoll ansehen“ öffnet §5.13; nach der Mail bleibt die Seite mit dem Text offen | ✅ 2026-11-24: rot, Seite fehlt |
 | T35.4 | – | „Verbesserung vorschlagen“ | ohne Text „Bitte beschreibe deine Idee kurz.“; Mail mit eigenem Betreff, ohne Anhang und ohne Schalter | ✅ 2026-11-24: rot, Seite fehlt |
 | T35.5 | keine Mail-App | „Mail vorbereiten“ | Dialog „Keine Mail-App gefunden“ / „Schreib an divedown-app@proton.ch.“; „Adresse kopieren“ legt die Adresse in die Zwischenablage, Snackbar „Adresse kopiert“ | ✅ 2026-11-24: rot, Seite fehlt |
-| T35.6 | von Hand auf dem S25 Ultra | „Fehler melden“ mit Protokoll | Gmail (o. ä.) öffnet sich mit Empfänger, Betreff, Text und Anhang | offen (nach der Umsetzung) |
+| T35.6 | von Hand auf dem S25 Ultra | „Fehler melden“ mit Protokoll | Gmail (o. ä.) öffnet sich mit Empfänger, Betreff, Text und Anhang | ✅ 2026-11-24: vom Nutzer am S25 Ultra geprüft, Mail-App öffnet den Entwurf mit Anhang („Hat funktioniert, Anhang ist dabei“) |
 
 Abgenommen am 2026-11-24.
 
@@ -817,4 +817,4 @@ Tests: `test/domain/feedback/feedback_mail_test.dart` (T35.1), `test/features/se
 - [x] `buildFeedbackMail` → T35.1 grün. `EmailSenderFeedbackMailer` übergibt den Anhang direkt aus dem Speicher (`EmailAttachment.data`); jede Ausnahme des Pakets gilt als „keine Mail-App“.
 - [x] Seiten „Fehler melden“ und „Verbesserung vorschlagen“ (`/feedback/bug`, `/feedback/idea`, ohne Tab-Leiste), Einträge unter „HILFE“ → T35.2–T35.5 grün.
 - Testkorrektur: T23.12 scrollt vor dem Tippen auf „Datenschutzerklärung“ und „Quellcode“ (`ensureVisible`), weil die Links durch die zwei neuen Zeilen unter 1600 px liegen.
-- Gesamt: `flutter test` 489/489, `flutter analyze` ohne Befund, Format sauber, Debug-APK baut. T35.6 (am Handy mit echter Mail-App) offen.
+- Gesamt: `flutter test` 489/489, `flutter analyze` ohne Befund, Format sauber, Debug-APK baut. T35.6 am Handy vom Nutzer geprüft.
