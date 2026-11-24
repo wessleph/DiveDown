@@ -25,7 +25,7 @@ jobs:
     name: Build, sign and upload to TestFlight
     environment: release
     if: github.repository == 'wessleph/DiveDown' && (startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main')
-    runs-on: macos-15
+    runs-on: xcode-27
     timeout-minutes: 60
     env:
       # Same as ci.yml: permission_handler without notifications (§4).
@@ -38,7 +38,7 @@ jobs:
           submodules: recursive
           fetch-depth: 0 # build number = commit count
 
-      - name: Select Xcode 26
+      - name: Select Xcode 27
         run: tool/ci/select_xcode.sh
       - name: Install Flutter
         run: tool/ci/install_flutter.sh

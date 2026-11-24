@@ -23,6 +23,10 @@ for test in integration_test/*_test.dart; do
   echo "::group::$test"
   if ! run_once "$test"; then
     echo "::warning::$test failed or hung, retrying once"
+    # The time limit stops `flutter test`, not the xcodebuild it started;
+    # a build left running makes the retry fail with "concurrent builds".
+    pkill -f xcodebuild || true
+    sleep 5
     if ! run_once "$test"; then
       echo "::error::$test failed twice"
       status=1

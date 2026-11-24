@@ -774,3 +774,23 @@ Test: `test/tool/android_signing_test.dart`. Nach dem Anlegen des Schlüssels ko
 - [x] Anleitung `docs/entwickler/android-release-einrichtung.md` (PKCS12-Keystore außerhalb des Repos, Fingerabdruck, Umstieg von der Debug-App über Sichern/Wiederherstellen).
 - [x] T33.5 von Hand geprüft (siehe Tabelle).
 - Offen beim Nutzer: Schlüssel erzeugen, Fingerabdruck melden; danach kommt er in die README.
+
+## T34: iOS-Builds mit Xcode 27 (ITMS-90725, Mail von Apple vom 2026-11-24)
+
+Build 85 wurde mit Xcode 26 (iOS 26.2 SDK) gebaut. Ab April 2027 nimmt App Store Connect nur noch Builds mit Xcode 27 / iOS-27-SDK an. GitHub bietet seit Oktober 2026 das Runner-Image `xcode-27` (macOS 27, Xcode 27) an. Die Umstellung wird zuerst auf einem Branch `ci/xcode-27` in der CI geprüft (der iOS-Job läuft auf `ci/*`), erst danach geht sie nach `main`.
+
+| Nr. | Ausgangslage | Aktion | Erwartet | Status |
+|---|---|---|---|---|
+| T34.1 | `ci.yml` (Job `ios`), `ios-release.yml` (Job `testflight`) | gelesen | `runs-on: xcode-27` | ✅ 2026-11-24: rot, `macos-15` |
+| T34.2 | dito | gelesen | Schritt „Select Xcode 27“ ruft `tool/ci/select_xcode.sh` | ✅ 2026-11-24: rot, „Select Xcode 26“ |
+| T34.3 | `tool/ci/select_xcode.sh` | gelesen | wählt `/Applications/Xcode_27*`, bricht ohne mit „No Xcode 27“ ab, kein Xcode 26 mehr | ✅ 2026-11-24: rot, wählt Xcode 26 |
+| T34.4 | Branch `ci/xcode-27` gepusht | CI-Lauf | Job `ios` grün: Build für das Gerät ohne Signatur, Simulator-Integrationstests, XCTest; Protokoll zeigt Xcode 27 und iOS-SDK 27 | ❌ 2026-11-24, Lauf 45350250592: Xcode 27.2 (27B52), SDK 27.2, Gerätebuild grün; Integrationstest `eon_core_parse_test` zweimal über dem Zeitlimit (kalter Simulator-Build mit Xcode 27 > 7 min, mit Xcode 26 3,7 min; der abgebrochene xcodebuild lief weiter und blockierte den zweiten Versuch). Behoben: eigener Schritt „Simulator build“ vor den Tests, `pkill -f xcodebuild` vor dem zweiten Versuch. ✅ 2026-11-24, Lauf 45354798066: alle Jobs grün (Android erst im zweiten Versuch, Maven Central antwortete „429 Too Many Requests“) |
+
+Abgenommen am 2026-11-24.
+
+Test: `test/tool/xcode_version_test.dart`. T19.12 erlaubt für den iOS-Job jetzt `macos-…` oder `xcode-…` als Runner (vorher nur `macos-…`).
+
+**Umgesetzt (2026-11-24), T34:**
+- [x] `ci.yml` (Job `ios`) und `ios-release.yml` laufen auf `xcode-27`, `select_xcode.sh` wählt Xcode 27 → T34.1–T34.3 grün.
+- [x] Eigener Schritt „Simulator build“ vor den Integrationstests, `pkill -f xcodebuild` vor dem zweiten Versuch → T34.4 grün (Xcode 27.2, SDK 27.2).
+- Der nächste TestFlight-Build wird mit dem iOS-27-SDK gebaut; die Warnung ITMS-90725 entfällt dann.

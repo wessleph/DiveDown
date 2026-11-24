@@ -80,7 +80,7 @@ jobs:
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'push' &&
        (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/ci/')))
-    runs-on: macos-15
+    runs-on: xcode-27
     timeout-minutes: 75
     env:
       # permission_handler under Swift Package Manager derives its macros
@@ -93,7 +93,7 @@ jobs:
         with:
           persist-credentials: false
           submodules: recursive
-      - name: Select Xcode 26
+      - name: Select Xcode 27
         run: tool/ci/select_xcode.sh
       - name: Install Flutter
         run: tool/ci/install_flutter.sh
@@ -116,6 +116,13 @@ jobs:
       - name: Boot simulator
         id: sim
         run: tool/ci/boot_simulator.sh
+
+      # One full simulator build first, without the per-test time limit:
+      # with Xcode 27 a cold build takes longer than one test's limit (T34.4,
+      # run 45350250592). The tests then only rebuild what changed.
+      - name: Simulator build
+        timeout-minutes: 30
+        run: flutter build ios --simulator --debug
 
       # T4.5 (EON Core fixtures through libdivecomputer built for iOS) and
       # T20.12 (Swift side of the backup exclusion).
