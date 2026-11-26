@@ -91,7 +91,7 @@ Die realistischen Risiken liegen in **vier Bereichen**:
 | go_router | 18.1.4 | BSD-3 | ✅ |
 | fl_chart | 1.3.1 | MIT | ✅ |
 | fit_tool | 1.0.5 (2022, ungepflegt) | BSD-3 | ✅ (R3) |
-| health | 13.3.2 | MIT | ✅ |
+| ~~health~~ | ~~13.3.2~~ | MIT | entfällt (2026-11-26, ADR 0003 Nachtrag: eigener Swift-Kanal) |
 | file_picker | 13.4.0 | MIT | ✅ |
 | share_plus | 13.3.1 | BSD-3 | ✅ |
 | ~~receive_sharing_intent~~ | entfällt (2026-11-20) | Apache-2.0 | ersetzt durch eigenen Android-Code, siehe Hinweis |

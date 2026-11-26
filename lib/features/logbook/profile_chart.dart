@@ -18,7 +18,7 @@ final _litres = NumberFormat('#,##0', 'de');
 String clockText(int seconds) =>
     '${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')}';
 
-enum _Layer { temperature, air, ndl, sac }
+enum _Layer { temperature, air, ndl, sac, pulse }
 
 /// Profile with layer chips, a plot that follows taps and drags, and the
 /// value panel for the chosen moment (ui-spec §6).
@@ -72,6 +72,7 @@ class _ProfileChartState extends State<ProfileChart> {
   /// Right-axis layers in the order they were switched on (max. two).
   final _rightLayers = <_Layer>[_Layer.temperature, _Layer.air];
   bool _ndl = false;
+  bool _hasPulse = false;
 
   @override
   void initState() {
@@ -82,17 +83,35 @@ class _ProfileChartState extends State<ProfileChart> {
   @override
   void didUpdateWidget(ProfileChart old) {
     super.didUpdateWidget(old);
-    if (old.dive != widget.dive) _prepare();
+    if (old.dive != widget.dive) {
+      _prepare(resetLayers: old.dive.id != widget.dive.id);
+    }
   }
 
-  void _prepare() {
+  void _prepare({bool resetLayers = true}) {
     _samples = widget.dive.samples;
     _air = AirProfile(widget.dive);
+    _hasPulse = _samples.any((s) => s.heartRate != null);
+    // Apple Watch dives have no air curve; the pulse takes its place (T6.11).
+    // A reload of the same dive keeps the layers the diver chose.
+    if (resetLayers) _setDefaultLayers();
     _index = 0;
     for (var i = 1; i < _samples.length; i++) {
       if (_samples[i].depthM > _samples[_index].depthM) _index = i;
     }
     _window = TimeWindow.full(math.max(1, _endS));
+  }
+
+  void _setDefaultLayers() {
+    _rightLayers
+      ..clear()
+      ..addAll([
+        _Layer.temperature,
+        if (_air.at(0).missing == null || !_hasPulse)
+          _Layer.air
+        else
+          _Layer.pulse,
+      ]);
   }
 
   int get _endS =>
@@ -154,6 +173,7 @@ class _ProfileChartState extends State<ProfileChart> {
     _Layer.air => _measured ? l10n.chipAir : l10n.chipAirEstimated,
     _Layer.ndl => l10n.chipNdl,
     _Layer.sac => l10n.chipSac,
+    _Layer.pulse => l10n.chipPulse,
   };
 
   @override
@@ -170,6 +190,7 @@ class _ProfileChartState extends State<ProfileChart> {
       if (_air.at(0).missing == null) _Layer.air,
       _Layer.ndl,
       if (_measured) _Layer.sac,
+      if (_hasPulse) _Layer.pulse,
     ];
     final deepest = _samples.isEmpty ? null : _samples[_deepestIndex()];
 
@@ -225,6 +246,7 @@ class _ProfileChartState extends State<ProfileChart> {
                     temperature: _rightLayers.contains(_Layer.temperature),
                     airLayer: _rightLayers.contains(_Layer.air),
                     sac: _rightLayers.contains(_Layer.sac),
+                    pulse: _rightLayers.contains(_Layer.pulse),
                     ndl: _ndl,
                     cursorColor: theme.colorScheme.onSurface,
                     background: theme.colorScheme.surface,
@@ -472,6 +494,7 @@ class _ValuePanel extends StatelessWidget {
           l10n.valueTemperature,
           '${t.toStringAsFixed(1).replaceAll('.', ',')} °C',
         ),
+      if (sample.heartRate case final r?) (l10n.valuePulse, '$r /min'),
       if (sample.ndlS case final n?) (l10n.valueNdl, _units.duration(n)),
       (
         l10n.valueAmbient,
@@ -647,6 +670,7 @@ class _ProfilePainter extends CustomPainter {
     required this.temperature,
     required this.airLayer,
     required this.sac,
+    required this.pulse,
     required this.ndl,
     required this.cursorColor,
     required this.background,
@@ -667,6 +691,7 @@ class _ProfilePainter extends CustomPainter {
   final bool temperature;
   final bool airLayer;
   final bool sac;
+  final bool pulse;
   final bool ndl;
   final Color cursorColor;
   final Color background;
@@ -869,6 +894,43 @@ class _ProfilePainter extends CustomPainter {
       );
     }
 
+    // Heart rate in the lower half (Apple Watch, T6.11).
+    if (pulse) {
+      final rates = [
+        for (final s in samples)
+          if (s.heartRate case final r?) (s.timeS, r.toDouble()),
+      ];
+      if (rates.isNotEmpty) {
+        final lo = (rates.map((e) => e.$2).reduce(math.min) / 10).floor() * 10;
+        final hi = (rates.map((e) => e.$2).reduce(math.max) / 10).ceil() * 10;
+        final span = math.max(10, hi - lo);
+        double py(double r) => _top + h * 0.5 + (hi - r) / span * h * 0.5;
+        final path = Path();
+        for (final (i, (t, r)) in rates.indexed) {
+          i == 0 ? path.moveTo(x(t), py(r)) : path.lineTo(x(t), py(r));
+        }
+        canvas.drawPath(
+          path,
+          Paint()
+            ..color = colors.accent
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.5,
+        );
+        _text(
+          canvas,
+          '$hi',
+          Offset(left + w + 4, _top + h * 0.5 + 6),
+          color: colors.accent,
+        );
+        _text(
+          canvas,
+          '$lo',
+          Offset(left + w + 4, _top + h - 4),
+          color: colors.accent,
+        );
+      }
+    }
+
     // Event markers.
     for (final e in dive.events) {
       final s = samples.lastWhere(
@@ -946,6 +1008,7 @@ class _ProfilePainter extends CustomPainter {
       old.temperature != temperature ||
       old.airLayer != airLayer ||
       old.sac != sac ||
+      old.pulse != pulse ||
       old.ndl != ndl ||
       old.colors != colors;
 }

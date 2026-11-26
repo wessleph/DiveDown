@@ -512,5 +512,27 @@
   },
   "feedbackCopyAddress": "Adresse kopieren",
   "feedbackAddressCopied": "Adresse kopiert",
-  "feedbackClose": "Schließen"
+  "feedbackClose": "Schließen",
+  "healthIntro": "DiveDown liest Tauchgänge deiner Apple Watch aus Apple Health: Tiefe, Wassertemperatur und Puls. DiveDown schreibt nichts in Apple Health.",
+  "healthDepthLimit": "Apple Health erfasst Tiefen nur bis ca. 40 m.",
+  "healthPeriodTitle": "ZEITRAUM",
+  "healthPeriodSince": "Seit letztem Import (ab {date})",
+  "@healthPeriodSince": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "healthPeriodYear": "Letzte 12 Monate",
+  "healthSearch": "Tauchgänge suchen",
+  "healthSearching": "Suche in Apple Health …",
+  "healthNone": "Keine Tauchgänge im gewählten Zeitraum gefunden.",
+  "healthNoneHint": "Tauchgänge werden von der Apple Watch Ultra mit der App „Tiefe“ oder einer Tauch-App aufgezeichnet.",
+  "healthNoneAccess": "Fehlt der Zugriff? Erlaube ihn in der Health-App → Profil → Apps → DiveDown.",
+  "healthNeedsNewerIos": "Benötigt iOS 17 oder neuer.",
+  "healthFailed": "Apple Health konnte nicht gelesen werden.",
+  "healthSkippedNoDepth": "{count, plural, =1{1 Training ohne Tiefe übersprungen.} other{{count} Trainings ohne Tiefe übersprungen.}}",
+  "@healthSkippedNoDepth": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "previewSourceHealth": "Aus Apple Health",
+  "chipPulse": "Puls",
+  "valuePulse": "Puls"
 }

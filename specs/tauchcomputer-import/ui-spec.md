@@ -208,13 +208,14 @@ Knopf unten: **„3 Tauchgänge importieren“**, die Zahl passt sich an die Aus
 | Erfolg | Zurück zum Logbuch, Snackbar (§5.2) |
 
 ### 5.10 Apple Health (nur iOS)
-**Ablauf:** Vorab-Erklärung → Health-Berechtigung (System) → Zeitraum wählen (Standard: „Seit letztem Import“ bzw. „Letzte 12 Monate“) → Suche → Vorschau (§5.9).
+**Ablauf** *(geändert 2026-11-26, T6)*: Vorab-Erklärung und Zeitraum auf einer Seite (Standard: „Seit letztem Import (ab …)“ bzw. „Letzte 12 Monate“) → **„Tauchgänge suchen“** → beim ersten Mal die Health-Berechtigung (System) → Suche → Vorschau (§5.9). Die Berechtigung kommt erst beim Suchen, damit der Nutzer vorher sieht, wozu sie dient, und ein Schritt entfällt; iOS zeigt den Dialog ohnehin nur einmal.
 - Vorab-Text: „DiveDown liest Tauchgänge deiner Apple Watch aus Apple Health: Tiefe, Wassertemperatur und Puls. DiveDown schreibt nichts in Apple Health.“
 
 | Zustand | Text |
 |---|---|
-| Berechtigung verweigert | „DiveDown hat keinen Zugriff auf Apple Health.“ · „Erlaube den Zugriff in der Health-App → Profil → Apps → DiveDown.“ |
-| keine Tauchgänge | „Keine Tauchgänge im gewählten Zeitraum gefunden.“ + Hinweis: „Tauchgänge werden von der Apple Watch Ultra mit der App ‚Tiefe‘ oder einer Tauch-App aufgezeichnet.“ |
+| ~~Berechtigung verweigert~~ | *Entfällt (abgenommen 2026-11-26, T6):* iOS teilt einer App nicht mit, ob der Lesezugriff verweigert wurde, es kommen dann einfach keine Daten. Der Hinweis wandert in „keine Tauchgänge“. |
+| keine Tauchgänge | „Keine Tauchgänge im gewählten Zeitraum gefunden.“ + Hinweis: „Tauchgänge werden von der Apple Watch Ultra mit der App ‚Tiefe‘ oder einer Tauch-App aufgezeichnet.“ · *neu:* „Fehlt der Zugriff? Erlaube ihn in der Health-App → Profil → Apps → DiveDown.“ |
+| iOS 15 und 16 *(neu, abgenommen 2026-11-26; iOS 17 statt 16 seit dem CI-Lauf vom selben Tag)* | Kachel „Apple Health“ deaktiviert, darunter „Benötigt iOS 17 oder neuer.“ (Tiefe und Wassertemperatur gibt es ab iOS 16, den Trainingstyp „Tauchen“ erst ab iOS 17) |
 | Hinweis Tiefe | klein: „Apple Health erfasst Tiefen nur bis ca. 40 m.“ |
 
 ### 5.11 Einstellungen
@@ -277,7 +278,7 @@ Die App hat keine Internet-Berechtigung (security.md §4): Sie **sendet nichts s
 ## 6. Profil-Diagramm
 - **X-Achse:** Zeit (min). **Y-Achse:** Tiefe, **nach unten wachsend** (0 m oben), Gitter alle 10 m (bis 15 m max. Tiefe alle 5 m), Beschriftung in `onSurfaceMuted`.
 - Tiefenkurve in `depth` als Fläche mit Verlauf (oben 5 %, unten 42 % Deckkraft) und Linie 2 dp.
-- **Zuschaltbare Ebenen** (Chips über dem Diagramm, Zustand wird gemerkt): **Temperatur** (rechte Achse, `temperature`) · **Luft** (rechte Achse, `pressure`, gestrichelt wenn geschätzt; pro Flasche eine Linie) · **NDL** (Band unten, `ndl`, gestrichelt) · **SAC** (eigene Achse, Stufenlinie über 1-min-Abschnitte, **nur mit gemessenem Druck**; geschätzt wäre sie eine waagrechte Linie ohne Aussage) · Puls (nur bei Watch).
+- **Zuschaltbare Ebenen** (Chips über dem Diagramm, Zustand wird gemerkt): **Temperatur** (rechte Achse, `temperature`) · **Luft** (rechte Achse, `pressure`, gestrichelt wenn geschätzt; pro Flasche eine Linie) · **NDL** (Band unten, `ndl`, gestrichelt) · **SAC** (eigene Achse, Stufenlinie über 1-min-Abschnitte, **nur mit gemessenem Druck**; geschätzt wäre sie eine waagrechte Linie ohne Aussage) · **Puls** (nur bei Watch, eigene Achse in `accent`; Watch-Tauchgänge haben keine Luft-Kurve; ist an, wenn es keine Luft gibt; Werte-Feld „Puls 95 /min“, T6.11).
   Immer höchstens **zwei rechte Achsen** gleichzeitig. Bei einer dritten schaltet die älteste automatisch ab, mit kurzem Hinweis.
 - **Ereignisse** als Punkte auf der Kurve (Warnungen `error`, sonst `primary`). Antippen zeigt den Text.
 - **Antippen/Ziehen (Wunsch vom 2026-11-22):** senkrechte Linie und Punkt auf der Kurve. Das **Werte-Feld unter dem Diagramm** zeigt immer die Werte dieses Moments; vor dem ersten Tippen steht die Linie beim tiefsten Punkt.

@@ -175,13 +175,50 @@ Neue Abhängigkeiten (Lizenzen am 2026-11-20 an den eingesetzten Versionen gepr�
 - Beobachtet: Die Suunto-App schreibt keine Seriennummer in `file_id`, die `sourceId` lautet dann `0:<time_created>`. Sie kennt den Zeitversatz (hier +7 h), der EON Core per BLE nicht. Die Wandzeit stimmt trotzdem überein. Ältere Tauchgänge bekommen die nächste freie Nummer (#72 für März 2026), nicht eine Nummer nach Datum.
 - Offen: echte Ocean-Fixture, iOS (Dokumenttyp FIT und „Öffnen in“, kommt mit der iOS-Pipeline), „Logs senden“ (T10).
 
-## T6: Apple Health (`data/import/health/`)
-| ID | A | W | D | Rot gesehen |
+## T6: Apple Health (`data/import/health/`, design §4.3, ui-spec §5.10, security G3, ADR 0003 Nachtrag 2026-11-26)
+
+> **Abgenommen am 2026-11-26** (mit den drei Empfehlungen: iOS 15 Kachel deaktiviert, Workouts ohne Tiefe überspringen, Zeitraum „Seit letztem Import“ bzw. „Letzte 12 Monate“). Ersetzt die erste Fassung T6.1–T6.4 (nie rot gesehen).
+> Entschieden am 2026-11-26: eigener Swift-Kanal statt Paket `health` (ADR 0003, Nachtrag). Der Freund mit der Apple Watch Ultra testet am Gerät.
+
+**Aufbau:** Der Swift-Kanal `ios/Runner/HealthDiveChannel.swift` (`MethodChannel io.github.wessleph.divedown/health`) liefert nur **Rohdaten**: Workouts vom Typ Tauchen mit UUID, Start, Ende, dem Versatz zu UTC (aus `HKMetadataKeyTimeZone`, sonst der Zeitzone des Telefons) und die drei Reihen Tiefe (m), Wassertemperatur (°C) und Puls (1/min) als Zeit-Wert-Paare. Das Zusammenführen geschieht in Dart (`lib/data/import/health/health_dive_mapper.dart`) und ist damit hier testbar. Gelesen wird nur, nichts geschrieben.
+
+**Was wir von Submersion lernen** (`healthkit_service.dart`, GPL-3, Logik nachgebaut, Herkunft im Dateikopf):
+- iOS verrät nie, ob der Lesezugriff verweigert wurde. Ohne Zugriff kommen einfach keine Daten. Ein Zustand „Berechtigung verweigert“ lässt sich also nicht erkennen (ui-spec §5.10 wird angepasst).
+- HealthKit liefert echte Zeitpunkte. Gespeichert wird wie bei allen Quellen die Uhrzeit, die der Taucher gesehen hat (sonst ist der Tauchgang um die Zeitzone verschoben, Submersion-Issue 2810).
+- Pro Sekunde können mehrere Tiefenwerte aus verschiedenen Quellen liegen; der tiefste zählt. Temperatur und Puls werden seltener gemessen und dem nächsten Tiefenpunkt bis 30 s Abstand zugeordnet.
+- Tiefe und Wassertemperatur gibt es in HealthKit erst ab iOS 16, den Trainingstyp `underwaterDiving` erst ab iOS 17 (gefunden im CI-Lauf 45898807045). Die App läuft ab iOS 15, der Import ab iOS 17.
+
+| Nr. | Ausgangslage | Aktion | Erwartet | Status |
 |---|---|---|---|---|
-| T6.1 | Fake-Health liefert Unterwasser-Workout mit Tiefe, Temp. und Puls | `fetch` | 1 `ImportedDive`, `source=appleHealth`, `sourceId`=Workout-UUID, kein Druck | |
-| T6.2 | Berechtigung verweigert | `requestPermission` | `false`, kein `fetch` | |
-| T6.3 | Workout ohne Tiefen-Samples | `fetch` | übersprungen | |
-| T6.4 | Zeitraum ohne Workouts | `fetch` | leere Liste | |
+| T6.1 | Rohdaten: Workout `7C1E…`, 10:42–11:29 UTC, Versatz +7200 s (Kairo); Tiefe jede Sekunde (max. 18,4 m), Temperatur alle 10 s (24 → 23 °C), Puls alle 5 s | `mapHealthDive` | 1 `ImportedDive`: `source` appleHealth, `sourceId` = UUID, `start` 12:42 (Uhrzeit Kairo, als UTC gespeichert), `startInstant` 10:42 UTC, `utcOffsetS` 7200, Dauer 47 min, max. 18,4 m, Ø-Tiefe zeitgewichtet (≈ 12,3 m), Temperatur 23–24 °C; Samples mit Temperatur und Puls; keine Flaschen, kein Druck. Mit Versatz +3600 (Telefon in Zürich, Workout ohne Zeitzone) 11:42 | ✅ 2026-11-26: rot wegen `UnimplementedError` |
+| T6.2 | Kanal `io.github.wessleph.divedown/health` | `availability`, `requestReadAccess`, `diveWorkouts(from, to)` | Antworten `available`/`needsNewerIos`/`unavailable` (Unbekanntes und fehlender Kanal unter Android → `unavailable`); Zeitraum als ms; Workouts mit UUID, Start/Ende in UTC, Versatz, drei Reihen `[ms, Wert]`; kaputte Daten oder `PlatformException` → `HealthReadFailure`. Die Zeitzone rechnet die Swift-Seite aus (Workout-Zeitzone, sonst die des Telefons), weil Dart keine Zeitzonen-Datenbank hat | ✅ 2026-11-26: rot wegen `UnimplementedError` |
+| T6.3 | Tiefenreihe unsortiert, zwei Werte in derselben Sekunde (12,0 und 12,4 m), ein Wert vor dem Start | `mapHealthDive` | sortiert, je Sekunde der tiefere Wert, Wert vor dem Start verworfen | ✅ 2026-11-26: rot wegen `UnimplementedError` |
+| T6.4 | Temperatur 40 s vom nächsten Tiefenpunkt entfernt; Puls 20 s | `mapHealthDive` | Temperatur dort leer, Puls übernommen | ✅ 2026-11-26: rot wegen `UnimplementedError` |
+| T6.5 | Workout ohne Tiefenwerte (ältere Watch oder kein Zugriff auf die Tiefe) | `mapHealthDive` | `null`, der Tauchgang wird übersprungen; gezählt als „ohne Tiefe“ | ✅ 2026-11-26: rot wegen `UnimplementedError` |
+| T6.6 | Fake-Store mit zwei Tauch-Workouts, eines davon ohne Tiefe; bzw. Fehler | `StoreHealthDiveSource.fetch(from, to)` | 1 Tauchgang, 1 übersprungen, neuester zuerst; Zeitraum an den Store übergeben; Fehler → `HealthReadFailure` statt Absturz; Verfügbarkeit und Berechtigung gehen an den Store | ✅ 2026-11-26: rot wegen `UnimplementedError` |
+| T6.7 | Logbuch mit Apple-Health-Tauchgängen vom 2.11. und 14.11. 12:42, FIT vom 20.11.; bzw. nur FIT | `healthImportFrom(dives, now)` | ab 13.11. 12:42 (neuester Health-Tauchgang minus 1 Tag); ohne früheren Import 12 Monate zurück, `since` leer | ✅ 2026-11-26: rot wegen `UnimplementedError` |
+| T6.8 | iOS, Health verfügbar | Import → „Apple Health“ | eigene Seite §5.10 (statt „kommt bald“) mit Vorab-Text und Hinweis „bis ca. 40 m“; Zeitraum „Letzte 12 Monate“, nach einem früheren Import zusätzlich „Seit letztem Import (ab 13.11.2026)“, vorgewählt; „Tauchgänge suchen“ fragt die Berechtigung an und sucht bis jetzt; Treffer → Vorschau §5.9 „Aus Apple Health“ mit „1 Training ohne Tiefe übersprungen.“, Speichern → „1 Tauchgang importiert“; derselbe Tauchgang ein zweites Mal → „Bereits im Logbuch“ | ✅ 2026-11-26: rot, Snackbar „Kommt mit einem der nächsten Updates.“ statt der Seite |
+| T6.9 | keine Tauchgänge im Zeitraum; bzw. Lesefehler | Suche | „Keine Tauchgänge im gewählten Zeitraum gefunden.“, Hinweis auf Ultra und „Tiefe“, dazu neu: „Fehlt der Zugriff? Erlaube ihn in der Health-App → Profil → Apps → DiveDown.“; bei Fehler „Apple Health konnte nicht gelesen werden.“ mit „Erneut versuchen“ | ✅ 2026-11-26: rot, Seite fehlt (Knopf „Tauchgänge suchen“ nicht gefunden) |
+| T6.10 | iOS 15 oder 16; Gerät ohne Health; Android | Import-Seite | Kachel deaktiviert mit „Benötigt iOS 17 oder neuer.“, Antippen bleibt auf der Seite; ohne Health keine Kachel; unter Android nie | ✅ 2026-11-26: rot, Hinweis fehlt bzw. Kachel trotz „unavailable“ sichtbar; Android schon grün (Absicherung) |
+| T6.11 | importierter Tauchgang mit Puls; bzw. ohne | Detail | Quelle „Apple Watch“ (ohne Modell, das Gerät wird nicht gespeichert); kein Chip „Luft“; Chip „Puls“ an, eigene Achse in `accent` (Watch-Tauchgänge haben keine Luft-Kurve), im Werte-Feld „Puls 95 /min“; Chip schaltet aus; ohne Puls kein Chip und kein Wert | ✅ 2026-11-26: rot, Chip fehlt; Quelle und „ohne Puls“ schon grün (Absicherung) |
+| T6.12 | Import mit 2 Workouts, eines ohne Tiefe; bzw. Lesefehler | Diagnose-Protokoll | Kategorie `health`: „2 workouts, 1 dives, 1 without depth, … samples“; **keine** Tiefen-, Temperatur- oder Pulswerte und keine UUID (security §3); bei Fehler nur der Fehlercode, nicht die Meldung von HealthKit | ✅ 2026-11-26: rot wegen `UnimplementedError` |
+| T6.13 | `Info.plist`, `Runner.entitlements`, `project.pbxproj`, `HealthDiveChannel.swift` | gelesen | `NSHealthShareUsageDescription` auf Deutsch; **kein** `NSHealthUpdateUsageDescription` (T20.2 bleibt); Entitlements nur `com.apple.developer.healthkit` = true (keine Clinical Records, keine Background Delivery); `CODE_SIGN_ENTITLEMENTS` an den drei Konfigurationen von Runner, nicht an den Tests; Swift-Datei im Target, fragt nur Lesen an (`toShare: nil`) | ✅ 2026-11-26: rot, Schlüssel und Dateien fehlen |
+| T6.14 | von Hand am iPhone mit Apple Watch Ultra (Freund) | Import aus Apple Health | Berechtigungsdialog nur mit Lesen von Workouts, Tiefe, Wassertemperatur, Puls; Tauchgänge mit Profil, Zeit stimmt mit der Watch überein | |
+
+Tests: `test/data/import/health/health_dive_mapper_test.dart` (T6.1, T6.3–T6.5), `test/data/platform/health_channel_test.dart` (T6.2), `test/data/import/health/store_health_dive_source_test.dart` (T6.6, T6.7, T6.12), `test/features/import/health_import_test.dart` (T6.8–T6.10, Quelle aus T6.11), `test/features/logbook/heart_rate_test.dart` (T6.11), `test/ios/ios_health_config_test.dart` (T6.13).
+Fixtures: `test/support/health_fixtures.dart` baut den Tauchgang „Elphinstone“ als Roh-Workout und, für die UI-Tests unabhängig vom Mapper, als fertigen `ImportedDive`. Sobald der Freund importiert hat, ergänzen wir einen echten (anonymisierten) Tauchgang; der kommt nicht aus dem Diagnose-Protokoll (das enthält keine Health-Werte), sondern über „Logbuch sichern“.
+Stubs: `domain/import/health_import.dart` (`healthImportFrom`), `data/import/health/health_dive_mapper.dart`, `StoreHealthDiveSource`, `ChannelHealthStore`; Provider `healthDiveSourceProvider`, `healthAvailabilityProvider`; Texte schon in `app_de.arb`.
+Testkorrektur vor dem Commit: Die Quelle „Apple Watch“ steht in der Liste nur als Icon; der Test prüft sie jetzt im Detail.
+
+**Umgesetzt (2026-11-26), T6:**
+- [x] `healthImportFrom`, `mapHealthDive` (tiefster Wert je Sekunde, Temperatur/Puls bis 30 s, Ø-Tiefe über `meanDepthFromSamples`, Uhrzeit aus dem Versatz der Swift-Seite), `StoreHealthDiveSource` (neuester zuerst, Zählung im Protokoll, Fehler nur als Code), `ChannelHealthStore` (Vertrag wie oben, fehlender Kanal → `unavailable`) → T6.1–T6.7, T6.12 grün.
+- [x] Seite `/import/health` (ohne Tab-Leiste): Vorab-Text, Hinweis 40 m, Zeitraum (Radio), Knopf „Tauchgänge suchen“ unten über der Tastatur-Ebene (T36); die Berechtigung wird beim ersten Suchen angefragt, nicht vor dem Zeitraum (ein Schritt weniger, §5.10 sonst unverändert). Treffer → `ImportPreview` mit Hinweis auf übersprungene Trainings; keine Treffer bzw. Fehler als Hinweis mit Icon, Fehler mit „Erneut versuchen“ → T6.8, T6.9 grün.
+- [x] Import-Seite: Kachel nach `healthAvailabilityProvider` (an, deaktiviert mit „Benötigt iOS 17 oder neuer.“, ausgeblendet); „Kommt mit einem der nächsten Updates.“ wird nicht mehr gebraucht → T6.10 grün.
+- [x] Profil: Ebene „Puls“ (untere Hälfte, eigene Skala in `accent`), an statt „Luft“, wenn es keinen Druck gibt; Werte-Feld „Puls 95 /min“; die Ebenen werden nur bei einem anderen Tauchgang zurückgesetzt, nicht beim Neuladen desselben → T6.11 grün.
+- [x] iOS: `HealthDiveChannel.swift` (nur Lesen, `HKQuantitySeriesSampleQuery` für alle Werte auch aus Serien, Zeitzone aus `HKMetadataKeyTimeZone`, sonst die des Telefons), registriert in `AppDelegate.swift`; `Runner.entitlements` mit nur HealthKit, `CODE_SIGN_ENTITLEMENTS` an Runner; `NSHealthShareUsageDescription` → T6.13 grün. `ios-release.yml` bricht mit klarer Meldung ab, wenn das Profil kein HealthKit enthält.
+- [x] `THIRD_PARTY.md` (Ablauf aus Submersion, Commit `4e638982`), security.md §5: Paket `health` entfällt.
+- Testkorrektur: Zwei Tests legten den früheren Import erst nach dem App-Start an (das Logbuch war schon geladen); jetzt vorher, wie in den anderen Tests. Der Test „Letzte 12 Monate wählen“ prüft jetzt mit früherem Import, sonst wäre er ohne Wahl grün.
+- Gesamt: `flutter test` 530/530, `flutter analyze` ohne Befund, Format sauber. Swift-Seite: kompiliert nur in der CI (iOS-Job), T6.14 am Gerät steht aus.
 
 ## T7: Luftverbrauch (`domain/metrics/sac_calculator.dart`, design §6)
 | ID | A | W | D | Rot gesehen |
@@ -831,7 +868,7 @@ Ursache: Der Knopf liegt in `Scaffold.bottomNavigationBar`. Flutter verkleinert 
 | T36.3 | dito, „Manuell eintragen“ | „Dauer“ eingeben, Tastatur offen | „Speichern“ über der Tastatur | ✅ 2026-11-26: schon grün (Absicherung, Seite in der Tab-Leiste) |
 | T36.4 | dito, „Ausrüstung hinzufügen“ | „Bezeichnung“ eingeben, Tastatur offen | „Speichern“ über der Tastatur | ✅ 2026-11-26: rot, Knopf endet bei y = 836 |
 | T36.5 | die vier Seiten, Tastatur offen | Seite nach oben wischen | Feld verliert den Fokus, die Tastatur schließt sich | ✅ 2026-11-26: rot, Fokus bleibt |
-| T36.6 | von Hand am iPhone (TestFlight) | „Fehler melden“, Text tippen, „Mail vorbereiten“ | Knopf sichtbar über der Tastatur, Mail-Entwurf öffnet sich; Wischen schließt die Tastatur | offen |
+| T36.6 | von Hand am iPhone (TestFlight) | „Fehler melden“, Text tippen, „Mail vorbereiten“ | Knopf sichtbar über der Tastatur, Mail-Entwurf öffnet sich; Wischen schließt die Tastatur | offen: Build 100 (Stand `4f77ea7`) am 2026-11-26 auf TestFlight freigegeben, Test am iPhone am 2026-11-27 |
 
 **Umgesetzt (2026-11-26), T36:**
 - [x] `lib/app/bottom_action.dart`: `BodyWithBottomAction` legt die Hauptaktion im `body` unter den scrollbaren Inhalt, sodass sie mit der Tastatur nach oben wandert; Feedback und Ausrüstung nutzen es → T36.1, T36.2, T36.4 grün.
@@ -839,3 +876,21 @@ Ursache: Der Knopf liegt in `Scaffold.bottomNavigationBar`. Flutter verkleinert 
 - Gesamt: `flutter test` 497/497, `flutter analyze` ohne Befund, Format sauber. T36.6 steht noch aus (nächster TestFlight-Build).
 
 Test: `test/features/keyboard_actions_test.dart` (alle mit `TargetPlatform.iOS`, Tastatur über `tester.view.viewInsets`).
+
+**Review (Phase 60, 2026-11-26, `review.md`):** keine kritischen Befunde. Tests zu den wichtigen Befunden, alle rot gesehen:
+- W1: `health_import_test.dart` „T6.9 any other error also ends the search“: ✅ rot, `StateError` unbehandelt, Suche bleibt hängen.
+- W3: `health_dive_mapper_test.dart` „T6.3 readings after the end are dropped“: ✅ rot, Sample bei 130 s trotz Ende 100 s.
+- N4: T6.10 prüft zusätzlich `Semantics(enabled: false)`: ✅ rot, Zustand fehlt.
+- W2 (Tiefenabfrage scheitert → als „ohne Tiefe“ gezählt) betrifft nur die Swift-Seite; Dart behandelt `query_failed` schon als `HealthReadFailure` (T6.2). Nachweis über T6.13 (Zeichenkette im Swift-Code) und die CI-Kompilierung.
+
+**Review-Befunde behoben (2026-11-26):**
+- [x] W1: `_search` fängt jeden Fehler, zeigt „Apple Health konnte nicht gelesen werden.“ mit „Erneut versuchen“ und protokolliert nur den Typ → Test grün.
+- [x] W2: Scheitert in Swift die Tiefenabfrage, kommt `query_failed` (→ `HealthReadFailure`) statt eines leeren Workouts; Temperatur und Puls bleiben bei einem Fehler leer. Nachweis: CI-Kompilierung.
+- [x] W3: `mapHealthDive` verwirft Tiefenwerte nach dem Ende → Test grün.
+- [x] N2: ui-spec §5.10 beschreibt den Ablauf mit der Berechtigung beim Suchen und die Begründung. N3: Kanalname und Inhalt oben korrigiert. N4: deaktivierte Kachel mit `Semantics(enabled: false)` → Test grün. N5: Zeitraum während der Suche gesperrt.
+- [x] Ins Repo: `docs/entwickler/apple-watch-test.md` (Anleitung für T6.14), `ios-release-einrichtung.md` §9 (Profil mit HealthKit erneuern, Review Notes).
+- Bewusst offen: N1 (ohne Zeitzone im Workout gilt die Zeitzone des Telefons beim Import, z. B. nach der Heimreise; die Watch speichert sie bei „Tiefe“ in der Regel), N6 (weitere Randfälle in Tests), N7 (Pulsachse ohne Einheit, die Legende „Puls“ und das Werte-Feld „/min“ nennen sie), N8.
+- Gesamt: `flutter test` 532/532, `flutter analyze` ohne Befund, Format sauber.
+
+**CI-Lauf 45898807045 (2026-11-26), Gerätebuild rot:** `'underwaterDiving' is only available in iOS 17.0 or newer` (`HealthDiveChannel.swift:93`). Unter iOS 16 lassen sich Tauch-Trainings nicht vom Rest unterscheiden, deshalb gilt der Import ab iOS 17 (Kachel: „Benötigt iOS 17 oder neuer.“). Wer eine Watch Ultra mit aktuellem watchOS nutzt, hat ohnehin iOS 17 oder neuer. Tests: T6.10 und T6.13 (keine iOS-16-Prüfung mehr im Swift-Code) rot gesehen, danach grün.
+- ✅ CI-Lauf 45900422619 (2026-11-26, Commit `0fe2540`): alle Jobs grün, iOS-Gerätebuild und Simulator-Build mit `HealthDiveChannel.swift` (Xcode 27), Integrationstests und Swift-Unit-Tests. Abgenommen zum Mergen (Review ohne kritische Befunde). Offen: T6.14 am Gerät mit der Watch Ultra.

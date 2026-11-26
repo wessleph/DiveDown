@@ -6,6 +6,7 @@ import '../domain/feedback/feedback_mail.dart';
 
 import '../features/import/dive_computer_screen.dart';
 import '../features/import/fit_import_screen.dart';
+import '../features/import/health_import_screen.dart';
 import '../features/import/import_screen.dart';
 import '../features/logbook/dive_detail_screen.dart';
 import '../features/logbook/logbook_screen.dart';
@@ -118,6 +119,11 @@ final routerProvider = Provider<GoRouter>((ref) {
                     path: 'fit',
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (context, state) => const FitImportScreen(),
+                  ),
+                  GoRoute(
+                    path: 'health',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (context, state) => const HealthImportScreen(),
                   ),
                 ],
               ),
