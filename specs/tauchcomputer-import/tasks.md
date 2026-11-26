@@ -833,4 +833,9 @@ Ursache: Der Knopf liegt in `Scaffold.bottomNavigationBar`. Flutter verkleinert 
 | T36.5 | die vier Seiten, Tastatur offen | Seite nach oben wischen | Feld verliert den Fokus, die Tastatur schließt sich | ✅ 2026-11-26: rot, Fokus bleibt |
 | T36.6 | von Hand am iPhone (TestFlight) | „Fehler melden“, Text tippen, „Mail vorbereiten“ | Knopf sichtbar über der Tastatur, Mail-Entwurf öffnet sich; Wischen schließt die Tastatur | offen |
 
+**Umgesetzt (2026-11-26), T36:**
+- [x] `lib/app/bottom_action.dart`: `BodyWithBottomAction` legt die Hauptaktion im `body` unter den scrollbaren Inhalt, sodass sie mit der Tastatur nach oben wandert; Feedback und Ausrüstung nutzen es → T36.1, T36.2, T36.4 grün.
+- [x] `keyboardDismissBehavior: onDrag` an den Listen von Feedback, Ausrüstung und „Manuell eintragen“ → T36.5 grün, T36.3 weiter grün.
+- Gesamt: `flutter test` 497/497, `flutter analyze` ohne Befund, Format sauber. T36.6 steht noch aus (nächster TestFlight-Build).
+
 Test: `test/features/keyboard_actions_test.dart` (alle mit `TargetPlatform.iOS`, Tastatur über `tester.view.viewInsets`).
