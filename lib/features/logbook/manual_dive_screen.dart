@@ -532,6 +532,8 @@ class _ManualDiveScreenState extends ConsumerState<ManualDiveScreen> {
         body: !loaded
             ? const SizedBox.shrink()
             : ListView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                 children: [
                   field(ManualDiveField.number, l10n.fieldNumber),

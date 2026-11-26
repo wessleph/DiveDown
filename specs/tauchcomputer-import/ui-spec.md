@@ -76,6 +76,7 @@ Gespeichert wird immer in SI (ADR 0004). Formatierung zentral (`UnitFormatter`),
 | **Offline** | **Kein eigener Zustand.** Version 1.0 braucht kein Netz, also zeigt die App auch keinen Offline-Hinweis. |
 | **Sync ausstehend/Konflikt** | Entfällt in v1.0 (kein Sync). Kommt mit dem Sync-Feature. |
 | **Speicher voll** | Dialog: „Nicht genug Speicherplatz. Gib Speicher frei und versuch es erneut.“ Die Daten bleiben unverändert. |
+| **Tastatur offen** *(neu 2026-11-26, T36)* | Die Hauptaktion einer Seite („Speichern“, „Mail vorbereiten“) bleibt über der Tastatur sichtbar und antippbar. Wischen über die Seite schließt die Tastatur (unter iOS gibt es bei mehrzeiligen Feldern keine Taste dafür). |
 | **Große Schrift (bis 200 %)** | Layouts brechen um statt abzuschneiden. Kennzahlen-Raster wird einspaltig. |
 
 ## 5. Bildschirme

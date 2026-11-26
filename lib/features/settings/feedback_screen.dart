@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../app/bottom_action.dart';
 import '../../app/providers.dart';
 import '../../app/theme.dart';
 import '../../domain/feedback/feedback_mail.dart';
@@ -120,81 +121,79 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
       appBar: AppBar(
         title: Text(_isBug ? l10n.feedbackBugEntry : l10n.feedbackIdeaEntry),
       ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                l10n.feedbackPrepareNote(feedbackAddress),
-                style: theme.textTheme.bodySmall?.copyWith(color: muted),
+      body: BodyWithBottomAction(
+        action: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              l10n.feedbackPrepareNote(feedbackAddress),
+              style: theme.textTheme.bodySmall?.copyWith(color: muted),
+            ),
+            const SizedBox(height: 8),
+            FilledButton.icon(
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(56),
               ),
-              const SizedBox(height: 8),
-              FilledButton.icon(
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size.fromHeight(56),
-                ),
-                onPressed: _busy ? null : _prepare,
-                icon: const Icon(Icons.mail_outline),
-                label: Text(l10n.feedbackPrepare),
-              ),
-            ],
-          ),
+              onPressed: _busy ? null : _prepare,
+              icon: const Icon(Icons.mail_outline),
+              label: Text(l10n.feedbackPrepare),
+            ),
+          ],
         ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-        children: [
-          TextField(
-            controller: _text,
-            focusNode: _focus,
-            minLines: 5,
-            maxLines: null,
-            textCapitalization: TextCapitalization.sentences,
-            onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(
-              labelText: l10n.requiredField(
-                _isBug ? l10n.feedbackBugField : l10n.feedbackIdeaField,
+        content: ListView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          children: [
+            TextField(
+              controller: _text,
+              focusNode: _focus,
+              minLines: 5,
+              maxLines: null,
+              textCapitalization: TextCapitalization.sentences,
+              onChanged: (_) => setState(() {}),
+              decoration: InputDecoration(
+                labelText: l10n.requiredField(
+                  _isBug ? l10n.feedbackBugField : l10n.feedbackIdeaField,
+                ),
+                hintText: _isBug ? l10n.feedbackBugHint : l10n.feedbackIdeaHint,
+                hintMaxLines: 3,
+                alignLabelWithHint: true,
+                errorText: !missing
+                    ? null
+                    : _isBug
+                    ? l10n.feedbackBugMissing
+                    : l10n.feedbackIdeaMissing,
               ),
-              hintText: _isBug ? l10n.feedbackBugHint : l10n.feedbackIdeaHint,
-              hintMaxLines: 3,
-              alignLabelWithHint: true,
-              errorText: !missing
-                  ? null
-                  : _isBug
-                  ? l10n.feedbackBugMissing
-                  : l10n.feedbackIdeaMissing,
             ),
-          ),
-          if (_isBug)
-            FutureBuilder<bool>(
-              future: _hasLog,
-              builder: (context, snapshot) {
-                if (snapshot.data != true) return const SizedBox.shrink();
-                return Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SwitchListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(l10n.feedbackAttachLog),
-                        subtitle: Text(l10n.feedbackAttachLogHint),
-                        value: _attachLog,
-                        onChanged: (v) => setState(() => _attachLog = v),
-                      ),
-                      TextButton.icon(
-                        onPressed: () => context.push(DiagnosticsScreen.path),
-                        icon: const Icon(Icons.visibility_outlined),
-                        label: Text(l10n.feedbackViewLog),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-        ],
+            if (_isBug)
+              FutureBuilder<bool>(
+                future: _hasLog,
+                builder: (context, snapshot) {
+                  if (snapshot.data != true) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(l10n.feedbackAttachLog),
+                          subtitle: Text(l10n.feedbackAttachLogHint),
+                          value: _attachLog,
+                          onChanged: (v) => setState(() => _attachLog = v),
+                        ),
+                        TextButton.icon(
+                          onPressed: () => context.push(DiagnosticsScreen.path),
+                          icon: const Icon(Icons.visibility_outlined),
+                          label: Text(l10n.feedbackViewLog),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+          ],
+        ),
       ),
     );
   }

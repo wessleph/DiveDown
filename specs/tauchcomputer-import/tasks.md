@@ -818,3 +818,24 @@ Tests: `test/domain/feedback/feedback_mail_test.dart` (T35.1), `test/features/se
 - [x] Seiten „Fehler melden“ und „Verbesserung vorschlagen“ (`/feedback/bug`, `/feedback/idea`, ohne Tab-Leiste), Einträge unter „HILFE“ → T35.2–T35.5 grün.
 - Testkorrektur: T23.12 scrollt vor dem Tippen auf „Datenschutzerklärung“ und „Quellcode“ (`ensureVisible`), weil die Links durch die zwei neuen Zeilen unter 1600 px liegen.
 - Gesamt: `flutter test` 489/489, `flutter analyze` ohne Befund, Format sauber, Debug-APK baut. T35.6 am Handy vom Nutzer geprüft.
+
+## T36: Hauptaktion über der Tastatur (ui-spec §4, §5.4, §5.11, §5.14; Test am iPhone vom 2026-11-26)
+
+Fehler aus dem Test am iPhone: In „Fehler melden“ und „Verbesserung vorschlagen“ verdeckt die Tastatur den Knopf „Mail vorbereiten“. Unter iOS hat ein mehrzeiliges Feld keine Taste, die die Tastatur schließt (Return macht eine neue Zeile), und es gibt keine Zurück-Taste wie unter Android. Die Nachricht lässt sich also nicht abschicken.
+Ursache: Der Knopf liegt in `Scaffold.bottomNavigationBar`. Flutter verkleinert für die Tastatur nur den `body`. Betroffen sind alle Seiten auf dem Root-Navigator (ohne Tab-Leiste) mit Knopf unten: Feedback und „Ausrüstung hinzufügen/bearbeiten“. „Manuell eintragen“ liegt in der Tab-Leiste; dort schiebt das äußere `Scaffold` schon alles über die Tastatur.
+
+| Nr. | Ausgangslage | Aktion | Erwartet | Status |
+|---|---|---|---|---|
+| T36.1 | iOS, 390 × 844, „Fehler melden“ | Text eingeben, Tastatur (336 px) offen | „Mail vorbereiten“ (mind. 56 px hoch) ganz über der Tastatur; Antippen öffnet den Entwurf | ✅ 2026-11-26: rot, Knopf endet bei y = 836 statt ≤ 508 |
+| T36.2 | dito, „Verbesserung vorschlagen“ | dito | dito | ✅ 2026-11-26: rot, dito |
+| T36.3 | dito, „Manuell eintragen“ | „Dauer“ eingeben, Tastatur offen | „Speichern“ über der Tastatur | ✅ 2026-11-26: schon grün (Absicherung, Seite in der Tab-Leiste) |
+| T36.4 | dito, „Ausrüstung hinzufügen“ | „Bezeichnung“ eingeben, Tastatur offen | „Speichern“ über der Tastatur | ✅ 2026-11-26: rot, Knopf endet bei y = 836 |
+| T36.5 | die vier Seiten, Tastatur offen | Seite nach oben wischen | Feld verliert den Fokus, die Tastatur schließt sich | ✅ 2026-11-26: rot, Fokus bleibt |
+| T36.6 | von Hand am iPhone (TestFlight) | „Fehler melden“, Text tippen, „Mail vorbereiten“ | Knopf sichtbar über der Tastatur, Mail-Entwurf öffnet sich; Wischen schließt die Tastatur | offen |
+
+**Umgesetzt (2026-11-26), T36:**
+- [x] `lib/app/bottom_action.dart`: `BodyWithBottomAction` legt die Hauptaktion im `body` unter den scrollbaren Inhalt, sodass sie mit der Tastatur nach oben wandert; Feedback und Ausrüstung nutzen es → T36.1, T36.2, T36.4 grün.
+- [x] `keyboardDismissBehavior: onDrag` an den Listen von Feedback, Ausrüstung und „Manuell eintragen“ → T36.5 grün, T36.3 weiter grün.
+- Gesamt: `flutter test` 497/497, `flutter analyze` ohne Befund, Format sauber. T36.6 steht noch aus (nächster TestFlight-Build).
+
+Test: `test/features/keyboard_actions_test.dart` (alle mit `TargetPlatform.iOS`, Tastatur über `tester.view.viewInsets`).

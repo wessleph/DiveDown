@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/bottom_action.dart';
 import '../../app/providers.dart';
 import '../../domain/equipment/equipment.dart';
 import '../../l10n/app_localizations.dart';
@@ -184,79 +185,76 @@ class _EquipmentEditScreenState extends ConsumerState<EquipmentEditScreen> {
               ),
           ],
         ),
-        bottomNavigationBar: !_loaded
-            ? null
-            : SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                  child: FilledButton(
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size.fromHeight(56),
-                    ),
-                    onPressed: _saving ? null : _save,
-                    child: Text(l10n.save),
-                  ),
-                ),
-              ),
         body: !_loaded
             ? const SizedBox.shrink()
-            : ListView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                children: [
-                  DropdownButtonFormField<EquipmentKind>(
-                    initialValue: _kind,
-                    decoration: InputDecoration(
-                      labelText: l10n.requiredField(l10n.equipmentKindField),
-                      errorText: _kindError(l10n),
-                    ),
-                    items: [
-                      for (final k in EquipmentKind.values)
-                        DropdownMenuItem(
-                          value: k,
-                          child: Row(
-                            children: [
-                              Icon(equipmentKindIcon(k), size: 20),
-                              const SizedBox(width: 12),
-                              Text(equipmentKindLabel(l10n, k)),
-                            ],
+            : BodyWithBottomAction(
+                action: FilledButton(
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(56),
+                  ),
+                  onPressed: _saving ? null : _save,
+                  child: Text(l10n.save),
+                ),
+                content: ListView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                  children: [
+                    DropdownButtonFormField<EquipmentKind>(
+                      initialValue: _kind,
+                      decoration: InputDecoration(
+                        labelText: l10n.requiredField(l10n.equipmentKindField),
+                        errorText: _kindError(l10n),
+                      ),
+                      items: [
+                        for (final k in EquipmentKind.values)
+                          DropdownMenuItem(
+                            value: k,
+                            child: Row(
+                              children: [
+                                Icon(equipmentKindIcon(k), size: 20),
+                                const SizedBox(width: 12),
+                                Text(equipmentKindLabel(l10n, k)),
+                              ],
+                            ),
                           ),
-                        ),
-                    ],
-                    onChanged: (k) => setState(() => _kind = k),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: _name,
-                    focusNode: _nameFocus,
-                    maxLength: Equipment.maxNameLength,
-                    textCapitalization: TextCapitalization.sentences,
-                    onChanged: (_) => setState(() {}),
-                    decoration: InputDecoration(
-                      labelText: l10n.requiredField(l10n.equipmentNameField),
-                      hintText: l10n.equipmentNameHint,
-                      errorText: _nameError(l10n),
+                      ],
+                      onChanged: (k) => setState(() => _kind = k),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  TextField(
-                    controller: _notes,
-                    minLines: 2,
-                    maxLines: null,
-                    textCapitalization: TextCapitalization.sentences,
-                    onChanged: (_) => setState(() {}),
-                    decoration: InputDecoration(
-                      labelText: l10n.equipmentNotesField,
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _name,
+                      focusNode: _nameFocus,
+                      maxLength: Equipment.maxNameLength,
+                      textCapitalization: TextCapitalization.sentences,
+                      onChanged: (_) => setState(() {}),
+                      decoration: InputDecoration(
+                        labelText: l10n.requiredField(l10n.equipmentNameField),
+                        hintText: l10n.equipmentNameHint,
+                        errorText: _nameError(l10n),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(l10n.equipmentDefault),
-                    subtitle: Text(l10n.equipmentDefaultHint),
-                    value: _isDefault,
-                    onChanged: (v) => setState(() => _isDefault = v),
-                  ),
-                ],
+                    const SizedBox(height: 4),
+                    TextField(
+                      controller: _notes,
+                      minLines: 2,
+                      maxLines: null,
+                      textCapitalization: TextCapitalization.sentences,
+                      onChanged: (_) => setState(() {}),
+                      decoration: InputDecoration(
+                        labelText: l10n.equipmentNotesField,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(l10n.equipmentDefault),
+                      subtitle: Text(l10n.equipmentDefaultHint),
+                      value: _isDefault,
+                      onChanged: (v) => setState(() => _isDefault = v),
+                    ),
+                  ],
+                ),
               ),
       ),
     );
