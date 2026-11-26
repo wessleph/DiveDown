@@ -893,3 +893,4 @@ Test: `test/features/keyboard_actions_test.dart` (alle mit `TargetPlatform.iOS`,
 - Gesamt: `flutter test` 532/532, `flutter analyze` ohne Befund, Format sauber.
 
 **CI-Lauf 45898807045 (2026-11-26), Gerätebuild rot:** `'underwaterDiving' is only available in iOS 17.0 or newer` (`HealthDiveChannel.swift:93`). Unter iOS 16 lassen sich Tauch-Trainings nicht vom Rest unterscheiden, deshalb gilt der Import ab iOS 17 (Kachel: „Benötigt iOS 17 oder neuer.“). Wer eine Watch Ultra mit aktuellem watchOS nutzt, hat ohnehin iOS 17 oder neuer. Tests: T6.10 und T6.13 (keine iOS-16-Prüfung mehr im Swift-Code) rot gesehen, danach grün.
+- ✅ CI-Lauf 45900422619 (2026-11-26, Commit `0fe2540`): alle Jobs grün, iOS-Gerätebuild und Simulator-Build mit `HealthDiveChannel.swift` (Xcode 27), Integrationstests und Swift-Unit-Tests. Abgenommen zum Mergen (Review ohne kritische Befunde). Offen: T6.14 am Gerät mit der Watch Ultra.
