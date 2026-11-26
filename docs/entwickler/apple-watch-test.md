@@ -4,7 +4,7 @@
 > Was hier fehlt oder anders aussieht, bitte über **Einstellungen → Hilfe → Fehler melden** in DiveDown schicken (mit Diagnose-Protokoll; es enthält keine Tiefen, Temperaturen oder Pulswerte).
 
 ## Voraussetzungen
-- iPhone mit **iOS 16 oder neuer**, DiveDown aus TestFlight in der neuesten Version.
+- iPhone mit **iOS 17 oder neuer**, DiveDown aus TestFlight in der neuesten Version.
 - Mindestens ein Tauchgang, den die Watch Ultra mit der App **„Tiefe“** oder einer Tauch-App (z. B. Oceanic+) aufgezeichnet hat. In der Health-App unter *Trainings* muss er als **Tauchen** erscheinen.
 - Hat die Watch die Daten noch nicht ans iPhone übertragen: Watch in die Nähe des iPhones legen, ein paar Minuten warten.
 

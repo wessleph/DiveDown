@@ -49,7 +49,7 @@ class HealthWorkout {
 enum HealthAvailability {
   available,
 
-  /// iOS 15: depth and water temperature need iOS 16 (T6.10).
+  /// iOS 15 and 16: the diving workout type exists from iOS 17 (T6.10).
   needsNewerIos,
 
   /// Android, or a device without the Health app.

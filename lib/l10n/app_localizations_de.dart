@@ -1236,7 +1236,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Fehlt der Zugriff? Erlaube ihn in der Health-App → Profil → Apps → DiveDown.';
 
   @override
-  String get healthNeedsIos16 => 'Benötigt iOS 16 oder neuer.';
+  String get healthNeedsNewerIos => 'Benötigt iOS 17 oder neuer.';
 
   @override
   String get healthFailed => 'Apple Health konnte nicht gelesen werden.';

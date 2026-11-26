@@ -219,11 +219,11 @@ void main() {
     });
   }, variant: _iOS);
 
-  testWidgets('T6.10 iOS 15: tile disabled with a hint', (tester) async {
+  testWidgets('T6.10 iOS 15/16: tile disabled with a hint', (tester) async {
     await _open(tester, answer: HealthAvailability.needsNewerIos);
 
     expect(find.text('Apple Health'), findsOneWidget);
-    expect(find.text('Benötigt iOS 16 oder neuer.'), findsOneWidget);
+    expect(find.text('Benötigt iOS 17 oder neuer.'), findsOneWidget);
     // Screen readers say it is off (review N4).
     expect(
       tester.getSemantics(find.text('Apple Health')),

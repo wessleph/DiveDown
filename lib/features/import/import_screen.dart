@@ -81,12 +81,12 @@ class ImportScreen extends ConsumerWidget {
                 subtitle: l10n.importSourceHealthHint,
                 onTap: () => context.go(HealthImportScreen.path),
               ),
-              // Depth and water temperature need iOS 16 (T6.10).
+              // Diving workouts exist in HealthKit from iOS 17 (T6.10).
               HealthAvailability.needsNewerIos => _SourceCard(
                 icon: Icons.favorite_outline,
                 title: l10n.importSourceHealth,
                 subtitle: l10n.importSourceHealthHint,
-                note: l10n.healthNeedsIos16,
+                note: l10n.healthNeedsNewerIos,
                 onTap: null,
               ),
               HealthAvailability.unavailable || null => const SizedBox.shrink(),

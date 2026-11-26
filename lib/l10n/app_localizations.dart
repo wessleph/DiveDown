@@ -2182,11 +2182,11 @@ abstract class AppLocalizations {
   /// **'Fehlt der Zugriff? Erlaube ihn in der Health-App → Profil → Apps → DiveDown.'**
   String get healthNoneAccess;
 
-  /// No description provided for @healthNeedsIos16.
+  /// No description provided for @healthNeedsNewerIos.
   ///
   /// In de, this message translates to:
-  /// **'Benötigt iOS 16 oder neuer.'**
-  String get healthNeedsIos16;
+  /// **'Benötigt iOS 17 oder neuer.'**
+  String get healthNeedsNewerIos;
 
   /// No description provided for @healthFailed.
   ///

@@ -526,7 +526,7 @@
   "healthNone": "Keine Tauchgänge im gewählten Zeitraum gefunden.",
   "healthNoneHint": "Tauchgänge werden von der Apple Watch Ultra mit der App „Tiefe“ oder einer Tauch-App aufgezeichnet.",
   "healthNoneAccess": "Fehlt der Zugriff? Erlaube ihn in der Health-App → Profil → Apps → DiveDown.",
-  "healthNeedsIos16": "Benötigt iOS 16 oder neuer.",
+  "healthNeedsNewerIos": "Benötigt iOS 17 oder neuer.",
   "healthFailed": "Apple Health konnte nicht gelesen werden.",
   "healthSkippedNoDepth": "{count, plural, =1{1 Training ohne Tiefe übersprungen.} other{{count} Trainings ohne Tiefe übersprungen.}}",
   "@healthSkippedNoDepth": {

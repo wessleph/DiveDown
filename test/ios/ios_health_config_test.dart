@@ -61,5 +61,8 @@ void main() {
     // Read only: never ask to share (write) anything.
     expect(swift, contains('toShare: nil'));
     expect(swift, contains('HKWorkoutActivityType.underwaterDiving'));
+    // The diving workout type exists from iOS 17 (CI run 45898807045).
+    expect(swift, isNot(contains('available(iOS 16')));
+    expect(swift, contains('#available(iOS 17.0, *)'));
   });
 }

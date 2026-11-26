@@ -24,14 +24,14 @@ final class HealthDiveChannel {
     case "availability":
       result(availability())
     case "requestReadAccess":
-      guard #available(iOS 16.0, *) else {
-        result(FlutterError(code: "needs_ios_16", message: nil, details: nil))
+      guard #available(iOS 17.0, *) else {
+        result(FlutterError(code: "needs_ios_17", message: nil, details: nil))
         return
       }
       requestReadAccess(result)
     case "diveWorkouts":
-      guard #available(iOS 16.0, *) else {
-        result(FlutterError(code: "needs_ios_16", message: nil, details: nil))
+      guard #available(iOS 17.0, *) else {
+        result(FlutterError(code: "needs_ios_17", message: nil, details: nil))
         return
       }
       guard let args = call.arguments as? [String: Any],
@@ -50,15 +50,16 @@ final class HealthDiveChannel {
     }
   }
 
-  /// Depth and water temperature exist in HealthKit from iOS 16 (T6.10).
+  /// Depth and water temperature exist in HealthKit from iOS 16, the diving
+  /// workout type `underwaterDiving` only from iOS 17 (T6.10).
   private func availability() -> String {
     guard HKHealthStore.isHealthDataAvailable() else { return "unavailable" }
-    if #available(iOS 16.0, *) { return "available" }
+    if #available(iOS 17.0, *) { return "available" }
     return "needsNewerIos"
   }
 
   /// Exactly what the import needs, nothing to write (security.md G3).
-  @available(iOS 16.0, *)
+  @available(iOS 17.0, *)
   private var readTypes: Set<HKObjectType> {
     [
       HKObjectType.workoutType(),
@@ -70,7 +71,7 @@ final class HealthDiveChannel {
 
   /// iOS never tells whether reading was allowed (T6.9), so a completed
   /// dialog is all there is to report.
-  @available(iOS 16.0, *)
+  @available(iOS 17.0, *)
   private func requestReadAccess(_ result: @escaping FlutterResult) {
     guard HKHealthStore.isHealthDataAvailable() else {
       result(FlutterError(code: "unavailable", message: nil, details: nil))
@@ -87,7 +88,7 @@ final class HealthDiveChannel {
     }
   }
 
-  @available(iOS 16.0, *)
+  @available(iOS 17.0, *)
   private func diveWorkouts(from: Date, to: Date, _ result: @escaping FlutterResult) {
     let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
       HKQuery.predicateForSamples(withStart: from, end: to, options: .strictStartDate),
@@ -111,7 +112,7 @@ final class HealthDiveChannel {
 
   /// One workout after the other, one series after the other: the
   /// callbacks never run at the same time, so `out` needs no lock.
-  @available(iOS 16.0, *)
+  @available(iOS 17.0, *)
   private func collect(_ workouts: [HKWorkout], _ result: @escaping FlutterResult) {
     var out: [[String: Any]] = []
     let bpm = HKUnit.count().unitDivided(by: .minute())
