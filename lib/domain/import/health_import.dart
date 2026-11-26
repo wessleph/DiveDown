@@ -106,4 +106,20 @@ abstract interface class HealthDiveSource {
 ({DateTime from, DateTime? since}) healthImportFrom(
   List<Dive> dives,
   DateTime now,
-) => throw UnimplementedError();
+) {
+  DateTime? newest;
+  for (final d in dives) {
+    if (d.source != DiveSource.appleHealth) continue;
+    if (newest == null || d.start.isAfter(newest)) newest = d.start;
+  }
+  if (newest == null) {
+    final n = now.toUtc();
+    return (
+      from: DateTime.utc(n.year - 1, n.month, n.day, n.hour, n.minute),
+      since: null,
+    );
+  }
+  // The start is the wall clock flagged UTC; the day covers any offset.
+  final since = newest.subtract(const Duration(days: 1));
+  return (from: since, since: since);
+}

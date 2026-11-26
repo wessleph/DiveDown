@@ -210,6 +210,16 @@ Fixtures: `test/support/health_fixtures.dart` baut den Tauchgang „Elphinstone�
 Stubs: `domain/import/health_import.dart` (`healthImportFrom`), `data/import/health/health_dive_mapper.dart`, `StoreHealthDiveSource`, `ChannelHealthStore`; Provider `healthDiveSourceProvider`, `healthAvailabilityProvider`; Texte schon in `app_de.arb`.
 Testkorrektur vor dem Commit: Die Quelle „Apple Watch“ steht in der Liste nur als Icon; der Test prüft sie jetzt im Detail.
 
+**Umgesetzt (2026-11-26), T6:**
+- [x] `healthImportFrom`, `mapHealthDive` (tiefster Wert je Sekunde, Temperatur/Puls bis 30 s, Ø-Tiefe über `meanDepthFromSamples`, Uhrzeit aus dem Versatz der Swift-Seite), `StoreHealthDiveSource` (neuester zuerst, Zählung im Protokoll, Fehler nur als Code), `ChannelHealthStore` (Vertrag wie oben, fehlender Kanal → `unavailable`) → T6.1–T6.7, T6.12 grün.
+- [x] Seite `/import/health` (ohne Tab-Leiste): Vorab-Text, Hinweis 40 m, Zeitraum (Radio), Knopf „Tauchgänge suchen“ unten über der Tastatur-Ebene (T36); die Berechtigung wird beim ersten Suchen angefragt, nicht vor dem Zeitraum (ein Schritt weniger, §5.10 sonst unverändert). Treffer → `ImportPreview` mit Hinweis auf übersprungene Trainings; keine Treffer bzw. Fehler als Hinweis mit Icon, Fehler mit „Erneut versuchen“ → T6.8, T6.9 grün.
+- [x] Import-Seite: Kachel nach `healthAvailabilityProvider` (an, deaktiviert mit „Benötigt iOS 16 oder neuer.“, ausgeblendet); „Kommt mit einem der nächsten Updates.“ wird nicht mehr gebraucht → T6.10 grün.
+- [x] Profil: Ebene „Puls“ (untere Hälfte, eigene Skala in `accent`), an statt „Luft“, wenn es keinen Druck gibt; Werte-Feld „Puls 95 /min“; die Ebenen werden nur bei einem anderen Tauchgang zurückgesetzt, nicht beim Neuladen desselben → T6.11 grün.
+- [x] iOS: `HealthDiveChannel.swift` (nur Lesen, `HKQuantitySeriesSampleQuery` für alle Werte auch aus Serien, Zeitzone aus `HKMetadataKeyTimeZone`, sonst die des Telefons), registriert in `AppDelegate.swift`; `Runner.entitlements` mit nur HealthKit, `CODE_SIGN_ENTITLEMENTS` an Runner; `NSHealthShareUsageDescription` → T6.13 grün. `ios-release.yml` bricht mit klarer Meldung ab, wenn das Profil kein HealthKit enthält.
+- [x] `THIRD_PARTY.md` (Ablauf aus Submersion, Commit `4e638982`), security.md §5: Paket `health` entfällt.
+- Testkorrektur: Zwei Tests legten den früheren Import erst nach dem App-Start an (das Logbuch war schon geladen); jetzt vorher, wie in den anderen Tests. Der Test „Letzte 12 Monate wählen“ prüft jetzt mit früherem Import, sonst wäre er ohne Wahl grün.
+- Gesamt: `flutter test` 530/530, `flutter analyze` ohne Befund, Format sauber. Swift-Seite: kompiliert nur in der CI (iOS-Job), T6.14 am Gerät steht aus.
+
 ## T7: Luftverbrauch (`domain/metrics/sac_calculator.dart`, design §6)
 | ID | A | W | D | Rot gesehen |
 |---|---|---|---|---|

@@ -43,10 +43,15 @@ class _FakeHealth implements HealthDiveSource {
 Future<(AppDatabase, String, _FakeHealth)> _open(
   WidgetTester tester, {
   HealthAvailability answer = HealthAvailability.available,
+  bool earlierImport = false,
 }) async {
   final db = newTestDatabase();
   addTearDown(db.close);
   final anna = await seedActiveDiver(db);
+  // Before the app starts, so the logbook already holds it.
+  if (earlierImport) {
+    await seedDive(db, elphinstoneImported().toDive(diverId: anna.id!));
+  }
   final health = _FakeHealth()..answer = answer;
   await pumpTestApp(
     tester,
@@ -111,10 +116,8 @@ void main() {
     tester,
   ) async {
     await withClock(Clock.fixed(_now), () async {
-      final (db, anna, health) = await _open(tester);
-      final dive = elphinstoneImported();
-      await seedDive(db, dive.toDive(diverId: anna));
-      health.dives = [dive];
+      final (_, _, health) = await _open(tester, earlierImport: true);
+      health.dives = [elphinstoneImported()];
 
       await _tap(tester, find.text('Apple Health'));
       // Earlier import: „Seit letztem Import“ is offered and chosen.
@@ -128,10 +131,10 @@ void main() {
 
   testWidgets('T6.8 „Letzte 12 Monate“ can be chosen instead', (tester) async {
     await withClock(Clock.fixed(_now), () async {
-      final (db, anna, health) = await _open(tester);
-      await seedDive(db, elphinstoneImported().toDive(diverId: anna));
+      final (_, _, health) = await _open(tester, earlierImport: true);
 
       await _tap(tester, find.text('Apple Health'));
+      expect(find.textContaining('Seit letztem Import'), findsOneWidget);
       await _tap(tester, find.text('Letzte 12 Monate'));
       await _tap(tester, find.text('Tauchgänge suchen'));
 
@@ -213,24 +216,26 @@ void main() {
     expect(find.text('Apple Health'), findsNothing);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-  testWidgets('T6.11 imported dive shows „Apple Watch“ as source in the detail', (
-    tester,
-  ) async {
-    final db = newTestDatabase();
-    addTearDown(db.close);
-    final anna = await seedActiveDiver(db);
-    final saved = await seedDive(
-      db,
-      elphinstoneImported().toDive(diverId: anna.id!),
-    );
-    expect(saved.source, DiveSource.appleHealth);
-    await pumpTestApp(
-      tester,
-      db: db,
-      size: const Size(400, 1400),
-      location: DiveDetailScreen.pathFor(saved.id!),
-    );
+  testWidgets(
+    'T6.11 imported dive shows „Apple Watch“ as source in the detail',
+    (tester) async {
+      final db = newTestDatabase();
+      addTearDown(db.close);
+      final anna = await seedActiveDiver(db);
+      final saved = await seedDive(
+        db,
+        elphinstoneImported().toDive(diverId: anna.id!),
+      );
+      expect(saved.source, DiveSource.appleHealth);
+      await pumpTestApp(
+        tester,
+        db: db,
+        size: const Size(400, 1400),
+        location: DiveDetailScreen.pathFor(saved.id!),
+      );
 
-    expect(find.textContaining('Apple Watch'), findsWidgets);
-  }, variant: _iOS);
+      expect(find.textContaining('Apple Watch'), findsWidgets);
+    },
+    variant: _iOS,
+  );
 }

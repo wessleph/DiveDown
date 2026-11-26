@@ -5,9 +5,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/providers.dart';
 import '../../app/theme.dart';
+import '../../domain/import/health_import.dart';
 import '../../l10n/app_localizations.dart';
 import 'dive_computer_screen.dart';
 import 'fit_import_screen.dart';
+import 'health_import_screen.dart';
 import 'last_used.dart';
 
 /// Choose where dives come from (ui-spec §5.5).
@@ -19,9 +21,6 @@ class ImportScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    void soon() =>
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(l10n.importComingSoon)));
 
     Future<void> pickFit() async {
       final file = await ref.read(importFilePickerProvider).pick();
@@ -75,12 +74,23 @@ class ImportScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           if (defaultTargetPlatform == TargetPlatform.iOS)
-            _SourceCard(
-              icon: Icons.favorite_outline,
-              title: l10n.importSourceHealth,
-              subtitle: l10n.importSourceHealthHint,
-              onTap: soon,
-            ),
+            switch (ref.watch(healthAvailabilityProvider).value) {
+              HealthAvailability.available => _SourceCard(
+                icon: Icons.favorite_outline,
+                title: l10n.importSourceHealth,
+                subtitle: l10n.importSourceHealthHint,
+                onTap: () => context.go(HealthImportScreen.path),
+              ),
+              // Depth and water temperature need iOS 16 (T6.10).
+              HealthAvailability.needsNewerIos => _SourceCard(
+                icon: Icons.favorite_outline,
+                title: l10n.importSourceHealth,
+                subtitle: l10n.importSourceHealthHint,
+                note: l10n.healthNeedsIos16,
+                onTap: null,
+              ),
+              HealthAvailability.unavailable || null => const SizedBox.shrink(),
+            },
         ],
       ),
     );
@@ -120,7 +130,9 @@ class _SourceCard extends StatelessWidget {
 
   /// A third, quieter line, e.g. „Zuletzt: EON Core, vor 3 Tagen“.
   final String? note;
-  final VoidCallback onTap;
+
+  /// Null shows the card disabled.
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +148,13 @@ class _SourceCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
-                Icon(icon, size: 32, color: theme.colorScheme.primary),
+                Icon(
+                  icon,
+                  size: 32,
+                  color: onTap == null
+                      ? theme.extension<DiveColors>()?.onSurfaceMuted
+                      : theme.colorScheme.primary,
+                ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -157,7 +175,7 @@ class _SourceCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right),
+                if (onTap != null) const Icon(Icons.chevron_right),
               ],
             ),
           ),

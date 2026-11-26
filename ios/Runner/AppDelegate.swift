@@ -18,6 +18,9 @@ import UIKit
     if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "DiveDownDevice") {
       registerDevice(messenger: registrar.messenger())
     }
+    if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "DiveDownHealth") {
+      healthDiveChannel = HealthDiveChannel(messenger: registrar.messenger())
+    }
     if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "DiveDownShare") {
       let receiver = SharedFileReceiver(messenger: registrar.messenger())
       sharedFileReceiver = receiver
@@ -27,6 +30,9 @@ import UIKit
 
   /// Kept alive here; the registrar holds scene delegates weakly.
   private var sharedFileReceiver: SharedFileReceiver?
+
+  /// Apple Health import, read only (T6); its handler holds it weakly.
+  private var healthDiveChannel: HealthDiveChannel?
 
   /// Keeps the display on during a dive computer transfer (ui-spec §5.7).
   /// Counterpart of lib/data/platform/device_channel.dart; the Bluetooth calls

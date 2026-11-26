@@ -71,6 +71,12 @@ jobs:
           uuid="$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$RUNNER_TEMP/profile.plist")"
           name="$(/usr/libexec/PlistBuddy -c 'Print :Name' "$RUNNER_TEMP/profile.plist")"
           team="$(/usr/libexec/PlistBuddy -c 'Print :TeamIdentifier:0' "$RUNNER_TEMP/profile.plist")"
+          # The app signs with HealthKit (T6.13); an older profile lacks it.
+          if ! /usr/libexec/PlistBuddy -c 'Print :Entitlements:com.apple.developer.healthkit' \
+              "$RUNNER_TEMP/profile.plist" >/dev/null 2>&1; then
+            echo "::error::Profile '$name' has no HealthKit. Regenerate it (docs/entwickler/ios-release-einrichtung.md) and update IOS_PROFILE_BASE64."
+            exit 1
+          fi
           for dir in "$HOME/Library/MobileDevice/Provisioning Profiles" \
                      "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"; do
             mkdir -p "$dir"

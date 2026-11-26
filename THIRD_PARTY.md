@@ -10,11 +10,7 @@ Liste aller übernommenen Teile (ADR 0001). Jede übernommene Datei trägt zusä
 | usb-serial-for-android v3.9.0 (`e1018ab`) | über Submersion eingebettet, unverändert, siehe `VENDORED.md` | 2026-11-20 | MIT | `packages/libdivecomputer_plugin/android/src/main/java/com/hoho/android/usbserial/` |
 | FIT-Extraktoren (`fit_constants`, `fit_message_access`, `fit_profile_extractor`, `fit_gas_extractor`, `fit_tank_extractor`, `fit_time_resolver`) und der Ablauf von `FitParserService` | Submersion `lib/features/dive_import/data/services/fit/…`, Commit `e78a87cb` | 2026-11-20 | GPL-3.0 | `lib/data/import/fit/` |
 | FIT-Test-Fixture `005_oc-trimix-two-deco-gases.fit` und der Test-Helfer `test/support/fit_builder.dart` | Submersion `test/dives/…`, `test/features/dive_import/data/services/fit_parser_service_test.dart`, Commit `e78a87cb` | 2026-11-20 | GPL-3.0 | `test/fixtures/fit/`, `test/support/` |
+| Ablauf des HealthKit-Imports (tiefster Wert je Sekunde, Temperatur und Puls zum nächsten Tiefenpunkt bis 30 s, Uhrzeit statt Zeitpunkt), neu geschrieben für DiveDowns Modell; der Swift-Kanal ist eigener Code | Submersion `lib/features/dive_import/data/services/healthkit_service.dart`, Commit `4e638982` | 2026-11-26 | GPL-3.0 | `lib/data/import/health/health_dive_mapper.dart` |
 | Schrift Manrope (Medium, SemiBold, Bold, ExtraBold), unverändert | [`googlefonts/manrope`](https://github.com/googlefonts/manrope), Commit `468c0db`, `fonts/ttf/` | 2026-11-22 | OFL-1.1 (`assets/fonts/OFL.txt`, in der App unter „Open-Source-Lizenzen“) | `assets/fonts/` |
 
 Ohne Herkunftskopf bleiben nur Dateien, in die kein Kommentar passt oder die unverändert eingebettet sind: Binär-Fixtures (`*.bin`), die libdivecomputer-Patches (`patches/*.patch`, ein Kopf würde `git am` stören), die Symlinks unter `ios/Classes/` und die usb-serial-Quellen.
-
-## Geplant (siehe ADR 0003, 0006)
-| Teil | Herkunft | Lizenz |
-|---|---|---|
-| HealthKit-Adapter | Submersion `lib/features/dive_import/…` | GPL-3.0 |
