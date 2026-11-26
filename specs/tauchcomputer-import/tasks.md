@@ -175,13 +175,38 @@ Neue Abhängigkeiten (Lizenzen am 2026-11-20 an den eingesetzten Versionen gepr�
 - Beobachtet: Die Suunto-App schreibt keine Seriennummer in `file_id`, die `sourceId` lautet dann `0:<time_created>`. Sie kennt den Zeitversatz (hier +7 h), der EON Core per BLE nicht. Die Wandzeit stimmt trotzdem überein. Ältere Tauchgänge bekommen die nächste freie Nummer (#72 für März 2026), nicht eine Nummer nach Datum.
 - Offen: echte Ocean-Fixture, iOS (Dokumenttyp FIT und „Öffnen in“, kommt mit der iOS-Pipeline), „Logs senden“ (T10).
 
-## T6: Apple Health (`data/import/health/`)
-| ID | A | W | D | Rot gesehen |
+## T6: Apple Health (`data/import/health/`, design §4.3, ui-spec §5.10, security G3, ADR 0003 Nachtrag 2026-11-26)
+
+> **Entwurf 2026-11-26, zur Abnahme.** Ersetzt die erste Fassung T6.1–T6.4 (nie rot gesehen).
+> Entschieden am 2026-11-26: eigener Swift-Kanal statt Paket `health` (ADR 0003, Nachtrag). Der Freund mit der Apple Watch Ultra testet am Gerät.
+
+**Aufbau:** Der Swift-Kanal `ios/Runner/HealthDiveChannel.swift` (`MethodChannel divedown/health`) liefert nur **Rohdaten**: Workouts vom Typ Tauchen mit UUID, Start, Ende, Zeitzone (`HKMetadataKeyTimeZone`, falls vorhanden), Gerät (Name, Modell) und die drei Reihen Tiefe (m), Wassertemperatur (°C) und Puls (1/min) als Zeit-Wert-Paare. Das Zusammenführen geschieht in Dart (`lib/data/import/health/health_dive_mapper.dart`) und ist damit hier testbar. Gelesen wird nur, nichts geschrieben.
+
+**Was wir von Submersion lernen** (`healthkit_service.dart`, GPL-3, Logik nachgebaut, Herkunft im Dateikopf):
+- iOS verrät nie, ob der Lesezugriff verweigert wurde. Ohne Zugriff kommen einfach keine Daten. Ein Zustand „Berechtigung verweigert“ lässt sich also nicht erkennen (ui-spec §5.10 wird angepasst).
+- HealthKit liefert echte Zeitpunkte. Gespeichert wird wie bei allen Quellen die Uhrzeit, die der Taucher gesehen hat (sonst ist der Tauchgang um die Zeitzone verschoben, Submersion-Issue 2810).
+- Pro Sekunde können mehrere Tiefenwerte aus verschiedenen Quellen liegen; der tiefste zählt. Temperatur und Puls werden seltener gemessen und dem nächsten Tiefenpunkt bis 30 s Abstand zugeordnet.
+- Tiefe und Wassertemperatur gibt es in HealthKit erst ab iOS 16. Die App läuft ab iOS 15.
+
+| Nr. | Ausgangslage | Aktion | Erwartet | Status |
 |---|---|---|---|---|
-| T6.1 | Fake-Health liefert Unterwasser-Workout mit Tiefe, Temp. und Puls | `fetch` | 1 `ImportedDive`, `source=appleHealth`, `sourceId`=Workout-UUID, kein Druck | |
-| T6.2 | Berechtigung verweigert | `requestPermission` | `false`, kein `fetch` | |
-| T6.3 | Workout ohne Tiefen-Samples | `fetch` | übersprungen | |
-| T6.4 | Zeitraum ohne Workouts | `fetch` | leere Liste | |
+| T6.1 | Rohdaten: Workout `7C1E…`, 10:42–11:29 UTC, Zeitzone `Africa/Cairo`, Gerät „Apple Watch“ / `Watch7,5`; Tiefe jede Sekunde (max. 18,4 m), Temperatur alle 10 s (24 → 23 °C), Puls alle 5 s | `mapHealthDive` | 1 `ImportedDive`: `source` appleHealth, `sourceId` = UUID, `start` 12:42 (Uhrzeit Kairo, als UTC gespeichert), `startInstant` 10:42 UTC, `utcOffsetS` 7200, Dauer 47 min, max. 18,4 m, Ø-Tiefe zeitgewichtet, min. Temperatur 23 °C; Samples mit Temperatur und Puls; keine Flaschen, kein Druck | |
+| T6.2 | dito, ohne Zeitzone im Workout; Telefon in `Europe/Zurich` | `mapHealthDive` | Uhrzeit und Versatz nach der Zeitzone des Telefons zum Zeitpunkt des Tauchgangs (Winterzeit +1 h) | |
+| T6.3 | Tiefenreihe unsortiert, zwei Werte in derselben Sekunde (12,0 und 12,4 m), ein Wert vor dem Start | `mapHealthDive` | sortiert, je Sekunde der tiefere Wert, Wert vor dem Start verworfen | |
+| T6.4 | Temperatur 40 s vom nächsten Tiefenpunkt entfernt; Puls 20 s | `mapHealthDive` | Temperatur dort leer, Puls übernommen | |
+| T6.5 | Workout ohne Tiefenwerte (ältere Watch oder kein Zugriff auf die Tiefe) | `mapHealthDive` | `null`, der Tauchgang wird übersprungen; gezählt als „ohne Tiefe“ | |
+| T6.6 | Fake-Kanal mit zwei Tauch-Workouts, eines davon ohne Tiefe | `HealthDiveSource.fetch(from, to)` | 1 Tauchgang; Zeitraum an den Kanal übergeben; Fehler des Kanals → `HealthReadFailure` statt Absturz | |
+| T6.7 | Logbuch mit Apple-Health-Tauchgang vom 14.11.; bzw. ohne | Zeitraum vorschlagen | „Seit letztem Import“ ab 14.11. minus 1 Tag; ohne früheren Import „Letzte 12 Monate“ | |
+| T6.8 | iOS, Health verfügbar | Import → „Apple Health“ | eigene Seite §5.10 (statt „kommt bald“) mit Vorab-Text und Hinweis „bis ca. 40 m“; „Weiter“ fragt die Berechtigung an und sucht; Treffer → Vorschau §5.9 mit Quelle „Apple Watch“; derselbe Tauchgang ein zweites Mal → als Duplikat erkannt (`source` + `sourceId`) | |
+| T6.9 | keine Tauchgänge im Zeitraum | Suche | „Keine Tauchgänge im gewählten Zeitraum gefunden.“, Hinweis auf Ultra und „Tiefe“, dazu neu: „Fehlt der Zugriff? Health-App → Profil → Apps → DiveDown.“ | |
+| T6.10 | iOS 15 bzw. Gerät ohne Health (iPad) | Import-Seite | Kachel „Apple Health“ deaktiviert mit „Benötigt iOS 16 oder neuer.“ bzw. ausgeblendet; unter Android nie sichtbar | |
+| T6.11 | importierter Tauchgang mit Puls | Detail | Kopf „Apple Watch“ mit Modell; Kennzahlen ohne Druck und SAC wie §5.3; Profil mit Chip „Puls“ (eigene Achse, Icon und Legende); ohne Puls kein Chip | |
+| T6.12 | Import mit 2 Tauchgängen | Diagnose-Protokoll | nur Anzahl Workouts, Samples, übersprungene; **keine** Tiefen-, Temperatur- oder Pulswerte (security §3) | |
+| T6.13 | `Info.plist`, `Runner.entitlements`, `project.pbxproj` | gelesen | `NSHealthShareUsageDescription` auf Deutsch; **kein** `NSHealthUpdateUsageDescription` (T20.2 bleibt); `com.apple.developer.healthkit` = true, keine Clinical Records, keine Background Delivery; `CODE_SIGN_ENTITLEMENTS` am Target Runner | |
+| T6.14 | von Hand am iPhone mit Apple Watch Ultra (Freund) | Import aus Apple Health | Berechtigungsdialog nur mit Lesen von Workouts, Tiefe, Wassertemperatur, Puls; Tauchgänge mit Profil, Zeit stimmt mit der Watch überein | |
+
+Tests (geplant): `test/data/import/health/health_dive_mapper_test.dart` (T6.1–T6.5), `test/data/import/health/health_dive_source_test.dart` (T6.6, T6.7), `test/features/import/health_import_test.dart` (T6.8–T6.10, T6.12), `test/features/logbook/heart_rate_test.dart` (T6.11), `test/tool/ios_health_config_test.dart` (T6.13).
+Fixtures: Rohdaten als JSON unter `test/fixtures/health/`, von Hand gebaut. Sobald der Freund importiert hat, ersetzen wir sie durch einen echten (anonymisierten) Tauchgang; der Export dafür kommt nicht aus dem Diagnose-Protokoll (das enthält keine Health-Werte), sondern über „Logbuch sichern“.
 
 ## T7: Luftverbrauch (`domain/metrics/sac_calculator.dart`, design §6)
 | ID | A | W | D | Rot gesehen |

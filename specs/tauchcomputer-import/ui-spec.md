@@ -213,8 +213,9 @@ Knopf unten: **„3 Tauchgänge importieren“**, die Zahl passt sich an die Aus
 
 | Zustand | Text |
 |---|---|
-| Berechtigung verweigert | „DiveDown hat keinen Zugriff auf Apple Health.“ · „Erlaube den Zugriff in der Health-App → Profil → Apps → DiveDown.“ |
-| keine Tauchgänge | „Keine Tauchgänge im gewählten Zeitraum gefunden.“ + Hinweis: „Tauchgänge werden von der Apple Watch Ultra mit der App ‚Tiefe‘ oder einer Tauch-App aufgezeichnet.“ |
+| ~~Berechtigung verweigert~~ | *Entfällt (Entwurf 2026-11-26, T6):* iOS teilt einer App nicht mit, ob der Lesezugriff verweigert wurde, es kommen dann einfach keine Daten. Der Hinweis wandert in „keine Tauchgänge“. |
+| keine Tauchgänge | „Keine Tauchgänge im gewählten Zeitraum gefunden.“ + Hinweis: „Tauchgänge werden von der Apple Watch Ultra mit der App ‚Tiefe‘ oder einer Tauch-App aufgezeichnet.“ · *neu:* „Fehlt der Zugriff? Erlaube ihn in der Health-App → Profil → Apps → DiveDown.“ |
+| iOS 15 *(neu, Entwurf 2026-11-26)* | Kachel „Apple Health“ deaktiviert, darunter „Benötigt iOS 16 oder neuer.“ (Tiefe und Wassertemperatur gibt es in Apple Health erst ab iOS 16) |
 | Hinweis Tiefe | klein: „Apple Health erfasst Tiefen nur bis ca. 40 m.“ |
 
 ### 5.11 Einstellungen
