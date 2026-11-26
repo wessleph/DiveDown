@@ -122,6 +122,14 @@ final class HealthDiveChannel {
       }
       let w = workouts[i]
       series(.underwaterDepth, .meter(), w) { depth in
+        // Without depth there is no dive. A failed depth query (no access,
+        // phone locked) is an error, not „Training ohne Tiefe“ (review W2).
+        guard let depth else {
+          DispatchQueue.main.async {
+            result(FlutterError(code: "query_failed", message: nil, details: nil))
+          }
+          return
+        }
         self.series(.waterTemperature, .degreeCelsius(), w) { temperature in
           self.series(.heartRate, bpm, w) { heartRate in
             out.append([
@@ -130,8 +138,8 @@ final class HealthDiveChannel {
               "end": Self.ms(w.endDate),
               "utcOffsetS": Self.utcOffset(w),
               "depth": depth,
-              "temperature": temperature,
-              "heartRate": heartRate,
+              "temperature": temperature ?? [],
+              "heartRate": heartRate ?? [],
             ])
             next(i + 1)
           }
@@ -142,11 +150,12 @@ final class HealthDiveChannel {
   }
 
   /// Every reading of one type during [workout], also those inside series
-  /// samples (heart rate is often stored as a series). A type that cannot be
-  /// read gives an empty list, so the others still arrive.
+  /// samples (heart rate is often stored as a series); nil when the query
+  /// failed. Readings of overlapping series outside the workout are dropped
+  /// in Dart.
   private func series(
     _ id: HKQuantityTypeIdentifier, _ unit: HKUnit, _ workout: HKWorkout,
-    _ done: @escaping ([[Double]]) -> Void
+    _ done: @escaping ([[Double]]?) -> Void
   ) {
     var points: [[Double]] = []
     var finished = false
@@ -158,7 +167,7 @@ final class HealthDiveChannel {
       guard !finished else { return }
       if error != nil {
         finished = true
-        done([])
+        done(nil)
         return
       }
       if let quantity, let interval {

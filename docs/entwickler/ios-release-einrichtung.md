@@ -113,3 +113,14 @@ Danach: *Actions* → **iOS release** → *Run workflow* auf `main` → im Lauf 
 - [ ] Interne Gruppe anlegen (**+** neben *Internal Testing*, Name `Intern`, automatische Verteilung an). **Erst danach** zeigt App Store Connect die Möglichkeit für externe Gruppen: auf die interne Gruppe klicken, dort erscheint die Option für eine externe Gruppe (Oberfläche seit 2026).
 - [ ] Externe Gruppe `Familie und Freunde` → Build hinzufügen → *Submit for Review*. Die erste Beta-Prüfung dauert meist 1–2 Tage. Danach in der Gruppe den **Public Link** einschalten und verschicken.
 - Neue Builds aus der CI müssen der externen Gruppe jeweils von Hand hinzugefügt werden; die interne Gruppe bekommt sie automatisch.
+
+## 9. Profil mit HealthKit erneuern (für den Apple-Health-Import, T6, ab 2026-11-26)
+Seit T6 signiert die App mit dem Entitlement HealthKit (`ios/Runner/Runner.entitlements`). Enthält das Profil es nicht, bricht **iOS release** schon beim Schritt „Install signing certificate and profile“ ab: „Profile '…' has no HealthKit“.
+- [ ] *Identifiers* → App-ID `io.github.wessleph.divedown` → unter *Capabilities* ist **HealthKit** angehakt (ohne „Clinical Health Records“ und „Background Delivery“).
+- [ ] *Profiles* → `DiveDown App Store` → unter *Enabled Capabilities* steht HealthKit und der Status ist **Active**. Steht dort „Invalid“ oder fehlt HealthKit: **Edit** → **Save** (bzw. ein neues Profil wie in Abschnitt 1 anlegen) → herunterladen.
+- [ ] Nur wenn ein neues Profil heruntergeladen wurde, in Git Bash im Arbeitsordner das Secret ersetzen:
+  ```bash
+  base64 -w0 DiveDown_App_Store.mobileprovision | gh secret set IOS_PROFILE_BASE64 --env release -R wessleph/DiveDown
+  ```
+- Das Zertifikat und die übrigen Secrets bleiben unverändert.
+- Health-Daten in TestFlight: Apple fragt bei der Beta-Prüfung nach dem Zweck. In *Review Notes* (Englisch) ergänzen: "The app reads underwater diving workouts (depth, water temperature, heart rate) from HealthKit to show them in the dive log. It never writes to HealthKit and sends no data anywhere."

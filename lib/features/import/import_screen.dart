@@ -140,43 +140,46 @@ class _SourceCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 88),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                Icon(
-                  icon,
-                  size: 32,
-                  color: onTap == null
-                      ? theme.extension<DiveColors>()?.onSurfaceMuted
-                      : theme.colorScheme.primary,
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title, style: theme.textTheme.titleMedium),
-                      Text(subtitle, style: theme.textTheme.bodyMedium),
-                      if (note case final n?)
-                        Text(
-                          n,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme
-                                .extension<DiveColors>()
-                                ?.onSurfaceMuted,
-                          ),
-                        ),
-                    ],
+      child: Semantics(
+        enabled: onTap != null,
+        child: InkWell(
+          onTap: onTap,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 88),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Icon(
+                    icon,
+                    size: 32,
+                    color: onTap == null
+                        ? theme.extension<DiveColors>()?.onSurfaceMuted
+                        : theme.colorScheme.primary,
                   ),
-                ),
-                if (onTap != null) const Icon(Icons.chevron_right),
-              ],
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(title, style: theme.textTheme.titleMedium),
+                        Text(subtitle, style: theme.textTheme.bodyMedium),
+                        if (note case final n?)
+                          Text(
+                            n,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme
+                                  .extension<DiveColors>()
+                                  ?.onSurfaceMuted,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  if (onTap != null) const Icon(Icons.chevron_right),
+                ],
+              ),
             ),
           ),
         ),

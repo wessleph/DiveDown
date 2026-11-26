@@ -208,7 +208,7 @@ Knopf unten: **„3 Tauchgänge importieren“**, die Zahl passt sich an die Aus
 | Erfolg | Zurück zum Logbuch, Snackbar (§5.2) |
 
 ### 5.10 Apple Health (nur iOS)
-**Ablauf:** Vorab-Erklärung → Health-Berechtigung (System) → Zeitraum wählen (Standard: „Seit letztem Import“ bzw. „Letzte 12 Monate“) → Suche → Vorschau (§5.9).
+**Ablauf** *(geändert 2026-11-26, T6)*: Vorab-Erklärung und Zeitraum auf einer Seite (Standard: „Seit letztem Import (ab …)“ bzw. „Letzte 12 Monate“) → **„Tauchgänge suchen“** → beim ersten Mal die Health-Berechtigung (System) → Suche → Vorschau (§5.9). Die Berechtigung kommt erst beim Suchen, damit der Nutzer vorher sieht, wozu sie dient, und ein Schritt entfällt; iOS zeigt den Dialog ohnehin nur einmal.
 - Vorab-Text: „DiveDown liest Tauchgänge deiner Apple Watch aus Apple Health: Tiefe, Wassertemperatur und Puls. DiveDown schreibt nichts in Apple Health.“
 
 | Zustand | Text |

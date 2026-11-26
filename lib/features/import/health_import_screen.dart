@@ -8,6 +8,9 @@ import 'package:intl/intl.dart';
 import '../../app/bottom_action.dart';
 import '../../app/providers.dart';
 import '../../app/theme.dart';
+import '../../data/import/health/store_health_dive_source.dart'
+    show healthLogCategory;
+import '../../domain/diagnostics/diagnostic_log.dart';
 import '../../domain/import/health_import.dart';
 import '../../domain/import/import_service.dart';
 import '../../domain/import/imported_dive.dart';
@@ -75,6 +78,17 @@ class _HealthImportScreenState extends ConsumerState<HealthImportScreen> {
       }
     } on HealthReadFailure {
       result = null;
+    } catch (e) {
+      // Anything else (database, preview) must not leave the search hanging
+      // (review W1). Only the type goes to the log, no data.
+      result = null;
+      await ref
+          .read(diagnosticLogProvider)
+          .log(
+            healthLogCategory,
+            LogLevel.error,
+            'search failed: ${e.runtimeType}',
+          );
     }
     _slow?.cancel();
     if (!mounted || run != _run) return;
@@ -183,6 +197,7 @@ class _HealthImportScreenState extends ConsumerState<HealthImportScreen> {
                 if (since != null)
                   RadioListTile<_Period>(
                     contentPadding: EdgeInsets.zero,
+                    enabled: !_searching,
                     value: _Period.sinceLast,
                     title: Text(
                       l10n.healthPeriodSince(
@@ -192,6 +207,7 @@ class _HealthImportScreenState extends ConsumerState<HealthImportScreen> {
                   ),
                 RadioListTile<_Period>(
                   contentPadding: EdgeInsets.zero,
+                  enabled: !_searching,
                   value: _Period.year,
                   title: Text(l10n.healthPeriodYear),
                 ),

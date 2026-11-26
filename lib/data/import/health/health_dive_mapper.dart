@@ -28,7 +28,9 @@ ImportedDive? mapHealthDive(HealthWorkout workout) {
   final deepest = <int, double>{};
   for (final p in workout.depth) {
     final ms = p.at.toUtc().difference(start).inMilliseconds;
-    if (ms < 0) continue;
+    // Overlapping series can reach before the start or past the end
+    // (review W3).
+    if (ms < 0 || ms > durationS * 1000) continue;
     final second = ms ~/ 1000;
     final known = deepest[second];
     if (known == null || p.value > known) deepest[second] = p.value;

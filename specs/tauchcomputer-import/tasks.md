@@ -180,7 +180,7 @@ Neue Abhängigkeiten (Lizenzen am 2026-11-20 an den eingesetzten Versionen gepr�
 > **Abgenommen am 2026-11-26** (mit den drei Empfehlungen: iOS 15 Kachel deaktiviert, Workouts ohne Tiefe überspringen, Zeitraum „Seit letztem Import“ bzw. „Letzte 12 Monate“). Ersetzt die erste Fassung T6.1–T6.4 (nie rot gesehen).
 > Entschieden am 2026-11-26: eigener Swift-Kanal statt Paket `health` (ADR 0003, Nachtrag). Der Freund mit der Apple Watch Ultra testet am Gerät.
 
-**Aufbau:** Der Swift-Kanal `ios/Runner/HealthDiveChannel.swift` (`MethodChannel divedown/health`) liefert nur **Rohdaten**: Workouts vom Typ Tauchen mit UUID, Start, Ende, Zeitzone (`HKMetadataKeyTimeZone`, falls vorhanden), Gerät (Name, Modell) und die drei Reihen Tiefe (m), Wassertemperatur (°C) und Puls (1/min) als Zeit-Wert-Paare. Das Zusammenführen geschieht in Dart (`lib/data/import/health/health_dive_mapper.dart`) und ist damit hier testbar. Gelesen wird nur, nichts geschrieben.
+**Aufbau:** Der Swift-Kanal `ios/Runner/HealthDiveChannel.swift` (`MethodChannel io.github.wessleph.divedown/health`) liefert nur **Rohdaten**: Workouts vom Typ Tauchen mit UUID, Start, Ende, dem Versatz zu UTC (aus `HKMetadataKeyTimeZone`, sonst der Zeitzone des Telefons) und die drei Reihen Tiefe (m), Wassertemperatur (°C) und Puls (1/min) als Zeit-Wert-Paare. Das Zusammenführen geschieht in Dart (`lib/data/import/health/health_dive_mapper.dart`) und ist damit hier testbar. Gelesen wird nur, nichts geschrieben.
 
 **Was wir von Submersion lernen** (`healthkit_service.dart`, GPL-3, Logik nachgebaut, Herkunft im Dateikopf):
 - iOS verrät nie, ob der Lesezugriff verweigert wurde. Ohne Zugriff kommen einfach keine Daten. Ein Zustand „Berechtigung verweigert“ lässt sich also nicht erkennen (ui-spec §5.10 wird angepasst).
@@ -882,3 +882,12 @@ Test: `test/features/keyboard_actions_test.dart` (alle mit `TargetPlatform.iOS`,
 - W3: `health_dive_mapper_test.dart` „T6.3 readings after the end are dropped“: ✅ rot, Sample bei 130 s trotz Ende 100 s.
 - N4: T6.10 prüft zusätzlich `Semantics(enabled: false)`: ✅ rot, Zustand fehlt.
 - W2 (Tiefenabfrage scheitert → als „ohne Tiefe“ gezählt) betrifft nur die Swift-Seite; Dart behandelt `query_failed` schon als `HealthReadFailure` (T6.2). Nachweis über T6.13 (Zeichenkette im Swift-Code) und die CI-Kompilierung.
+
+**Review-Befunde behoben (2026-11-26):**
+- [x] W1: `_search` fängt jeden Fehler, zeigt „Apple Health konnte nicht gelesen werden.“ mit „Erneut versuchen“ und protokolliert nur den Typ → Test grün.
+- [x] W2: Scheitert in Swift die Tiefenabfrage, kommt `query_failed` (→ `HealthReadFailure`) statt eines leeren Workouts; Temperatur und Puls bleiben bei einem Fehler leer. Nachweis: CI-Kompilierung.
+- [x] W3: `mapHealthDive` verwirft Tiefenwerte nach dem Ende → Test grün.
+- [x] N2: ui-spec §5.10 beschreibt den Ablauf mit der Berechtigung beim Suchen und die Begründung. N3: Kanalname und Inhalt oben korrigiert. N4: deaktivierte Kachel mit `Semantics(enabled: false)` → Test grün. N5: Zeitraum während der Suche gesperrt.
+- [x] Ins Repo: `docs/entwickler/apple-watch-test.md` (Anleitung für T6.14), `ios-release-einrichtung.md` §9 (Profil mit HealthKit erneuern, Review Notes).
+- Bewusst offen: N1 (ohne Zeitzone im Workout gilt die Zeitzone des Telefons beim Import, z. B. nach der Heimreise; die Watch speichert sie bei „Tiefe“ in der Regel), N6 (weitere Randfälle in Tests), N7 (Pulsachse ohne Einheit, die Legende „Puls“ und das Werte-Feld „/min“ nennen sie), N8.
+- Gesamt: `flutter test` 532/532, `flutter analyze` ohne Befund, Format sauber.
