@@ -23,6 +23,8 @@ import '../data/local/drift_dive_computer_repository.dart';
 import '../data/local/drift_dive_repository.dart';
 import '../data/local/drift_equipment_repository.dart';
 import '../data/local/drift_site_repository.dart';
+import '../data/import/health/store_health_dive_source.dart';
+import '../data/platform/health_channel.dart';
 import '../data/platform/device_channel.dart';
 import '../data/platform/email_feedback_mailer.dart';
 import '../data/platform/permission_bluetooth_access.dart';
@@ -35,6 +37,7 @@ import '../domain/dive/dive_repository.dart';
 import '../domain/dive/diver.dart';
 import '../domain/equipment/equipment.dart';
 import '../domain/feedback/feedback_mail.dart';
+import '../domain/import/health_import.dart';
 import '../domain/import/bluetooth_access.dart';
 import '../domain/import/dive_computer_import.dart';
 import '../domain/import/dive_computer_registry.dart';
@@ -446,6 +449,19 @@ final sharedFilesProvider = Provider<SharedFiles>(
 /// Each file shared with DiveDown, as it arrives.
 final sharedFileEventsProvider = StreamProvider<PickResult>(
   (ref) => ref.watch(sharedFilesProvider).incoming,
+);
+
+/// Apple Health (ui-spec §5.10, T6); only iOS answers.
+final healthDiveSourceProvider = Provider<HealthDiveSource>(
+  (ref) => StoreHealthDiveSource(
+    const ChannelHealthStore(),
+    log: ref.watch(diagnosticLogProvider),
+  ),
+);
+
+/// Whether the Apple Health tile is shown and enabled (T6.10).
+final healthAvailabilityProvider = FutureProvider<HealthAvailability>(
+  (ref) => ref.watch(healthDiveSourceProvider).availability(),
 );
 
 final importServiceProvider = Provider<ImportService>(

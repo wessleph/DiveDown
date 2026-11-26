@@ -1198,4 +1198,66 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get feedbackClose => 'Schließen';
+
+  @override
+  String get healthIntro =>
+      'DiveDown liest Tauchgänge deiner Apple Watch aus Apple Health: Tiefe, Wassertemperatur und Puls. DiveDown schreibt nichts in Apple Health.';
+
+  @override
+  String get healthDepthLimit =>
+      'Apple Health erfasst Tiefen nur bis ca. 40 m.';
+
+  @override
+  String get healthPeriodTitle => 'ZEITRAUM';
+
+  @override
+  String healthPeriodSince(String date) {
+    return 'Seit letztem Import (ab $date)';
+  }
+
+  @override
+  String get healthPeriodYear => 'Letzte 12 Monate';
+
+  @override
+  String get healthSearch => 'Tauchgänge suchen';
+
+  @override
+  String get healthSearching => 'Suche in Apple Health …';
+
+  @override
+  String get healthNone => 'Keine Tauchgänge im gewählten Zeitraum gefunden.';
+
+  @override
+  String get healthNoneHint =>
+      'Tauchgänge werden von der Apple Watch Ultra mit der App „Tiefe“ oder einer Tauch-App aufgezeichnet.';
+
+  @override
+  String get healthNoneAccess =>
+      'Fehlt der Zugriff? Erlaube ihn in der Health-App → Profil → Apps → DiveDown.';
+
+  @override
+  String get healthNeedsIos16 => 'Benötigt iOS 16 oder neuer.';
+
+  @override
+  String get healthFailed => 'Apple Health konnte nicht gelesen werden.';
+
+  @override
+  String healthSkippedNoDepth(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Trainings ohne Tiefe übersprungen.',
+      one: '1 Training ohne Tiefe übersprungen.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get previewSourceHealth => 'Aus Apple Health';
+
+  @override
+  String get chipPulse => 'Puls';
+
+  @override
+  String get valuePulse => 'Puls';
 }

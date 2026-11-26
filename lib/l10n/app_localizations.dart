@@ -2121,6 +2121,102 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Schließen'**
   String get feedbackClose;
+
+  /// No description provided for @healthIntro.
+  ///
+  /// In de, this message translates to:
+  /// **'DiveDown liest Tauchgänge deiner Apple Watch aus Apple Health: Tiefe, Wassertemperatur und Puls. DiveDown schreibt nichts in Apple Health.'**
+  String get healthIntro;
+
+  /// No description provided for @healthDepthLimit.
+  ///
+  /// In de, this message translates to:
+  /// **'Apple Health erfasst Tiefen nur bis ca. 40 m.'**
+  String get healthDepthLimit;
+
+  /// No description provided for @healthPeriodTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'ZEITRAUM'**
+  String get healthPeriodTitle;
+
+  /// No description provided for @healthPeriodSince.
+  ///
+  /// In de, this message translates to:
+  /// **'Seit letztem Import (ab {date})'**
+  String healthPeriodSince(String date);
+
+  /// No description provided for @healthPeriodYear.
+  ///
+  /// In de, this message translates to:
+  /// **'Letzte 12 Monate'**
+  String get healthPeriodYear;
+
+  /// No description provided for @healthSearch.
+  ///
+  /// In de, this message translates to:
+  /// **'Tauchgänge suchen'**
+  String get healthSearch;
+
+  /// No description provided for @healthSearching.
+  ///
+  /// In de, this message translates to:
+  /// **'Suche in Apple Health …'**
+  String get healthSearching;
+
+  /// No description provided for @healthNone.
+  ///
+  /// In de, this message translates to:
+  /// **'Keine Tauchgänge im gewählten Zeitraum gefunden.'**
+  String get healthNone;
+
+  /// No description provided for @healthNoneHint.
+  ///
+  /// In de, this message translates to:
+  /// **'Tauchgänge werden von der Apple Watch Ultra mit der App „Tiefe“ oder einer Tauch-App aufgezeichnet.'**
+  String get healthNoneHint;
+
+  /// No description provided for @healthNoneAccess.
+  ///
+  /// In de, this message translates to:
+  /// **'Fehlt der Zugriff? Erlaube ihn in der Health-App → Profil → Apps → DiveDown.'**
+  String get healthNoneAccess;
+
+  /// No description provided for @healthNeedsIos16.
+  ///
+  /// In de, this message translates to:
+  /// **'Benötigt iOS 16 oder neuer.'**
+  String get healthNeedsIos16;
+
+  /// No description provided for @healthFailed.
+  ///
+  /// In de, this message translates to:
+  /// **'Apple Health konnte nicht gelesen werden.'**
+  String get healthFailed;
+
+  /// No description provided for @healthSkippedNoDepth.
+  ///
+  /// In de, this message translates to:
+  /// **'{count, plural, =1{1 Training ohne Tiefe übersprungen.} other{{count} Trainings ohne Tiefe übersprungen.}}'**
+  String healthSkippedNoDepth(int count);
+
+  /// No description provided for @previewSourceHealth.
+  ///
+  /// In de, this message translates to:
+  /// **'Aus Apple Health'**
+  String get previewSourceHealth;
+
+  /// No description provided for @chipPulse.
+  ///
+  /// In de, this message translates to:
+  /// **'Puls'**
+  String get chipPulse;
+
+  /// No description provided for @valuePulse.
+  ///
+  /// In de, this message translates to:
+  /// **'Puls'**
+  String get valuePulse;
 }
 
 class _AppLocalizationsDelegate
