@@ -66,6 +66,27 @@ void main() {
     expect(dive.maxDepthM, 12.4);
   });
 
+  test('T6.3 readings after the end are dropped (review W3)', () {
+    final s = elphinstoneStart;
+    DateTime at(int t) => s.add(Duration(seconds: t));
+    final dive = mapHealthDive(
+      HealthWorkout(
+        uuid: 'u',
+        start: s,
+        end: at(100),
+        utcOffsetS: 0,
+        depth: [
+          HealthPoint(at(0), 0),
+          HealthPoint(at(100), 3),
+          HealthPoint(at(130), 25), // an overlapping series after the dive
+        ],
+      ),
+    )!;
+
+    expect([for (final x in dive.samples) x.timeS], [0, 100]);
+    expect(dive.maxDepthM, 3);
+  });
+
   test('T6.4 temperature and heart rate only within 30 s', () {
     final s = elphinstoneStart;
     DateTime at(int t) => s.add(Duration(seconds: t));

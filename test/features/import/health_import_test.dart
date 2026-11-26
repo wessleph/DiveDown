@@ -20,6 +20,7 @@ class _FakeHealth implements HealthDiveSource {
   List<ImportedDive> dives = const [];
   int skipped = 0;
   bool fail = false;
+  Object? unexpected;
   int permissionRequests = 0;
   final asked = <({DateTime from, DateTime to})>[];
 
@@ -36,6 +37,7 @@ class _FakeHealth implements HealthDiveSource {
   }) async {
     asked.add((from: from, to: to));
     if (fail) throw const HealthReadFailure('query_failed');
+    if (unexpected case final e?) throw e;
     return HealthFetchResult(dives, skippedWithoutDepth: skipped);
   }
 }
@@ -194,11 +196,39 @@ void main() {
     });
   }, variant: _iOS);
 
+  testWidgets('T6.9 any other error also ends the search (review W1)', (
+    tester,
+  ) async {
+    await withClock(Clock.fixed(_now), () async {
+      final (_, _, health) = await _open(tester);
+      health.unexpected = StateError('database closed');
+      await _tap(tester, find.text('Apple Health'));
+      await _tap(tester, find.text('Tauchgänge suchen'));
+
+      expect(
+        find.text('Apple Health konnte nicht gelesen werden.'),
+        findsOneWidget,
+      );
+      final retry = tester.widget<ButtonStyleButton>(
+        find.ancestor(
+          of: find.text('Erneut versuchen'),
+          matching: find.byWidgetPredicate((w) => w is ButtonStyleButton),
+        ),
+      );
+      expect(retry.onPressed, isNotNull);
+    });
+  }, variant: _iOS);
+
   testWidgets('T6.10 iOS 15: tile disabled with a hint', (tester) async {
     await _open(tester, answer: HealthAvailability.needsNewerIos);
 
     expect(find.text('Apple Health'), findsOneWidget);
     expect(find.text('Benötigt iOS 16 oder neuer.'), findsOneWidget);
+    // Screen readers say it is off (review N4).
+    expect(
+      tester.getSemantics(find.text('Apple Health')),
+      isSemantics(isEnabled: false, hasEnabledState: true),
+    );
     await _tap(tester, find.text('Apple Health'));
     expect(currentLocation(tester), ImportScreen.path);
     expect(find.text('Tauchgänge suchen'), findsNothing);

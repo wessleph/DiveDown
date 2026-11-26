@@ -876,3 +876,9 @@ Ursache: Der Knopf liegt in `Scaffold.bottomNavigationBar`. Flutter verkleinert 
 - Gesamt: `flutter test` 497/497, `flutter analyze` ohne Befund, Format sauber. T36.6 steht noch aus (nächster TestFlight-Build).
 
 Test: `test/features/keyboard_actions_test.dart` (alle mit `TargetPlatform.iOS`, Tastatur über `tester.view.viewInsets`).
+
+**Review (Phase 60, 2026-11-26, `review.md`):** keine kritischen Befunde. Tests zu den wichtigen Befunden, alle rot gesehen:
+- W1: `health_import_test.dart` „T6.9 any other error also ends the search“: ✅ rot, `StateError` unbehandelt, Suche bleibt hängen.
+- W3: `health_dive_mapper_test.dart` „T6.3 readings after the end are dropped“: ✅ rot, Sample bei 130 s trotz Ende 100 s.
+- N4: T6.10 prüft zusätzlich `Semantics(enabled: false)`: ✅ rot, Zustand fehlt.
+- W2 (Tiefenabfrage scheitert → als „ohne Tiefe“ gezählt) betrifft nur die Swift-Seite; Dart behandelt `query_failed` schon als `HealthReadFailure` (T6.2). Nachweis über T6.13 (Zeichenkette im Swift-Code) und die CI-Kompilierung.
