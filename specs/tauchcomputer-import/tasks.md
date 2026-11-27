@@ -1021,6 +1021,8 @@ Tests: `test/domain/feedback/feedback_mail_test.dart`, `test/features/settings/f
 
 **Release 2026-11-27:** CI auf `main` grün (Lauf 45999396627, `af79f26`), iOS-Release-Lauf 46006424840 grün: signiert, gebaut und zu TestFlight hochgeladen mit T7.3 und T37–T41 (Schema v3). Noch nicht am Handy angesehen.
 
+**Am Gerät geprüft (2026-11-27):** Build 142 aus dem internen Test von Google Play auf dem S25 Ultra vom Nutzer durchgesehen (T7.3, T37–T41): „funktioniert soweit alles“. Auf dem iPhone (TestFlight, `af79f26`) die Feedback-Mail mit der neuen Adresse `divedown-app@proton.me` geprüft (T41).
+
 ## T42: Android über den internen Test von Google Play (ADR 0005, Nachtrag 2026-11-27; security.md G6)
 
 Entschieden am 2026-11-27: Familie und Freunde installieren DiveDown unter Android über den internen Test. Der bestehende Schlüssel `divedown` (T33) wird App-Signaturschlüssel bei Google, hochgeladen wird mit einem **eigenen, neuen Upload-Schlüssel**. Damit gibt es am PC zwei Schlüssel: die APK wird weiter mit `divedown` signiert (`android/key.properties`), das App-Bundle für Google mit dem Upload-Schlüssel (`android/upload-key.properties`). Welcher gilt, hängt am Gradle-Task: Wird ein App-Bundle gebaut (`bundle…`), nimmt der Build-Typ `release` die Signatur `upload`, sonst `release`.
