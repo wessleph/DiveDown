@@ -81,9 +81,15 @@ class DriftAppSettings implements AppSettings {
       );
 
   @override
-  Future<List<ProfileLayer>?> profileLayers() => throw UnimplementedError();
+  Future<List<ProfileLayer>?> profileLayers() async {
+    final raw = await _get(profileLayersKey);
+    if (raw == null) return null;
+    final byName = ProfileLayer.values.asNameMap();
+    // Names of other app versions (e.g. the removed `ndl`) are skipped.
+    return [for (final name in raw.split(',')) ?byName[name.trim()]];
+  }
 
   @override
   Future<void> setProfileLayers(List<ProfileLayer> layers) =>
-      throw UnimplementedError();
+      _set(profileLayersKey, layers.map((l) => l.name).join(','));
 }

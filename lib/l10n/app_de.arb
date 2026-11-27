@@ -129,7 +129,7 @@
   },
 
   "welcomeTitle": "Willkommen bei DiveDown",
-  "welcomeBody": "Wer taucht? Du kannst später weitere Taucher hinzufügen.",
+  "welcomeBody": "Wer taucht? Den Namen kannst du später in den Einstellungen ändern.",
   "welcomeName": "Name",
   "welcomeNameMissing": "Bitte gib einen Namen ein.",
   "welcomeStart": "Los geht’s",

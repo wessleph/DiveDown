@@ -939,3 +939,9 @@ Regel fürs Merken: Gespeichert werden die eingeschalteten Ebenen (`app_meta` `p
 
 Tests: `test/features/onboarding/welcome_test.dart` (T38.1), `test/data/local/settings_data_test.dart` (T38.2), `test/features/logbook/profile_chart_test.dart` Gruppe T38 (T38.3–T38.6). Stubs: `ProfileLayer`, `AppSettings.profileLayers`/`setProfileLayers`.
 
+
+**Umgesetzt (2026-11-27), T38:**
+- [x] Begrüßung: „Wer taucht? Den Namen kannst du später in den Einstellungen ändern.“ → T38.1 grün.
+- [x] `ProfileLayer` (domain), `DriftAppSettings.profileLayers`/`setProfileLayers` (`app_meta` `profile_layers`, unbekannte Namen übersprungen), `profileLayersProvider` → T38.2 grün.
+- [x] `ProfileChart` liest die gemerkte Wahl (Regel oben), Antippen speichert sie; gilt auch im Vollbild → T38.3–T38.6 grün, T22.10/T22.11, T37 und T6.11 weiter grün.
+- Gesamt: `flutter test` 546/546, `flutter analyze` ohne Befund.

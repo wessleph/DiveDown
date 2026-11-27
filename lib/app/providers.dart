@@ -108,6 +108,24 @@ final themeModeProvider = AsyncNotifierProvider<ThemeModeSetting, AppThemeMode>(
   ThemeModeSetting.new,
 );
 
+/// The profile layers last switched on, null until the diver changes them
+/// (ui-spec §6, T38).
+final profileLayersProvider =
+    AsyncNotifierProvider<ProfileLayersSetting, List<ProfileLayer>?>(
+      ProfileLayersSetting.new,
+    );
+
+class ProfileLayersSetting extends AsyncNotifier<List<ProfileLayer>?> {
+  @override
+  Future<List<ProfileLayer>?> build() =>
+      ref.watch(appSettingsProvider).profileLayers();
+
+  Future<void> set(List<ProfileLayer> layers) async {
+    state = AsyncData(List.unmodifiable(layers));
+    await ref.read(appSettingsProvider).setProfileLayers(layers);
+  }
+}
+
 class ThemeModeSetting extends AsyncNotifier<AppThemeMode> {
   @override
   Future<AppThemeMode> build() => ref.watch(appSettingsProvider).themeMode();

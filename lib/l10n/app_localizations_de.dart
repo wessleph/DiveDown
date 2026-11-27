@@ -272,7 +272,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get welcomeBody =>
-      'Wer taucht? Du kannst später weitere Taucher hinzufügen.';
+      'Wer taucht? Den Namen kannst du später in den Einstellungen ändern.';
 
   @override
   String get welcomeName => 'Name';

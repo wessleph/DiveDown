@@ -547,7 +547,7 @@ abstract class AppLocalizations {
   /// No description provided for @welcomeBody.
   ///
   /// In de, this message translates to:
-  /// **'Wer taucht? Du kannst später weitere Taucher hinzufügen.'**
+  /// **'Wer taucht? Den Namen kannst du später in den Einstellungen ändern.'**
   String get welcomeBody;
 
   /// No description provided for @welcomeName.
