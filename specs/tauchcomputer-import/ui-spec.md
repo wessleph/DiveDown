@@ -265,12 +265,12 @@ Info: „Hilf bei der Fehlersuche: Schicke das Protokoll an den Entwickler. Es e
 - leer: „Noch keine Einträge im Protokoll.“
 
 ### 5.14 Feedback: Fehler melden, Verbesserung vorschlagen *(neu 2026-11-24, T35)*
-Die App hat keine Internet-Berechtigung (security.md §4): Sie **sendet nichts selbst**, sondern bereitet einen **Mail-Entwurf** an `divedown-app@proton.ch` vor, den die Mail-App des Handys öffnet. Der Nutzer sieht ihn vor dem Senden und kann ihn ändern oder verwerfen.
+Die App hat keine Internet-Berechtigung (security.md §4): Sie **sendet nichts selbst**, sondern bereitet einen **Mail-Entwurf** an `divedown-app@proton.me` vor, den die Mail-App des Handys öffnet. Der Nutzer sieht ihn vor dem Senden und kann ihn ändern oder verwerfen.
 
 **„Fehler melden“** (eigene Seite, Titel „Fehler melden“):
 - Textfeld **„Was ist passiert?“*** (mehrzeilig, Hinweis „z. B. Beim Übertragen vom EON Core bricht die App nach drei Tauchgängen ab.“; leer → „Bitte beschreibe kurz, was passiert ist.“)
 - Schalter **„Diagnose-Protokoll anhängen“** (Standard an), darunter klein „Enthält keine Orte, Namen oder Gesundheitswerte.“ und der Link **„Protokoll ansehen“** (öffnet §5.13)
-- Knopf **„Mail vorbereiten“**. Kleiner Text darunter: „Deine Mail-App öffnet sich mit der Nachricht an divedown-app@proton.ch. Gesendet wird erst, wenn du dort auf Senden tippst.“
+- Knopf **„Mail vorbereiten“**. Kleiner Text darunter: „Deine Mail-App öffnet sich mit der Nachricht an divedown-app@proton.me. Gesendet wird erst, wenn du dort auf Senden tippst.“
 - Mail: Betreff „DiveDown: Fehler“, Text = Beschreibung, darunter eine Trennlinie und die Gerätedaten wie im Kopf des Diagnose-Protokolls (App-Version und Build, Betriebssystem, Modell, libdivecomputer). Mit Protokoll hängt die Datei `DiveDown-Diagnose-<Datum>.txt` an (wie bei „Diagnose-Logs teilen“).
 
 **„Verbesserung vorschlagen“** (eigene Seite, Titel „Verbesserung vorschlagen“):
@@ -279,7 +279,7 @@ Die App hat keine Internet-Berechtigung (security.md §4): Sie **sendet nichts s
 
 | Zustand | Darstellung |
 |---|---|
-| keine Mail-App | Dialog „Keine Mail-App gefunden“ · „Schreib an divedown-app@proton.ch.“ · **„Adresse kopieren“** (Snackbar „Adresse kopiert“) / „Schließen“ |
+| keine Mail-App | Dialog „Keine Mail-App gefunden“ · „Schreib an divedown-app@proton.me.“ · **„Adresse kopieren“** (Snackbar „Adresse kopiert“) / „Schließen“ |
 | Protokoll leer | Schalter ausgeblendet, Mail ohne Anhang |
 | zurück aus der Mail-App | Die Seite bleibt mit dem Text offen (man weiß nicht, ob gesendet wurde) |
 

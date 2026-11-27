@@ -16,7 +16,7 @@ lang: de
 
 ## 2. Verantwortlich
 Philipp Wessler, Schweiz
-E-Mail: [divedown-app@proton.ch](mailto:divedown-app@proton.ch)
+E-Mail: [divedown-app@proton.me](mailto:divedown-app@proton.me)
 
 DiveDown ist ein privates, nicht kommerzielles Open-Source-Projekt (Lizenz GPL-3.0).
 

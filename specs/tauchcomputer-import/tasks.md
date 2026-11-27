@@ -1015,3 +1015,5 @@ Fehler: Die App schickt Feedback an `divedown-app@proton.ch`. Richtig ist **`div
 
 Tests: `test/domain/feedback/feedback_mail_test.dart`, `test/features/settings/feedback_test.dart` (Adresse ersetzt).
 
+
+**Umgesetzt (2026-11-27), T41:** `feedbackAddress` = `divedown-app@proton.me`, dazu ui-spec §5.14 und `docs/datenschutz.md` (die Datenschutzerklärung auf GitHub Pages zeigt die Adresse nach dem Merge nach `main`) → T41.1 grün. Die Einträge zu T35 oben bleiben als Verlauf mit der alten Adresse stehen. Gesamt: `flutter test` alle grün, `flutter analyze` ohne Befund.
