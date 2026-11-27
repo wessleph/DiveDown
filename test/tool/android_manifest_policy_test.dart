@@ -82,6 +82,9 @@ void main() {
       'READ_CONTACTS',
       'RECORD_AUDIO',
       'READ_EXTERNAL_STORAGE',
+      // T43.12: the share photo comes from the system picker.
+      'READ_MEDIA_IMAGES',
+      'READ_MEDIA_VISUAL_USER_SELECTED',
     ]) {
       final problems = checkAndroidManifest(
         _manifest(

@@ -2505,6 +2505,144 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Die Statistik konnte nicht geladen werden.'**
   String get statsLoadError;
+
+  /// No description provided for @shareDiveTooltip.
+  ///
+  /// In de, this message translates to:
+  /// **'Tauchgang teilen'**
+  String get shareDiveTooltip;
+
+  /// No description provided for @shareTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Tauchgang teilen'**
+  String get shareTitle;
+
+  /// No description provided for @shareAction.
+  ///
+  /// In de, this message translates to:
+  /// **'Teilen'**
+  String get shareAction;
+
+  /// No description provided for @sharePickPhoto.
+  ///
+  /// In de, this message translates to:
+  /// **'Foto wählen'**
+  String get sharePickPhoto;
+
+  /// No description provided for @shareRemovePhoto.
+  ///
+  /// In de, this message translates to:
+  /// **'Foto entfernen'**
+  String get shareRemovePhoto;
+
+  /// No description provided for @shareSize.
+  ///
+  /// In de, this message translates to:
+  /// **'Größe'**
+  String get shareSize;
+
+  /// No description provided for @shareOpacity.
+  ///
+  /// In de, this message translates to:
+  /// **'Deckkraft'**
+  String get shareOpacity;
+
+  /// No description provided for @sharePosition.
+  ///
+  /// In de, this message translates to:
+  /// **'Position'**
+  String get sharePosition;
+
+  /// No description provided for @sharePositionTop.
+  ///
+  /// In de, this message translates to:
+  /// **'Oben'**
+  String get sharePositionTop;
+
+  /// No description provided for @sharePositionMiddle.
+  ///
+  /// In de, this message translates to:
+  /// **'Mitte'**
+  String get sharePositionMiddle;
+
+  /// No description provided for @sharePositionBottom.
+  ///
+  /// In de, this message translates to:
+  /// **'Unten'**
+  String get sharePositionBottom;
+
+  /// No description provided for @shareSizeValue.
+  ///
+  /// In de, this message translates to:
+  /// **'Größe {percent} Prozent'**
+  String shareSizeValue(int percent);
+
+  /// No description provided for @shareOpacityValue.
+  ///
+  /// In de, this message translates to:
+  /// **'Deckkraft {percent} Prozent'**
+  String shareOpacityValue(int percent);
+
+  /// No description provided for @sharePreviewPhoto.
+  ///
+  /// In de, this message translates to:
+  /// **'Vorschau: Tauchangaben auf Foto'**
+  String get sharePreviewPhoto;
+
+  /// No description provided for @sharePreviewPlain.
+  ///
+  /// In de, this message translates to:
+  /// **'Vorschau: Tauchangaben auf farbiger Fläche'**
+  String get sharePreviewPlain;
+
+  /// No description provided for @shareCardSemantics.
+  ///
+  /// In de, this message translates to:
+  /// **'Tauchangaben, Position {position}, Größe {percent} %'**
+  String shareCardSemantics(String position, int percent);
+
+  /// No description provided for @sharePhotoFailed.
+  ///
+  /// In de, this message translates to:
+  /// **'Das Foto konnte nicht geöffnet werden.'**
+  String get sharePhotoFailed;
+
+  /// No description provided for @shareFailed.
+  ///
+  /// In de, this message translates to:
+  /// **'Teilen hat nicht geklappt. Versuch es noch einmal.'**
+  String get shareFailed;
+
+  /// No description provided for @shareCardFallbackTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Tauchgang #{number}'**
+  String shareCardFallbackTitle(int number);
+
+  /// No description provided for @shareCardMax.
+  ///
+  /// In de, this message translates to:
+  /// **'max.'**
+  String get shareCardMax;
+
+  /// No description provided for @shareCardDuration.
+  ///
+  /// In de, this message translates to:
+  /// **'Dauer'**
+  String get shareCardDuration;
+
+  /// No description provided for @shareCardWater.
+  ///
+  /// In de, this message translates to:
+  /// **'Wasser'**
+  String get shareCardWater;
+
+  /// No description provided for @shareCardBrand.
+  ///
+  /// In de, this message translates to:
+  /// **'DiveDown'**
+  String get shareCardBrand;
 }
 
 class _AppLocalizationsDelegate

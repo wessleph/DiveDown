@@ -600,5 +600,43 @@
   "@visibilityDetail": {
     "placeholders": { "level": { "type": "String" } }
   },
-  "statsLoadError": "Die Statistik konnte nicht geladen werden."
+  "statsLoadError": "Die Statistik konnte nicht geladen werden.",
+  "shareDiveTooltip": "Tauchgang teilen",
+  "shareTitle": "Tauchgang teilen",
+  "shareAction": "Teilen",
+  "sharePickPhoto": "Foto wählen",
+  "shareRemovePhoto": "Foto entfernen",
+  "shareSize": "Größe",
+  "shareOpacity": "Deckkraft",
+  "sharePosition": "Position",
+  "sharePositionTop": "Oben",
+  "sharePositionMiddle": "Mitte",
+  "sharePositionBottom": "Unten",
+  "shareSizeValue": "Größe {percent} Prozent",
+  "@shareSizeValue": {
+    "placeholders": { "percent": { "type": "int" } }
+  },
+  "shareOpacityValue": "Deckkraft {percent} Prozent",
+  "@shareOpacityValue": {
+    "placeholders": { "percent": { "type": "int" } }
+  },
+  "sharePreviewPhoto": "Vorschau: Tauchangaben auf Foto",
+  "sharePreviewPlain": "Vorschau: Tauchangaben auf farbiger Fläche",
+  "shareCardSemantics": "Tauchangaben, Position {position}, Größe {percent} %",
+  "@shareCardSemantics": {
+    "placeholders": {
+      "position": { "type": "String" },
+      "percent": { "type": "int" }
+    }
+  },
+  "sharePhotoFailed": "Das Foto konnte nicht geöffnet werden.",
+  "shareFailed": "Teilen hat nicht geklappt. Versuch es noch einmal.",
+  "shareCardFallbackTitle": "Tauchgang #{number}",
+  "@shareCardFallbackTitle": {
+    "placeholders": { "number": { "type": "int" } }
+  },
+  "shareCardMax": "max.",
+  "shareCardDuration": "Dauer",
+  "shareCardWater": "Wasser",
+  "shareCardBrand": "DiveDown"
 }

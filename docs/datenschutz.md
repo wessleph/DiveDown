@@ -12,7 +12,7 @@ lang: de
 - DiveDown speichert alle Daten **nur auf deinem Gerät**.
 - Die App hat **keinen Server**, **kein Konto**, **keine Werbung**, **kein Tracking** und **keine Analyse-Dienste**.
 - Die Android-Version hat nicht einmal die Berechtigung, ins Internet zu gehen.
-- Daten verlassen dein Gerät nur, wenn **du selbst** eine Sicherung oder ein Diagnose-Protokoll teilst oder mir eine Fehlermeldung bzw. einen Vorschlag per Mail schickst.
+- Daten verlassen dein Gerät nur, wenn **du selbst** eine Sicherung, ein Diagnose-Protokoll oder einen Tauchgang als Bild teilst oder mir eine Fehlermeldung bzw. einen Vorschlag per Mail schickst.
 
 ## 2. Verantwortlich
 Philipp Wessler, Schweiz
@@ -45,6 +45,8 @@ Die Logbuch-Datenbank wird **nicht** in iCloud- bzw. Google-Backups aufgenommen,
    Die Nachricht liegt beim Anbieter meines E-Mail-Postfachs, der seinen Sitz auch außerhalb der Schweiz haben kann.
 3. **Fehler melden und Verbesserung vorschlagen:** Die App bereitet eine Mail an mich (Abschnitt 2) vor, mit deinem Text und technischen Angaben (App-Version, Betriebssystem, Gerätemodell), beim Fehlermelden auf Wunsch mit dem Diagnose-Protokoll. Gesendet wird erst, wenn du in deiner Mail-App auf Senden tippst.
    Ich nutze die Nachricht nur, um Fehler zu beheben und die App zu verbessern, und lösche sie, sobald sie erledigt ist, spätestens nach 12 Monaten. Rechtsgrundlage und Speicherort wie unter Punkt 2.
+4. **Tauchgang teilen:** Die App erstellt ein Bild mit Tauchplatz, Datum, Nummer, Tiefe, Dauer, Wassertemperatur und Tiefenprofil, auf Wunsch mit einem Foto aus deiner Galerie als Hintergrund. Du wählst im Teilen-Menü selbst, an welche App es geht (z. B. Instagram). Für das Bild gelten dann die Bedingungen dieser App.
+   DiveDown liest nur das eine Foto, das du auswählst, braucht keinen Zugriff auf deine Galerie und speichert das Foto nicht. Das Bild wird neu erzeugt; Ort, Zeit und Kamera aus den Metadaten des Fotos werden **nicht** übernommen. Koordinaten, dein Name, Notizen und Gesundheitswerte stehen nie auf dem Bild. Ich erhalte davon nichts.
 
 ## 5. Verteilung der App
 - **iPhone (TestFlight):** Die App wird über Apples TestFlight verteilt. Apple verarbeitet dabei Daten nach den eigenen Bedingungen ([Apple-Datenschutzrichtlinie](https://www.apple.com/legal/privacy/)).

@@ -8,6 +8,7 @@ import 'package:divedown/domain/dive/dive.dart';
 import 'package:divedown/domain/dive/diver.dart';
 import 'package:divedown/domain/import/dive_computer_registry.dart';
 import 'package:divedown/domain/settings/app_settings.dart';
+import 'package:divedown/domain/share/share_card.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -171,5 +172,23 @@ void main() {
     expect(await repo.listAll(), isEmpty);
     expect(await repo.findByAddress('D4:22:CD:00:3F:7A'), isNull);
     expect(await dives.findById(dive.dive.id!), isNotNull);
+  });
+
+  test('T43.4 the share card layout is stored, null until used', () async {
+    final settings = DriftAppSettings(db);
+    expect(await settings.shareCardLayout(), isNull);
+
+    final layout = const ShareCardLayout().copyWith(
+      scale: 0.6,
+      opacity: 0.2,
+      x: 0.5,
+      y: 0,
+    );
+    await settings.setShareCardLayout(layout);
+    final read = (await settings.shareCardLayout())!;
+    expect(read.scale, closeTo(0.6, 1e-9));
+    expect(read.opacity, closeTo(0.2, 1e-9));
+    expect(read.x, closeTo(0.5, 1e-9));
+    expect(read.y, closeTo(0, 1e-9));
   });
 }

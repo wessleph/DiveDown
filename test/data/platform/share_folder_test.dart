@@ -59,4 +59,8 @@ void main() {
     );
     expect(shareMimeType('x.bin'), 'application/octet-stream');
   });
+
+  test('T43.7 a share image is a PNG, so Instagram offers itself', () {
+    expect(shareMimeType('DiveDown-2026-11-14-42.png'), 'image/png');
+  });
 }

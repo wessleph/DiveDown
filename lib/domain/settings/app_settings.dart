@@ -1,3 +1,5 @@
+import '../share/share_card.dart';
+
 /// „Darstellung“ in the settings (ui-spec §5.11).
 enum AppThemeMode { system, light, dark }
 
@@ -30,4 +32,9 @@ abstract interface class AppSettings {
   /// T38); null until the diver changes them.
   Future<List<ProfileLayer>?> profileLayers();
   Future<void> setProfileLayers(List<ProfileLayer> layers);
+
+  /// Size, opacity and position of the share card last used (ui-spec
+  /// §5.16, T43.4); null until the diver shares for the first time.
+  Future<ShareCardLayout?> shareCardLayout();
+  Future<void> setShareCardLayout(ShareCardLayout layout);
 }

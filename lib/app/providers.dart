@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:clock/clock.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -30,6 +31,7 @@ import '../data/platform/email_feedback_mailer.dart';
 import '../data/platform/permission_bluetooth_access.dart';
 import '../data/platform/share_channel.dart';
 import '../data/platform/share_folder.dart';
+import '../data/platform/share_photo.dart';
 import '../data/platform/system_file_picker.dart';
 import '../domain/diagnostics/diagnostic_log.dart';
 import '../domain/dive/dive.dart';
@@ -45,7 +47,10 @@ import '../domain/import/dive_computer_source.dart';
 import '../domain/import/file_import.dart';
 import '../domain/import/import_service.dart';
 import '../domain/settings/app_settings.dart';
+import '../domain/share/share_card.dart';
 import '../domain/sites/site_repository.dart';
+import '../features/logbook/share_card_painter.dart';
+import '../l10n/app_localizations.dart';
 import '../domain/sites/site_suggestions.dart';
 import 'startup.dart' show databaseFolderName;
 
@@ -190,6 +195,31 @@ final shareFileProvider =
         );
       },
     );
+
+/// The photo for a share image (ui-spec §5.16): images only, up to 50 MB.
+final sharePhotoPickerProvider = Provider<ImportFilePicker>(
+  (ref) => const SystemFilePicker(maxBytes: maxSharePhotoBytes),
+);
+
+/// „Foto wählen“ on the share page: picks and decodes (T43.6); replaced in
+/// widget tests.
+final sharePhotoLoaderProvider = Provider<Future<SharePhotoResult?> Function()>(
+  (ref) =>
+      () => loadSharePhoto(ref.read(sharePhotoPickerProvider)),
+);
+
+/// Draws the share image (T43.5); replaced in widget tests, where the
+/// engine's image encoding does not run inside fake time.
+typedef ShareImageRenderer = Future<Uint8List> Function({
+  required ShareCardContent content,
+  required ShareCardLayout layout,
+  required AppLocalizations l10n,
+  ui.Image? photo,
+});
+
+final shareImageRendererProvider = Provider<ShareImageRenderer>(
+  (ref) => renderShareImage,
+);
 
 /// The file dialog for „Logbuch wiederherstellen“ (up to 200 MB).
 final backupFilePickerProvider = Provider<ImportFilePicker>(

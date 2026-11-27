@@ -1,6 +1,7 @@
 import 'package:clock/clock.dart';
 
 import '../../domain/settings/app_settings.dart';
+import '../../domain/share/share_card.dart';
 import 'database.dart';
 
 /// Key in `app_meta` for [AppSettings.activeDiverId].
@@ -10,6 +11,7 @@ const lastBackupKey = 'last_backup_at';
 const backupBaselineKey = 'backup_baseline';
 const backupSnoozedKey = 'backup_snoozed_until';
 const profileLayersKey = 'profile_layers';
+const shareCardKey = 'share_card';
 
 class DriftAppSettings implements AppSettings {
   DriftAppSettings(this._db);
@@ -92,4 +94,12 @@ class DriftAppSettings implements AppSettings {
   @override
   Future<void> setProfileLayers(List<ProfileLayer> layers) =>
       _set(profileLayersKey, layers.map((l) => l.name).join(','));
+
+  @override
+  Future<ShareCardLayout?> shareCardLayout() =>
+      throw UnimplementedError('shareCardLayout');
+
+  @override
+  Future<void> setShareCardLayout(ShareCardLayout layout) =>
+      throw UnimplementedError('setShareCardLayout');
 }

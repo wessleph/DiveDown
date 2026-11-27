@@ -50,6 +50,12 @@ void main() {
     expect(forbidden, isEmpty);
   });
 
+  // T43.12: the share photo comes from the PHPicker, which needs no access
+  // to the photo library (security.md G7).
+  test('T43.12 no photo library access', () {
+    expect(info.keys.where((k) => k.startsWith('NSPhotoLibrary')), isEmpty);
+  });
+
   test('T20.3 I3 FIT is an imported type with extension .fit', () {
     final imported = info['UTImportedTypeDeclarations'];
     expect(imported, isNotNull, reason: 'UTImportedTypeDeclarations missing');

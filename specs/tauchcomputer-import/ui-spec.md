@@ -118,7 +118,7 @@ Monatsüberschrift fett in `onSurfaceMuted` mit etwas Laufweite, neuester oben. 
 5. **Ausrüstung** *(neu 2026-11-23, T31)*: Abschnitt mit kleiner Überschrift „AUSRÜSTUNG“. Erste Zeile **„Blei 6 kg“** (fehlt der Wert: „Blei —“), darunter die zugeordneten Teile als Chips mit Icon der Art. Gelöschte Teile erscheinen weiter, in `onSurfaceMuted`. Ohne Blei und ohne Teile entfällt der Abschnitt.
 5a. **Bedingungen** *(neu, T40)*: Abschnitt „BEDINGUNGEN“ mit „Sicht gut (10–20 m) · Strömung leicht“ und darunter den Arten „Wrack · Nacht“; ohne Angaben entfällt er.
 6. Flaschen (falls mehrere), Notizen, Bewertung (1–5 Sterne)
-- Aktionen in der App-Leiste: **Bearbeiten**, Menü: „Löschen“
+- Aktionen in der App-Leiste: **Teilen** (§5.16, seit T43), **Bearbeiten**, Menü: „Löschen“
 
 | Zustand | Darstellung |
 |---|---|
@@ -290,6 +290,39 @@ Erreichbar durch Antippen der beiden Kacheln oben im Logbuch (§5.2, vorgelesen 
 3. **TAUCHPLÄTZE:** die 5 meistbesuchten mit „12×“. Gleiche Namen ohne Groß-/Kleinschreibung und Leerzeichen am Rand zählen zusammen; angezeigt wird die Schreibweise des neuesten Tauchgangs. Gleichstand: zuletzt besucht zuerst. Tauchgänge ohne Platz zählen nicht.
 4. **LUFTVERBRAUCH:** Ø-SAC der letzten 10 Tauchgänge mit Flaschendruck und Flaschengröße, als Linie (älteste links, `sac`), darunter „Ø 17,6 l/min · zuletzt 16,9 l/min“. Mit weniger als zwei solchen Tauchgängen statt der Linie: „Für den Verlauf braucht es mindestens zwei Tauchgänge mit Flaschendruck und Flaschengröße.“
 5. **Leer:** „Noch keine Statistik. Sie entsteht mit deinen Tauchgängen.“
+
+### 5.16 Tauchgang teilen *(neu 2026-11-27, T43, Entwurf A mit Anpassungen)*
+Ein Tauchgang wird als **Bild** geteilt, z. B. als Instagram-Story: eigenes Foto aus der Galerie im Hintergrund, darüber eine **Karte mit den Tauchangaben**. Die App erzeugt nur das Bild und übergibt es dem **Teilen-Menü des Systems**; welche App es bekommt (Instagram, WhatsApp, Mail …), wählt der Nutzer dort. Kein SDK von Instagram bzw. Meta, keine Internet-Berechtigung.
+
+**Einstieg:** Im Tauchgang-Detail (§5.3) in der App-Leiste ein Icon **Teilen** (`share`), vorgelesen „Tauchgang teilen“. Öffnet die Seite **„Tauchgang teilen“** ohne Tab-Leiste.
+
+**Seite „Tauchgang teilen“:**
+1. **Vorschau** im Format **9:16**, so groß wie der Platz erlaubt, Ecken 14 dp. Hintergrund: das gewählte Foto, formatfüllend und mittig zugeschnitten; ohne Foto eine Fläche in `primary`.
+2. **„Foto wählen“** öffnet die Fotoauswahl des Systems (Android Photo Picker, iOS PHPicker): **ein** Foto, **keine Berechtigung** für die Galerie. Mit Foto zusätzlich **„Foto entfernen“**. Das Foto bleibt nur im Speicher, solange die Seite offen ist, und wird nie in der App gespeichert.
+3. **Größe:** Regler **50–100 %** in Schritten von 5, dazu Zusammenziehen mit zwei Fingern auf der Vorschau.
+4. **Deckkraft:** Regler **0–100 %** in Schritten von 5. Wirkt nur auf den **weißen Hintergrund** der Karte, nie auf Schrift und Diagramm. **Unter 50 %** werden Schrift, Achsen und Kurve **weiß mit leichtem Schatten**, damit sie auf dem Foto lesbar bleiben.
+5. **Position:** Karte mit dem Finger auf der Vorschau ziehen; sie bleibt immer ganz im Bild. Dazu die Knöpfe **„Oben“, „Mitte“, „Unten“** (waagrecht mittig), damit es auch ohne Ziehen geht (§7).
+6. Hauptaktion **„Teilen“** (56 dp) unten, wie in §4.
+Größe, Deckkraft und Position werden **gemerkt** (`app_meta` `share_card`) und beim nächsten Teilen wieder verwendet. Standard: 100 %, 95 %, unten.
+
+**Die Karte** (Stil „Riff“, Ecken 12 dp, Hintergrund `surfaceRaised` mit der eingestellten Deckkraft, Schrift Manrope; immer im hellen Stil, auch im dunklen Modus, weil sie Teil eines Bildes ist):
+- **Tauchplatz** (fehlt er: „Tauchgang #42“), darunter **Datum · #Nummer** („14.11.2026 · #42“)
+- **Drei Kennzahlen:** max. Tiefe (`depth`) · Dauer · Wasser (min. Temperatur, `temperature`). Ohne Temperatur nur zwei Spalten.
+- **Profil-Diagramm mit Achsen** wie §6, vereinfacht: Tiefenkurve in `depth` (Linie, Fläche darunter leicht gefüllt). **Y-Achse** Tiefe nach unten wachsend, 0 m oben, Gitterlinien und Beschriftung wie §6 (alle 10 m, bis 15 m alle 5 m), Einheit „m“ an der obersten Beschriftung. **X-Achse** Zeit in Minuten, 3–5 Marken in runden Schritten (z. B. 0, 15, 30, 45 min), Einheit „min“ an der letzten Marke. Achsen und Beschriftung in `onSurfaceMuted`. Keine weiteren Ebenen (kein Druck, Puls, NDL). Ohne Samples das geschätzte Rechteckprofil aus §5.3, gestrichelt, ohne Hinweistext.
+- Unten rechts klein **„DiveDown“**.
+- **Nie auf der Karte:** Koordinaten, Name des Tauchers, Notizen, Puls, NDL/Deko, Luftverbrauch, Seriennummer.
+
+**Das Bild:** **1080 × 1920 px** PNG, unabhängig von der Bildschirmgröße gezeichnet; Karte und Schrift skalieren mit (bei 100 % Größe ist die Karte 88 % der Bildbreite breit, Achsenbeschriftung 30 px). Es wird **neu erzeugt**, deshalb gehen Metadaten des Fotos (Ort, Kamera, Zeit) nicht mit. Datei `DiveDown-<Datum>-<Nummer>.png` im Cache, beim nächsten Öffnen der Seite bzw. App-Start gelöscht. Geteilt wird nur das Bild, ohne Text.
+
+| Zustand | Darstellung |
+|---|---|
+| Foto lässt sich nicht öffnen | Snackbar „Das Foto konnte nicht geöffnet werden.“, Vorschau bleibt wie vorher |
+| Auswahl abgebrochen | nichts ändert sich |
+| Bild wird erzeugt | Knopf „Teilen“ zeigt einen Fortschrittskreis, ist gesperrt |
+| Teilen gescheitert | Snackbar „Teilen hat nicht geklappt. Versuch es noch einmal.“ |
+| zurück aus dem Teilen-Menü | Seite bleibt offen (man weiß nicht, ob geteilt wurde) |
+
+**Barrierefreiheit:** Die Vorschau wird vorgelesen als „Vorschau: Tauchangaben auf Foto“ bzw. „… auf farbiger Fläche“; die Karte als „Tauchangaben, Position unten, Größe 100 %“. Regler lesen ihren Wert vor („Deckkraft 60 Prozent“). Ziehen und Zusammenziehen sind nie der einzige Weg (Knöpfe und Regler).
 
 ## 6. Profil-Diagramm
 - **X-Achse:** Zeit (min). **Y-Achse:** Tiefe, **nach unten wachsend** (0 m oben), Gitter alle 10 m (bis 15 m max. Tiefe alle 5 m), Beschriftung in `onSurfaceMuted`.

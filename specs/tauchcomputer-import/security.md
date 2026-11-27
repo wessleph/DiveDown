@@ -54,6 +54,18 @@ Die realistischen Risiken liegen in **vier Bereichen**:
 | I | Logs gehen ungewollt an falsche Empfänger. | Es wird **nie automatisch gesendet**. Vor dem Senden zeigt die App eine Vorschau, dann öffnet sich der Teilen-Dialog des Systems. |
 | D | Logs füllen den Speicher. | Ringpuffer mit 5 MB bzw. 7 Tagen. |
 
+### G7: Tauchgang als Bild teilen (ui-spec §5.16, T43; neu 2026-11-27)
+Ein Foto aus der Galerie kommt **in** die App, ein erzeugtes Bild geht über das Teilen-Menü des Systems **hinaus**. Beides nur auf Aktion des Nutzers. Keine neuen Abhängigkeiten: Fotoauswahl über `file_picker` (Android `ACTION_GET_CONTENT` mit `image/*`, iOS `PHPickerViewController`), Teilen über `share_plus`, beide schon für Import und Sicherung im Einsatz. Kein SDK von Instagram bzw. Meta.
+
+| STRIDE | Bedrohung | Gegenmaßnahme |
+|---|---|---|
+| I | Metadaten des Fotos (GPS-Ort, Aufnahmezeit, Kamera) gehen mit dem geteilten Bild hinaus. | Das Bild wird **neu gezeichnet** und als PNG ohne Zusatzdaten kodiert; vom Foto werden nur die Pixel übernommen. Test: das erzeugte PNG enthält keine `eXIf`-, `tEXt`-, `iTXt`- oder `zTXt`-Chunks. |
+| I | Die Karte verrät mehr als gewollt (Koordinaten, Name, Notizen, Gesundheitswerte). | Inhalt nach **Positivliste** (ui-spec §5.16): Tauchplatz, Datum, Nummer, max. Tiefe, Dauer, Wassertemperatur, Tiefenprofil. Test: Koordinaten, Tauchername, Notizen, Puls, NDL und Seriennummer eines vollständig befüllten Tauchgangs erscheinen nicht. |
+| I | Das Foto bleibt in der App bzw. im Cache liegen. | Das Foto wird in den Speicher gelesen, die Kopie von `file_picker` sofort gelöscht (`clearTemporaryFiles`, wie beim Import), nie in DB oder Sicherung. Das erzeugte PNG liegt nur im Cache und wird beim nächsten Öffnen der Seite bzw. App-Start gelöscht. Kein Name des Fotos in Logs (§3). |
+| D | Ein riesiges oder kaputtes Foto bringt die App zum Absturz (Speicher). | Höchstens **50 MB**; dekodiert wird **verkleinert** auf die nötige Größe (kürzere Seite höchstens 1920 px). Nicht lesbare Dateien → Hinweis „Das Foto konnte nicht geöffnet werden.“, kein Absturz. |
+| E | Neue Berechtigungen für Galerie oder Speicher. | **Keine.** Beide Auswahlwege liefern nur das gewählte Foto. Manifest-Prüfung (T14.4) und iOS-Konfigurationstest erwarten weiter keine Rechte für Fotos, Speicher oder Kamera und keine Schlüssel `NSPhotoLibrary…`/`NSCamera…`. |
+| R | Unklar, ob geteilt wurde. | Unkritisch: Die App erfährt nicht, ob bzw. wohin geteilt wurde, und braucht es nicht. Nichts wird protokolliert außer „share image created“ ohne Inhalt. |
+
 ### G6: Lieferkette und Build-Pipeline
 | STRIDE | Bedrohung | Gegenmaßnahme |
 |---|---|---|

@@ -1424,4 +1424,82 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get statsLoadError => 'Die Statistik konnte nicht geladen werden.';
+
+  @override
+  String get shareDiveTooltip => 'Tauchgang teilen';
+
+  @override
+  String get shareTitle => 'Tauchgang teilen';
+
+  @override
+  String get shareAction => 'Teilen';
+
+  @override
+  String get sharePickPhoto => 'Foto wählen';
+
+  @override
+  String get shareRemovePhoto => 'Foto entfernen';
+
+  @override
+  String get shareSize => 'Größe';
+
+  @override
+  String get shareOpacity => 'Deckkraft';
+
+  @override
+  String get sharePosition => 'Position';
+
+  @override
+  String get sharePositionTop => 'Oben';
+
+  @override
+  String get sharePositionMiddle => 'Mitte';
+
+  @override
+  String get sharePositionBottom => 'Unten';
+
+  @override
+  String shareSizeValue(int percent) {
+    return 'Größe $percent Prozent';
+  }
+
+  @override
+  String shareOpacityValue(int percent) {
+    return 'Deckkraft $percent Prozent';
+  }
+
+  @override
+  String get sharePreviewPhoto => 'Vorschau: Tauchangaben auf Foto';
+
+  @override
+  String get sharePreviewPlain => 'Vorschau: Tauchangaben auf farbiger Fläche';
+
+  @override
+  String shareCardSemantics(String position, int percent) {
+    return 'Tauchangaben, Position $position, Größe $percent %';
+  }
+
+  @override
+  String get sharePhotoFailed => 'Das Foto konnte nicht geöffnet werden.';
+
+  @override
+  String get shareFailed =>
+      'Teilen hat nicht geklappt. Versuch es noch einmal.';
+
+  @override
+  String shareCardFallbackTitle(int number) {
+    return 'Tauchgang #$number';
+  }
+
+  @override
+  String get shareCardMax => 'max.';
+
+  @override
+  String get shareCardDuration => 'Dauer';
+
+  @override
+  String get shareCardWater => 'Wasser';
+
+  @override
+  String get shareCardBrand => 'DiveDown';
 }
