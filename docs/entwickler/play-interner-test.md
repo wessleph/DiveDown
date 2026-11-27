@@ -65,7 +65,7 @@ Zertifikat für Google exportieren (fragt das neue Passwort ab):
 
 `upload_certificate.pem` in Schritt 2.6 hochladen und speichern.
 
-**Prüfen (T42.5):** Unter „App-Integrität“ stehen jetzt zwei Zertifikate. Beim **App-Signaturschlüssel** muss der SHA-256-Fingerabdruck `83:4A:81:53:5B:41:26:4E:70:C3:2D:33:9C:D1:A5:B7:ED:F4:85:05:EB:34:05:F6:84:73:88:EE:A6:8D:27:E5` sein, beim Upload-Schlüssel ein anderer.
+**Prüfen (T42.5):** Unter „App-Integrität“ stehen jetzt zwei Zertifikate. Beim **App-Signaturschlüssel** muss der SHA-256-Fingerabdruck `83:4A:81:53:5B:41:26:4E:70:C3:2D:33:9C:D1:A5:B7:ED:F4:85:05:EB:34:05:F6:84:73:88:EE:A6:8D:27:E5` sein, beim Upload-Schlüssel („Schlüssel hochladen“) ein anderer, seit 2026-11-27 `99:15:1C:63:B4:5E:68:83:1B:CB:DB:FE:1D:4D:D1:CD:DB:24:92:0D:09:3B:EA:16:1F:BE:1E:D8:E8:A4:F9:0B`. Google erzeugt beim Anlegen der App schon einen eigenen Schlüssel; solange die Installationsbasis 0 % ist, ersetzt „Schlüssel ändern“ ihn.
 
 ## 4. `android/upload-key.properties` anlegen
 Wie `key.properties` (android-release-einrichtung.md §3), nur mit dem Upload-Schlüssel:
