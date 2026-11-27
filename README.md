@@ -21,7 +21,7 @@ git clone --depth 1 --recurse-submodules --shallow-submodules https://github.com
 ```
 
 ## Android-APK prüfen
-Jede Release-APK von DiveDown ist mit demselben Schlüssel signiert. Der SHA-256-Fingerabdruck des Zertifikats lautet:
+Unter Android gibt es DiveDown auf zwei Wegen: als APK und, für eingeladene Familie und Freunde, über den internen Test von Google Play. Beide sind mit demselben Schlüssel signiert; Google signiert die Store-App mit einer Kopie davon (Play App Signing, ADR 0005). Man kann deshalb zwischen beiden wechseln, ohne neu zu installieren. Der SHA-256-Fingerabdruck des Zertifikats lautet:
 
 ```text
 83:4A:81:53:5B:41:26:4E:70:C3:2D:33:9C:D1:A5:B7:ED:F4:85:05:EB:34:05:F6:84:73:88:EE:A6:8D:27:E5
