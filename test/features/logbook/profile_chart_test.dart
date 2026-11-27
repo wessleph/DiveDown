@@ -123,32 +123,36 @@ void main() {
     );
   });
 
-  testWidgets('T22.10 measured air has no estimate note and offers SAC', (
-    tester,
-  ) async {
-    await _open(tester, _measured);
-    await _tapAt(tester, 1.0);
+  testWidgets(
+    'T22.10 measured air has no estimate note, offers Luftverbrauch',
+    (tester) async {
+      await _open(tester, _measured);
+      await _tapAt(tester, 1.0);
 
-    expect(_inValues(find.text('ca. 50 bar')), findsNothing);
-    expect(_inValues(find.text('50 bar')), findsOneWidget);
-    expect(_inValues(find.textContaining('geschätzt')), findsNothing);
-    expect(find.widgetWithText(FilterChip, 'Luft'), findsOneWidget);
-    expect(find.widgetWithText(FilterChip, 'SAC'), findsOneWidget);
-    expect(
-      find.text('Werte vom Tauchcomputer, nur zur Anzeige.'),
-      findsOneWidget,
-    );
-  });
+      expect(_inValues(find.text('ca. 50 bar')), findsNothing);
+      expect(_inValues(find.text('50 bar')), findsOneWidget);
+      expect(_inValues(find.textContaining('geschätzt')), findsNothing);
+      // Renamed in T37: „Luft“ → „Flaschendruck“, „SAC“ → „Luftverbrauch“.
+      expect(find.widgetWithText(FilterChip, 'Flaschendruck'), findsOneWidget);
+      expect(find.widgetWithText(FilterChip, 'Luftverbrauch'), findsOneWidget);
+      expect(
+        find.text('Werte vom Tauchcomputer, nur zur Anzeige.'),
+        findsOneWidget,
+      );
+    },
+  );
 
-  testWidgets('T22.11 layer chips; no SAC curve for an estimate', (
+  testWidgets('T22.11 layer chips; no Luftverbrauch for an estimate', (
     tester,
   ) async {
     await _open(tester, exampleDive);
 
     expect(find.widgetWithText(FilterChip, 'Temperatur'), findsOneWidget);
-    expect(find.widgetWithText(FilterChip, 'Luft (geschätzt)'), findsOneWidget);
-    expect(find.widgetWithText(FilterChip, 'NDL'), findsOneWidget);
-    expect(find.widgetWithText(FilterChip, 'SAC'), findsNothing);
+    expect(
+      find.widgetWithText(FilterChip, 'Flaschendruck (geschätzt)'),
+      findsOneWidget,
+    );
+    expect(find.widgetWithText(FilterChip, 'Luftverbrauch'), findsNothing);
 
     final temp = find.widgetWithText(FilterChip, 'Temperatur');
     final before = tester.widget<FilterChip>(temp).selected;
@@ -204,5 +208,58 @@ void main() {
     expect(find.text('0:00'), findsWidgets);
     expect(find.text('47:00'), findsWidgets);
     handle.dispose();
+  });
+
+  group('T37 chips: Temperatur, Flaschendruck, Luftverbrauch, Puls', () {
+    List<String> chips(WidgetTester tester) => [
+      for (final c in tester.widgetList<FilterChip>(find.byType(FilterChip)))
+        (c.label as Text).data!,
+    ];
+
+    testWidgets('measured: no NDL, in this order', (tester) async {
+      await _open(
+        tester,
+        (id) => exampleDive(
+          id,
+          samples: [
+            for (var t = 0; t <= 2820; t += 60)
+              DiveSample(
+                timeS: t,
+                depthM: t < 1410 ? t / 1410 * 18.4 : 10,
+                temperatureC: 21,
+                ndlS: 1200,
+                pressures: [
+                  TankPressure(tankIndex: 0, pressureBar: 200 - t / 20),
+                ],
+              ),
+          ],
+        ),
+      );
+
+      expect(chips(tester), ['Temperatur', 'Flaschendruck', 'Luftverbrauch']);
+      // The NDL stays in the value panel when the computer sends it.
+      expect(_inValues(find.text('NDL')), findsOneWidget);
+    });
+
+    testWidgets('a third axis turns the oldest off, with the new names', (
+      tester,
+    ) async {
+      await _open(tester, _measured);
+
+      await tester.tap(find.widgetWithText(FilterChip, 'Luftverbrauch'));
+      await tester.pump();
+
+      expect(
+        find.text(
+          'Höchstens zwei Werte mit eigener Achse. „Temperatur“ ist jetzt aus.',
+        ),
+        findsOneWidget,
+      );
+      final selected = [
+        for (final c in tester.widgetList<FilterChip>(find.byType(FilterChip)))
+          if (c.selected) (c.label as Text).data!,
+      ];
+      expect(selected, ['Flaschendruck', 'Luftverbrauch']);
+    });
   });
 }

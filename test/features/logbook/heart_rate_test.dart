@@ -34,7 +34,8 @@ void main() {
     expect(_chip('Puls'), findsOneWidget);
     expect(tester.widget<FilterChip>(_chip('Puls')).selected, isTrue);
     // No pressure from the watch: no air chip.
-    expect(_chip('Luft'), findsNothing);
+    expect(_chip('Flaschendruck'), findsNothing);
+    expect(_chip('Flaschendruck (geschätzt)'), findsNothing);
     // The panel starts at the deepest point, 5:00 with 95 /min.
     expect(
       find.descendant(of: _values, matching: find.text('Puls')),

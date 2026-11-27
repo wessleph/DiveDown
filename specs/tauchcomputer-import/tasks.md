@@ -904,3 +904,16 @@ Test: `test/features/keyboard_actions_test.dart` (alle mit `TargetPlatform.iOS`,
 
 **Release-Lauf 45910791826 (2026-11-27):** Signieren und Bauen grün (das Profil enthält HealthKit), der Upload abgelehnt mit ITMS-90683: Apple verlangt `NSHealthUpdateUsageDescription` für jede App mit HealthKit-Entitlement, auch wenn sie nur liest. Entschieden am 2026-11-27: Text ergänzen („DiveDown schreibt nichts in Apple Health. Apple verlangt diesen Hinweis für alle Apps mit Zugriff auf Apple Health.“), Schreibzugriff wird weiter nie angefragt. T6.13 erwartet jetzt den Text (✅ rot gesehen, dann grün), T20.2 verbietet den Schlüssel nicht mehr; security.md §4 angepasst.
 - ✅ Release-Lauf 45952636586 (2026-11-27, `main` `52a4475`): signiert, gebaut und zu TestFlight hochgeladen, mit Apple-Health-Import und dem Text `NSHealthUpdateUsageDescription`. CI auf `main` grün (Lauf 45947909972, Android im zweiten Versuch wegen Maven Central 429). Offen: T6.14 am Gerät mit der Watch Ultra, T36.6.
+
+## T37: Ebenen im Profil (ui-spec §6, Wunsch vom 2026-11-27)
+
+Rückmeldung: „NDL“ ändert im Diagramm nichts (der EON Core schickt keine Nullzeit), „SAC“ ist nicht verständlich. Entschieden am 2026-11-27: NDL entfällt, „Luft“ → „Flaschendruck“, „SAC“ → „Luftverbrauch“; Temperatur und Puls bleiben (Puls nur mit Pulswerten, also bei der Apple Watch). Die NDL bleibt im Werte-Feld, wenn sie in den Daten steht. Die Kachel „Ø-SAC“ im Detail bleibt unverändert.
+
+| Nr. | Ausgangslage | Aktion | Erwartet | Status |
+|---|---|---|---|---|
+| T37.1 | Tauchgang mit Druck-Samples, Temperatur und NDL | Detail | Chips genau „Temperatur“, „Flaschendruck“, „Luftverbrauch“ (kein „NDL“); NDL weiter im Werte-Feld | ✅ 2026-11-27: rot, Chips „Luft“, „NDL“, „SAC“ |
+| T37.2 | dito, Temperatur und Flaschendruck an | „Luftverbrauch“ antippen | Hinweis „Höchstens zwei Werte mit eigener Achse. „Temperatur“ ist jetzt aus.“, an sind Flaschendruck und Luftverbrauch | ✅ 2026-11-27: rot, Chip „Luftverbrauch“ fehlt |
+| T37.3 | geschätzte Luft (nur Start- und Enddruck) | Detail | „Flaschendruck (geschätzt)“, kein „Luftverbrauch“ (T22.11 angepasst) | ✅ 2026-11-27: rot, Chip heißt noch „Luft (geschätzt)“ |
+
+Tests: `test/features/logbook/profile_chart_test.dart` (Gruppe T37, T22.10 und T22.11 auf die neuen Namen), `heart_rate_test.dart` (kein Flaschendruck bei der Watch).
+
