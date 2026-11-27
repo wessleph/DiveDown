@@ -72,7 +72,7 @@ Ab dann gehen alle weiteren Release-APKs direkt als Update drüber. Dazu muss di
 ## 8. App bei Google registrieren (Android-Entwicklerverifizierung, ab 2026-11-27)
 Seit September 2026 installieren zertifizierte Android-Geräte nur noch Apps, die bei einem **verifizierten Entwickler registriert** sind. Das gilt auch für eine APK, die wir direkt an Familie und Freunde geben, nicht nur für den Play Store.
 
-- [ ] **Play-Console-Konto** angelegt (2026-11-27) und **Identitätsprüfung abgeschlossen**. Google nennt etwa 3 Werktage. Den Stand zeigt die Play Console unter „Alle Apps“, zum Schluss kommt eine Mail.
+- [x] **Play-Console-Konto** angelegt (2026-11-27) und **Identitätsprüfung abgeschlossen** (2026-11-27, am selben Tag bestätigt). Google nennt etwa 3 Werktage. Den Stand zeigt die Play Console unter „Alle Apps“, zum Schluss kommt eine Mail.
 - [ ] **Release-Schlüssel erzeugt** (Abschnitte 2 und 4). Ohne ihn gibt es keinen Fingerabdruck, den man registrieren kann.
 - [ ] In der Play Console die App registrieren: **Paketname `io.github.wessleph.divedown`** und **SHA-256-Fingerabdruck** des Zertifikats aus Abschnitt 4. Die genauen Menüpunkte und ob Google einen Nachweis verlangt, dass der Schlüssel dir gehört (z. B. eine damit signierte Datei), zeigt die Play Console; sie ändern sich gerade.
 - [ ] Danach eine Release-APK auf einem Gerät **ohne** Entwickleroptionen installieren und prüfen, dass Android sie annimmt.
