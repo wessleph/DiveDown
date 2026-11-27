@@ -26,6 +26,8 @@ Lege dir für die Dateien von Google einen Unterordner an, z. B. `C:\Users\<du>\
 
 - **Paketname: `io.github.wessleph.divedown`** (genau so, steht in `android/app/build.gradle.kts`). Seit der Android-Entwicklerverifizierung fragt die Console ihn schon beim Anlegen ab (Stand 2026-11-27; früher kam er erst mit dem ersten Bundle). Damit ist er bei Google registriert und lässt sich nicht mehr ändern.
 
+**Automatischen Schutz ausschalten:** App-Integrität → „Automatischer Schutz“ → Verwalten → Schalter „Installationsprüfung“ aus. Sonst baut Google Laufzeitprüfungen in den ausgelieferten Code ein, die eine App aus einer anderen Quelle zum Play Store schicken. Das passt nicht zu einer GPL-App, die auch als APK verteilt wird, und die Store-App wäre nicht mehr das, was aus dem Quellcode gebaut wird. Bei neuen Apps ist er voreingestellt (2026-11-27). Er wirkt ab dem nächsten Release.
+
 ## 2. Eigenen Schlüssel als App-Signaturschlüssel hinterlegen (vor dem ersten Hochladen)
 Google erzeugt sonst beim ersten Hochladen selbst einen Schlüssel. Deshalb **zuerst** diesen Schritt.
 
