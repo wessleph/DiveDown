@@ -141,6 +141,14 @@ class DriftDiveRepository implements DiveRepository, DiveNumbering {
     return (weightKg: rows.weightKg!, siteName: rows.siteName!.trim());
   }
 
+  @override
+  Future<LastConditions?> lastConditionsAt(
+    String diverId, {
+    String? siteName,
+    String? siteCatalogueId,
+    String? excludeDiveId,
+  }) => throw UnimplementedError();
+
   /// [Dive.equipmentIds] null: a new dive gets the standard set, an existing
   /// one keeps its links (ADR 0007).
   Future<void> _linkEquipment(Dive dive, {required bool isNew}) async {

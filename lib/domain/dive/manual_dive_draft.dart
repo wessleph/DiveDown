@@ -55,6 +55,9 @@ class ManualDiveDraft {
     this.o2 = '',
     this.weight = '',
     this.equipmentIds,
+    this.visibility,
+    this.current,
+    this.kinds = const {},
     this.waterType,
     this.notes = '',
     this.rating,
@@ -118,6 +121,11 @@ class ManualDiveDraft {
   /// Selected equipment; null until the form has loaded it (then the
   /// repository applies the standard set to a new dive, ADR 0007).
   final Set<String>? equipmentIds;
+
+  /// Conditions (T40), all optional.
+  final WaterVisibility? visibility;
+  final WaterCurrent? current;
+  final Set<DiveKind> kinds;
   final WaterType? waterType;
   final String notes;
   final int? rating;

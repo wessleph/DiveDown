@@ -1327,4 +1327,93 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get statsAirNone =>
       'Für den Verlauf braucht es mindestens zwei Tauchgänge mit Flaschendruck und Flaschengröße.';
+
+  @override
+  String get fieldVisibility => 'Sichtweite';
+
+  @override
+  String get visibilityPoor => 'schlecht (< 5 m)';
+
+  @override
+  String get visibilityModerate => 'mittel (5–10 m)';
+
+  @override
+  String get visibilityGood => 'gut (10–20 m)';
+
+  @override
+  String get visibilityExcellent => 'sehr gut (> 20 m)';
+
+  @override
+  String get visibilityShortPoor => 'Sicht schlecht';
+
+  @override
+  String get visibilityShortModerate => 'Sicht mittel';
+
+  @override
+  String get visibilityShortGood => 'Sicht gut';
+
+  @override
+  String get visibilityShortExcellent => 'Sicht sehr gut';
+
+  @override
+  String get fieldCurrent => 'Strömung';
+
+  @override
+  String get currentNone => 'keine';
+
+  @override
+  String get currentLight => 'leicht';
+
+  @override
+  String get currentModerate => 'mittel';
+
+  @override
+  String get currentStrong => 'stark';
+
+  @override
+  String get currentShortNone => 'keine Strömung';
+
+  @override
+  String get currentShortLight => 'Strömung leicht';
+
+  @override
+  String get currentShortModerate => 'Strömung mittel';
+
+  @override
+  String get currentShortStrong => 'Strömung stark';
+
+  @override
+  String get fieldDiveKinds => 'Tauchgangsart';
+
+  @override
+  String get diveKindReef => 'Riff';
+
+  @override
+  String get diveKindWreck => 'Wrack';
+
+  @override
+  String get diveKindWall => 'Steilwand';
+
+  @override
+  String get diveKindCave => 'Höhle';
+
+  @override
+  String get diveKindNight => 'Nacht';
+
+  @override
+  String get diveKindLake => 'See';
+
+  @override
+  String get diveKindTraining => 'Ausbildung';
+
+  @override
+  String get diveKindDrift => 'Drift';
+
+  @override
+  String get detailConditions => 'BEDINGUNGEN';
+
+  @override
+  String conditionsLastAt(String site, String conditions) {
+    return 'Zuletzt bei $site: $conditions';
+  }
 }

@@ -39,6 +39,14 @@ abstract interface class DiveNumbering {
   Future<bool> numbersFollowDates(String diverId);
 }
 
+/// Conditions of an earlier dive, for „Zuletzt bei …“ (T40).
+typedef LastConditions = ({
+  WaterVisibility? visibility,
+  WaterCurrent? current,
+  Set<DiveKind> kinds,
+  String siteName,
+});
+
 abstract interface class DiveRepository {
   /// Inserts or updates a dive with all samples, tanks and events.
   Future<SaveDiveResult> save(Dive dive);
@@ -75,6 +83,15 @@ abstract interface class DiveRepository {
   /// surrounding spaces. Dives without lead, deleted dives and
   /// [excludeDiveId] do not count. Null when there is none.
   Future<({double weightKg, String siteName})?> lastWeightAt(
+    String diverId, {
+    String? siteName,
+    String? siteCatalogueId,
+    String? excludeDiveId,
+  });
+
+  /// Conditions of the newest other dive at the same site with at least one
+  /// of them noted; same matching rules as [lastWeightAt] (T40).
+  Future<LastConditions?> lastConditionsAt(
     String diverId, {
     String? siteName,
     String? siteCatalogueId,

@@ -563,5 +563,37 @@
   "@statsAirLine": {
     "placeholders": { "average": { "type": "String" }, "latest": { "type": "String" } }
   },
-  "statsAirNone": "Für den Verlauf braucht es mindestens zwei Tauchgänge mit Flaschendruck und Flaschengröße."
+  "statsAirNone": "Für den Verlauf braucht es mindestens zwei Tauchgänge mit Flaschendruck und Flaschengröße.",
+  "fieldVisibility": "Sichtweite",
+  "visibilityPoor": "schlecht (< 5 m)",
+  "visibilityModerate": "mittel (5–10 m)",
+  "visibilityGood": "gut (10–20 m)",
+  "visibilityExcellent": "sehr gut (> 20 m)",
+  "visibilityShortPoor": "Sicht schlecht",
+  "visibilityShortModerate": "Sicht mittel",
+  "visibilityShortGood": "Sicht gut",
+  "visibilityShortExcellent": "Sicht sehr gut",
+  "fieldCurrent": "Strömung",
+  "currentNone": "keine",
+  "currentLight": "leicht",
+  "currentModerate": "mittel",
+  "currentStrong": "stark",
+  "currentShortNone": "keine Strömung",
+  "currentShortLight": "Strömung leicht",
+  "currentShortModerate": "Strömung mittel",
+  "currentShortStrong": "Strömung stark",
+  "fieldDiveKinds": "Tauchgangsart",
+  "diveKindReef": "Riff",
+  "diveKindWreck": "Wrack",
+  "diveKindWall": "Steilwand",
+  "diveKindCave": "Höhle",
+  "diveKindNight": "Nacht",
+  "diveKindLake": "See",
+  "diveKindTraining": "Ausbildung",
+  "diveKindDrift": "Drift",
+  "detailConditions": "BEDINGUNGEN",
+  "conditionsLastAt": "Zuletzt bei {site}: {conditions}",
+  "@conditionsLastAt": {
+    "placeholders": { "site": { "type": "String" }, "conditions": { "type": "String" } }
+  }
 }

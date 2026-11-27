@@ -2319,6 +2319,180 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Für den Verlauf braucht es mindestens zwei Tauchgänge mit Flaschendruck und Flaschengröße.'**
   String get statsAirNone;
+
+  /// No description provided for @fieldVisibility.
+  ///
+  /// In de, this message translates to:
+  /// **'Sichtweite'**
+  String get fieldVisibility;
+
+  /// No description provided for @visibilityPoor.
+  ///
+  /// In de, this message translates to:
+  /// **'schlecht (< 5 m)'**
+  String get visibilityPoor;
+
+  /// No description provided for @visibilityModerate.
+  ///
+  /// In de, this message translates to:
+  /// **'mittel (5–10 m)'**
+  String get visibilityModerate;
+
+  /// No description provided for @visibilityGood.
+  ///
+  /// In de, this message translates to:
+  /// **'gut (10–20 m)'**
+  String get visibilityGood;
+
+  /// No description provided for @visibilityExcellent.
+  ///
+  /// In de, this message translates to:
+  /// **'sehr gut (> 20 m)'**
+  String get visibilityExcellent;
+
+  /// No description provided for @visibilityShortPoor.
+  ///
+  /// In de, this message translates to:
+  /// **'Sicht schlecht'**
+  String get visibilityShortPoor;
+
+  /// No description provided for @visibilityShortModerate.
+  ///
+  /// In de, this message translates to:
+  /// **'Sicht mittel'**
+  String get visibilityShortModerate;
+
+  /// No description provided for @visibilityShortGood.
+  ///
+  /// In de, this message translates to:
+  /// **'Sicht gut'**
+  String get visibilityShortGood;
+
+  /// No description provided for @visibilityShortExcellent.
+  ///
+  /// In de, this message translates to:
+  /// **'Sicht sehr gut'**
+  String get visibilityShortExcellent;
+
+  /// No description provided for @fieldCurrent.
+  ///
+  /// In de, this message translates to:
+  /// **'Strömung'**
+  String get fieldCurrent;
+
+  /// No description provided for @currentNone.
+  ///
+  /// In de, this message translates to:
+  /// **'keine'**
+  String get currentNone;
+
+  /// No description provided for @currentLight.
+  ///
+  /// In de, this message translates to:
+  /// **'leicht'**
+  String get currentLight;
+
+  /// No description provided for @currentModerate.
+  ///
+  /// In de, this message translates to:
+  /// **'mittel'**
+  String get currentModerate;
+
+  /// No description provided for @currentStrong.
+  ///
+  /// In de, this message translates to:
+  /// **'stark'**
+  String get currentStrong;
+
+  /// No description provided for @currentShortNone.
+  ///
+  /// In de, this message translates to:
+  /// **'keine Strömung'**
+  String get currentShortNone;
+
+  /// No description provided for @currentShortLight.
+  ///
+  /// In de, this message translates to:
+  /// **'Strömung leicht'**
+  String get currentShortLight;
+
+  /// No description provided for @currentShortModerate.
+  ///
+  /// In de, this message translates to:
+  /// **'Strömung mittel'**
+  String get currentShortModerate;
+
+  /// No description provided for @currentShortStrong.
+  ///
+  /// In de, this message translates to:
+  /// **'Strömung stark'**
+  String get currentShortStrong;
+
+  /// No description provided for @fieldDiveKinds.
+  ///
+  /// In de, this message translates to:
+  /// **'Tauchgangsart'**
+  String get fieldDiveKinds;
+
+  /// No description provided for @diveKindReef.
+  ///
+  /// In de, this message translates to:
+  /// **'Riff'**
+  String get diveKindReef;
+
+  /// No description provided for @diveKindWreck.
+  ///
+  /// In de, this message translates to:
+  /// **'Wrack'**
+  String get diveKindWreck;
+
+  /// No description provided for @diveKindWall.
+  ///
+  /// In de, this message translates to:
+  /// **'Steilwand'**
+  String get diveKindWall;
+
+  /// No description provided for @diveKindCave.
+  ///
+  /// In de, this message translates to:
+  /// **'Höhle'**
+  String get diveKindCave;
+
+  /// No description provided for @diveKindNight.
+  ///
+  /// In de, this message translates to:
+  /// **'Nacht'**
+  String get diveKindNight;
+
+  /// No description provided for @diveKindLake.
+  ///
+  /// In de, this message translates to:
+  /// **'See'**
+  String get diveKindLake;
+
+  /// No description provided for @diveKindTraining.
+  ///
+  /// In de, this message translates to:
+  /// **'Ausbildung'**
+  String get diveKindTraining;
+
+  /// No description provided for @diveKindDrift.
+  ///
+  /// In de, this message translates to:
+  /// **'Drift'**
+  String get diveKindDrift;
+
+  /// No description provided for @detailConditions.
+  ///
+  /// In de, this message translates to:
+  /// **'BEDINGUNGEN'**
+  String get detailConditions;
+
+  /// No description provided for @conditionsLastAt.
+  ///
+  /// In de, this message translates to:
+  /// **'Zuletzt bei {site}: {conditions}'**
+  String conditionsLastAt(String site, String conditions);
 }
 
 class _AppLocalizationsDelegate

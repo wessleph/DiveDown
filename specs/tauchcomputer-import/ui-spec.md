@@ -116,6 +116,7 @@ Monatsüberschrift fett in `onSurfaceMuted` mit etwas Laufweite, neuester oben. 
 3. **Profil-Diagramm** (§6) mit Chips darüber und dem **Werte-Feld** darunter, Knopf „Vollbild“
 4. **Ereignisse** als kompakte Liste: Zeit · farbiger Punkt (Warnungen `error`, sonst `primary`) · deutscher Text. Gleiche Ereignisse innerhalb von 60 s werden zusammengefasst („Sicherheitsstopp 3×“). Jeder Ereignistyp hat einen deutschen Text (z. B. `deepstop` → „Tiefenstopp“), unbekannte Typen „Ereignis“ plus Code.
 5. **Ausrüstung** *(neu 2026-11-23, T31)*: Abschnitt mit kleiner Überschrift „AUSRÜSTUNG“. Erste Zeile **„Blei 6 kg“** (fehlt der Wert: „Blei —“), darunter die zugeordneten Teile als Chips mit Icon der Art. Gelöschte Teile erscheinen weiter, in `onSurfaceMuted`. Ohne Blei und ohne Teile entfällt der Abschnitt.
+5a. **Bedingungen** *(neu, T40)*: Abschnitt „BEDINGUNGEN“ mit „Sicht gut (10–20 m) · Strömung leicht“ und darunter den Arten „Wrack · Nacht“; ohne Angaben entfällt er.
 6. Flaschen (falls mehrere), Notizen, Bewertung (1–5 Sterne)
 - Aktionen in der App-Leiste: **Bearbeiten**, Menü: „Löschen“
 
@@ -137,6 +138,13 @@ Felder: **Nr.** (vorbelegt mit der nächsten freien Nummer, änderbar), **Tauchp
 - Zahlenfelder mit Ziffern-Tastatur.
 - Speichern: **„Speichern“** (Pflichtfelder fehlen → Fokus springt zum ersten Fehler).
 - Verlassen mit Änderungen: „Änderungen verwerfen?“ · **„Verwerfen“** / „Weiter bearbeiten“
+
+**Bedingungen** *(neu, abgenommen 2026-11-27, T40)*, alle optional, unter dem Wassertyp:
+- **Sichtweite** (Chips, eine Stufe, nochmal Antippen hebt sie auf): „schlecht (< 5 m)“ · „mittel (5–10 m)“ · „gut (10–20 m)“ · „sehr gut (> 20 m)“
+- **Strömung** (Chips, eine Stufe): „keine“ · „leicht“ · „mittel“ · „stark“
+- **Tauchgangsart** (Chips, mehrere möglich): Riff · Wrack · Steilwand · Höhle · Nacht · See · Ausbildung · Drift
+- Vorschlag wie beim Blei: Ist noch keines der drei gewählt und gibt es am selben Platz (Katalog-ID oder Name ohne Groß-/Kleinschreibung) einen früheren Tauchgang mit Bedingungen, steht darunter „Zuletzt bei Elphinstone: Sicht gut · Strömung leicht · Riff“ · **„Übernehmen“** (setzt alle drei).
+- Ersetzt ein Import den Tauchgang, bleiben die Bedingungen (wie Notizen und Blei).
 
 ### 5.5 Importieren (Quelle wählen)
 Drei große Karten (je 88 dp hoch):

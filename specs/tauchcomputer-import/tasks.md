@@ -969,3 +969,20 @@ Tests: `test/domain/metrics/logbook_stats_test.dart` (T39.1–T39.4), `test/feat
 - [x] Seite `/logbook/statistics` (in der Tab „Logbuch“): Überblick, Rekorde öffnen den Tauchgang, Balken pro Jahr (je Zeile ein eigener Eintrag für den Screenreader), Tauchplätze, Luftverbrauch als Linie mit „Ø … · zuletzt …“ bzw. Hinweis; Kacheln im Logbuch öffnen sie („Statistik öffnen“) → T39.5–T39.7 grün.
 - Gesamt: `flutter test` 558/558, `flutter analyze` ohne Befund, Format sauber. Noch nicht am Handy angesehen.
 
+## T40: Sichtweite, Strömung, Tauchgangsart (ui-spec §5.3, §5.4; Wunsch vom 2026-11-27)
+
+Abgenommen am 2026-11-27: Sichtweite in 4 Stufen mit Metern, Strömung in 4 Stufen als Chips, Tauchgangsart mit Mehrfachauswahl (Riff, Wrack, Steilwand, Höhle, Nacht, See, Ausbildung, Drift), Vorschlag „Zuletzt bei …“ für alle drei in einer Zeile. Schema v3: Spalten `dives.visibility`, `dives.current_strength`, `dives.kinds` (Namen, durch Komma getrennt). Fixture `test/fixtures/db/schema_v2.sql` (vor der Änderung aus dem Code erzeugt).
+
+| Nr. | Ausgangslage | Aktion | Erwartet | Status |
+|---|---|---|---|---|
+| T40.1 | Datenbankdatei in Schema v2 mit Tauchgang #7 (6 kg Blei) | öffnen | Migration auf v3: Tauchgang unverändert, Bedingungen leer und speicherbar; `user_version` 3 | ✅ 2026-11-27: rot, Werte werden nicht gespeichert |
+| T40.2 | Tauchgang mit „sehr gut“, „stark“, Wrack + Nacht | speichern, laden, auflisten, ohne Angaben neu speichern | gleich zurück, auch in der Liste die Arten; danach leer | ✅ 2026-11-27: rot, dito |
+| T40.3 | importierter Tauchgang mit Bedingungen | gleiche Kennung, andere Daten, bestätigt | Messwerte ersetzt, Bedingungen bleiben | ✅ 2026-11-27: rot, dito |
+| T40.4 | Tauchgänge an Elphinstone mit/ohne Bedingungen, ein gelöschter | `lastConditionsAt` | neuester mit mindestens einer Angabe (Name ohne Groß-/Kleinschreibung oder Katalog-ID); ausgenommener und gelöschte zählen nicht; sonst null | ✅ 2026-11-27: rot wegen `UnimplementedError` |
+| T40.5 | Formular-Entwurf | `fromDive`, `toDive` | Bedingungen übernommen bzw. gesetzt; ohne Angaben leer | ✅ 2026-11-27: rot, Felder werden nicht übernommen |
+| T40.6 | neues Formular | Chips wählen, speichern | Überschriften und alle 16 Chips; je eine Sichtweite und Strömung (nochmal Antippen hebt auf), mehrere Arten; gespeichert | ✅ 2026-11-27: rot, Felder fehlen |
+| T40.7 | früherer Tauchgang an Elphinstone mit Sicht gut, Strömung leicht, Riff | Tauchplatz „Elphinstone“ | „Zuletzt bei Elphinstone: Sicht gut · Strömung leicht · Riff“, „Übernehmen“ setzt alle drei, dann weg; anderer Platz oder schon etwas gewählt → keine Zeile | ✅ 2026-11-27: rot, Zeile bzw. Chips fehlen |
+| T40.8 | Tauchgang mit „sehr gut“, „keine“, Wrack + Nacht; bzw. ohne | Detail | „BEDINGUNGEN“, „Sicht sehr gut (> 20 m) · keine Strömung“, „Wrack · Nacht“; ohne Angaben kein Abschnitt | ✅ 2026-11-27: rot, Abschnitt fehlt |
+
+Tests: `test/data/local/conditions_data_test.dart` (T40.1–T40.4), `test/domain/dive/conditions_draft_test.dart` (T40.5), `test/features/logbook/conditions_dive_test.dart` (T40.6–T40.8). Stubs: Enums `WaterVisibility`, `WaterCurrent`, `DiveKind`, Felder an `Dive` und `ManualDiveDraft`, `DiveRepository.lastConditionsAt`; Texte schon in `app_de.arb`.
+
