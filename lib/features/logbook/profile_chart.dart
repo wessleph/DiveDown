@@ -18,7 +18,8 @@ final _litres = NumberFormat('#,##0', 'de');
 String clockText(int seconds) =>
     '${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')}';
 
-enum _Layer { temperature, air, ndl, sac, pulse }
+/// Chips over the plot (ui-spec §6, T37): no NDL, most computers send none.
+enum _Layer { temperature, air, sac, pulse }
 
 /// Profile with layer chips, a plot that follows taps and drags, and the
 /// value panel for the chosen moment (ui-spec §6).
@@ -71,7 +72,6 @@ class _ProfileChartState extends State<ProfileChart> {
 
   /// Right-axis layers in the order they were switched on (max. two).
   final _rightLayers = <_Layer>[_Layer.temperature, _Layer.air];
-  bool _ndl = false;
   bool _hasPulse = false;
 
   @override
@@ -153,10 +153,6 @@ class _ProfileChartState extends State<ProfileChart> {
 
   void _toggle(_Layer layer, AppLocalizations l10n) {
     setState(() {
-      if (layer == _Layer.ndl) {
-        _ndl = !_ndl;
-        return;
-      }
       if (_rightLayers.remove(layer)) return;
       _rightLayers.add(layer);
       if (_rightLayers.length > 2) {
@@ -171,7 +167,6 @@ class _ProfileChartState extends State<ProfileChart> {
   String _label(_Layer layer, AppLocalizations l10n) => switch (layer) {
     _Layer.temperature => l10n.chipTemperature,
     _Layer.air => _measured ? l10n.chipAir : l10n.chipAirEstimated,
-    _Layer.ndl => l10n.chipNdl,
     _Layer.sac => l10n.chipSac,
     _Layer.pulse => l10n.chipPulse,
   };
@@ -188,7 +183,6 @@ class _ProfileChartState extends State<ProfileChart> {
       _Layer.temperature,
       // Without any pressure the chip would switch nothing on.
       if (_air.at(0).missing == null) _Layer.air,
-      _Layer.ndl,
       if (_measured) _Layer.sac,
       if (_hasPulse) _Layer.pulse,
     ];
@@ -204,9 +198,7 @@ class _ProfileChartState extends State<ProfileChart> {
           for (final layer in layers)
             FilterChip(
               label: Text(_label(layer, l10n)),
-              selected: layer == _Layer.ndl
-                  ? _ndl
-                  : _rightLayers.contains(layer),
+              selected: _rightLayers.contains(layer),
               onSelected: (_) => _toggle(layer, l10n),
               showCheckmark: false,
             ),
@@ -247,7 +239,6 @@ class _ProfileChartState extends State<ProfileChart> {
                     airLayer: _rightLayers.contains(_Layer.air),
                     sac: _rightLayers.contains(_Layer.sac),
                     pulse: _rightLayers.contains(_Layer.pulse),
-                    ndl: _ndl,
                     cursorColor: theme.colorScheme.onSurface,
                     background: theme.colorScheme.surface,
                   ),
@@ -671,7 +662,6 @@ class _ProfilePainter extends CustomPainter {
     required this.airLayer,
     required this.sac,
     required this.pulse,
-    required this.ndl,
     required this.cursorColor,
     required this.background,
   });
@@ -692,7 +682,6 @@ class _ProfilePainter extends CustomPainter {
   final bool airLayer;
   final bool sac;
   final bool pulse;
-  final bool ndl;
   final Color cursorColor;
   final Color background;
 
@@ -787,28 +776,6 @@ class _ProfilePainter extends CustomPainter {
       return;
     }
     canvas.drawPath(line, depthPaint);
-
-    // NDL band at the bottom (up to 99 min fills a third of the height).
-    if (ndl) {
-      final path = Path();
-      var started = false;
-      for (final s in samples) {
-        final n = s.ndlS;
-        if (n == null) continue;
-        final v = math.min(n / 60, 99) / 99;
-        final p = Offset(x(s.timeS), _top + h - v * h / 3);
-        started ? path.lineTo(p.dx, p.dy) : path.moveTo(p.dx, p.dy);
-        started = true;
-      }
-      _dashed(
-        canvas,
-        path,
-        Paint()
-          ..color = colors.ndl
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.5,
-      );
-    }
 
     // Right axes: temperature, air, SAC (at most two are on).
     if (temperature) {
@@ -1012,6 +979,5 @@ class _ProfilePainter extends CustomPainter {
       old.airLayer != airLayer ||
       old.sac != sac ||
       old.pulse != pulse ||
-      old.ndl != ndl ||
       old.colors != colors;
 }

@@ -200,10 +200,9 @@
     "placeholders": { "pressure": { "type": "String" } }
   },
   "chipTemperature": "Temperatur",
-  "chipAir": "Luft",
-  "chipAirEstimated": "Luft (geschätzt)",
-  "chipNdl": "NDL",
-  "chipSac": "SAC",
+  "chipAir": "Flaschendruck",
+  "chipAirEstimated": "Flaschendruck (geschätzt)",
+  "chipSac": "Luftverbrauch",
   "chipLayersSpoken": "Ebenen im Diagramm",
   "profileAxesLimit": "Höchstens zwei Werte mit eigener Achse. „{name}“ ist jetzt aus.",
   "@profileAxesLimit": {

@@ -835,25 +835,19 @@ abstract class AppLocalizations {
   /// No description provided for @chipAir.
   ///
   /// In de, this message translates to:
-  /// **'Luft'**
+  /// **'Flaschendruck'**
   String get chipAir;
 
   /// No description provided for @chipAirEstimated.
   ///
   /// In de, this message translates to:
-  /// **'Luft (geschätzt)'**
+  /// **'Flaschendruck (geschätzt)'**
   String get chipAirEstimated;
-
-  /// No description provided for @chipNdl.
-  ///
-  /// In de, this message translates to:
-  /// **'NDL'**
-  String get chipNdl;
 
   /// No description provided for @chipSac.
   ///
   /// In de, this message translates to:
-  /// **'SAC'**
+  /// **'Luftverbrauch'**
   String get chipSac;
 
   /// No description provided for @chipLayersSpoken.

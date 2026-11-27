@@ -917,3 +917,7 @@ Rückmeldung: „NDL“ ändert im Diagramm nichts (der EON Core schickt keine N
 
 Tests: `test/features/logbook/profile_chart_test.dart` (Gruppe T37, T22.10 und T22.11 auf die neuen Namen), `heart_rate_test.dart` (kein Flaschendruck bei der Watch).
 
+
+**Umgesetzt (2026-11-27), T37:**
+- [x] `profile_chart.dart`: Ebene und Band „NDL“ entfernt (der Wert bleibt im Werte-Feld), Chips „Flaschendruck“, „Flaschendruck (geschätzt)“, „Luftverbrauch“ (`app_de.arb`, Schlüssel `chipNdl` entfällt) → T37.1–T37.3 grün. Das Farbtoken `ndl` bleibt im Theme (ui-spec §1).
+- Gesamt: `flutter test` 540/540, `flutter analyze` ohne Befund. Noch nicht am Handy angesehen.

@@ -440,16 +440,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get chipTemperature => 'Temperatur';
 
   @override
-  String get chipAir => 'Luft';
+  String get chipAir => 'Flaschendruck';
 
   @override
-  String get chipAirEstimated => 'Luft (geschätzt)';
+  String get chipAirEstimated => 'Flaschendruck (geschätzt)';
 
   @override
-  String get chipNdl => 'NDL';
-
-  @override
-  String get chipSac => 'SAC';
+  String get chipSac => 'Luftverbrauch';
 
   @override
   String get chipLayersSpoken => 'Ebenen im Diagramm';
