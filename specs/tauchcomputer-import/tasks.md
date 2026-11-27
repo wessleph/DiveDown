@@ -986,3 +986,10 @@ Abgenommen am 2026-11-27: Sichtweite in 4 Stufen mit Metern, Strömung in 4 Stuf
 
 Tests: `test/data/local/conditions_data_test.dart` (T40.1–T40.4), `test/domain/dive/conditions_draft_test.dart` (T40.5), `test/features/logbook/conditions_dive_test.dart` (T40.6–T40.8). Stubs: Enums `WaterVisibility`, `WaterCurrent`, `DiveKind`, Felder an `Dive` und `ManualDiveDraft`, `DiveRepository.lastConditionsAt`; Texte schon in `app_de.arb`.
 
+
+**Umgesetzt (2026-11-27), T40:**
+- [x] Schema v3 mit Migration (`onUpgrade` `from < 3`: Spalten `visibility`, `current_strength`, `kinds`), `database.g.dart` mit `build_runner` neu erzeugt → T40.1 grün. Speichern/Laden, Arten in fester Reihenfolge, unbekannte Namen übersprungen → T40.2 grün. Ersetzt ein Import den Tauchgang, bleiben die Bedingungen → T40.3 grün.
+- [x] `lastConditionsAt` über die gemeinsame Abfrage `_newestAtSite` (gleiche Regeln wie beim Blei) → T40.4 grün; Entwurf übernimmt die drei Felder → T40.5 grün.
+- [x] Formular: Abschnitte „Sichtweite“, „Strömung“ (`ChoiceChip`, nochmal Antippen hebt auf), „Tauchgangsart“ (`FilterChip`) unter dem Wassertyp, Vorschlag „Zuletzt bei …“ · „Übernehmen“ solange nichts gewählt ist → T40.6, T40.7 grün. Detail: Abschnitt „BEDINGUNGEN“ vor „AUSRÜSTUNG“ → T40.8 grün.
+- Testkorrekturen: T30.1 erwartet nach der Migration jetzt `latestSchemaVersion` (läuft bis v3) statt fest 2. Das Formular ist länger, deshalb öffnen `equipment_dive_test.dart` und `conditions_dive_test.dart` es mit 2400 px Höhe (Felder außerhalb des Bildes baut die Liste nicht). In `conditions_dive_test.dart` schließt `_site` die Tastatur und `_tap` wartet, bis das Scrollen fertig ist.
+- Gesamt: `flutter test` 568/568, `flutter analyze` ohne Befund, Format sauber. Noch nicht am Handy angesehen. Sicherungen aus v2 werden beim Wiederherstellen auf v3 migriert (Schema ≤ aktuelles, T11.4).

@@ -595,5 +595,9 @@
   "conditionsLastAt": "Zuletzt bei {site}: {conditions}",
   "@conditionsLastAt": {
     "placeholders": { "site": { "type": "String" }, "conditions": { "type": "String" } }
+  },
+  "visibilityDetail": "Sicht {level}",
+  "@visibilityDetail": {
+    "placeholders": { "level": { "type": "String" } }
   }
 }

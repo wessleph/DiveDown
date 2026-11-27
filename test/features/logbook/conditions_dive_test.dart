@@ -36,8 +36,18 @@ Future<void> _enter(WidgetTester tester, String label, String text) async {
   await tester.pumpAndSettle();
 }
 
+/// Types the site and closes the keyboard; a focused field keeps scrolling
+/// itself back into view.
+Future<void> _site(WidgetTester tester, String name) async {
+  await _enter(tester, 'Tauchplatz', name);
+  FocusManager.instance.primaryFocus?.unfocus();
+  await tester.pumpAndSettle();
+}
+
 Future<void> _tap(WidgetTester tester, Finder finder) async {
   await tester.ensureVisible(finder);
+  // Closing the keyboard may still be scrolling the form.
+  await tester.pumpAndSettle();
   await tester.tap(finder);
   await tester.pumpAndSettle();
 }
@@ -66,7 +76,7 @@ Future<(AppDatabase, String)> _seed({bool earlier = false}) async {
 }
 
 Future<void> _openNewForm(WidgetTester tester, AppDatabase db) async {
-  await pumpTestApp(tester, db: db, size: const Size(400, 1400));
+  await pumpTestApp(tester, db: db, size: const Size(400, 2400));
   await tester.tap(find.byType(FloatingActionButton));
   await tester.pumpAndSettle();
 }
@@ -134,7 +144,7 @@ void main() {
       await _openNewForm(tester, db);
       expect(find.textContaining('Zuletzt bei'), findsNothing);
 
-      await _enter(tester, 'Tauchplatz', 'Elphinstone');
+      await _site(tester, 'Elphinstone');
       expect(
         find.text(
           'Zuletzt bei Elphinstone: Sicht gut · Strömung leicht · Riff',
@@ -147,7 +157,7 @@ void main() {
       expect(_selected(tester, 'Riff'), isTrue);
       expect(find.textContaining('Zuletzt bei'), findsNothing);
 
-      await _enter(tester, 'Tauchplatz', 'Daedalus');
+      await _site(tester, 'Daedalus');
       await _tap(tester, _chip('gut (10–20 m)'));
       await _tap(tester, _chip('leicht'));
       await _tap(tester, _chip('Riff'));
@@ -160,8 +170,9 @@ void main() {
       final (db, _) = await _seed(earlier: true);
       await _openNewForm(tester, db);
 
+      await _site(tester, 'Elphinstone');
+      expect(find.textContaining('Zuletzt bei'), findsOneWidget);
       await _tap(tester, _chip('Nacht'));
-      await _enter(tester, 'Tauchplatz', 'Elphinstone');
       expect(find.textContaining('Zuletzt bei'), findsNothing);
     });
   });

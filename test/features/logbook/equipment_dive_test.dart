@@ -77,7 +77,7 @@ Future<(AppDatabase, String, Map<String, Equipment>)> _seed() async {
 }
 
 Future<void> _openNewForm(WidgetTester tester, AppDatabase db) async {
-  await pumpTestApp(tester, db: db, size: const Size(400, 1400));
+  await pumpTestApp(tester, db: db, size: const Size(400, 2400));
   await tester.tap(find.byType(FloatingActionButton));
   await tester.pumpAndSettle();
 }

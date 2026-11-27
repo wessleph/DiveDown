@@ -58,7 +58,11 @@ void main() {
       );
       expect((await equipment.list('anna')).single.id, bcd.id);
       final version = await db.customSelect('PRAGMA user_version').getSingle();
-      expect(version.read<int>('user_version'), 2);
+      // Runs on to the newest schema (v3 since T40).
+      expect(
+        version.read<int>('user_version'),
+        AppDatabase.latestSchemaVersion,
+      );
     });
   });
 

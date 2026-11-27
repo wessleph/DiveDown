@@ -147,7 +147,60 @@ class DriftDiveRepository implements DiveRepository, DiveNumbering {
     String? siteName,
     String? siteCatalogueId,
     String? excludeDiveId,
-  }) => throw UnimplementedError();
+  }) async {
+    final row = await _newestAtSite(
+      diverId,
+      siteName: siteName,
+      siteCatalogueId: siteCatalogueId,
+      excludeDiveId: excludeDiveId,
+      noted: (d) =>
+          d.visibility.isNotNull() |
+          d.currentStrength.isNotNull() |
+          d.kinds.isNotNull(),
+    );
+    if (row == null) return null;
+    final dive = _fromRow(row);
+    return (
+      visibility: dive.visibility,
+      current: dive.current,
+      kinds: dive.kinds,
+      siteName: row.siteName!.trim(),
+    );
+  }
+
+  /// The newest dive of [diverId] at the same site (catalogue id, else name
+  /// ignoring case and outer spaces) for which [noted] holds (ADR 0007, T40).
+  Future<DiveRow?> _newestAtSite(
+    String diverId, {
+    String? siteName,
+    String? siteCatalogueId,
+    String? excludeDiveId,
+    required Expression<bool> Function($DivesTable d) noted,
+  }) {
+    final name = siteName?.trim().toLowerCase() ?? '';
+    final byCatalogue = siteCatalogueId != null && siteCatalogueId.isNotEmpty;
+    if (name.isEmpty && !byCatalogue) return Future.value();
+    return (_db.select(_db.dives)
+          ..where((d) {
+            var where =
+                d.diverId.equals(diverId) & d.deletedAt.isNull() & noted(d);
+            if (excludeDiveId != null) {
+              where = where & d.id.equals(excludeDiveId).not();
+            }
+            final sameName = d.siteName.trim().lower().equals(name);
+            return where &
+                (byCatalogue
+                    ? (d.siteCatalogueId.equals(siteCatalogueId) |
+                          (name.isEmpty ? const Constant(false) : sameName))
+                    : sameName);
+          })
+          ..orderBy([
+            (d) => OrderingTerm.desc(d.startLocal),
+            (d) => OrderingTerm.desc(d.diveNumber),
+          ])
+          ..limit(1))
+        .getSingleOrNull();
+  }
 
   /// [Dive.equipmentIds] null: a new dive gets the standard set, an existing
   /// one keeps its links (ADR 0007).
@@ -588,6 +641,16 @@ DivesCompanion _toRow(
     notes: Value(d.notes),
     rating: Value(d.rating),
     weightKg: Value(d.weightKg),
+    visibility: Value(d.visibility?.name),
+    currentStrength: Value(d.current?.name),
+    kinds: Value(
+      d.kinds.isEmpty
+          ? null
+          : [
+              for (final k in DiveKind.values)
+                if (d.kinds.contains(k)) k.name,
+            ].join(','),
+    ),
     createdAt: createdAt,
     updatedAt: now,
   );
@@ -618,5 +681,15 @@ Dive _fromRow(DiveRow r) {
     notes: r.notes,
     rating: r.rating,
     weightKg: r.weightKg,
+    visibility: WaterVisibility.values.asNameMap()[r.visibility],
+    current: WaterCurrent.values.asNameMap()[r.currentStrength],
+    kinds: _kinds(r.kinds),
   );
+}
+
+/// Kinds from their stored names; unknown names are skipped.
+Set<DiveKind> _kinds(String? stored) {
+  if (stored == null || stored.isEmpty) return const {};
+  final byName = DiveKind.values.asNameMap();
+  return {for (final name in stored.split(',')) ?byName[name]};
 }

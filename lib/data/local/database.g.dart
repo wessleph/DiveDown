@@ -1355,6 +1355,37 @@ class $DivesTable extends Dives with TableInfo<$DivesTable, DiveRow> {
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _visibilityMeta = const VerificationMeta(
+    'visibility',
+  );
+  @override
+  late final GeneratedColumn<String> visibility = GeneratedColumn<String>(
+    'visibility',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _currentStrengthMeta = const VerificationMeta(
+    'currentStrength',
+  );
+  @override
+  late final GeneratedColumn<String> currentStrength = GeneratedColumn<String>(
+    'current_strength',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _kindsMeta = const VerificationMeta('kinds');
+  @override
+  late final GeneratedColumn<String> kinds = GeneratedColumn<String>(
+    'kinds',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1381,6 +1412,9 @@ class $DivesTable extends Dives with TableInfo<$DivesTable, DiveRow> {
     notes,
     rating,
     weightKg,
+    visibility,
+    currentStrength,
+    kinds,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1568,6 +1602,27 @@ class $DivesTable extends Dives with TableInfo<$DivesTable, DiveRow> {
         weightKg.isAcceptableOrUnknown(data['weight_kg']!, _weightKgMeta),
       );
     }
+    if (data.containsKey('visibility')) {
+      context.handle(
+        _visibilityMeta,
+        visibility.isAcceptableOrUnknown(data['visibility']!, _visibilityMeta),
+      );
+    }
+    if (data.containsKey('current_strength')) {
+      context.handle(
+        _currentStrengthMeta,
+        currentStrength.isAcceptableOrUnknown(
+          data['current_strength']!,
+          _currentStrengthMeta,
+        ),
+      );
+    }
+    if (data.containsKey('kinds')) {
+      context.handle(
+        _kindsMeta,
+        kinds.isAcceptableOrUnknown(data['kinds']!, _kindsMeta),
+      );
+    }
     return context;
   }
 
@@ -1673,6 +1728,18 @@ class $DivesTable extends Dives with TableInfo<$DivesTable, DiveRow> {
         DriftSqlType.double,
         data['${effectivePrefix}weight_kg'],
       ),
+      visibility: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}visibility'],
+      ),
+      currentStrength: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}current_strength'],
+      ),
+      kinds: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kinds'],
+      ),
     );
   }
 
@@ -1711,6 +1778,11 @@ class DiveRow extends DataClass implements Insertable<DiveRow> {
 
   /// Lead in kg (schema v2, ADR 0007).
   final double? weightKg;
+
+  /// Conditions (schema v3, T40): enum names; kinds separated by commas.
+  final String? visibility;
+  final String? currentStrength;
+  final String? kinds;
   const DiveRow({
     required this.id,
     required this.createdAt,
@@ -1736,6 +1808,9 @@ class DiveRow extends DataClass implements Insertable<DiveRow> {
     this.notes,
     this.rating,
     this.weightKg,
+    this.visibility,
+    this.currentStrength,
+    this.kinds,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1793,6 +1868,15 @@ class DiveRow extends DataClass implements Insertable<DiveRow> {
     }
     if (!nullToAbsent || weightKg != null) {
       map['weight_kg'] = Variable<double>(weightKg);
+    }
+    if (!nullToAbsent || visibility != null) {
+      map['visibility'] = Variable<String>(visibility);
+    }
+    if (!nullToAbsent || currentStrength != null) {
+      map['current_strength'] = Variable<String>(currentStrength);
+    }
+    if (!nullToAbsent || kinds != null) {
+      map['kinds'] = Variable<String>(kinds);
     }
     return map;
   }
@@ -1853,6 +1937,15 @@ class DiveRow extends DataClass implements Insertable<DiveRow> {
       weightKg: weightKg == null && nullToAbsent
           ? const Value.absent()
           : Value(weightKg),
+      visibility: visibility == null && nullToAbsent
+          ? const Value.absent()
+          : Value(visibility),
+      currentStrength: currentStrength == null && nullToAbsent
+          ? const Value.absent()
+          : Value(currentStrength),
+      kinds: kinds == null && nullToAbsent
+          ? const Value.absent()
+          : Value(kinds),
     );
   }
 
@@ -1886,6 +1979,9 @@ class DiveRow extends DataClass implements Insertable<DiveRow> {
       notes: serializer.fromJson<String?>(json['notes']),
       rating: serializer.fromJson<int?>(json['rating']),
       weightKg: serializer.fromJson<double?>(json['weightKg']),
+      visibility: serializer.fromJson<String?>(json['visibility']),
+      currentStrength: serializer.fromJson<String?>(json['currentStrength']),
+      kinds: serializer.fromJson<String?>(json['kinds']),
     );
   }
   @override
@@ -1916,6 +2012,9 @@ class DiveRow extends DataClass implements Insertable<DiveRow> {
       'notes': serializer.toJson<String?>(notes),
       'rating': serializer.toJson<int?>(rating),
       'weightKg': serializer.toJson<double?>(weightKg),
+      'visibility': serializer.toJson<String?>(visibility),
+      'currentStrength': serializer.toJson<String?>(currentStrength),
+      'kinds': serializer.toJson<String?>(kinds),
     };
   }
 
@@ -1944,6 +2043,9 @@ class DiveRow extends DataClass implements Insertable<DiveRow> {
     Value<String?> notes = const Value.absent(),
     Value<int?> rating = const Value.absent(),
     Value<double?> weightKg = const Value.absent(),
+    Value<String?> visibility = const Value.absent(),
+    Value<String?> currentStrength = const Value.absent(),
+    Value<String?> kinds = const Value.absent(),
   }) => DiveRow(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -1977,6 +2079,11 @@ class DiveRow extends DataClass implements Insertable<DiveRow> {
     notes: notes.present ? notes.value : this.notes,
     rating: rating.present ? rating.value : this.rating,
     weightKg: weightKg.present ? weightKg.value : this.weightKg,
+    visibility: visibility.present ? visibility.value : this.visibility,
+    currentStrength: currentStrength.present
+        ? currentStrength.value
+        : this.currentStrength,
+    kinds: kinds.present ? kinds.value : this.kinds,
   );
   DiveRow copyWithCompanion(DivesCompanion data) {
     return DiveRow(
@@ -2018,6 +2125,13 @@ class DiveRow extends DataClass implements Insertable<DiveRow> {
       notes: data.notes.present ? data.notes.value : this.notes,
       rating: data.rating.present ? data.rating.value : this.rating,
       weightKg: data.weightKg.present ? data.weightKg.value : this.weightKg,
+      visibility: data.visibility.present
+          ? data.visibility.value
+          : this.visibility,
+      currentStrength: data.currentStrength.present
+          ? data.currentStrength.value
+          : this.currentStrength,
+      kinds: data.kinds.present ? data.kinds.value : this.kinds,
     );
   }
 
@@ -2047,7 +2161,10 @@ class DiveRow extends DataClass implements Insertable<DiveRow> {
           ..write('waterType: $waterType, ')
           ..write('notes: $notes, ')
           ..write('rating: $rating, ')
-          ..write('weightKg: $weightKg')
+          ..write('weightKg: $weightKg, ')
+          ..write('visibility: $visibility, ')
+          ..write('currentStrength: $currentStrength, ')
+          ..write('kinds: $kinds')
           ..write(')'))
         .toString();
   }
@@ -2078,6 +2195,9 @@ class DiveRow extends DataClass implements Insertable<DiveRow> {
     notes,
     rating,
     weightKg,
+    visibility,
+    currentStrength,
+    kinds,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -2106,7 +2226,10 @@ class DiveRow extends DataClass implements Insertable<DiveRow> {
           other.waterType == this.waterType &&
           other.notes == this.notes &&
           other.rating == this.rating &&
-          other.weightKg == this.weightKg);
+          other.weightKg == this.weightKg &&
+          other.visibility == this.visibility &&
+          other.currentStrength == this.currentStrength &&
+          other.kinds == this.kinds);
 }
 
 class DivesCompanion extends UpdateCompanion<DiveRow> {
@@ -2134,6 +2257,9 @@ class DivesCompanion extends UpdateCompanion<DiveRow> {
   final Value<String?> notes;
   final Value<int?> rating;
   final Value<double?> weightKg;
+  final Value<String?> visibility;
+  final Value<String?> currentStrength;
+  final Value<String?> kinds;
   final Value<int> rowid;
   const DivesCompanion({
     this.id = const Value.absent(),
@@ -2160,6 +2286,9 @@ class DivesCompanion extends UpdateCompanion<DiveRow> {
     this.notes = const Value.absent(),
     this.rating = const Value.absent(),
     this.weightKg = const Value.absent(),
+    this.visibility = const Value.absent(),
+    this.currentStrength = const Value.absent(),
+    this.kinds = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   DivesCompanion.insert({
@@ -2187,6 +2316,9 @@ class DivesCompanion extends UpdateCompanion<DiveRow> {
     this.notes = const Value.absent(),
     this.rating = const Value.absent(),
     this.weightKg = const Value.absent(),
+    this.visibility = const Value.absent(),
+    this.currentStrength = const Value.absent(),
+    this.kinds = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        createdAt = Value(createdAt),
@@ -2222,6 +2354,9 @@ class DivesCompanion extends UpdateCompanion<DiveRow> {
     Expression<String>? notes,
     Expression<int>? rating,
     Expression<double>? weightKg,
+    Expression<String>? visibility,
+    Expression<String>? currentStrength,
+    Expression<String>? kinds,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2249,6 +2384,9 @@ class DivesCompanion extends UpdateCompanion<DiveRow> {
       if (notes != null) 'notes': notes,
       if (rating != null) 'rating': rating,
       if (weightKg != null) 'weight_kg': weightKg,
+      if (visibility != null) 'visibility': visibility,
+      if (currentStrength != null) 'current_strength': currentStrength,
+      if (kinds != null) 'kinds': kinds,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2278,6 +2416,9 @@ class DivesCompanion extends UpdateCompanion<DiveRow> {
     Value<String?>? notes,
     Value<int?>? rating,
     Value<double?>? weightKg,
+    Value<String?>? visibility,
+    Value<String?>? currentStrength,
+    Value<String?>? kinds,
     Value<int>? rowid,
   }) {
     return DivesCompanion(
@@ -2305,6 +2446,9 @@ class DivesCompanion extends UpdateCompanion<DiveRow> {
       notes: notes ?? this.notes,
       rating: rating ?? this.rating,
       weightKg: weightKg ?? this.weightKg,
+      visibility: visibility ?? this.visibility,
+      currentStrength: currentStrength ?? this.currentStrength,
+      kinds: kinds ?? this.kinds,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2384,6 +2528,15 @@ class DivesCompanion extends UpdateCompanion<DiveRow> {
     if (weightKg.present) {
       map['weight_kg'] = Variable<double>(weightKg.value);
     }
+    if (visibility.present) {
+      map['visibility'] = Variable<String>(visibility.value);
+    }
+    if (currentStrength.present) {
+      map['current_strength'] = Variable<String>(currentStrength.value);
+    }
+    if (kinds.present) {
+      map['kinds'] = Variable<String>(kinds.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2417,6 +2570,9 @@ class DivesCompanion extends UpdateCompanion<DiveRow> {
           ..write('notes: $notes, ')
           ..write('rating: $rating, ')
           ..write('weightKg: $weightKg, ')
+          ..write('visibility: $visibility, ')
+          ..write('currentStrength: $currentStrength, ')
+          ..write('kinds: $kinds, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -6578,6 +6734,9 @@ typedef $$DivesTableCreateCompanionBuilder = DivesCompanion Function({
   Value<String?> notes,
   Value<int?> rating,
   Value<double?> weightKg,
+  Value<String?> visibility,
+  Value<String?> currentStrength,
+  Value<String?> kinds,
   Value<int> rowid,
 });
 typedef $$DivesTableUpdateCompanionBuilder = DivesCompanion Function({
@@ -6605,6 +6764,9 @@ typedef $$DivesTableUpdateCompanionBuilder = DivesCompanion Function({
   Value<String?> notes,
   Value<int?> rating,
   Value<double?> weightKg,
+  Value<String?> visibility,
+  Value<String?> currentStrength,
+  Value<String?> kinds,
   Value<int> rowid,
 });
 
@@ -6856,6 +7018,21 @@ class $$DivesTableFilterComposer extends Composer<_$AppDatabase, $DivesTable> {
 
   ColumnFilters<double> get weightKg => $composableBuilder(
     column: $table.weightKg,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get visibility => $composableBuilder(
+    column: $table.visibility,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get currentStrength => $composableBuilder(
+    column: $table.currentStrength,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kinds => $composableBuilder(
+    column: $table.kinds,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7150,6 +7327,21 @@ class $$DivesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get visibility => $composableBuilder(
+    column: $table.visibility,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get currentStrength => $composableBuilder(
+    column: $table.currentStrength,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kinds => $composableBuilder(
+    column: $table.kinds,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$DiversTableOrderingComposer get diverId {
     final $$DiversTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -7283,6 +7475,19 @@ class $$DivesTableAnnotationComposer
 
   GeneratedColumn<double> get weightKg =>
       $composableBuilder(column: $table.weightKg, builder: (column) => column);
+
+  GeneratedColumn<String> get visibility => $composableBuilder(
+    column: $table.visibility,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get currentStrength => $composableBuilder(
+    column: $table.currentStrength,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get kinds =>
+      $composableBuilder(column: $table.kinds, builder: (column) => column);
 
   $$DiversTableAnnotationComposer get diverId {
     final $$DiversTableAnnotationComposer composer = $composerBuilder(
@@ -7517,6 +7722,9 @@ class $$DivesTableTableManager
                 Value<String?> notes = const Value.absent(),
                 Value<int?> rating = const Value.absent(),
                 Value<double?> weightKg = const Value.absent(),
+                Value<String?> visibility = const Value.absent(),
+                Value<String?> currentStrength = const Value.absent(),
+                Value<String?> kinds = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DivesCompanion(
                 id: id,
@@ -7543,6 +7751,9 @@ class $$DivesTableTableManager
                 notes: notes,
                 rating: rating,
                 weightKg: weightKg,
+                visibility: visibility,
+                currentStrength: currentStrength,
+                kinds: kinds,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -7571,6 +7782,9 @@ class $$DivesTableTableManager
                 Value<String?> notes = const Value.absent(),
                 Value<int?> rating = const Value.absent(),
                 Value<double?> weightKg = const Value.absent(),
+                Value<String?> visibility = const Value.absent(),
+                Value<String?> currentStrength = const Value.absent(),
+                Value<String?> kinds = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DivesCompanion.insert(
                 id: id,
@@ -7597,6 +7811,9 @@ class $$DivesTableTableManager
                 notes: notes,
                 rating: rating,
                 weightKg: weightKg,
+                visibility: visibility,
+                currentStrength: currentStrength,
+                kinds: kinds,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

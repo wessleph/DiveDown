@@ -2493,6 +2493,12 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Zuletzt bei {site}: {conditions}'**
   String conditionsLastAt(String site, String conditions);
+
+  /// No description provided for @visibilityDetail.
+  ///
+  /// In de, this message translates to:
+  /// **'Sicht {level}'**
+  String visibilityDetail(String level);
 }
 
 class _AppLocalizationsDelegate

@@ -1416,4 +1416,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String conditionsLastAt(String site, String conditions) {
     return 'Zuletzt bei $site: $conditions';
   }
+
+  @override
+  String visibilityDetail(String level) {
+    return 'Sicht $level';
+  }
 }

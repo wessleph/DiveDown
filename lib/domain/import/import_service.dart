@@ -215,6 +215,9 @@ class ImportService {
         rating: old.rating,
         // Lead and equipment are the user's (ADR 0007); null keeps the links.
         weightKg: old.weightKg,
+        visibility: old.visibility,
+        current: old.current,
+        kinds: old.kinds,
         samples: fresh.samples,
         tanks: fresh.tanks,
         events: fresh.events,

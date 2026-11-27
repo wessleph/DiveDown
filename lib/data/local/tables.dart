@@ -64,6 +64,11 @@ class Dives extends Table with SyncColumns {
   /// Lead in kg (schema v2, ADR 0007).
   RealColumn get weightKg => real().nullable()();
 
+  /// Conditions (schema v3, T40): enum names; kinds separated by commas.
+  TextColumn get visibility => text().nullable()();
+  TextColumn get currentStrength => text().nullable()();
+  TextColumn get kinds => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
