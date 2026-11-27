@@ -871,27 +871,30 @@ class _ProfilePainter extends CustomPainter {
       );
     }
     if (sac && start.source == AirSource.measured) {
-      final rates = [
-        for (final s in samples)
-          (
-            s.timeS,
-            (air.at(s.timeS).litresPerMinuteNow ?? 0) /
-                ambientPressureBar(s.depthM, dive.waterType),
-          ),
-      ];
-      final hi = math.max(1.0, rates.map((e) => e.$2).reduce(math.max));
-      final path = Path();
-      for (final (i, (t, r)) in rates.indexed) {
-        final py = _top + (1 - r / hi) * h * 0.6 + h * 0.4;
-        i == 0 ? path.moveTo(x(t), py) : path.lineTo(x(t), py);
+      // Step line over fixed one-minute segments (ui-spec §6, T7.3).
+      final segments = const SacCalculator().segments(dive);
+      if (segments.isNotEmpty) {
+        final hi = math.max(
+          1.0,
+          segments.map((e) => e.litresPerMinute).reduce(math.max),
+        );
+        double py(double r) => _top + (1 - r / hi) * h * 0.6 + h * 0.4;
+        final path = Path();
+        for (final (i, seg) in segments.indexed) {
+          final y = py(seg.litresPerMinute);
+          i == 0
+              ? path.moveTo(x(seg.startS), y)
+              : path.lineTo(x(seg.startS), y);
+          path.lineTo(x(seg.endS), y);
+        }
+        canvas.drawPath(
+          path,
+          Paint()
+            ..color = colors.sac
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.5,
+        );
       }
-      canvas.drawPath(
-        path,
-        Paint()
-          ..color = colors.sac
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.5,
-      );
     }
 
     // Heart rate in the lower half (Apple Watch, T6.11).

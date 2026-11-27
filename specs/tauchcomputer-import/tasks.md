@@ -236,6 +236,11 @@ Tests: `test/domain/metrics/sac_calculator_test.dart`. Annahme: Oberflächendruc
 
 **T7.3 ausgestaltet (2026-11-27):** Bisher rechnete das Diagramm für jeden Messpunkt einen gleitenden 60-s-Wert und zeichnete eine glatte Linie; ui-spec §6 verlangt eine Stufenlinie über feste 1-min-Abschnitte. `SacCalculator.segments(dive, tankIndex)` liefert Abschnitte [0, 60), [60, 120) … bis zum letzten Druckwert (der letzte darf kürzer sein); Druck an den Grenzen linear zwischen den Messwerten der Flasche; Umgebungsdruck aus der mittleren Tiefe der Samples im Abschnitt; Δp < 0 zählt als 0. Ohne Druck-Samples oder Flaschengröße leer. Tests: `test/domain/metrics/sac_segments_test.dart` (gleichmäßig 3 bar/min → 50 gleiche Abschnitte; Minute ohne Änderung bzw. mit steigendem Druck → 0; kürzerer letzter Abschnitt; Tiefe je Abschnitt; Messwerte nur alle 30 s; ohne Druck/Volumen leer).
 
+**Umgesetzt (2026-11-27), T7.3:**
+- [x] `SacCalculator.segments` (Abschnitte, Druck linear an den Grenzen, Tiefe je Abschnitt, nie negativ) → 6 Tests grün.
+- [x] Profil: Ebene „SAC“ zeichnet jetzt die Stufenlinie aus diesen Abschnitten statt der glatten Linie je Messpunkt. „Luft jetzt“ im Werte-Feld bleibt beim gleitenden Wert der laufenden Minute (ui-spec §6).
+- Gesamt: `flutter test` 538/538, `flutter analyze` ohne Befund. Am Handy noch nicht angesehen (nur Tauchgänge mit Druck-Samples, z. B. EON Core mit Sender).
+
 ## T8: Datenbank (`data/local/`, ADR 0004/0006)
 | ID | A | W | D | Rot gesehen |
 |---|---|---|---|---|
