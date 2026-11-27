@@ -20,6 +20,22 @@ Der Referenz-Checkout von Submersion (`submersion-referenz/`) ist **nicht** Teil
 git clone --depth 1 --recurse-submodules --shallow-submodules https://github.com/submersion-app/submersion.git submersion-referenz
 ```
 
+## Android-APK prüfen
+Jede Release-APK von DiveDown ist mit demselben Schlüssel signiert. Der SHA-256-Fingerabdruck des Zertifikats lautet:
+
+```text
+83:4A:81:53:5B:41:26:4E:70:C3:2D:33:9C:D1:A5:B7:ED:F4:85:05:EB:34:05:F6:84:73:88:EE:A6:8D:27:E5
+```
+
+Prüfen mit `apksigner` aus den Build-Tools des Android-SDK:
+
+```bash
+apksigner verify --print-certs app-release.apk
+```
+
+Die Zeile `Signer #1 certificate SHA-256 digest` muss denselben Wert zeigen (dort ohne Doppelpunkte und in Kleinbuchstaben). Stimmt er nicht, die APK nicht installieren.
+Obtainium und Android prüfen das Zertifikat bei jedem Update selbst. Einrichtung des Schlüssels: `docs/entwickler/android-release-einrichtung.md`.
+
 ## Datenschutz
 Die Datenschutzerklärung ist `docs/datenschutz.md` und erscheint über GitHub Pages unter **https://wessleph.github.io/DiveDown/datenschutz/** (Pages-Quelle: Branch `main`, Ordner `/docs`).
 Vor jedem Release, das etwas am Umgang mit Daten ändert, wird sie geprüft und angepasst (Phase 60 bzw. 80). Recht: Schweizer DSG, ergänzend DSGVO.
