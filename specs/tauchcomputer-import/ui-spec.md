@@ -275,6 +275,14 @@ Die App hat keine Internet-Berechtigung (security.md §4): Sie **sendet nichts s
 | Protokoll leer | Schalter ausgeblendet, Mail ohne Anhang |
 | zurück aus der Mail-App | Die Seite bleibt mit dem Text offen (man weiß nicht, ob gesendet wurde) |
 
+### 5.15 Statistik *(neu, abgenommen 2026-11-27, T39)*
+Erreichbar durch Antippen der beiden Kacheln oben im Logbuch (§5.2, vorgelesen „Statistik öffnen“); eigene Seite in der Tab „Logbuch“, Titel **„Statistik“**. Alles wird beim Öffnen aus den Tauchgängen auf dem Gerät berechnet, offline, nichts davon gespeichert.
+1. **ÜBERBLICK:** Tauchgänge · Zeit unter Wasser · **Tiefster Tauchgang** · **Längster Tauchgang** · **Kältestes Wasser** · **Länder** (aus den Katalog-Tauchplätzen). Die drei Rekorde zeigen den Wert groß und darunter „#42 · SS Thistlegorm“; Antippen öffnet den Tauchgang. Gleichstand: der frühere Tauchgang. Kältestes Wasser nur aus Tauchgängen mit Temperatur.
+2. **PRO JAHR:** waagrechte Balken (Länge = Anzahl, `primary`), daneben Jahr und Zahl als Text; vorgelesen „2026: 12 Tauchgänge“.
+3. **TAUCHPLÄTZE:** die 5 meistbesuchten mit „12×“. Gleiche Namen ohne Groß-/Kleinschreibung und Leerzeichen am Rand zählen zusammen; angezeigt wird die Schreibweise des neuesten Tauchgangs. Gleichstand: zuletzt besucht zuerst. Tauchgänge ohne Platz zählen nicht.
+4. **LUFTVERBRAUCH:** Ø-SAC der letzten 10 Tauchgänge mit Flaschendruck und Flaschengröße, als Linie (älteste links, `sac`), darunter „Ø 17,6 l/min · zuletzt 16,9 l/min“. Mit weniger als zwei solchen Tauchgängen statt der Linie: „Für den Verlauf braucht es mindestens zwei Tauchgänge mit Flaschendruck und Flaschengröße.“
+5. **Leer:** „Noch keine Statistik. Sie entsteht mit deinen Tauchgängen.“
+
 ## 6. Profil-Diagramm
 - **X-Achse:** Zeit (min). **Y-Achse:** Tiefe, **nach unten wachsend** (0 m oben), Gitter alle 10 m (bis 15 m max. Tiefe alle 5 m), Beschriftung in `onSurfaceMuted`.
 - Tiefenkurve in `depth` als Fläche mit Verlauf (oben 5 %, unten 42 % Deckkraft) und Linie 2 dp.

@@ -945,3 +945,20 @@ Tests: `test/features/onboarding/welcome_test.dart` (T38.1), `test/data/local/se
 - [x] `ProfileLayer` (domain), `DriftAppSettings.profileLayers`/`setProfileLayers` (`app_meta` `profile_layers`, unbekannte Namen übersprungen), `profileLayersProvider` → T38.2 grün.
 - [x] `ProfileChart` liest die gemerkte Wahl (Regel oben), Antippen speichert sie; gilt auch im Vollbild → T38.3–T38.6 grün, T22.10/T22.11, T37 und T6.11 weiter grün.
 - Gesamt: `flutter test` 546/546, `flutter analyze` ohne Befund.
+
+## T39: Statistik (ui-spec §5.15, Wunsch vom 2026-11-27)
+
+Abgenommen am 2026-11-27 (mit tiefstem Tauchgang; „es fehlt nichts“). Rechnung rein in Dart (`lib/domain/metrics/logbook_stats.dart`), Seite `lib/features/logbook/statistics_screen.dart` unter `/logbook/statistics`.
+
+| Nr. | Ausgangslage | Aktion | Erwartet | Status |
+|---|---|---|---|---|
+| T39.1 | Tauchgänge 2025/2026, mit und ohne Temperatur, Gleichstände | `logbookStats` | Anzahl, Summe der Dauer; tiefster, längster, kältester (Gleichstand: früherer; Kälte nur mit Temperatur); pro Jahr aufsteigend |✅ 2026-11-27: rot wegen `UnimplementedError` |
+| T39.2 | „Elphinstone“ 3×, „ elphinstone “ 1×, 6 weitere Plätze, Tauchgänge ohne Platz | `logbookStats` | höchstens 5 Plätze, Elphinstone mit 4 in der Schreibweise des neuesten; Gleichstand: zuletzt besucht zuerst; ohne Platz zählt nicht |✅ 2026-11-27: rot wegen `UnimplementedError` |
+| T39.3 | 12 Tauchgänge mit Druck und Größe, 2 ohne | `logbookStats` | SAC-Verlauf: die letzten 10 mit Wert, älteste zuerst |✅ 2026-11-27: rot wegen `UnimplementedError` |
+| T39.4 | keine Tauchgänge | `logbookStats`; Seite | leer; Text „Noch keine Statistik. Sie entsteht mit deinen Tauchgängen.“ |✅ 2026-11-27: rot wegen `UnimplementedError` bzw. Seite fehlt (Route unbekannt) |
+| T39.5 | Logbuch mit Tauchgängen | Kachel antippen | Seite „Statistik“, Tab-Leiste bleibt; Überblick mit Werten, „Länder 2“ (aus `visitedCountriesProvider`); „Tiefster Tauchgang“ antippen öffnet ihn |✅ 2026-11-27: rot, Antippen bleibt auf `/logbook`, kein „Statistik öffnen“ |
+| T39.6 | Tauchgänge 2025 und 2026 | Seite | Jahre mit Zahlen; vorgelesen „2026: 3 Tauchgänge“ |✅ 2026-11-27: rot, Seite fehlt |
+| T39.7 | Tauchplätze, SAC | Seite | „TAUCHPLÄTZE“ mit „3×“; Luftverbrauch „Ø … · zuletzt …“; mit weniger als zwei Werten der Hinweistext |✅ 2026-11-27: rot, Seite fehlt |
+
+Tests: `test/domain/metrics/logbook_stats_test.dart` (T39.1–T39.4), `test/features/logbook/statistics_test.dart` (T39.4–T39.7). Stub: `logbookStats`.
+
