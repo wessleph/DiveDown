@@ -2620,6 +2620,12 @@ abstract class AppLocalizations {
   /// **'Tauchgang #{number}'**
   String shareCardFallbackTitle(int number);
 
+  /// No description provided for @shareCardFallbackTitleNoNumber.
+  ///
+  /// In de, this message translates to:
+  /// **'Tauchgang'**
+  String get shareCardFallbackTitleNoNumber;
+
   /// No description provided for @shareCardMax.
   ///
   /// In de, this message translates to:

@@ -38,6 +38,14 @@ const _temperature = Color(0xFFA35C00);
 const _outline = Color(0xFFD6E7E8);
 const _white = Color(0xFFFFFFFF);
 
+/// The card's first line: the site, else „Tauchgang #42“, else
+/// „Tauchgang“ (review N7).
+String shareCardTitle(ShareCardContent content, AppLocalizations l10n) =>
+    content.siteName ??
+    (content.number == null
+        ? l10n.shareCardFallbackTitleNoNumber
+        : l10n.shareCardFallbackTitle(content.number!));
+
 /// Draws photo (or colour) and card. The same painter draws the preview on
 /// the screen and the shared image, so both always look the same.
 class ShareCardPainter extends CustomPainter {
@@ -154,7 +162,7 @@ class ShareCardPainter extends CustomPainter {
 
     _text(
       canvas,
-      content.siteName ?? l10n.shareCardFallbackTitle(content.number ?? 0),
+      shareCardTitle(content, l10n),
       _style(46, FontWeight.w800, text, light),
       const Offset(_pad, _titleTop),
       maxWidth: inner,
@@ -205,7 +213,9 @@ class ShareCardPainter extends CustomPainter {
       l10n.shareCardBrand,
       _style(26, FontWeight.w700, muted, light),
     );
-    brand.paint(canvas, Offset(_cardWidth - _pad - brand.width, _brandTop));
+    brand
+      ..paint(canvas, Offset(_cardWidth - _pad - brand.width, _brandTop))
+      ..dispose();
   }
 
   void _chart(Canvas canvas, bool light) {
@@ -230,10 +240,12 @@ class ShareCardPainter extends CustomPainter {
         grid,
       );
       final p = _layoutText(t.label, label);
-      p.paint(
-        canvas,
-        Offset(plot.left - 14 - p.width, y(t.position) - p.height / 2),
-      );
+      p
+        ..paint(
+          canvas,
+          Offset(plot.left - 14 - p.width, y(t.position) - p.height / 2),
+        )
+        ..dispose();
     }
     for (final (i, t) in content.timeTicks.indexed) {
       final p = _layoutText(t.label, label);
@@ -241,7 +253,9 @@ class ShareCardPainter extends CustomPainter {
       final left = i == 0
           ? cx
           : math.min(cx - p.width / 2, plot.right - p.width);
-      p.paint(canvas, Offset(left, plot.bottom + 10));
+      p
+        ..paint(canvas, Offset(left, plot.bottom + 10))
+        ..dispose();
     }
 
     if (content.profile.length < 2) return;
@@ -325,7 +339,9 @@ class ShareCardPainter extends CustomPainter {
     TextStyle style,
     Offset at, {
     required double maxWidth,
-  }) => _layoutText(text, style, maxWidth: maxWidth).paint(canvas, at);
+  }) => _layoutText(text, style, maxWidth: maxWidth)
+    ..paint(canvas, at)
+    ..dispose();
 
   @override
   bool shouldRepaint(ShareCardPainter old) =>

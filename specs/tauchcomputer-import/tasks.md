@@ -1074,3 +1074,5 @@ Tests: `test/domain/share/share_card_test.dart` (T43.1–T43.3), `test/data/loca
 - [x] Seite `ShareDiveScreen` (Vorschau mit verschiebbarer Karte, Zusammenziehen mit zwei Fingern, Regler, Oben/Mitte/Unten, Foto wählen/entfernen, „Teilen“ mit Fortschritt, Fehler als Snackbar, Protokoll nur „share image created“), Icon „Tauchgang teilen“ im Detail → T43.8–T43.11 grün.
 - [x] `tool/android_manifest_policy.dart`: `READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO`, `READ_MEDIA_VISUAL_USER_SELECTED` verboten → T43.12 grün.
 - Gesamt: `flutter test` 606/606, `flutter analyze` ohne Befund, Format sauber. Offen: Review (Phase 60), T43.13 am S25 und iPhone.
+
+**Review (Phase 60, 2026-11-27, `review.md`):** keine kritischen Befunde, 3 wichtige (W1 Seite bei kleinem Handy und großer Schrift, W2 Lade-/Fehlerzustand, W3 Testlücken), 7 kleine. EXIF-Orientierung vom Prüfer nachgemessen: richtig. Behoben W1–W3, N1–N5, N7, jeweils mit Test (Einzelheiten in `review.md`); N6 bleibt. `flutter test` 618/618.

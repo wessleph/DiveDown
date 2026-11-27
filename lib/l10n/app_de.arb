@@ -635,6 +635,7 @@
   "@shareCardFallbackTitle": {
     "placeholders": { "number": { "type": "int" } }
   },
+  "shareCardFallbackTitleNoNumber": "Tauchgang",
   "shareCardMax": "max.",
   "shareCardDuration": "Dauer",
   "shareCardWater": "Wasser",

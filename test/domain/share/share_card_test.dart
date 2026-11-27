@@ -162,6 +162,17 @@ void main() {
       expect(c.timeTicks.last.label, endsWith(' min'));
     });
 
+    test('review N4: under a minute or no duration: axis of 2 min', () {
+      final short = shareCardContent(_profile(maxDepth: 3, durationS: 45));
+      expect(short.timeScaleS, 120);
+      expect(labels(short.timeTicks), ['0', '1', '2 min']);
+      final none = shareCardContent(
+        _profile(maxDepth: 3, durationS: 0).copyWith(samples: const []),
+      );
+      expect(none.timeScaleS, 120);
+      expect(none.timeTicks.last.label, '2 min');
+    });
+
     test('the curve follows the samples', () {
       final c = shareCardContent(_fullDive());
       expect(c.estimatedProfile, isFalse);

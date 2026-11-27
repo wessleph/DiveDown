@@ -43,6 +43,37 @@ Future<Uint8List> solidPng(int width, int height, ui.Color color) async {
   return data!.buffer.asUint8List();
 }
 
+/// A PNG of vertical stripes: each entry is (width, colour), left to right.
+Future<Uint8List> stripedPng(int height, List<(int, ui.Color)> stripes) async {
+  final width = stripes.fold<int>(0, (w, s) => w + s.$1);
+  final recorder = ui.PictureRecorder();
+  final canvas = ui.Canvas(recorder);
+  var x = 0;
+  for (final (w, color) in stripes) {
+    canvas.drawRect(
+      ui.Rect.fromLTWH(x.toDouble(), 0, w.toDouble(), height.toDouble()),
+      ui.Paint()..color = color,
+    );
+    x += w;
+  }
+  final image = await recorder.endRecording().toImage(width, height);
+  final data = await image.toByteData(format: ui.ImageByteFormat.png);
+  image.dispose();
+  return data!.buffer.asUint8List();
+}
+
+/// The colour of one pixel of a decoded [image]; call inside `runAsync`.
+Future<ui.Color> imagePixel(ui.Image image, int x, int y) async {
+  final data = (await image.toByteData(format: ui.ImageByteFormat.rawRgba))!;
+  final i = (y * image.width + x) * 4;
+  return ui.Color.fromARGB(
+    data.getUint8(i + 3),
+    data.getUint8(i),
+    data.getUint8(i + 1),
+    data.getUint8(i + 2),
+  );
+}
+
 Future<ui.Image> solidImage(int width, int height, ui.Color color) {
   final recorder = ui.PictureRecorder();
   ui.Canvas(recorder).drawRect(

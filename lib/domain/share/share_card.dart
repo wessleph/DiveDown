@@ -115,10 +115,13 @@ ShareCardContent shareCardContent(Dive dive) {
       ShareTick(d, d == 0 ? '0 m' : '${d.round()}'),
   ];
 
-  // Time axis: the smallest round step that gives at most five marks.
-  final end = estimated
-      ? dive.durationS
-      : math.max(dive.durationS, samples.last.timeS);
+  // Time axis: the smallest round step that gives at most five marks. At
+  // least two minutes long, so a very short dive still gets three marks
+  // and nothing is divided by zero (review N4).
+  final end = math.max(
+    120,
+    estimated ? dive.durationS : math.max(dive.durationS, samples.last.timeS),
+  );
   final minutes = end / 60;
   const steps = [1, 2, 5, 10, 15, 20, 30, 60, 120];
   final step = steps.firstWhere(

@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -32,12 +33,21 @@ class _ShareDiveScreenState extends ConsumerState<ShareDiveScreen> {
   bool _busy = false;
   double _pinchBase = 1;
 
+  /// Set by the first change; a layout read later must not undo it (N5).
+  bool _changed = false;
+
   @override
   void initState() {
     super.initState();
-    ref.read(appSettingsProvider).shareCardLayout().then((stored) {
-      if (stored != null && mounted) setState(() => _layout = stored);
-    });
+    ref
+        .read(appSettingsProvider)
+        .shareCardLayout()
+        .then((stored) {
+          if (stored != null && mounted && !_changed) {
+            setState(() => _layout = stored);
+          }
+        })
+        .catchError((Object _) {}); // the default stays
   }
 
   @override
@@ -47,11 +57,16 @@ class _ShareDiveScreenState extends ConsumerState<ShareDiveScreen> {
   }
 
   void _change(ShareCardLayout layout, {bool save = false}) {
+    _changed = true;
     setState(() => _layout = layout);
     if (save) _save();
   }
 
-  void _save() => ref.read(appSettingsProvider).setShareCardLayout(_layout);
+  /// Remembering is a convenience: a failure never bothers the diver.
+  void _save() => ref
+      .read(appSettingsProvider)
+      .setShareCardLayout(_layout)
+      .catchError((Object _) {});
 
   Future<void> _pickPhoto() async {
     final l10n = AppLocalizations.of(context);
@@ -108,41 +123,62 @@ class _ShareDiveScreenState extends ConsumerState<ShareDiveScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final dive = ref.watch(diveDetailProvider(widget.diveId)).value?.dive;
+    final detail = ref.watch(diveDetailProvider(widget.diveId));
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.shareTitle)),
-      body: dive == null
-          ? const SizedBox.shrink()
-          : BodyWithBottomAction(
-              content: Column(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                      child: Center(child: _preview(l10n, dive)),
-                    ),
-                  ),
-                  _controls(l10n),
-                ],
-              ),
-              action: SizedBox(
-                height: 56,
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: _busy ? null : () => _share(dive),
-                  icon: _busy
-                      ? const SizedBox.square(
-                          dimension: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.share_outlined),
-                  label: Text(l10n.shareAction),
-                ),
-              ),
-            ),
+      body: switch (detail) {
+        AsyncData(value: final d?) => _body(l10n, d.dive),
+        AsyncData() || AsyncError() => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(l10n.detailNotFound, textAlign: TextAlign.center),
+          ),
+        ),
+        _ => const Center(child: CircularProgressIndicator()),
+      },
     );
   }
+
+  /// The preview keeps at least 55 % of the height (or 200 dp); the
+  /// controls below scroll, so large text never squeezes the preview away
+  /// or overflows (review W1).
+  Widget _body(AppLocalizations l10n, Dive dive) => BodyWithBottomAction(
+    content: LayoutBuilder(
+      builder: (context, box) {
+        final previewHeight = math.max(
+          box.maxHeight * 0.55,
+          math.min(box.maxHeight, 200.0),
+        );
+        return Column(
+          children: [
+            SizedBox(
+              height: previewHeight,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                child: Center(child: _preview(l10n, dive)),
+              ),
+            ),
+            Expanded(child: _controls(l10n)),
+          ],
+        );
+      },
+    ),
+    action: SizedBox(
+      height: 56,
+      width: double.infinity,
+      child: FilledButton.icon(
+        onPressed: _busy ? null : () => _share(dive),
+        icon: _busy
+            ? const SizedBox.square(
+                dimension: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.share_outlined),
+        label: Text(l10n.shareAction),
+      ),
+    ),
+  );
 
   Widget _preview(AppLocalizations l10n, Dive dive) {
     final content = shareCardContent(dive);
@@ -153,54 +189,65 @@ class _ShareDiveScreenState extends ConsumerState<ShareDiveScreen> {
         builder: (context, box) {
           final size = box.biggest;
           final card = ShareCardPainter.cardRect(size, _layout);
-          return ClipRRect(
-            borderRadius: BorderRadius.circular(14),
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: Semantics(
-                    image: true,
-                    label: _photo == null
-                        ? l10n.sharePreviewPlain
-                        : l10n.sharePreviewPhoto,
-                    child: CustomPaint(
-                      painter: ShareCardPainter(
-                        content: content,
-                        layout: _layout,
-                        l10n: l10n,
-                        photo: _photo,
+          // Two fingers anywhere on the preview change the size (N7); one
+          // finger moves the card only when it is on the card.
+          return GestureDetector(
+            onScaleStart: (_) => _pinchBase = _layout.scale,
+            onScaleUpdate: (d) {
+              if (d.pointerCount > 1) {
+                _change(_layout.copyWith(scale: _pinchBase * d.scale));
+              }
+            },
+            onScaleEnd: (_) => _save(),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: Semantics(
+                      image: true,
+                      label: _photo == null
+                          ? l10n.sharePreviewPlain
+                          : l10n.sharePreviewPhoto,
+                      child: CustomPaint(
+                        painter: ShareCardPainter(
+                          content: content,
+                          layout: _layout,
+                          l10n: l10n,
+                          photo: _photo,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Positioned.fromRect(
-                  rect: card,
-                  child: Semantics(
-                    key: const ValueKey('share-card'),
-                    container: true,
-                    label: l10n.shareCardSemantics(
-                      _positionWord(l10n),
-                      (_layout.scale * 100).round(),
-                    ),
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onScaleStart: (_) => _pinchBase = _layout.scale,
-                      onScaleUpdate: (d) {
-                        var next = ShareCardPainter.dragged(
-                          _layout,
-                          size,
-                          d.focalPointDelta,
-                        );
-                        if (d.pointerCount > 1) {
-                          next = next.copyWith(scale: _pinchBase * d.scale);
-                        }
-                        _change(next);
-                      },
-                      onScaleEnd: (_) => _save(),
+                  Positioned.fromRect(
+                    rect: card,
+                    child: Semantics(
+                      key: const ValueKey('share-card'),
+                      container: true,
+                      label: l10n.shareCardSemantics(
+                        _positionWord(l10n),
+                        (_layout.scale * 100).round(),
+                      ),
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onScaleStart: (_) => _pinchBase = _layout.scale,
+                        onScaleUpdate: (d) {
+                          var next = ShareCardPainter.dragged(
+                            _layout,
+                            size,
+                            d.focalPointDelta,
+                          );
+                          if (d.pointerCount > 1) {
+                            next = next.copyWith(scale: _pinchBase * d.scale);
+                          }
+                          _change(next);
+                        },
+                        onScaleEnd: (_) => _save(),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },
@@ -218,80 +265,84 @@ class _ShareDiveScreenState extends ConsumerState<ShareDiveScreen> {
 
   Widget _controls(AppLocalizations l10n) {
     final labelStyle = Theme.of(context).textTheme.bodyMedium;
-    Widget row(String label, Widget child) => Row(
-      children: [
-        SizedBox(width: 88, child: Text(label, style: labelStyle)),
-        Expanded(child: child),
-      ],
+    // Label above its control, so large text wraps instead of squeezing.
+    Widget labelled(String label, Widget child) => Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: labelStyle),
+          child,
+        ],
+      ),
     );
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          alignment: WrapAlignment.center,
+          children: [
+            OutlinedButton.icon(
+              onPressed: _busy ? null : _pickPhoto,
+              icon: const Icon(Icons.photo_outlined),
+              label: Text(l10n.sharePickPhoto),
+            ),
+            if (_photo != null)
+              TextButton(
+                onPressed: _busy ? null : _removePhoto,
+                child: Text(l10n.shareRemovePhoto),
+              ),
+          ],
+        ),
+        labelled(
+          l10n.shareSize,
+          Slider(
+            key: const ValueKey('share-size'),
+            value: _layout.scale,
+            min: ShareCardLayout.minScale,
+            max: ShareCardLayout.maxScale,
+            divisions: 10,
+            semanticFormatterCallback: (v) =>
+                l10n.shareSizeValue((v * 100).round()),
+            onChanged: (v) => _change(_layout.copyWith(scale: v)),
+            onChangeEnd: (_) => _save(),
+          ),
+        ),
+        labelled(
+          l10n.shareOpacity,
+          Slider(
+            key: const ValueKey('share-opacity'),
+            value: _layout.opacity,
+            divisions: 20,
+            semanticFormatterCallback: (v) =>
+                l10n.shareOpacityValue((v * 100).round()),
+            onChanged: (v) => _change(_layout.copyWith(opacity: v)),
+            onChangeEnd: (_) => _save(),
+          ),
+        ),
+        labelled(
+          l10n.sharePosition,
           Wrap(
             spacing: 8,
-            alignment: WrapAlignment.center,
+            runSpacing: 4,
             children: [
-              OutlinedButton.icon(
-                onPressed: _busy ? null : _pickPhoto,
-                icon: const Icon(Icons.photo_outlined),
-                label: Text(l10n.sharePickPhoto),
-              ),
-              if (_photo != null)
-                TextButton(
-                  onPressed: _busy ? null : _removePhoto,
-                  child: Text(l10n.shareRemovePhoto),
+              for (final (anchor, label) in [
+                (ShareCardAnchor.top, l10n.sharePositionTop),
+                (ShareCardAnchor.middle, l10n.sharePositionMiddle),
+                (ShareCardAnchor.bottom, l10n.sharePositionBottom),
+              ])
+                OutlinedButton(
+                  onPressed: () =>
+                      _change(_layout.anchoredAt(anchor), save: true),
+                  child: Text(label),
                 ),
             ],
           ),
-          row(
-            l10n.shareSize,
-            Slider(
-              key: const ValueKey('share-size'),
-              value: _layout.scale,
-              min: ShareCardLayout.minScale,
-              max: ShareCardLayout.maxScale,
-              divisions: 10,
-              semanticFormatterCallback: (v) =>
-                  l10n.shareSizeValue((v * 100).round()),
-              onChanged: (v) => _change(_layout.copyWith(scale: v)),
-              onChangeEnd: (_) => _save(),
-            ),
-          ),
-          row(
-            l10n.shareOpacity,
-            Slider(
-              key: const ValueKey('share-opacity'),
-              value: _layout.opacity,
-              divisions: 20,
-              semanticFormatterCallback: (v) =>
-                  l10n.shareOpacityValue((v * 100).round()),
-              onChanged: (v) => _change(_layout.copyWith(opacity: v)),
-              onChangeEnd: (_) => _save(),
-            ),
-          ),
-          row(
-            l10n.sharePosition,
-            Wrap(
-              spacing: 8,
-              children: [
-                for (final (anchor, label) in [
-                  (ShareCardAnchor.top, l10n.sharePositionTop),
-                  (ShareCardAnchor.middle, l10n.sharePositionMiddle),
-                  (ShareCardAnchor.bottom, l10n.sharePositionBottom),
-                ])
-                  OutlinedButton(
-                    onPressed: () =>
-                        _change(_layout.anchoredAt(anchor), save: true),
-                    child: Text(label),
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

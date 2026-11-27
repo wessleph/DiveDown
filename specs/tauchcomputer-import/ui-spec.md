@@ -303,7 +303,8 @@ Ein Tauchgang wird als **Bild** geteilt, z. B. als Instagram-Story: eigenes Foto
 4. **Deckkraft:** Regler **0–100 %** in Schritten von 5. Wirkt nur auf den **weißen Hintergrund** der Karte, nie auf Schrift und Diagramm. **Unter 50 %** werden Schrift, Achsen und Kurve **weiß mit leichtem Schatten**, damit sie auf dem Foto lesbar bleiben.
 5. **Position:** Karte mit dem Finger auf der Vorschau ziehen; sie bleibt immer ganz im Bild. Dazu die Knöpfe **„Oben“, „Mitte“, „Unten“** (waagrecht mittig), damit es auch ohne Ziehen geht (§7).
 6. Hauptaktion **„Teilen“** (56 dp) unten, wie in §4.
-Größe, Deckkraft und Position werden **gemerkt** (`app_meta` `share_card`) und beim nächsten Teilen wieder verwendet. Standard: 100 %, 95 %, unten.
+Größe, Deckkraft und Position werden **gemerkt** (`app_meta` `share_card`, Text `scale,opacity,x,y`; die Position ist ein Anteil des freien Platzes im Bildrand, damit die Karte bei jeder Größe im Bild bleibt) und beim nächsten Teilen wieder verwendet. Standard: 100 %, 95 %, unten.
+Aufteilung: Die Vorschau bekommt mindestens 55 % der Höhe (wenigstens 200 dp), die Bedienelemente darunter scrollen, ihre Beschriftungen stehen darüber. Zwei Finger überall auf der Vorschau ändern die Größe. Laden: Ladekreis; Tauchgang nicht gefunden: „Diesen Tauchgang gibt es nicht mehr.“ Ohne Platz und Nummer heißt die Karte „Tauchgang“.
 
 **Die Karte** (Stil „Riff“, Ecken 12 dp, Hintergrund `surfaceRaised` mit der eingestellten Deckkraft, Schrift Manrope; immer im hellen Stil, auch im dunklen Modus, weil sie Teil eines Bildes ist):
 - **Tauchplatz** (fehlt er: „Tauchgang #42“), darunter **Datum · #Nummer** („14.11.2026 · #42“)

@@ -1492,6 +1492,9 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get shareCardFallbackTitleNoNumber => 'Tauchgang';
+
+  @override
   String get shareCardMax => 'max.';
 
   @override

@@ -1,3 +1,135 @@
+# Review: Tauchgang als Bild teilen (T43)
+
+Datum: 2026-11-27 · Phase 60 (unabhängiges Review durch einen frischen Agenten, der die Implementierung nicht kennt)
+
+## Umfang
+
+- Die zwei lokalen Commits `origin/main..HEAD`: `f5128cc` (fehlschlagende Tests, Stubs, Spec-Texte) und `def7459` (Umsetzung), 35 Dateien.
+- Geprüft gegen: `ui-spec.md` §5.16 (dazu §1, §4, §5.3, §6, §7), `security.md` G7, `tasks.md` T43 (T43.1 bis T43.12; T43.13 ist die offene Handprüfung am S25/iPhone und kein Befund), `docs/datenschutz.md` §4 Punkt 4, `docs/constitution.md`.
+- Gelesen: `share_card.dart`, `share_card_painter.dart`, `share_dive_screen.dart`, `share_photo.dart`, `system_file_picker.dart`, `share_folder.dart`, `providers.dart`, `router.dart`, `dive_detail_screen.dart`, `drift_app_settings.dart`, `android_manifest_policy.dart`, `app_de.arb` und die T43-Tests. Generierte l10n-Dateien nicht zeilenweise.
+
+## Selbst ausgeführt
+
+| Befehl | Ergebnis |
+|---|---|
+| `flutter analyze` | „No issues found!“ |
+| `dart format --output=none --set-exit-if-changed lib test tool integration_test` | 189 Dateien, 0 geändert, Exit 0 |
+| `flutter test` (volle Suite) | „All tests passed!“, 606 Tests grün |
+| Stub-Suche (`TODO`, `FIXME`, `UnimplementedError`, `return null`) in den hinzugefügten Zeilen von `lib/` und `tool/` | Keine Treffer. Keine hartkodierten Leerantworten. |
+| Abhängigkeiten, Berechtigungen | `pubspec.yaml`, `pubspec.lock`, `android/`, `ios/` unverändert; `tool/android_manifest_policy.dart` verbietet zusätzlich `READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO`, `READ_MEDIA_VISUAL_USER_SELECTED`. Kein Netzzugriff. |
+| Wegwerf-Probe EXIF (Scratch, nicht im Repo): JPEG 400 × 200, links rot, rechts blau, EXIF-Orientierung 6, durch `decodeSharePhoto` | Ergebnis 200 × 400, oben rot, unten blau, also **richtig gedreht und nicht verzerrt**; ohne EXIF 400 × 200 unverändert. Die Engine wendet die Orientierung beim Dekodieren mit `targetWidth/targetHeight` an. |
+| Wegwerf-Probe Größe (Scratch): JPEG 6000 × 2400 | dekodiert als 4800 × 1920 (siehe N1) |
+| Wegwerf-Probe Layout (Kopie des Repos im Scratch, `pumpTestApp`, Seite „Tauchgang teilen“, 360 × 640 dp) | Schriftgröße 1,0: Vorschau 144 × 256 dp; 1,5: 87 × 154; 2,0: 41 × 72; 3,0: Vorschau 0 × 0 und **„RenderFlex overflowed by 328 pixels on the bottom“** (siehe W1) |
+
+## Ergebnis in Kürze
+
+Keine kritischen Befunde. Die Sicherheitszusagen aus G7 halten: Das Bild wird mit `PictureRecorder` neu gezeichnet und als PNG kodiert, nichts außer den Pixeln des Fotos geht über; die Karte bekommt ihre Texte nur aus `ShareCardContent`, das ausschließlich Platz, Nummer, Datum, Tiefe, Dauer, Wassertemperatur und Profil kennt; das Foto liegt nur als `ui.Image` im Zustand der Seite und wird beim Entfernen, Ersetzen und Schließen freigegeben; keine neue Abhängigkeit, keine neue Berechtigung, im Protokoll steht nur „share image created“ bzw. der Typ des Fehlers. Vorschau und PNG nutzen denselben `ShareCardPainter`, die Geometrie (`cardRect`, `dragged`) ist über Anteile des freien Platzes gerechnet, die Karte kann das Bild deshalb bei keiner Größe verlassen. Die Farben stimmen mit `theme.dart` überein, die Karte bleibt im dunklen Modus hell.
+
+Es gibt drei wichtige Befunde: Die Seite ist bei kleinem Telefon und großer Schrift kaum bzw. nicht benutzbar (Überlauf bei 3,0), sie hat keinen Lade- und Fehlerzustand, und mehrere Zeilen von T43 sind durch Tests nicht wirklich abgedeckt (Foto-Ausschnitt, 50-MB-Grenze, Zusammenziehen, gesperrter Knopf). Dazu sieben kleinere Punkte.
+
+Geprüft und in Ordnung:
+
+- **EXIF-Drehung:** siehe Probe oben. Ein Hochformatfoto der Kamera (Orientierung 6) kommt aufrecht an. HEIC ist damit nicht belegt (ob die Engine HEIC dekodiert, hängt vom Gerät ab; bei Misserfolg erscheint ohne Absturz „Das Foto konnte nicht geöffnet werden.“); das bleibt bei T43.13.
+- **Speicher:** Das Foto wird bei `dispose`, `_removePhoto` und Ersetzen freigegeben; ein nach dem Schließen der Seite eintreffendes Foto wird in `_pickPhoto` sofort freigegeben (`share_dive_screen.dart:60-63`). Deskriptor und Puffer werden im `finally` freigegeben, ebenso das `ui.Image` des PNG. `renderShareImage` zeichnet vor dem ersten `await` (`share_card_painter.dart:353-358`); ein Schließen der Seite während des Erzeugens kann das Foto deshalb nicht mehr unter dem Bild wegnehmen.
+- **Doppeltipp auf „Teilen“:** `_busy` wird synchron vor dem ersten `await` gesetzt (`share_dive_screen.dart:86`), der Knopf ist danach gesperrt.
+- **Geometrie:** Ziehen rechnet `delta / k / freeX`, bei `freeX <= 0` bleibt der Wert; `copyWith` klemmt auf 0 bis 1. Zusammenziehen nimmt `_pinchBase * d.scale`, `onScaleStart` setzt die Basis neu, auch wenn ein zweiter Finger später dazukommt. Karte 88 % der Breite, Achsenschrift 30 px, Größe 50 bis 100 % in 5er-Schritten (`divisions: 10`), Deckkraft 0 bis 100 % in 5er-Schritten (`divisions: 20`), „Teilen“ 56 dp, Ecken 14 dp: wie in §5.16.
+- **Datenschutzerklärung:** §4 Punkt 4 beschreibt das Verhalten richtig und sagt, dass kein Zugriff auf die Galerie nötig ist.
+
+## Kritisch
+
+Keine.
+
+## Wichtig
+
+### W1. Seite ist bei kleinem Telefon und großer Schrift kaum benutzbar, bei 3,0 fach Überlauf
+`lib/features/logbook/share_dive_screen.dart:118-128` (Column mit `Expanded` für die Vorschau und nicht scrollbaren Reglern darunter), `:223` (`SizedBox(width: 88)` für die Beschriftung der Regler)
+
+Verstoß gegen ui-spec §7 (große Schrift, Seiten bleiben bedienbar) und §4. Gemessen mit `pumpTestApp` bei 360 × 640 dp: Schriftgröße 1,0 gibt der Vorschau 144 × 256 dp (noch benutzbar, aber klein), 2,0 nur 41 × 72 dp, 3,0 einen RenderFlex-Überlauf von 328 px und eine Vorschau mit Größe 0 (die iOS-Stufen der Bedienungshilfen gehen über 2,0 hinaus). Die Beschriftungen „Deckkraft“ und „Position“ stehen in einer festen Breite von 88 dp und laufen bei großer Schrift aus dem Feld. Der Hauptknopf bleibt erreichbar, aber ein Nutzer mit großer Schrift sieht die Vorschau nicht mehr. Die Tests laufen nur mit 400 × 1000 dp und Schriftgröße 1.
+
+Vorschlag: Inhalt (Vorschau mit fester Mindesthöhe, z. B. `min(Breite * 16/9, 0,5 * Höhe)`, und Regler) in ein `SingleChildScrollView`/`ListView` legen, nur „Teilen“ bleibt unten fixiert; die Beschriftung der Regler **über** den Regler setzen (oder `Flexible` statt fester 88 dp), die Positionsknöpfe in einem `Wrap`. Test: `pumpTestApp(size: Size(360, 640), textScale: 1 / 2 / 3)`, danach ist `tester.takeException()` `null` und die Vorschau mindestens 120 dp breit bzw. die Seite scrollt.
+
+### W2. Kein Lade- und Fehlerzustand der Seite
+`lib/features/logbook/share_dive_screen.dart:111` und `:115` (`ref.watch(diveDetailProvider(...)).value?.dive`, sonst `SizedBox.shrink()`)
+
+ui-spec §4 verlangt für jede Seite Laden, Leer und Fehler mit Ausweg. Hier zeigt die Seite bei Laden, bei einem Datenbankfehler und bei einem inzwischen gelöschten Tauchgang nur die App-Leiste und eine leere Fläche, ohne Text, Fortschrittskreis, „Erneut versuchen“ oder Hinweis für Screenreader. Es ist derselbe Mangel wie W2 im Review zur Statistik-Seite.
+
+Vorschlag: `AsyncValue.when` mit Fortschrittskreis (mit Semantics-Label), Fehlertext plus „Erneut versuchen“ (`ref.invalidate(diveDetailProvider(id))`) und für „nicht gefunden“ einen Text mit Knopf „Zurück“, wie die Detailseite. Test mit einem Repository, das wirft, und mit einer unbekannten ID.
+
+### W3. Mehrere Zeilen von T43 sind nicht durch einen Test abgedeckt, der die Erwartung wirklich prüft
+Tests: `test/features/logbook/share_image_test.dart`, `test/data/platform/share_photo_loader_test.dart`, `test/features/logbook/share_dive_test.dart`
+
+Gegen `tasks.md` T43 und ui-spec §5.16/§4/§7:
+
+1. **T43.5 „mit Foto Pixel aus dem Foto (formatfüllend, mittig)“:** Der Test benutzt ein **einfarbiges** 400 × 300 Foto und prüft nur den Pixel (20, 20) (`share_image_test.dart:79-100`). Ein falscher Ausschnitt (nicht mittig, gestreckt statt zugeschnitten, vertauschte Seiten) würde bestehen. Vorschlag: ein Foto aus drei senkrechten Streifen (z. B. 3000 × 1000, rot/grün/blau) und Pixel links, Mitte und rechts im PNG prüfen: bei „mittig zugeschnitten“ muss das ganze Bild grün sein; bei einem Hochformatfoto mit drei waagrechten Streifen entsprechend. Der Metadaten-Teil des Tests ist ohnehin schwach: Ein `ui.Image` trägt keine Chunks, der Test sichert nur, dass das Kodieren nichts hinzufügt. Das ist richtig, aber kein Beweis für „Pixel aus dem Foto“.
+2. **T43.6 „> 50 MB → `tooLarge` ohne Dekodieren“:** Der Test reicht dem Lader ein `PickFailed(tooLarge)` vom Fake (`share_photo_loader_test.dart:27-34`) und prüft nur die Abbildung. Die eigene Prüfung `bytes.length > maxSharePhotoBytes` in `decodeSharePhoto` (`share_photo.dart:48`) und die Einstellung `SystemFilePicker(maxBytes: maxSharePhotoBytes, imagesOnly: true)` in `providers.dart:200` (nur so greifen die 50-MB-Grenze und der Bildfilter, security G7) haben keinen Test. Vorschlag: `decodeSharePhoto(Uint8List(51 * 1024 * 1024))` ergibt `tooLarge`; `ref.read(sharePhotoPickerProvider)` ist ein `SystemFilePicker` mit `maxBytes == maxSharePhotoBytes` und `imagesOnly`.
+3. **T43.9 Zusammenziehen:** ui-spec §5.16 Punkt 3 verlangt Zusammenziehen mit zwei Fingern. Es gibt keinen Test; der Zweig `pointerCount > 1` (`share_dive_screen.dart:194-196`) wird nie durchlaufen. Der Ziehen-Test prüft nur „nach oben“ bei 100 % Größe. Vorschlag: zwei `TestGesture`s auf der Karte auseinanderziehen bzw. zusammenführen und `_cardLabel` („Größe 50 %“) prüfen; Ziehen nach rechts unten bei 50 % Größe prüft, dass die Karte ganz im Bild bleibt.
+4. **ui-spec §4 „Bild wird erzeugt: Knopf zeigt Fortschrittskreis, ist gesperrt“:** nirgends getestet. Vorschlag: Fake-Renderer mit `Completer`, `pump()`, dann `CircularProgressIndicator` gefunden, und ein zweiter Tipp auf „Teilen“ ruft den Renderer nur **einmal** auf.
+5. **ui-spec §7 „Regler lesen ihren Wert vor“:** Es wird nur das Label der Karte geprüft, nicht `semanticFormatterCallback` der Regler („Deckkraft 60 Prozent“). Vorschlag: `tester.getSemantics(_opacity).value` prüfen.
+6. **EXIF-Orientierung:** von mir geprüft (siehe oben), im Repo aber durch nichts abgesichert, obwohl T43.13 („Foto richtig gedreht“) sich darauf verlässt. Vorschlag: ein kleines JPEG mit Orientierung 6 als Testdatei und ein Test, der die Maße 200 × 400 statt 400 × 200 erwartet.
+
+## Nice-to-have
+
+### N1. Panoramafotos können sehr viel Speicher belegen
+`lib/data/platform/share_photo.dart:57-65`
+
+Nur die **kürzere** Seite wird auf 1920 begrenzt. Ein JPEG 6000 × 2400 wird zu 4800 × 1920 (37 MB RGBA, gemessen), ein Panorama 20000 × 2000 zu 19200 × 1920 (rechnerisch 147 MB), obwohl das Bild nur einen 1080 px breiten Ausschnitt braucht. Unter 50 MB Dateigröße sind solche Fotos möglich; security G7 (Dienstgüte) nennt die Begrenzung auf die „nötige Größe“. Vorschlag: zusätzlich die längere Seite begrenzen (z. B. auf 4096), Test mit 6000 × 1500.
+
+### N2. Codec wird bei einem Fehler in `getNextFrame` nicht freigegeben
+`lib/data/platform/share_photo.dart:62-69`
+
+`codec.dispose()` steht nur auf dem Erfolgspfad. Bei einem Foto mit lesbarem Kopf, aber kaputten Daten wirft `getNextFrame`, und der Codec bleibt bis zur Garbage Collection liegen. `on Exception` fängt außerdem keine `Error`s. Vorschlag: `codec` im `try/finally` freigeben, `on Object` (wie in `_share`).
+
+### N3. `TextPainter` werden nie freigegeben
+`lib/features/logbook/share_card_painter.dart:311-328`
+
+`_layoutText` erzeugt pro `paint` etwa zwanzig `TextPainter` (jeder mit nativem Absatz), die nie `dispose()` bekommen; beim Ziehen sind das bis zu 60 Durchläufe pro Sekunde. Kein Absturz, aber unnötiger Druck auf die Speicherbereinigung und im Leak-Tracking von Flutter ein Befund. Vorschlag: nach dem Zeichnen `painter.dispose()` aufrufen.
+
+### N4. Zeitachse bei Tauchgängen unter einer Minute
+`lib/domain/share/share_card.dart:119-132`, `lib/features/logbook/share_card_painter.dart:223`
+
+Bei Dauer unter 60 s ist `marks == [0]`; die einzige Marke heißt „0“ ohne Einheit „min“ (Bedingung `i > 0`), ui-spec §5.16 verlangt die Einheit an der letzten Marke. Bei `durationS == 0` ohne Samples ist `timeScaleS == 0` und `x(t)` rechnet `t / 0` (NaN); Skia ignoriert das, das Profil fehlt aber. Beides ist selten (das Formular verlangt eine Dauer), kostet aber nichts: `timeScaleS = max(1, end)`, Beschriftung „0 min“ bei nur einer Marke, Test in `share_card_test.dart`.
+
+### N5. Gespeicherte Lage kann Änderungen des Nutzers überschreiben, Schreibfehler sind ungefangen
+`lib/features/logbook/share_dive_screen.dart:36-41`, `:54`
+
+`initState` lädt die Lage asynchron und setzt sie, sobald sie ankommt, ohne zu prüfen, ob der Nutzer schon etwas verändert hat; bei einer langsamen Datenbank springt die Karte zurück, und kurz ist die Standardlage zu sehen. `_save` und das Lesen haben kein `catchError`, ein Datenbankfehler wäre ein unbehandelter Fehler. Vorschlag: die Lage vor dem ersten Aufbau über einen `FutureProvider` laden (Ladezustand siehe W2), `_save` mit `unawaited(...catchError(...))` und nur ein Protokolleintrag.
+
+### N6. Datei im Cache wird nicht beim Öffnen der Seite gelöscht
+`lib/features/logbook/share_dive_screen.dart` (`initState`), `lib/app/providers.dart:187-197`
+
+Spec §5.16 und G7: „beim nächsten Öffnen der Seite bzw. App-Start gelöscht“. Umgesetzt sind App-Start (`lib/main.dart:59`) und das nächste Teilen (`prepareShareFile`, `share_folder.dart:18`). Das PNG mit dem Foto des Nutzers kann so, solange der Prozess lebt, im Cache liegen. Das „bzw.“ lässt die Umsetzung zu; wer G7 streng liest, ruft `clearShareFolder(await getTemporaryDirectory())` in `initState` der Seite auf (nicht in `dispose`, die Ziel-App liest die Datei eventuell noch).
+
+### N7. Zusammenziehen nur auf der Karte, Titel „Tauchgang #0“
+`lib/features/logbook/share_dive_screen.dart:176-201`, `lib/features/logbook/share_card_painter.dart:157`
+
+Die Geste hängt nur an der Karte; ui-spec §5.16 Punkt 3 sagt „auf der Vorschau“. Zwei Finger neben der Karte tun nichts (die Regler sind der Ausweg, deshalb nicht wichtig). Außerdem fällt der Titel bei fehlendem Platz **und** fehlender Nummer auf „Tauchgang #0“ (`content.number ?? 0`); die Nummer wird beim Speichern vergeben, der Fall ist kaum erreichbar, „#0“ wäre aber falsch. Vorschlag: Geste auf die ganze Vorschau legen; bei `number == null` den Titel „Tauchgang“ ohne Nummer.
+
+## Was im Chat erklärt wurde und ins Repo gehört
+
+Aus dem Chat war nichts bekannt; aus dem Code ergeben sich diese Punkte, die in die Spec gehören:
+
+- **EXIF-Drehung und Fotogröße:** Die Annahme „die Engine dreht Kamerafotos beim Dekodieren richtig“ trägt T43.13, steht aber nirgends. In `security.md` G7 bzw. `tasks.md` T43.6 ergänzen (mit dem Test aus W3.6) und die Grenze für die längere Seite (N1) festhalten.
+- **Karte bleibt im Bild über Anteile:** Die Lage ist ein Anteil des freien Platzes (nicht ein Pixelwert); das steht im Code und in `tasks.md`, in ui-spec §5.16 steht nur „gemerkt“. Eine Zeile zum Format `scale,opacity,x,y` dort reicht.
+- **HEIC:** Ob Android HEIC dekodiert, ist offen; das Ergebnis von T43.13 in `ui-spec.md` §5.16 bei „Foto lässt sich nicht öffnen“ nachtragen.
+
+## Befunde behoben (2026-11-27)
+
+Vom Nutzer freigegeben: W1–W3, N1–N5, N7. N6 bleibt (laut G7 zulässig). Zu jedem Befund zuerst ein Test, rot gesehen bzw. als Absicherung sofort grün:
+
+- [x] **W1** (rot: „RenderFlex overflowed by 328 pixels“ bei 360 × 640 und Schrift 3×): Die Vorschau behält mindestens 55 % der Höhe (wenigstens 200 dp), die Bedienelemente darunter scrollen, Beschriftungen stehen über Regler und Knöpfen. „Teilen“ bleibt unten sichtbar. Test `review W1`.
+- [x] **W2** (rot: Text fehlt): Ladekreis während des Ladens, „Diesen Tauchgang gibt es nicht mehr.“ bei fehlendem Tauchgang oder Fehler. Test `review W2`.
+- [x] **W3** Tests ergänzt: Ausschnitt mit drei Streifen (Mitte bleibt, Strecken oder Linksschnitt fiele auf), 50 MB direkt in `decodeSharePhoto`, Picker nur Bilder und 50 MB, EXIF-Orientierung 6 mit Fixture `test/fixtures/photos/orientation6.jpg` (kommt 200 × 400, oben rot), gesperrter Knopf mit Fortschrittskreis, vorgelesene Reglerwerte: alle sofort grün (Absicherung). Zusammenziehen auf dem Foto über der Karte: rot (nur auf der Karte möglich), siehe N7.
+- [x] **N1** (rot: 4800 × 1920): auch die längere Seite höchstens 4096 px; gleicher Faktor für beide Seiten.
+- [x] **N2**: Codec wird immer freigegeben, jede Ausnahme oder jeder Fehler beim Dekodieren gilt als „nicht lesbar“ (kein eigener Test, abgedeckt durch „kaputte Datei“).
+- [x] **N3**: `TextPainter` werden nach dem Zeichnen freigegeben.
+- [x] **N4** (rot: Achse 45 s): Zeitachse mindestens 2 min, dadurch drei Marken mit „min“ und keine Division durch 0.
+- [x] **N5**: Eine Änderung vor dem Laden der gemerkten Lage wird nicht mehr überschrieben; Lesen und Speichern fangen Fehler ab (kein Test, Zeitfenster im Test nicht stabil herstellbar).
+- [x] **N7** (rot): Zwei Finger überall auf der Vorschau ändern die Größe; Titel ohne Platz und Nummer „Tauchgang“ statt „Tauchgang #0“ (rot wegen `UnimplementedError` in `shareCardTitle`).
+- Repo-Hinweise oben: EXIF und Größengrenzen stehen jetzt in `security.md` G7, das Format der Lage in ui-spec §5.16; HEIC wird mit T43.13 nachgetragen.
+- Gesamt: `flutter test` 618/618, `flutter analyze` ohne Befund, Format sauber.
+
+---
+
 # Review: SAC-Stufenkurve, Ebenen, Statistik, Bedingungen (T7.3, T37 bis T40)
 
 Datum: 2026-11-27 · Phase 60 (unabhängiges Review durch einen frischen Agenten, der die Implementierung nicht kennt)
