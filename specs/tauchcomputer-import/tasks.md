@@ -228,7 +228,7 @@ Testkorrektur vor dem Commit: Die Quelle „Apple Watch“ steht in der Liste nu
 | T7.3 | Druckverlauf in Samples | Kurve berechnet | 1-min-Abschnitte. Abschnitt ohne Druckänderung = 0. Kein Abschnitt negativ. | ✅ 2026-11-27: rot wegen `UnimplementedError` (`SacCalculator.segments`), 6 Tests |
 | T7.4 | kein Druck | berechnet | `null` | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
 | T7.5 | Druck vorhanden, kein Flaschenvolumen | berechnet | `null` mit Grund `missingVolume` | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
-| T7.6 | 2 Flaschen (Gaswechsel) | berechnet | SAC pro Flasche über deren Nutzungszeit | |
+| T7.6 | 2 Flaschen (Gaswechsel) | berechnet | SAC pro Flasche über deren Nutzungszeit | ⏸ zurückgestellt (2026-11-27, Entscheidung des Nutzers): Niemand taucht mit mehreren Flaschen, es ist auch nicht absehbar. Die App rechnet weiter mit Flasche 1. |
 | T7.7 | Dauer 0 | berechnet | `null`, kein Division-durch-0 | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
 | T7.8 | Druck und Volumen da, keine Ø-Tiefe | berechnet | ohne Samples `null` mit Grund `depth`. Mit Samples: zeitgewichtetes Mittel der Samples | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
 
