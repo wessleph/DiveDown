@@ -48,6 +48,10 @@ abstract interface class DiveRepository {
   /// For the list only: samples, tanks and events are left empty.
   Future<List<Dive>> listForDiver(String diverId);
 
+  /// Like [listForDiver], with the tanks, for the statistics (T39.8).
+  /// Samples and events are left empty.
+  Future<List<Dive>> listWithTanksForDiver(String diverId);
+
   /// The number [save] would give a new dive of this diver (ui-spec §5.4).
   Future<int> nextNumber(String diverId);
 

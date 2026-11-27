@@ -2,6 +2,7 @@
 // demand from the dives on the device, never stored.
 
 import '../dive/dive.dart';
+import 'sac_calculator.dart';
 
 /// A dive site and how often it was dived.
 class SiteCount {
@@ -56,4 +57,67 @@ class LogbookStats {
 }
 
 /// Statistics of [dives] (not deleted, one diver).
-LogbookStats logbookStats(List<Dive> dives) => throw UnimplementedError();
+LogbookStats logbookStats(List<Dive> dives) {
+  if (dives.isEmpty) return const LogbookStats();
+  // Oldest first: on a tie the earlier dive keeps the record.
+  final sorted = [...dives]..sort((a, b) => a.start.compareTo(b.start));
+
+  Dive? best(
+    bool Function(Dive d, Dive current) better, {
+    bool Function(Dive d)? only,
+  }) {
+    Dive? result;
+    for (final d in sorted) {
+      if (only != null && !only(d)) continue;
+      if (result == null || better(d, result)) result = d;
+    }
+    return result;
+  }
+
+  final years = <int, int>{};
+  for (final d in sorted) {
+    years.update(d.start.year, (n) => n + 1, ifAbsent: () => 1);
+  }
+
+  // Sites: same name ignoring case and outer spaces; newest spelling.
+  final sites = <String, ({String name, int count, DateTime last})>{};
+  for (final d in sorted) {
+    final name = d.siteName?.trim() ?? '';
+    if (name.isEmpty) continue;
+    final key = name.toLowerCase();
+    final known = sites[key];
+    sites[key] = (name: name, count: (known?.count ?? 0) + 1, last: d.start);
+  }
+  final ranked = sites.values.toList()
+    ..sort((a, b) {
+      final byCount = b.count.compareTo(a.count);
+      return byCount != 0 ? byCount : b.last.compareTo(a.last);
+    });
+
+  const sac = SacCalculator();
+  final trend = [
+    for (final d in sorted)
+      if (sac.average(d).litresPerMinute case final v?) SacPoint(d, v),
+  ];
+
+  return LogbookStats(
+    count: dives.length,
+    totalDurationS: dives.fold(0, (n, d) => n + d.durationS),
+    deepest: best((d, c) => d.maxDepthM > c.maxDepthM),
+    longest: best((d, c) => d.durationS > c.durationS),
+    coldest: best(
+      (d, c) => d.minTemperatureC! < c.minTemperatureC!,
+      only: (d) => d.minTemperatureC != null,
+    ),
+    perYear: Map.fromEntries(
+      years.entries.toList()..sort((a, b) => a.key.compareTo(b.key)),
+    ),
+    topSites: [
+      for (final s in ranked.take(LogbookStats.maxSites))
+        SiteCount(s.name, s.count),
+    ],
+    sacTrend: trend.length > LogbookStats.maxSacPoints
+        ? trend.sublist(trend.length - LogbookStats.maxSacPoints)
+        : trend,
+  );
+}

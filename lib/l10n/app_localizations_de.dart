@@ -1257,4 +1257,74 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get valuePulse => 'Puls';
+
+  @override
+  String get statsTitle => 'Statistik';
+
+  @override
+  String get statsOpen => 'Statistik öffnen';
+
+  @override
+  String get statsEmpty =>
+      'Noch keine Statistik. Sie entsteht mit deinen Tauchgängen.';
+
+  @override
+  String get statsOverview => 'ÜBERBLICK';
+
+  @override
+  String get statsDives => 'Tauchgänge';
+
+  @override
+  String get statsUnderwater => 'Zeit unter Wasser';
+
+  @override
+  String get statsDeepest => 'Tiefster Tauchgang';
+
+  @override
+  String get statsLongest => 'Längster Tauchgang';
+
+  @override
+  String get statsColdest => 'Kältestes Wasser';
+
+  @override
+  String get statsCountries => 'Länder';
+
+  @override
+  String statsDiveRef(String number, String site) {
+    return '#$number · $site';
+  }
+
+  @override
+  String get statsPerYear => 'PRO JAHR';
+
+  @override
+  String statsYearSpoken(String year, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Tauchgänge',
+      one: '1 Tauchgang',
+    );
+    return '$year: $_temp0';
+  }
+
+  @override
+  String get statsSites => 'TAUCHPLÄTZE';
+
+  @override
+  String statsTimes(int count) {
+    return '$count×';
+  }
+
+  @override
+  String get statsAir => 'LUFTVERBRAUCH';
+
+  @override
+  String statsAirLine(String average, String latest) {
+    return 'Ø $average · zuletzt $latest';
+  }
+
+  @override
+  String get statsAirNone =>
+      'Für den Verlauf braucht es mindestens zwei Tauchgänge mit Flaschendruck und Flaschengröße.';
 }

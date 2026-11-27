@@ -56,6 +56,13 @@ void main() {
     expect(stats.perYear.keys, [2025, 2026]);
   });
 
+  test('T39.1 no temperature anywhere: no coldest dive', () {
+    final stats = logbookStats([_dive(1, _day(2026, 1, 1))]);
+
+    expect(stats.coldest, isNull);
+    expect(stats.deepest?.number, 1);
+  });
+
   test('T39.2 top five sites, names merged, newest spelling, ties', () {
     final stats = logbookStats([
       _dive(1, _day(2026, 1, 1), site: 'Elphinstone'),

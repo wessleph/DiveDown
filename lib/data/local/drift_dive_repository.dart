@@ -207,6 +207,36 @@ class DriftDiveRepository implements DiveRepository, DiveNumbering {
     ];
   }
 
+  @override
+  Future<List<Dive>> listWithTanksForDiver(String diverId) async {
+    final rows = await (_db.select(
+      _db.dives,
+    )..where((t) => t.diverId.equals(diverId) & t.deletedAt.isNull())).get();
+    if (rows.isEmpty) return const [];
+    // One query for the tanks of all dives.
+    final tankRows =
+        await (_db.select(_db.diveTanks)
+              ..where((t) => t.diveId.isIn([for (final r in rows) r.id]))
+              ..orderBy([(t) => OrderingTerm.asc(t.tankIndex)]))
+            .get();
+    final tanks = <String, List<DiveTank>>{};
+    for (final r in tankRows) {
+      (tanks[r.diveId] ??= []).add(
+        DiveTank(
+          index: r.tankIndex,
+          volumeL: r.volumeL,
+          startPressureBar: r.startPressureBar,
+          endPressureBar: r.endPressureBar,
+          gas: r.o2 == null ? null : GasMix(o2: r.o2!, he: r.he ?? 0),
+        ),
+      );
+    }
+    return [
+      for (final r in rows)
+        _fromRow(r).copyWith(tanks: tanks[r.id] ?? const []),
+    ];
+  }
+
   /// Time and depth only, for the logbook sparklines (ui-spec §5.2, T21.14).
   Future<Map<String, List<DiveSample>>> _loadProfiles(List<String> ids) async {
     if (ids.isEmpty) return const {};

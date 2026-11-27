@@ -959,6 +959,13 @@ Abgenommen am 2026-11-27 (mit tiefstem Tauchgang; „es fehlt nichts“). Rechnu
 | T39.5 | Logbuch mit Tauchgängen | Kachel antippen | Seite „Statistik“, Tab-Leiste bleibt; Überblick mit Werten, „Länder 2“ (aus `visitedCountriesProvider`); „Tiefster Tauchgang“ antippen öffnet ihn |✅ 2026-11-27: rot, Antippen bleibt auf `/logbook`, kein „Statistik öffnen“ |
 | T39.6 | Tauchgänge 2025 und 2026 | Seite | Jahre mit Zahlen; vorgelesen „2026: 3 Tauchgänge“ |✅ 2026-11-27: rot, Seite fehlt |
 | T39.7 | Tauchplätze, SAC | Seite | „TAUCHPLÄTZE“ mit „3×“; Luftverbrauch „Ø … · zuletzt …“; mit weniger als zwei Werten der Hinweistext |✅ 2026-11-27: rot, Seite fehlt |
+| T39.8 | Tauchgang mit zwei Flaschen, ein gelöschter | `listWithTanksForDiver` | nur der nicht gelöschte, mit allen Flaschen, ohne Samples | ✅ 2026-11-27: rot wegen `UnimplementedError` (beim Umsetzen gefunden: die Logbuch-Liste lädt keine Flaschen, der Luftverbrauch blieb leer) |
 
 Tests: `test/domain/metrics/logbook_stats_test.dart` (T39.1–T39.4), `test/features/logbook/statistics_test.dart` (T39.4–T39.7). Stub: `logbookStats`.
+
+**Umgesetzt (2026-11-27), T39:**
+- [x] `logbookStats` (Rekorde mit Gleichstand-Regel, Kälte nur mit Temperatur, Jahre, Top 5 Plätze, SAC-Verlauf der letzten 10) → T39.1–T39.4 grün; dazu der Randfall „keine Temperatur → kein kältester Tauchgang“ (rot gesehen, dann grün).
+- [x] `DriftDiveRepository.listWithTanksForDiver` (Flaschen aller Tauchgänge in einer Abfrage), `statisticsDivesProvider` → T39.8 grün.
+- [x] Seite `/logbook/statistics` (in der Tab „Logbuch“): Überblick, Rekorde öffnen den Tauchgang, Balken pro Jahr (je Zeile ein eigener Eintrag für den Screenreader), Tauchplätze, Luftverbrauch als Linie mit „Ø … · zuletzt …“ bzw. Hinweis; Kacheln im Logbuch öffnen sie („Statistik öffnen“) → T39.5–T39.7 grün.
+- Gesamt: `flutter test` 558/558, `flutter analyze` ohne Befund, Format sauber. Noch nicht am Handy angesehen.
 

@@ -533,5 +533,35 @@
   },
   "previewSourceHealth": "Aus Apple Health",
   "chipPulse": "Puls",
-  "valuePulse": "Puls"
+  "valuePulse": "Puls",
+  "statsTitle": "Statistik",
+  "statsOpen": "Statistik öffnen",
+  "statsEmpty": "Noch keine Statistik. Sie entsteht mit deinen Tauchgängen.",
+  "statsOverview": "ÜBERBLICK",
+  "statsDives": "Tauchgänge",
+  "statsUnderwater": "Zeit unter Wasser",
+  "statsDeepest": "Tiefster Tauchgang",
+  "statsLongest": "Längster Tauchgang",
+  "statsColdest": "Kältestes Wasser",
+  "statsCountries": "Länder",
+  "statsDiveRef": "#{number} · {site}",
+  "@statsDiveRef": {
+    "placeholders": { "number": { "type": "String" }, "site": { "type": "String" } }
+  },
+  "statsPerYear": "PRO JAHR",
+  "statsYearSpoken": "{year}: {count, plural, =1{1 Tauchgang} other{{count} Tauchgänge}}",
+  "@statsYearSpoken": {
+    "placeholders": { "year": { "type": "String" }, "count": { "type": "int" } }
+  },
+  "statsSites": "TAUCHPLÄTZE",
+  "statsTimes": "{count}×",
+  "@statsTimes": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "statsAir": "LUFTVERBRAUCH",
+  "statsAirLine": "Ø {average} · zuletzt {latest}",
+  "@statsAirLine": {
+    "placeholders": { "average": { "type": "String" }, "latest": { "type": "String" } }
+  },
+  "statsAirNone": "Für den Verlauf braucht es mindestens zwei Tauchgänge mit Flaschendruck und Flaschengröße."
 }

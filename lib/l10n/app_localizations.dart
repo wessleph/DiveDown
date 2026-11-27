@@ -2211,6 +2211,114 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Puls'**
   String get valuePulse;
+
+  /// No description provided for @statsTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Statistik'**
+  String get statsTitle;
+
+  /// No description provided for @statsOpen.
+  ///
+  /// In de, this message translates to:
+  /// **'Statistik öffnen'**
+  String get statsOpen;
+
+  /// No description provided for @statsEmpty.
+  ///
+  /// In de, this message translates to:
+  /// **'Noch keine Statistik. Sie entsteht mit deinen Tauchgängen.'**
+  String get statsEmpty;
+
+  /// No description provided for @statsOverview.
+  ///
+  /// In de, this message translates to:
+  /// **'ÜBERBLICK'**
+  String get statsOverview;
+
+  /// No description provided for @statsDives.
+  ///
+  /// In de, this message translates to:
+  /// **'Tauchgänge'**
+  String get statsDives;
+
+  /// No description provided for @statsUnderwater.
+  ///
+  /// In de, this message translates to:
+  /// **'Zeit unter Wasser'**
+  String get statsUnderwater;
+
+  /// No description provided for @statsDeepest.
+  ///
+  /// In de, this message translates to:
+  /// **'Tiefster Tauchgang'**
+  String get statsDeepest;
+
+  /// No description provided for @statsLongest.
+  ///
+  /// In de, this message translates to:
+  /// **'Längster Tauchgang'**
+  String get statsLongest;
+
+  /// No description provided for @statsColdest.
+  ///
+  /// In de, this message translates to:
+  /// **'Kältestes Wasser'**
+  String get statsColdest;
+
+  /// No description provided for @statsCountries.
+  ///
+  /// In de, this message translates to:
+  /// **'Länder'**
+  String get statsCountries;
+
+  /// No description provided for @statsDiveRef.
+  ///
+  /// In de, this message translates to:
+  /// **'#{number} · {site}'**
+  String statsDiveRef(String number, String site);
+
+  /// No description provided for @statsPerYear.
+  ///
+  /// In de, this message translates to:
+  /// **'PRO JAHR'**
+  String get statsPerYear;
+
+  /// No description provided for @statsYearSpoken.
+  ///
+  /// In de, this message translates to:
+  /// **'{year}: {count, plural, =1{1 Tauchgang} other{{count} Tauchgänge}}'**
+  String statsYearSpoken(String year, int count);
+
+  /// No description provided for @statsSites.
+  ///
+  /// In de, this message translates to:
+  /// **'TAUCHPLÄTZE'**
+  String get statsSites;
+
+  /// No description provided for @statsTimes.
+  ///
+  /// In de, this message translates to:
+  /// **'{count}×'**
+  String statsTimes(int count);
+
+  /// No description provided for @statsAir.
+  ///
+  /// In de, this message translates to:
+  /// **'LUFTVERBRAUCH'**
+  String get statsAir;
+
+  /// No description provided for @statsAirLine.
+  ///
+  /// In de, this message translates to:
+  /// **'Ø {average} · zuletzt {latest}'**
+  String statsAirLine(String average, String latest);
+
+  /// No description provided for @statsAirNone.
+  ///
+  /// In de, this message translates to:
+  /// **'Für den Verlauf braucht es mindestens zwei Tauchgänge mit Flaschendruck und Flaschengröße.'**
+  String get statsAirNone;
 }
 
 class _AppLocalizationsDelegate

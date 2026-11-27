@@ -15,6 +15,7 @@ import 'dive_texts.dart';
 import '../settings/backup_flows.dart';
 import 'manual_dive_screen.dart';
 import 'sparkline.dart';
+import 'statistics_screen.dart';
 
 /// Logbuch (ui-spec §5.2): dives of the active diver by month, newest first.
 class LogbookScreen extends ConsumerWidget {
@@ -495,24 +496,33 @@ class _SummaryTiles extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final total = dives.fold<int>(0, (sum, d) => sum + d.durationS);
+    // Both tiles open the statistics (ui-spec §5.15, T39).
     return Padding(
       padding: const EdgeInsets.fromLTRB(14, 4, 14, 0),
-      child: Row(
-        children: [
-          Expanded(
-            child: _Tile(
-              value: '${dives.length}',
-              label: l10n.logbookTileDives,
-            ),
+      child: Semantics(
+        button: true,
+        label: l10n.statsOpen,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () => context.go(StatisticsScreen.path),
+          child: Row(
+            children: [
+              Expanded(
+                child: _Tile(
+                  value: '${dives.length}',
+                  label: l10n.logbookTileDives,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _Tile(
+                  value: _units.underwater(total),
+                  label: l10n.logbookTileUnderwater,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: _Tile(
-              value: _units.underwater(total),
-              label: l10n.logbookTileUnderwater,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
