@@ -818,7 +818,7 @@ Test: `test/tool/android_signing_test.dart`. Nach dem Anlegen des Schlüssels ko
 - [x] Anleitung `docs/entwickler/android-release-einrichtung.md` (PKCS12-Keystore außerhalb des Repos, Fingerabdruck, Umstieg von der Debug-App über Sichern/Wiederherstellen).
 - [x] T33.5 von Hand geprüft (siehe Tabelle).
 - [x] 2026-11-27: Schlüssel vom Nutzer erzeugt (PKCS12, RSA 4096, Alias `divedown`), SHA-256 `83:4A:…:27:E5` in der README unter „Android-APK prüfen“ und in der Anleitung §8. Release-APK vom Nutzer mit `key.properties` gebaut, `apksigner verify --print-certs` zeigt genau diesen SHA-256 (Build-Tools 36.0.0).
-- Offen beim Nutzer: App in der Play Console registrieren (Anleitung §8), Release-APK auf einem Gerät ohne Entwickleroptionen installieren, S25 von der Debug-App umstellen (§6).
+- Offen beim Nutzer: S25 von der Debug-App umstellen (§6). Die Registrierung bei Google ist in der Schweiz noch nicht Pflicht (korrigiert 2026-11-27, Anleitung §8); sie kommt, sobald Google es verlangt, über die Android Developer Console, nicht über „App erstellen“ in der Play Console.
 
 ## T34: iOS-Builds mit Xcode 27 (ITMS-90725, Mail von Apple vom 2026-11-24)
 

@@ -10,7 +10,7 @@
 | **diese Woche** | Apple-Entwicklerkonto beantragen (Einzelperson, ca. 99 €/Jahr) | Die Prüfung durch Apple dauert oft 1–2 Tage, manchmal länger. |
 | bis **07.12.** | Erster iOS-Build auf TestFlight, intern | GitHub-Actions-Pipeline und Zertifikate einrichten, Testfreund mit iPhone einladen |
 | bis **14.12.** | Erstes „Beta App Review“ einreichen | Externe Tester per Link brauchen eine einmalige Freigabe durch Apple, meist 1–2 Tage. |
-| **ab 27.11.** | **Android:** ~~Identitätsprüfung im Play-Console-Konto~~ ✅ bestätigt am 27.11.; ~~Release-Schlüssel (T33)~~ ✅ 27.11.; jetzt **App registrieren** (Paketname + SHA-256-Fingerabdruck) | Seit September 2026 installieren Android-Geräte auch eine direkt verteilte APK nur, wenn die App bei einem verifizierten Entwickler registriert ist ([Google, Android developer verification](https://developer.android.com/developer-verification/guides)). Anleitung: `docs/entwickler/android-release-einrichtung.md` §8 |
+| **2027, sobald Google es für die Schweiz verlangt** | **Android:** ~~Identitätsprüfung im Play-Console-Konto~~ ✅ bestätigt am 27.11.; ~~Release-Schlüssel (T33)~~ ✅ 27.11.; später **App registrieren** (Paketname + SHA-256-Fingerabdruck) | Registrierte Apps sind laut Google seit dem 30.09.2026 nur in Brasilien, Indonesien, Singapur und Thailand Pflicht, weltweit „2027 and beyond“ (Stand 27.11., [Google, Android developer verification](https://developer.android.com/developer-verification/guides)). Für die APK zu Weihnachten nicht nötig. Weg für reine APKs: Android Developer Console, nicht „App erstellen“ in der Play Console. Anleitung: `docs/entwickler/android-release-einrichtung.md` §8 |
 | bis **19.12.** | Weihnachts-Build auf TestFlight freigegeben | Apple prüft rund um die Feiertage erfahrungsgemäß langsamer oder gar nicht. |
 | ~~bis **19.12.**~~ ✅ 27.11. | Datenschutzerklärung gegen die fertige App 1.0 prüfen (Berechtigungen, TestFlight-Daten); geprüft und vom Nutzer abgenommen am 27.11. Bei weiteren Änderungen am Umgang mit Daten erneut prüfen. | Phase 60, URL: https://wessleph.github.io/DiveDown/datenschutz/ |
 | **24.12.** | Link verschenken 🎁 | |
@@ -48,6 +48,8 @@
 13. Nicht gelistete App im App Store statt TestFlight
 13a. **Vor der Verlängerung des Apple-Kontos (ca. Nov. 2027):** prüfen, ob eine Web-App für die iPhones reicht (ADR 0005, Nachtrag)
 14. Suunto Ocean per BLE, sobald libdivecomputer den Treiber hat
+15. **Idee: freiwilliges Trinkgeld** (2026-11-24), erst nach der GPL-Klärung (ADR 0008) und nicht in TestFlight-Builds. iOS nur als In-App-Kauf (ein PayPal-Link würde Apple nach Richtlinie 3.1.1 ablehnen), Android bzw. F-Droid per PayPal-Link.
+    **Vorher den Händlerstatus in der Play Console prüfen:** Bestätigt ist am 2026-11-27 „Kein Händler“ (Digital Services Act der EU: kostenlos, privat, ohne Einnahmen). Fließt Geld über die App oder gehört sie zur beruflichen Tätigkeit, kann das als Händler gelten. Dann muss der Status geändert werden, und Adresse, Telefon und E-Mail stehen öffentlich im Play Store. Eine falsche Angabe kann zur Sperre von App oder Konto führen. Gilt sinngemäß auch für den App Store.
 
 ## Vorgehen unter Zeitdruck
 - Die Phasen-Gates **gelten weiter**. Damit es schneller geht, bündeln wir die Phasen 20 (Security) und 30 (UI-Design) für den ganzen Umfang der Version 1.0, statt sie pro Feature einzeln zu machen.
@@ -61,5 +63,6 @@
 
 ## Änderungen
 - **2026-11-18:** Das Repo `wessleph/DiveDown` ist **öffentlich** (früher als in research.md 8.3 geplant). Damit gelten ab sofort die CI-Regeln aus security.md G6/A3 für jeden neuen Workflow. Die Datenschutzerklärung erscheint über GitHub Pages aus `/docs`.
+- **2026-11-27 (abends korrigiert):** Die Pflicht zur Registrierung gilt noch nicht in der Schweiz (siehe Termine). Das Play-Console-Konto ist verifiziert, „Kein Händler“ ist bestätigt. Für die reine APK wird dort keine App angelegt.
 - **2026-11-27:** Für Android ist ein Play-Console-Konto nötig (Android-Entwicklerverifizierung, siehe Termine). Verteilt wird für 1.0 weiter die **APK**; den Play Store selbst lassen wir weg, weil neue private Konten vorher einen geschlossenen Test mit (Stand der Recherche) 12 Testern über 14 Tage brauchen und wir nur zwei Tester haben. Ausweg bei Bedarf: interner Test der Play Console (ohne Mindestzahl).
 

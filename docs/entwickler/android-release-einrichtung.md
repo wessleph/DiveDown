@@ -69,12 +69,23 @@ Ab dann gehen alle weiteren Release-APKs direkt als Update drüber. Dazu muss di
 - `divedown-upload.p12` und das Passwort verschlüsselt an **zwei** Orten aufbewahren.
 - `key.properties` braucht kein Backup, sie lässt sich aus den Angaben oben neu schreiben.
 
-## 8. App bei Google registrieren (Android-Entwicklerverifizierung, ab 2026-11-27)
-Seit September 2026 installieren zertifizierte Android-Geräte nur noch Apps, die bei einem **verifizierten Entwickler registriert** sind. Quelle: [Android developer verification](https://developer.android.com/developer-verification/guides) und [Updates to Play Console (PDF)](https://developer.android.com/developer-verification/assets/pdfs/updates-to-play-console-for-android-developer-verification.pdf), abgerufen am 2026-11-27. Das gilt auch für eine APK, die wir direkt an Familie und Freunde geben, nicht nur für den Play Store.
+## 8. App bei Google registrieren (Android-Entwicklerverifizierung)
+Zertifizierte Android-Geräte installieren künftig nur noch Apps, die bei einem **verifizierten Entwickler registriert** sind, auch eine APK, die wir direkt an Familie und Freunde geben. Laut Google (Stand 2026-11-27) gilt das seit dem **30.09.2026 nur in Brasilien, Indonesien, Singapur und Thailand**, weltweit „2027 and beyond“. **In der Schweiz ist es für 1.0 noch nicht nötig.** Vor dem Registrieren die Seiten neu lesen, Google ändert sie gerade.
+Quellen, abgerufen am 2026-11-27: [Android developer verification](https://developer.android.com/developer-verification/guides), [Android Developer Console](https://developer.android.com/developer-verification/guides/android-developer-console), [Limited distribution](https://developer.android.com/developer-verification/guides/limited-distribution). Das früher verlinkte PDF zur Play Console ist nicht mehr erreichbar (404).
 
-- [x] **Play-Console-Konto** angelegt (2026-11-27) und **Identitätsprüfung abgeschlossen** (2026-11-27, am selben Tag bestätigt). Google nennt etwa 3 Werktage. Den Stand zeigt die Play Console unter „Alle Apps“, zum Schluss kommt eine Mail.
-- [x] **Release-Schlüssel erzeugt** (Abschnitte 2 und 4, 2026-11-27). SHA-256: `83:4A:81:53:5B:41:26:4E:70:C3:2D:33:9C:D1:A5:B7:ED:F4:85:05:EB:34:05:F6:84:73:88:EE:A6:8D:27:E5` (steht auch in der README).
-- [ ] In der Play Console die App registrieren: **Paketname `io.github.wessleph.divedown`** und **SHA-256-Fingerabdruck** des Zertifikats aus Abschnitt 4. Die genauen Menüpunkte und ob Google einen Nachweis verlangt, dass der Schlüssel dir gehört (z. B. eine damit signierte Datei), zeigt die Play Console; sie ändern sich gerade.
+**Welcher Weg:** Google unterscheidet nach Verteilung. Nur im Play Store → Play Console, „App erstellen“. Im Play Store und außerhalb → Play Console mit einer neuen Funktion für Apps außerhalb von Play. **Nur außerhalb von Play (unser Fall) → Android Developer Console, Seite „Packages“.** „App erstellen“ in der Play Console legt einen Store-Eintrag an und ist dafür nicht gedacht.
+
+**Variante „Limited distribution“** (passt zu uns: „Share with family and friends … no commercial intent“): kostenlos, ohne amtlichen Ausweis; braucht ein Google-Zahlungsprofil, Bestätigung in zwei Schritten und eine Kontakt-Mail. Die App lässt sich dann mit einer begrenzten Zahl Geräte teilen, die dem per QR-Code oder Link zustimmen (Google nennt einmal 20, einmal 50 Geräte).
+
+**Registrieren** auf der Seite „Packages“:
+1. Paketname **`io.github.wessleph.divedown`** eingeben.
+2. SHA-256-Fingerabdruck aus Abschnitt 4 eingeben. Status: „In review“.
+3. Besitz nachweisen: Für schon verwendete Paketnamen eine APK hochladen, die mit dem eigenen Schlüssel signiert ist und eine von der Konsole vorgegebene Datei im Ordner `assets` enthält. Das ist ein eigener kleiner Task (Datei ins Projekt, Release-APK bauen), nicht von Hand am Build vorbei.
+4. Nach der Prüfung kommt eine Mail, der Status lautet „Registered“.
+
+- [x] **Play-Console-Konto** angelegt (2026-11-27) und **Identitätsprüfung abgeschlossen** (2026-11-27, am selben Tag bestätigt). Status „Kein Händler“ bestätigt (Digital Services Act; vor einem Trinkgeld prüfen, Roadmap Punkt 15).
+- [x] **Release-Schlüssel erzeugt** (Abschnitte 2 und 4, 2026-11-27). SHA-256: `83:4A:81:53:5B:41:26:4E:70:C3:2D:33:9C:D1:A5:B7:ED:F4:85:05:EB:34:05:F6:84:73:88:EE:A6:8D:27:E5` (steht auch in der README). Release-APK damit gebaut, `apksigner` bestätigt den Wert.
+- [ ] Sobald Google es für die Schweiz verlangt: App wie oben registrieren. Offen: ob das verifizierte Play-Console-Konto dafür reicht oder ein Konto in der Android Developer Console nötig ist.
 - [ ] Danach eine Release-APK auf einem Gerät **ohne** Entwickleroptionen installieren und prüfen, dass Android sie annimmt.
 
 **Der Fingerabdruck** ist eine Prüfsumme (SHA-256, 64 Zeichen in Zweiergruppen, z. B. `3F:7A:…`) über das öffentliche Zertifikat des Schlüssels. Er verrät nichts über den geheimen Schlüssel und darf öffentlich stehen. Android und Google erkennen daran, dass eine APK wirklich von dir signiert wurde.
