@@ -67,7 +67,7 @@ Ab dann gehen alle weiteren Release-APKs direkt als Update drüber. Dazu muss di
 Mit dem internen Test von Google Play (T42) läuft der Umstieg über den Play Store statt über die APK, siehe `play-interner-test.md` §9.
 
 ## 7. Sichern
-- `divedown-upload.p12` und das Passwort verschlüsselt an **zwei** Orten aufbewahren.
+- `divedown-upload.p12` und das Passwort an **zwei** Orten aufbewahren. Die Datei ist mit dem Keystore-Passwort verschlüsselt; eine Kopie liegt seit 2026-11-27 auf `P:\IT Projekte\Sicherung-Signaturschluessel`, das Passwort im Chrome-Passwortmanager. Befehl zum Kopieren: `play-interner-test.md` §8.
 - `key.properties` braucht kein Backup, sie lässt sich aus den Angaben oben neu schreiben.
 
 ## 8. App bei Google registrieren (Android-Entwicklerverifizierung)

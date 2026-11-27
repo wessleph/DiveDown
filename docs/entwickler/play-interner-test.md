@@ -133,7 +133,11 @@ Ein interner Test braucht laut Google keine Prüfung durch Google und ist meist 
 Die Tester bekommen das Update wie jedes andere über den Play Store. Eine APK für Leute ohne Google-Konto baust du mit derselben Build-Nummer: `flutter build apk --release --build-number=$(git rev-list --count HEAD)`.
 
 ## 8. Sichern
-- `divedown-play-upload.p12` und sein Passwort verschlüsselt an **zwei** Orten aufbewahren, wie `divedown-upload.p12` (z. B. zusätzlich in der verschlüsselten Sicherung auf `P:\IT Projekte\Sicherung-Signaturschluessel`).
+- Beide Schlüssel liegen an **zwei** Orten: in `divedown-signing` auf dem PC und als Kopie auf `P:\IT Projekte\Sicherung-Signaturschluessel` (seit 2026-11-27). Die `.p12`-Dateien sind mit ihrem eigenen Passwort verschlüsselt, ein zusätzliches Sicherungs-Passwort wie bei iOS braucht es nicht. Die Passwörter stehen im Chrome-Passwortmanager („DiveDown Android-Schlüssel“, „DiveDown Play-Upload-Schlüssel“). Kopieren:
+
+  ```powershell
+  Copy-Item "$env:USERPROFILE\divedown-signing\divedown-upload.p12", "$env:USERPROFILE\divedown-signing\divedown-play-upload.p12" "P:\IT Projekte\Sicherung-Signaturschluessel\"
+  ```
 - Geht der **Upload-Schlüssel** verloren, kann man in der Play Console unter „App-Integrität“ ein Zurücksetzen beantragen. Den **App-Signaturschlüssel** kann niemand ersetzen, deshalb bleibt seine Sicherung das Wichtigste.
 - Die Dateien von Google im Ordner `play\` (`pepk.jar`, `encryption_public_key.pem`, `divedown-app-signing.zip`, `upload_certificate.pem`) braucht man nach dem Einrichten nicht mehr. Die ZIP-Datei enthält den verschlüsselten Schlüssel: nach dem Hochladen löschen.
 
