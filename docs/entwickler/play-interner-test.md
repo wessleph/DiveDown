@@ -24,7 +24,7 @@ Lege dir für die Dateien von Google einen Unterordner an, z. B. `C:\Users\<du>\
 - Kostenlos oder kostenpflichtig: **Kostenlos** (lässt sich später nicht mehr ändern)
 - Die Erklärungen (Richtlinien für Entwickler, US-Exportgesetze) bestätigen.
 
-Damit ist der Paketname bei Google registriert, sobald das erste Bundle hochgeladen ist. Der Paketname lässt sich danach nicht mehr ändern.
+- **Paketname: `io.github.wessleph.divedown`** (genau so, steht in `android/app/build.gradle.kts`). Seit der Android-Entwicklerverifizierung fragt die Console ihn schon beim Anlegen ab (Stand 2026-11-27; früher kam er erst mit dem ersten Bundle). Damit ist er bei Google registriert und lässt sich nicht mehr ändern.
 
 ## 2. Eigenen Schlüssel als App-Signaturschlüssel hinterlegen (vor dem ersten Hochladen)
 Google erzeugt sonst beim ersten Hochladen selbst einen Schlüssel. Deshalb **zuerst** diesen Schritt.
