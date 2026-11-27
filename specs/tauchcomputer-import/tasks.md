@@ -1035,3 +1035,9 @@ Anleitung: `docs/entwickler/play-interner-test.md`.
 | T42.5 | von Hand in der Play Console | App angelegt, Play App Signing mit eigenem Schlüssel, Bundle im internen Test | „App-Integrität“ zeigt als App-Signaturschlüssel SHA-256 `83:4A:…:27:E5` und als Upload-Schlüssel den neuen | |
 | T42.6 | von Hand am S25 Ultra mit der Debug-App | Logbuch sichern, Debug-App deinstallieren, über den Testlink aus dem Play Store installieren, Logbuch wiederherstellen | alle Tauchgänge da; installierte App mit `83:4A:…:27:E5` (`adb` holt `base.apk`, `apksigner verify --print-certs`) | |
 | T42.7 | dito | Build `+N+1` hochladen | Update kommt über den Play Store, ohne neu zu installieren; Logbuch bleibt | |
+
+**Umgesetzt (2026-11-27), T42.1–T42.3:**
+- [x] `build.gradle.kts`: Signatur `upload` aus `android/upload-key.properties`; der Build-Typ `release` nimmt sie, wenn Gradle einen Task mit `bundle` baut (`flutter build appbundle` → `bundleRelease`), sonst weiter `release`. Ohne die passende Datei bricht nur das Packen ab, mit Verweis auf die jeweilige Anleitung → T42.1, T42.2 grün, T33.1–T33.4 weiter grün.
+- [x] `android/.gitignore`: `upload-key.properties`, `**/*.p12` → T42.3 grün.
+- [x] Anleitung `docs/entwickler/play-interner-test.md` (App anlegen, eigener App-Signaturschlüssel per PEPK, Upload-Schlüssel, Bundle, interner Test, Updates, Sichern, Umstieg des S25). Build-Nummer für Android wie bei iOS = Anzahl der Commits (`--build-number=$(git rev-list --count HEAD)`), `pubspec.yaml` bleibt bei `+1`.
+- `flutter test test/tool` 35/35, `flutter analyze` ohne Befund, Format sauber, `gradlew :app:processReleaseMainManifest` liest das Skript ohne Schlüssel. Offen: T42.4–T42.7 von Hand.

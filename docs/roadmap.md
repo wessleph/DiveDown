@@ -1,6 +1,6 @@
 # DiveDown: Roadmap bis Weihnachten 2026
 
-> Ziel: Die App **zu Weihnachten an Familie und Freunde verschenken** (TestFlight-Link für iPhone, APK für Android).
+> Ziel: Die App **zu Weihnachten an Familie und Freunde verschenken** (TestFlight-Link für iPhone, Link zum internen Test von Google Play für Android, APK für alle ohne Google-Konto; ADR 0005, Nachtrag 2026-11-27).
 > Danach werden Fehler nach und nach behoben. Grundlage für Rückmeldungen ist der fest eingebaute Export der Diagnose-Logs.
 > Stand: 2026-11-18 · noch **5 Wochen**
 
