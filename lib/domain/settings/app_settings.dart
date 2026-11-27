@@ -1,6 +1,9 @@
 /// „Darstellung“ in the settings (ui-spec §5.11).
 enum AppThemeMode { system, light, dark }
 
+/// The layers of the profile chart with their own axis (ui-spec §6, T37).
+enum ProfileLayer { temperature, pressure, consumption, pulse }
+
 /// Small app-wide settings kept in the local database.
 abstract interface class AppSettings {
   /// The diver that logbook and import work for (ui-spec §2), null on the
@@ -22,4 +25,9 @@ abstract interface class AppSettings {
   /// „✕“ on the reminder hides it until then (T11.8).
   Future<DateTime?> backupReminderSnoozedUntil();
   Future<void> setBackupReminderSnoozedUntil(DateTime until);
+
+  /// The profile layers last switched on (ui-spec §6 „Zustand wird gemerkt“,
+  /// T38); null until the diver changes them.
+  Future<List<ProfileLayer>?> profileLayers();
+  Future<void> setProfileLayers(List<ProfileLayer> layers);
 }

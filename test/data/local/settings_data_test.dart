@@ -118,6 +118,35 @@ void main() {
     expect(await DriftAppSettings(db).themeMode(), AppThemeMode.dark);
   });
 
+  test('T38.2 the profile layers are stored, null until changed', () async {
+    final settings = DriftAppSettings(db);
+    expect(await settings.profileLayers(), isNull);
+    await settings.setProfileLayers([
+      ProfileLayer.pressure,
+      ProfileLayer.consumption,
+    ]);
+    expect(await DriftAppSettings(db).profileLayers(), [
+      ProfileLayer.pressure,
+      ProfileLayer.consumption,
+    ]);
+    await settings.setProfileLayers(const []);
+    expect(await DriftAppSettings(db).profileLayers(), isEmpty);
+  });
+
+  test('T38.2 unknown names from an older or newer app are skipped', () async {
+    await db
+        .into(db.appMeta)
+        .insertOnConflictUpdate(
+          AppMetaCompanion.insert(
+            key: profileLayersKey,
+            value: 'ndl,temperature,something',
+          ),
+        );
+    expect(await DriftAppSettings(db).profileLayers(), [
+      ProfileLayer.temperature,
+    ]);
+  });
+
   test('T23.5 known dive computers: list and forget, dives stay', () async {
     final repo = DriftDiveComputerRepository(db);
     final eon = await repo.create(

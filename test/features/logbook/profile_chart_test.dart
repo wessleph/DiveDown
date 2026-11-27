@@ -3,12 +3,15 @@
 // Contract for the widgets: the drawing area that maps 0 … duration onto
 // its full width has the key `profile-plot`; the value panel under it has
 // the key `profile-values`.
+import 'package:divedown/data/local/drift_app_settings.dart';
 import 'package:divedown/domain/dive/dive.dart';
+import 'package:divedown/domain/settings/app_settings.dart';
 import 'package:divedown/features/logbook/dive_detail_screen.dart';
 import 'package:divedown/features/logbook/manual_dive_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../support/health_fixtures.dart';
 import '../../support/test_app.dart';
 
 final _plot = find.byKey(const ValueKey('profile-plot'));
@@ -260,6 +263,92 @@ void main() {
           if (c.selected) (c.label as Text).data!,
       ];
       expect(selected, ['Flaschendruck', 'Luftverbrauch']);
+    });
+  });
+
+  group('T38 the chosen layers are remembered', () {
+    List<String> selected(WidgetTester tester) => [
+      for (final c in tester.widgetList<FilterChip>(find.byType(FilterChip)))
+        if (c.selected) (c.label as Text).data!,
+    ];
+
+    testWidgets('for the next dive and after a restart', (tester) async {
+      final db = newTestDatabase();
+      addTearDown(db.close);
+      final anna = await seedActiveDiver(db);
+      final a = await seedDive(db, _measured(anna.id!));
+      final b = await seedDive(
+        db,
+        _measured(anna.id!).copyWith(number: 43, sourceId: 'eon-3F7A-43'),
+      );
+      await pumpTestApp(
+        tester,
+        db: db,
+        size: const Size(400, 2000),
+        location: DiveDetailScreen.pathFor(a.id!),
+      );
+      expect(selected(tester), ['Temperatur', 'Flaschendruck']);
+
+      await tester.tap(find.widgetWithText(FilterChip, 'Luftverbrauch'));
+      await tester.pumpAndSettle();
+      router(tester).go(DiveDetailScreen.pathFor(b.id!));
+      await tester.pumpAndSettle();
+      expect(selected(tester), ['Flaschendruck', 'Luftverbrauch']);
+
+      // A fresh app on the same database.
+      await pumpTestApp(
+        tester,
+        db: db,
+        size: const Size(400, 2000),
+        location: DiveDetailScreen.pathFor(a.id!),
+      );
+      expect(selected(tester), ['Flaschendruck', 'Luftverbrauch']);
+    });
+
+    Future<void> openWith(
+      WidgetTester tester,
+      List<ProfileLayer> saved,
+      Dive Function(String) dive,
+    ) async {
+      final db = newTestDatabase();
+      addTearDown(db.close);
+      final anna = await seedActiveDiver(db);
+      await DriftAppSettings(db).setProfileLayers(saved);
+      final d = await seedDive(db, dive(anna.id!));
+      await pumpTestApp(
+        tester,
+        db: db,
+        size: const Size(400, 2000),
+        location: DiveDetailScreen.pathFor(d.id!),
+      );
+    }
+
+    testWidgets('only what the dive has: estimated air, no consumption', (
+      tester,
+    ) async {
+      await openWith(tester, [
+        ProfileLayer.pressure,
+        ProfileLayer.consumption,
+      ], exampleDive);
+
+      expect(selected(tester), ['Flaschendruck (geschätzt)']);
+    });
+
+    testWidgets('Apple Watch: the pulse takes the place of the pressure', (
+      tester,
+    ) async {
+      await openWith(tester, [
+        ProfileLayer.temperature,
+        ProfileLayer.pressure,
+      ], (id) => elphinstoneImported().toDive(diverId: id));
+
+      expect(selected(tester), ['Temperatur', 'Puls']);
+    });
+
+    testWidgets('everything switched off stays off', (tester) async {
+      await openWith(tester, const [], _measured);
+
+      expect(selected(tester), isEmpty);
     });
   });
 }

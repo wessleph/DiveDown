@@ -83,7 +83,7 @@ Gespeichert wird immer in SI (ADR 0004). Formatierung zentral (`UnitFormatter`),
 
 ### 5.1 Erster Start: Taucher anlegen
 **Ablauf:** Begrüßung → Name (Pflicht) → optional Farbe/Avatar-Initialen → Einheiten (metrisch/imperial) → fertig → leeres Logbuch.
-- Texte: Titel „Willkommen bei DiveDown“ · „Wer taucht? Du kannst später weitere Taucher hinzufügen.“ · Feld „Name“ · Knopf **„Los geht’s“**
+- Texte: Titel „Willkommen bei DiveDown“ · „Wer taucht? Den Namen kannst du später in den Einstellungen ändern.“ *(geändert 2026-11-27, T38: ein Taucher pro App)* · Feld „Name“ · Knopf **„Los geht’s“**
 - Hinweis klein: „Alle Daten bleiben auf diesem Gerät.“
 - Zustände: Name leer → Knopf deaktiviert, mit Hinweis „Bitte gib einen Namen ein.“
 

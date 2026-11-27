@@ -921,3 +921,21 @@ Tests: `test/features/logbook/profile_chart_test.dart` (Gruppe T37, T22.10 und T
 **Umgesetzt (2026-11-27), T37:**
 - [x] `profile_chart.dart`: Ebene und Band „NDL“ entfernt (der Wert bleibt im Werte-Feld), Chips „Flaschendruck“, „Flaschendruck (geschätzt)“, „Luftverbrauch“ (`app_de.arb`, Schlüssel `chipNdl` entfällt) → T37.1–T37.3 grün. Das Farbtoken `ndl` bleibt im Theme (ui-spec §1).
 - Gesamt: `flutter test` 540/540, `flutter analyze` ohne Befund. Noch nicht am Handy angesehen.
+
+## T38: Begrüßung und gemerkte Ebenen (ui-spec §5.1, §6; 2026-11-27)
+
+Gefunden beim Durchsehen: Die Begrüßung verspricht „weitere Taucher“, obwohl es seit 2026-11-22 nur einen gibt; die Ebenen im Profil werden entgegen ui-spec §6 („Zustand wird gemerkt“) nicht gemerkt. Abgenommen vom Nutzer am 2026-11-27.
+
+Regel fürs Merken: Gespeichert werden die eingeschalteten Ebenen (`app_meta` `profile_layers`, z. B. `pressure,consumption`). Beim Öffnen gelten die gespeicherten, soweit der Tauchgang sie hat; fehlt der Flaschendruck und gibt es Puls, tritt der Puls an seine Stelle (wie beim Standard, T6.11). Nichts gespeichert → Standard (Temperatur und Flaschendruck bzw. Puls). Alles aus bleibt aus.
+
+| Nr. | Ausgangslage | Aktion | Erwartet | Status |
+|---|---|---|---|---|
+| T38.1 | erster Start | Begrüßung | „Wer taucht? Den Namen kannst du später in den Einstellungen ändern.“ | ✅ 2026-11-27: rot, alter Text |
+| T38.2 | `DriftAppSettings` | speichern, lesen | ohne Wahl `null`; Liste in Reihenfolge; leer bleibt leer; unbekannte Namen (z. B. `ndl`) werden übersprungen | ✅ 2026-11-27: rot wegen `UnimplementedError` |
+| T38.3 | zwei Tauchgänge mit Sender | bei A „Luftverbrauch“ einschalten, B öffnen, App neu starten | bei B und nach dem Neustart an: Flaschendruck und Luftverbrauch | ✅ 2026-11-27: rot, B zeigt wieder Temperatur und Flaschendruck |
+| T38.4 | gespeichert Flaschendruck + Luftverbrauch; Tauchgang mit geschätzter Luft | Detail | nur „Flaschendruck (geschätzt)“ an | ✅ 2026-11-27: rot wegen `UnimplementedError` |
+| T38.5 | gespeichert Temperatur + Flaschendruck; Watch-Tauchgang | Detail | Temperatur und Puls an | ✅ 2026-11-27: rot wegen `UnimplementedError` |
+| T38.6 | gespeichert: nichts | Detail | kein Chip an | ✅ 2026-11-27: rot wegen `UnimplementedError` |
+
+Tests: `test/features/onboarding/welcome_test.dart` (T38.1), `test/data/local/settings_data_test.dart` (T38.2), `test/features/logbook/profile_chart_test.dart` Gruppe T38 (T38.3–T38.6). Stubs: `ProfileLayer`, `AppSettings.profileLayers`/`setProfileLayers`.
+

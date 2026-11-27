@@ -9,6 +9,7 @@ const themeModeKey = 'theme_mode';
 const lastBackupKey = 'last_backup_at';
 const backupBaselineKey = 'backup_baseline';
 const backupSnoozedKey = 'backup_snoozed_until';
+const profileLayersKey = 'profile_layers';
 
 class DriftAppSettings implements AppSettings {
   DriftAppSettings(this._db);
@@ -78,4 +79,11 @@ class DriftAppSettings implements AppSettings {
       .insertOnConflictUpdate(
         AppMetaCompanion.insert(key: themeModeKey, value: mode.name),
       );
+
+  @override
+  Future<List<ProfileLayer>?> profileLayers() => throw UnimplementedError();
+
+  @override
+  Future<void> setProfileLayers(List<ProfileLayer> layers) =>
+      throw UnimplementedError();
 }
