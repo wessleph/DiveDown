@@ -63,7 +63,8 @@ Eine mit dem Debug-Schlüssel installierte App (alle Testinstallationen per `adb
 3. Die Release-APK installieren.
 4. **Einstellungen → Logbuch wiederherstellen** mit der gesicherten Datei.
 
-Ab dann gehen alle weiteren Release-APKs direkt als Update drüber. Dazu muss die Build-Nummer in `pubspec.yaml` (`version: 1.0.0+N`) bei jedem Release steigen.
+Ab dann gehen alle weiteren Release-APKs direkt als Update drüber. Dazu muss die Build-Nummer bei jedem Release steigen. Wie bei iOS und Google Play ist sie die Anzahl der Commits: `flutter build apk --release --build-number=$(git rev-list --count HEAD)` (siehe `play-interner-test.md` §5).
+Mit dem internen Test von Google Play (T42) läuft der Umstieg über den Play Store statt über die APK, siehe `play-interner-test.md` §9.
 
 ## 7. Sichern
 - `divedown-upload.p12` und das Passwort verschlüsselt an **zwei** Orten aufbewahren.

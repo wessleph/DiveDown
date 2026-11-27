@@ -16,6 +16,21 @@ val keystoreProperties = Properties().apply {
     }
 }
 
+// App bundles go to the internal test of Google Play (T42, ADR 0005,
+// addendum 2026-11-27). Google re-signs them with a copy of the key above
+// (Play App Signing), so they are uploaded with an own upload key from
+// android/upload-key.properties (ignored by git). `flutter build appbundle`
+// runs bundleRelease; every other release build stays on the key above.
+val uploadKeyPropertiesFile = rootProject.file("upload-key.properties")
+val uploadKeyProperties = Properties().apply {
+    if (uploadKeyPropertiesFile.exists()) {
+        uploadKeyPropertiesFile.inputStream().use { load(it) }
+    }
+}
+val buildsBundle = gradle.startParameter.taskNames.any {
+    it.contains("bundle", ignoreCase = true)
+}
+
 android {
     namespace = "io.github.wessleph.divedown"
     // permission_handler_android needs 37; backward compatible, targetSdk stays.
@@ -51,11 +66,20 @@ android {
                 keyPassword = keystoreProperties["keyPassword"] as String
             }
         }
+        create("upload") {
+            if (uploadKeyPropertiesFile.exists()) {
+                storeFile = file(uploadKeyProperties["storeFile"] as String)
+                storePassword = uploadKeyProperties["storePassword"] as String
+                keyAlias = uploadKeyProperties["keyAlias"] as String
+                keyPassword = uploadKeyProperties["keyPassword"] as String
+            }
+        }
     }
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("release")
+            signingConfig = if (buildsBundle) signingConfigs.getByName("upload")
+                else signingConfigs.getByName("release")
         }
     }
 }
@@ -68,7 +92,14 @@ tasks.configureEach {
         name == "bundleRelease"
     ) {
         doFirst {
-            if (!keystorePropertiesFile.exists()) {
+            if (buildsBundle && !uploadKeyPropertiesFile.exists()) {
+                throw GradleException(
+                    "android/upload-key.properties fehlt: App-Bundles für " +
+                        "Google Play werden mit dem Upload-Schlüssel signiert. " +
+                        "Siehe docs/entwickler/play-interner-test.md",
+                )
+            }
+            if (!buildsBundle && !keystorePropertiesFile.exists()) {
                 throw GradleException(
                     "android/key.properties fehlt: Release-APKs werden mit dem " +
                         "eigenen Schlüssel signiert. Siehe " +

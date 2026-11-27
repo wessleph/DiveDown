@@ -63,3 +63,20 @@ Die Grundbausteine sollen zu Submersion passen, damit sich übernommener Code le
   Sie reicht für FIT-Import (Schwester), manuelle Eingabe (Bruder) und Diagramme. Sie reicht **nicht** für BLE und Apple Health auf dem iPhone. Für den Apple-Watch-Nutzer bräuchte sie einen UDDF-Import über eine Export-App.
   Risiko: Safari kann die Speicherdaten einer Web-App löschen.
   Wichtig: Läuft das Konto aus, funktionieren TestFlight-Builds nicht mehr. Ein Umstieg muss also **vor Ablauf** fertig sein.
+
+## Nachtrag 2026-11-27: Android über den internen Test von Google Play
+- Status: **angenommen** (2026-11-27)
+- **Kontext:** Das Play-Console-Konto ist verifiziert („Kein Händler“). Ein öffentlicher Store-Eintrag braucht für neue private Konten vorher einen geschlossenen Test mit mindestens 12 Testern über 14 Tage. Der **interne Test** hat laut Google keine Vorbedingungen („Requirements to access track: None“), keine Store-Prüfung, bis zu 100 Tester per E-Mail-Liste, und Updates sind „within minutes“ bei den Testern. Quellen, abgerufen am 2026-11-27: [Testanforderungen für neue private Konten](https://support.google.com/googleplay/android-developer/answer/14151465), [Tests einrichten](https://support.google.com/googleplay/android-developer/answer/9845334), [Play App Signing](https://support.google.com/googleplay/android-developer/answer/9842756).
+- **Entscheidung:**
+  - **Android, Stufe 1:** Familie und Freunde installieren DiveDown über den **internen Test** von Google Play, per Einladungslink. Updates kommen automatisch über den Play Store, wie bei TestFlight unter iOS.
+  - **Weiterhin:** die signierte APK mit dem Fingerabdruck in der README, für alle ohne Google-Konto (z. B. über GitHub Releases und Obtainium).
+  - **Signatur:** Der bestehende Schlüssel `divedown` (T33) wird **App-Signaturschlüssel bei Google** (Play App Signing, „Provide a copy of your app signing key“). Zum Hochladen dient ein **neuer, eigener Upload-Schlüssel**, wie Google es empfiehlt. Damit haben Store-App und APK **dasselbe Zertifikat**: Der Fingerabdruck in der README gilt für beide, und ein Gerät kann zwischen APK und Store wechseln, ohne neu zu installieren. Festgelegt wird das **vor dem ersten Hochladen**.
+  - Hochgeladen wird ein **App-Bundle** (`flutter build appbundle --release`), gebaut wie die APK nur am PC, nie in der CI.
+  - Ein öffentlicher Store-Eintrag (geschlossener Test, Produktion) bleibt offen, wie die nicht gelistete App unter iOS (Stufe 2).
+- **Konsequenzen:**
+  - Jeder Tester braucht ein **Google-Konto**, seine Adresse steht in der Tester-Liste der Play Console.
+  - Die **Build-Nummer** in `pubspec.yaml` (`1.0.0+N`) muss bei jedem Upload steigen. Google nimmt keine Nummer zweimal.
+  - Eine Kopie des App-Signaturschlüssels liegt bei Google. Der Upload-Schlüssel wird wie der bisherige gesichert (verschlüsselt an zwei Orten, nie im Repo). Geht er verloren, lässt er sich bei Google zurücksetzen; den App-Signaturschlüssel nicht.
+  - Mit dem Anlegen der App in der Play Console ist der Paketname bei Google registriert (Android-Entwicklerverifizierung). Ob das auch die APK abdeckt, sagt Google nicht; wird geprüft, sobald die Pflicht für die Schweiz kommt (`android-release-einrichtung.md` §8).
+  - Die Datenschutzerklärung nennt Google Play als Vertriebsweg, wie schon TestFlight.
+  - Neue Apps müssen auf API 36 oder höher zielen; der Build tut das (Flutter-Standard).

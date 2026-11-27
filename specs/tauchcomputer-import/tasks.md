@@ -1020,3 +1020,18 @@ Tests: `test/domain/feedback/feedback_mail_test.dart`, `test/features/settings/f
 **Umgesetzt (2026-11-27), T41:** `feedbackAddress` = `divedown-app@proton.me`, dazu ui-spec §5.14 und `docs/datenschutz.md` (die Datenschutzerklärung auf GitHub Pages zeigt die Adresse nach dem Merge nach `main`) → T41.1 grün. Die Einträge zu T35 oben bleiben als Verlauf mit der alten Adresse stehen. Gesamt: `flutter test` alle grün, `flutter analyze` ohne Befund.
 
 **Release 2026-11-27:** CI auf `main` grün (Lauf 45999396627, `af79f26`), iOS-Release-Lauf 46006424840 grün: signiert, gebaut und zu TestFlight hochgeladen mit T7.3 und T37–T41 (Schema v3). Noch nicht am Handy angesehen.
+
+## T42: Android über den internen Test von Google Play (ADR 0005, Nachtrag 2026-11-27; security.md G6)
+
+Entschieden am 2026-11-27: Familie und Freunde installieren DiveDown unter Android über den internen Test. Der bestehende Schlüssel `divedown` (T33) wird App-Signaturschlüssel bei Google, hochgeladen wird mit einem **eigenen, neuen Upload-Schlüssel**. Damit gibt es am PC zwei Schlüssel: die APK wird weiter mit `divedown` signiert (`android/key.properties`), das App-Bundle für Google mit dem Upload-Schlüssel (`android/upload-key.properties`). Welcher gilt, hängt am Gradle-Task: Wird ein App-Bundle gebaut (`bundle…`), nimmt der Build-Typ `release` die Signatur `upload`, sonst `release`.
+Anleitung: `docs/entwickler/play-interner-test.md`.
+
+| Nr. | Ausgangslage | Aktion | Erwartet | Status |
+|---|---|---|---|---|
+| T42.1 | `android/app/build.gradle.kts` | gelesen | Signatur `upload` liest `storeFile`, `storePassword`, `keyAlias`, `keyPassword` aus `rootProject.file("upload-key.properties")`; der Build-Typ `release` nimmt `upload`, wenn ein Task mit `bundle` gebaut wird, sonst `release` (T33.1 weiter grün) | ✅ 2026-11-27: rot, keine Signatur `upload` |
+| T42.2 | dito, ohne `upload-key.properties` | gelesen | `bundleRelease` bricht in `doFirst` mit `GradleException` und Verweis auf `docs/entwickler/play-interner-test.md` ab; die Anleitung existiert; die APK braucht die Datei nicht | ✅ 2026-11-27: rot, Prüfung und Anleitung fehlen |
+| T42.3 | `android/.gitignore` | gelesen, `git check-ignore` | `upload-key.properties` und `**/*.p12` ausgeschlossen (T33.4 weiter grün) | ✅ 2026-11-27: rot, beide nicht in `.gitignore` |
+| T42.4 | von Hand am PC | `flutter build appbundle --release`, `flutter build apk --release` | App-Bundle mit dem Upload-Zertifikat signiert (`keytool -printcert -jarfile`); APK weiter mit `83:4A:…:27:E5`; ohne `upload-key.properties` Abbruch mit Hinweis | |
+| T42.5 | von Hand in der Play Console | App angelegt, Play App Signing mit eigenem Schlüssel, Bundle im internen Test | „App-Integrität“ zeigt als App-Signaturschlüssel SHA-256 `83:4A:…:27:E5` und als Upload-Schlüssel den neuen | |
+| T42.6 | von Hand am S25 Ultra mit der Debug-App | Logbuch sichern, Debug-App deinstallieren, über den Testlink aus dem Play Store installieren, Logbuch wiederherstellen | alle Tauchgänge da; installierte App mit `83:4A:…:27:E5` (`adb` holt `base.apk`, `apksigner verify --print-certs`) | |
+| T42.7 | dito | Build `+N+1` hochladen | Update kommt über den Play Store, ohne neu zu installieren; Logbuch bleibt | |
