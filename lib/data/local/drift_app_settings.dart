@@ -96,10 +96,12 @@ class DriftAppSettings implements AppSettings {
       _set(profileLayersKey, layers.map((l) => l.name).join(','));
 
   @override
-  Future<ShareCardLayout?> shareCardLayout() =>
-      throw UnimplementedError('shareCardLayout');
+  Future<ShareCardLayout?> shareCardLayout() async {
+    final raw = await _get(shareCardKey);
+    return raw == null ? null : ShareCardLayout.decode(raw);
+  }
 
   @override
   Future<void> setShareCardLayout(ShareCardLayout layout) =>
-      throw UnimplementedError('setShareCardLayout');
+      _set(shareCardKey, layout.encode());
 }

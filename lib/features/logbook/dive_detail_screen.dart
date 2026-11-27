@@ -15,6 +15,7 @@ import 'logbook_screen.dart';
 import 'manual_dive_screen.dart';
 import 'profile_chart.dart';
 import 'profile_fullscreen_screen.dart';
+import 'share_dive_screen.dart';
 
 const _units = UnitFormatter.metric();
 
@@ -87,6 +88,11 @@ class DiveDetailScreen extends ConsumerWidget {
       appBar: AppBar(
         actions: [
           if (detail.value != null) ...[
+            IconButton(
+              tooltip: l10n.shareDiveTooltip,
+              icon: const Icon(Icons.share_outlined),
+              onPressed: () => context.go(ShareDiveScreen.pathFor(diveId)),
+            ),
             IconButton(
               tooltip: l10n.detailEdit,
               icon: const Icon(Icons.edit_outlined),

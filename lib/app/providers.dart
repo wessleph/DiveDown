@@ -198,7 +198,8 @@ final shareFileProvider =
 
 /// The photo for a share image (ui-spec §5.16): images only, up to 50 MB.
 final sharePhotoPickerProvider = Provider<ImportFilePicker>(
-  (ref) => const SystemFilePicker(maxBytes: maxSharePhotoBytes),
+  (ref) =>
+      const SystemFilePicker(maxBytes: maxSharePhotoBytes, imagesOnly: true),
 );
 
 /// „Foto wählen“ on the share page: picks and decodes (T43.6); replaced in

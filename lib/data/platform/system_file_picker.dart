@@ -7,14 +7,24 @@ import '../../domain/import/file_import.dart';
 /// checked there); it is read into memory and the copy removed
 /// (security.md: caches).
 class SystemFilePicker implements ImportFilePicker {
-  const SystemFilePicker({this.maxBytes = maxImportFileBytes});
+  const SystemFilePicker({
+    this.maxBytes = maxImportFileBytes,
+    this.imagesOnly = false,
+  });
 
-  /// Larger files are refused before reading (FIT 10 MB, backup 200 MB).
+  /// Larger files are refused before reading (FIT 10 MB, backup 200 MB,
+  /// share photo 50 MB).
   final int maxBytes;
+
+  /// The photo for a share image (T43): the system's image picker, no
+  /// permission (Android `ACTION_GET_CONTENT` `image/*`, iOS PHPicker).
+  final bool imagesOnly;
 
   @override
   Future<PickResult?> pick() async {
-    final files = await FilePicker.pickFiles();
+    final files = await FilePicker.pickFiles(
+      type: imagesOnly ? FileType.image : FileType.any,
+    );
     if (files.isEmpty) return null;
     final file = files.first;
     try {

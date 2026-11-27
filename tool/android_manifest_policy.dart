@@ -30,6 +30,10 @@ const _never = {
   'android.permission.READ_EXTERNAL_STORAGE',
   'android.permission.WRITE_EXTERNAL_STORAGE',
   'android.permission.MANAGE_EXTERNAL_STORAGE',
+  // The share photo comes from the system picker (T43.12, security.md G7).
+  'android.permission.READ_MEDIA_IMAGES',
+  'android.permission.READ_MEDIA_VIDEO',
+  'android.permission.READ_MEDIA_VISUAL_USER_SELECTED',
 };
 
 /// Problems in [manifestXml]; empty when it follows the rules.

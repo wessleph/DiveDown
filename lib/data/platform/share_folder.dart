@@ -31,9 +31,10 @@ Future<void> clearShareFolder(Directory cache) async {
 }
 
 /// Media type for the share dialog (T10.15): text for the diagnostic log,
-/// ZIP for a backup, otherwise generic.
+/// ZIP for a backup, PNG for a share image (T43.7), otherwise generic.
 String shareMimeType(String name) => switch (p.extension(name).toLowerCase()) {
   '.txt' => 'text/plain',
   '.divedown' => 'application/zip',
+  '.png' => 'image/png',
   _ => 'application/octet-stream',
 };

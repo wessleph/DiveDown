@@ -1066,3 +1066,11 @@ Aufbau: Inhalt und Achsen rein in Dart (`lib/domain/share/share_card.dart`), Lag
 | T43.13 | von Hand am S25 und iPhone | Foto im Hochformat (mit Ort), Karte klein oben, Deckkraft 20 %, an Instagram-Story teilen | Bild wie in der Vorschau, Foto richtig gedreht, Instagram öffnet die Story mit dem Bild; auf dem iPhone auch ein HEIC-Foto; geteiltes Bild ohne Ort | |
 
 Tests: `test/domain/share/share_card_test.dart` (T43.1–T43.3), `test/data/local/settings_data_test.dart` (T43.4), `test/features/logbook/share_image_test.dart` (T43.5), `test/data/platform/share_photo_loader_test.dart` (T43.6), `test/data/platform/share_folder_test.dart` (T43.7), `test/features/logbook/share_dive_test.dart` (T43.8–T43.11), bestehende Manifest- und iOS-Tests (T43.12).
+
+**Umgesetzt (2026-11-27), T43.1–T43.12:**
+- [x] `shareCardContent` (Positivliste, Datum, Kennzahlen über `UnitFormatter`, Tiefenachse wie §6, Zeitachse mit dem kleinsten runden Schritt für höchstens fünf Marken, Rechteckprofil ohne Samples) → T43.1, T43.2 grün. `ShareCardLayout` (Lage als Anteil des freien Platzes, damit die Karte bei jeder Größe im Bild bleibt; Grenzen, Oben/Mitte/Unten, `lightText`, Text `scale,opacity,x,y`) → T43.3 grün; `DriftAppSettings` `share_card` → T43.4 grün.
+- [x] `ShareCardPainter` zeichnet Vorschau und Bild (Foto formatfüllend, Karte mit Kennzahlen und Profil mit Achsen, helle Schrift mit Schatten unter 50 %); `renderShareImage` → PNG 1080 × 1920 ohne Metadaten-Chunks → T43.5 grün.
+- [x] `loadSharePhoto`/`decodeSharePhoto` (über `ImageDescriptor` mit gleichem Faktor für beide Seiten verkleinert, Fehler → `unreadable`); `SystemFilePicker(imagesOnly: true)` nutzt `FileType.image` → T43.6 grün. Medientyp `image/png` → T43.7 grün.
+- [x] Seite `ShareDiveScreen` (Vorschau mit verschiebbarer Karte, Zusammenziehen mit zwei Fingern, Regler, Oben/Mitte/Unten, Foto wählen/entfernen, „Teilen“ mit Fortschritt, Fehler als Snackbar, Protokoll nur „share image created“), Icon „Tauchgang teilen“ im Detail → T43.8–T43.11 grün.
+- [x] `tool/android_manifest_policy.dart`: `READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO`, `READ_MEDIA_VISUAL_USER_SELECTED` verboten → T43.12 grün.
+- Gesamt: `flutter test` 606/606, `flutter analyze` ohne Befund, Format sauber. Offen: Review (Phase 60), T43.13 am S25 und iPhone.
