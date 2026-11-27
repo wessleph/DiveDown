@@ -4,6 +4,17 @@ import 'profile_stats.dart';
 /// Why no SAC value can be given (design.md §6).
 enum SacMissing { pressure, volume, duration, depth }
 
+/// SAC over one fixed minute of the dive (T7.3); the last one can be shorter.
+class SacSegment {
+  const SacSegment(this.startS, this.endS, this.litresPerMinute);
+
+  final int startS;
+  final int endS;
+
+  /// l/min at surface pressure, never negative.
+  final double litresPerMinute;
+}
+
 class SacResult {
   const SacResult.value(double this.litresPerMinute) : missing = null;
   const SacResult.missing(SacMissing this.missing) : litresPerMinute = null;
@@ -43,6 +54,12 @@ class SacCalculator {
     final minutes = dive.durationS / 60;
     return SacResult.value((start - end) * volume / (minutes * ambient));
   }
+
+  /// The SAC curve of one tank from its pressure samples, in fixed
+  /// one-minute segments (ui-spec §6: step line). Empty without pressure
+  /// samples or tank size.
+  List<SacSegment> segments(Dive dive, {int tankIndex = 0}) =>
+      throw UnimplementedError();
 }
 
 /// Ambient pressure at [depthM]: 1,0 bar at the surface plus 10,05 kPa/m in

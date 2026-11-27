@@ -1,5 +1,5 @@
 // T7.1, T7.2, T7.4, T7.5, T7.7, T7.8: average SAC (tasks.md, design.md §6).
-// T7.3 (curve) and T7.6 (gas switch) follow with the profile chart.
+// T7.3 (curve): sac_segments_test.dart. T7.6 (gas switch) is still open.
 import 'package:divedown/domain/dive/dive.dart';
 import 'package:divedown/domain/metrics/sac_calculator.dart';
 import 'package:flutter_test/flutter_test.dart';

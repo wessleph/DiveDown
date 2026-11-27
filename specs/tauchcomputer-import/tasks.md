@@ -225,7 +225,7 @@ Testkorrektur vor dem Commit: Die Quelle „Apple Watch“ steht in der Liste nu
 |---|---|---|---|---|
 | T7.1 | Flasche 12 l, 200 → 50 bar, Dauer 50 min, mittlere Tiefe 10 m (Salzwasser) | Ø-SAC berechnet | (150 × 12) / (50 × 2,0) = **18,0 l/min** (±0,1) | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
 | T7.2 | wie T7.1, Süßwasser | berechnet | Umgebungsdruck mit 9,81 kPa/m statt 10,05 kPa/m, Ergebnis entsprechend | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
-| T7.3 | Druckverlauf in Samples | Kurve berechnet | 1-min-Abschnitte. Abschnitt ohne Druckänderung = 0. Kein Abschnitt negativ. | |
+| T7.3 | Druckverlauf in Samples | Kurve berechnet | 1-min-Abschnitte. Abschnitt ohne Druckänderung = 0. Kein Abschnitt negativ. | ✅ 2026-11-27: rot wegen `UnimplementedError` (`SacCalculator.segments`), 6 Tests |
 | T7.4 | kein Druck | berechnet | `null` | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
 | T7.5 | Druck vorhanden, kein Flaschenvolumen | berechnet | `null` mit Grund `missingVolume` | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
 | T7.6 | 2 Flaschen (Gaswechsel) | berechnet | SAC pro Flasche über deren Nutzungszeit | |
@@ -233,6 +233,8 @@ Testkorrektur vor dem Commit: Die Quelle „Apple Watch“ steht in der Liste nu
 | T7.8 | Druck und Volumen da, keine Ø-Tiefe | berechnet | ohne Samples `null` mit Grund `depth`. Mit Samples: zeitgewichtetes Mittel der Samples | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
 
 Tests: `test/domain/metrics/sac_calculator_test.dart`. Annahme: Oberflächendruck **1,0 bar** (mit 1,013 bar läge T7.1 bei 17,84 und damit außerhalb ±0,1). Unbekannter Wassertyp zählt als Salzwasser. T7.3 (Kurve) und T7.6 (Gaswechsel) kommen mit dem Profil-Diagramm (KW 49).
+
+**T7.3 ausgestaltet (2026-11-27):** Bisher rechnete das Diagramm für jeden Messpunkt einen gleitenden 60-s-Wert und zeichnete eine glatte Linie; ui-spec §6 verlangt eine Stufenlinie über feste 1-min-Abschnitte. `SacCalculator.segments(dive, tankIndex)` liefert Abschnitte [0, 60), [60, 120) … bis zum letzten Druckwert (der letzte darf kürzer sein); Druck an den Grenzen linear zwischen den Messwerten der Flasche; Umgebungsdruck aus der mittleren Tiefe der Samples im Abschnitt; Δp < 0 zählt als 0. Ohne Druck-Samples oder Flaschengröße leer. Tests: `test/domain/metrics/sac_segments_test.dart` (gleichmäßig 3 bar/min → 50 gleiche Abschnitte; Minute ohne Änderung bzw. mit steigendem Druck → 0; kürzerer letzter Abschnitt; Tiefe je Abschnitt; Messwerte nur alle 30 s; ohne Druck/Volumen leer).
 
 ## T8: Datenbank (`data/local/`, ADR 0004/0006)
 | ID | A | W | D | Rot gesehen |
