@@ -993,3 +993,8 @@ Tests: `test/data/local/conditions_data_test.dart` (T40.1–T40.4), `test/domain
 - [x] Formular: Abschnitte „Sichtweite“, „Strömung“ (`ChoiceChip`, nochmal Antippen hebt auf), „Tauchgangsart“ (`FilterChip`) unter dem Wassertyp, Vorschlag „Zuletzt bei …“ · „Übernehmen“ solange nichts gewählt ist → T40.6, T40.7 grün. Detail: Abschnitt „BEDINGUNGEN“ vor „AUSRÜSTUNG“ → T40.8 grün.
 - Testkorrekturen: T30.1 erwartet nach der Migration jetzt `latestSchemaVersion` (läuft bis v3) statt fest 2. Das Formular ist länger, deshalb öffnen `equipment_dive_test.dart` und `conditions_dive_test.dart` es mit 2400 px Höhe (Felder außerhalb des Bildes baut die Liste nicht). In `conditions_dive_test.dart` schließt `_site` die Tastatur und `_tap` wartet, bis das Scrollen fertig ist.
 - Gesamt: `flutter test` 568/568, `flutter analyze` ohne Befund, Format sauber. Noch nicht am Handy angesehen. Sicherungen aus v2 werden beim Wiederherstellen auf v3 migriert (Schema ≤ aktuelles, T11.4).
+
+**Review (Phase 60, 2026-11-27, `review.md`, T7.3 und T37–T40):** keine kritischen Befunde; Migration v1/v2 → v3 und Wiederherstellen alter Sicherungen ohne Befund. Tests zu den Befunden:
+- W1 (gemerkte Ebenen, Detail hinter dem Vollbild zeigt alte Auswahl): `profile_chart_test.dart` „a choice in full screen shows in the detail behind it“: ✅ rot, Detail zeigt nur „Flaschendruck“.
+- W2 (Statistik ohne Fehlerzustand, ui-spec §4): `statistics_test.dart` T39.9: ✅ rot, Fehlertext fehlt.
+- N1 (Sicherung aus Schema v2 in der v3-App): `logbook_backup_test.dart` „a backup from schema v2 restores into this app“: sofort grün (Absicherung).

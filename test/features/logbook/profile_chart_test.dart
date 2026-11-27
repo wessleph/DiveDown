@@ -323,6 +323,26 @@ void main() {
       );
     }
 
+    testWidgets('a choice in full screen shows in the detail behind it', (
+      tester,
+    ) async {
+      await _open(tester, _measured);
+      // First a choice in the detail, then another one in full screen.
+      await tester.tap(find.widgetWithText(FilterChip, 'Temperatur'));
+      await tester.pumpAndSettle();
+      expect(selected(tester), ['Flaschendruck']);
+
+      await tester.ensureVisible(find.text('Vollbild'));
+      await tester.tap(find.text('Vollbild'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilterChip, 'Luftverbrauch'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Schließen'));
+      await tester.pumpAndSettle();
+
+      expect(selected(tester), ['Flaschendruck', 'Luftverbrauch']);
+    });
+
     testWidgets('only what the dive has: estimated air, no consumption', (
       tester,
     ) async {

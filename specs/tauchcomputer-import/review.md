@@ -1,3 +1,90 @@
+# Review: SAC-Stufenkurve, Ebenen, Statistik, Bedingungen (T7.3, T37 bis T40)
+
+Datum: 2026-11-27 · Phase 60 (unabhängiges Review durch einen frischen Agenten, der die Implementierung nicht kennt)
+
+## Umfang
+
+- Commits `origin/main..HEAD` (Merge-Basis `4812619`) auf `claude/nice-cori-n4f6mx`: T7.3, T7.6 (zurückgestellt), T37, T38, T39, T40 samt Test-Commits, dazu zwei Doku-Commits (Roadmap, Android-Verifizierung).
+- Geprüft gegen: `tasks.md` (T7, T37 bis T40), `ui-spec.md` §1, §4, §5.1, §5.3, §5.4, §5.15, §6, §7, `design.md` §2 und §6, ADR 0004, `security.md` (Backup O1). `database.g.dart` nicht zeilenweise gelesen.
+
+## Selbst ausgeführt
+
+| Befehl | Ergebnis |
+|---|---|
+| `flutter analyze` | „No issues found!“ |
+| `dart format --output=none --set-exit-if-changed lib test tool integration_test` | 179 Dateien, 0 geändert, Exit 0 |
+| `flutter test` | „All tests passed!“, 568 Tests grün |
+| Stub-Suche (`TODO`, `FIXME`, `UnimplementedError`, Festantworten) im neuen Code | Nur der alte, absichtliche `UnimplementedError` in `appDatabaseProvider` (`lib/app/providers.dart:55`). Keine Stubs. |
+| Netzwerk, Abhängigkeiten | Kein neuer Netzzugriff, keine neue Abhängigkeit, `lib/domain/` ohne Flutter/Drift-Importe. |
+
+## Ergebnis in Kürze
+
+Keine kritischen Befunde. Die Migration ist sicher (v1→v3 und v2→v3 über `from < 2` und `from < 3`, nur `addColumn` mit nullbaren Spalten, nichts wird kopiert oder gelöscht), `schema_v2.sql` stimmt mit dem v2-Schema (`git show origin/main:lib/data/local/tables.dart`) überein, ein v2-Backup lässt sich in der v3-App einspielen (die Datei wird beim Öffnen migriert), ein v3-Backup wird von einer v2-App abgelehnt (`logbook_backup.dart:219`). Es gibt drei wichtige Befunde (veralteter Zustand der Ebenen nach Vollbild, Statistik ohne Lade-/Fehlerzustand, Roadmap widerspricht der Release-Anleitung) und einige Kleinigkeiten.
+
+Geprüft und in Ordnung:
+
+- **Alle `Dive(`-Konstruktoren:** `drift_dive_repository.dart:660` (`_fromRow`), `manual_dive_draft.dart:278` (`toDive`), `imported_dive.dart:119` (frischer Import, Bedingungen gehören nur dem Nutzer) und `import_service.dart` `_replace` setzen oder behalten die neuen Felder. `copyWith` bewahrt sie. Es gibt keinen Pfad, der sie unbeabsichtigt verliert.
+- **Löschen über das Formular:** `toDive` baut ein frisches `Dive` mit `visibility: visibility` (null möglich); `copyWith` wird dort nicht benutzt. Test T40.2 („danach leer“) deckt es ab.
+- **`lastConditionsAt`/`_newestAtSite`:** SQL entspricht Zeile für Zeile `lastWeightAt` (Mandant, `deleted_at IS NULL`, `excludeDiveId`, Katalog-ID oder Name mit `trim().lower()`, leerer Name ohne Katalog-ID → null, Sortierung `start_local desc, dive_number desc`). Die Bedingung „mindestens eines gesetzt“ ist richtig; `kinds` wird bei leerer Menge als NULL gespeichert, nie als leerer String.
+- **SAC-Abschnitte:** Mathematik stimmt (Druck linear interpoliert und an den Enden geklemmt, Umgebungsdruck aus der mittleren Tiefe des Abschnitts mit Rückfall auf das nächste Sample, letzter Abschnitt je Minute gerechnet, Δp ≤ 0 → 0). Stufenlinie in `profile_chart.dart` ist stetig gezeichnet.
+- **Gemerkte Ebenen:** unbekannte Namen (z. B. `ndl`) werden übersprungen, leere Liste bleibt leer, `null` = nie gewählt. Die Ersetzung Druck→Puls greift nur, wenn Druck gewählt, nicht verfügbar und Puls nicht schon gewählt ist.
+- **Statistik:** Rekorde mit „früherer gewinnt bei Gleichstand“ (Sortierung aufsteigend nach der Wanduhr-`start`, strikt `>`/`<`), Jahre über `start.year` (Wanduhr, keine Zeitzonenverschiebung), Plätze zusammengeführt ohne Groß-/Kleinschreibung, gelöschte Tauchgänge fehlen (Repository-Test T39.8), Flaschen in **einer** Abfrage (`isIn`, kein N+1). Bei 500 Tauchgängen unkritisch.
+
+## Kritisch
+
+Keine.
+
+## Wichtig
+
+### W1. Ebenen-Wahl im Detail wird nach dem Vollbild veraltet angezeigt
+`lib/features/logbook/profile_chart.dart` (`_chosen`, `_layersOn`, `_toggle`; `dive_detail_screen.dart:219` öffnet das Vollbild mit `context.push`)
+
+Verstoß gegen ui-spec §6 („Zustand wird gemerkt“, T38, „gilt auch im Vollbild“): `_toggle` setzt zusätzlich zum Provider die lokale Liste `_chosen`, und `_layersOn` bevorzugt sie immer vor dem gemerkten Wert. Da das Vollbild per `push` über dem Detail liegt, bleibt der Detail-Chart (und sein `_chosen`) am Leben. Schaltet man im Detail eine Ebene und danach im Vollbild eine andere, zeigt der Detail-Chart nach dem Zurück die alte Auswahl, während Provider und Datenbank schon die neue haben. Ein Test dafür fehlt (T38.3 prüft nur „Tauchgang B öffnen“ und Neustart).
+
+Fix: `_chosen` entfernen; `_toggle` schreibt nur in den Provider (der Zustand wird dort synchron gesetzt, `ProfileLayersSetting.set` setzt `state` vor dem `await`), `_layersOn` liest nur `ref.watch(profileLayersProvider)`. Falls die Wahl je Tauchgang kurz „ohne Provider“ gelten soll (Fehler beim Speichern), reicht ein Fallback auf den Provider-Wert. Test: Detail → Ebene ändern → Vollbild (push) → andere Ebene → zurück → Chips müssen die Vollbild-Wahl zeigen.
+
+### W2. Statistik-Seite ohne Lade- und Fehlerzustand
+`lib/features/logbook/statistics_screen.dart:26-35`
+
+ui-spec §4 verlangt für jede Seite Laden, Leer und Fehler mit Ausweg. `ref.watch(statisticsDivesProvider).value` ist bei Laden und bei Fehler `null`; beide zeigen eine leere Fläche (`SizedBox.shrink()`), ohne Text, ohne „Erneut versuchen“ und ohne Hinweis für Screenreader. Ein DB-Fehler sähe aus wie eine leere Seite. Auch `visitedCountriesProvider` im Ladezustand lässt die Zeile „Länder“ ohne Hinweis weg.
+
+Fix: `AsyncValue.when` mit `CircularProgressIndicator` (mit Semantics-Label) und einem Fehlertext plus „Erneut versuchen“ (`ref.invalidate(statisticsDivesProvider)`), wie in den anderen Listen-Seiten; Test mit einem Repository, das wirft.
+
+### W3. Roadmap und Release-Anleitung widersprechen sich
+`docs/roadmap.md:13` gegen `docs/entwickler/android-release-einrichtung.md` §8
+
+Die Roadmap nennt die Identitätsprüfung weiter als offen („ab 27.11. … (ca. 3 Werktage), dann Release-Schlüssel“), die Anleitung hakt sie am selben Tag als abgeschlossen ab (letzter Commit „Record the confirmed Play Console identity“). Die Roadmap ist die Quelle für „Was kommt als Nächstes“. Außerdem steht in beiden Dokumenten „seit September 2026 …“ als Tatsache; das lässt sich aus dem Repo nicht prüfen (Quelle oder „Stand der Recherche“ ergänzen, wie im zweiten Absatz schon getan).
+
+Fix: Roadmap-Zeile auf „Identitätsprüfung bestätigt; nächster Schritt Release-Schlüssel (T33), dann App registrieren“ ändern.
+
+## Nice-to-have
+
+- **N1. Fehlende Tests (kein Befund gegen den Code, aber Lücke in der Absicherung):** (a) kein Test, der eine `.divedown`-Sicherung mit `schemaVersion: 2` in der v3-App einspielt und öffnet (T11 prüft nur `db.schemaVersion + 1`, `logbook_backup_test.dart:174`, und die Migration geschieht in T40.1 nur mit einer SQL-Datei, nicht über `restore`); (b) kein Test für die direkte Kette v1→v3 mit Daten (T30.1 prüft v1→`latestSchemaVersion` mit Ausrüstung, nicht die neuen Spalten). Beides würde ich vor dem Release als je einen kleinen Test ergänzen, weil echte Nutzer v2 haben.
+- **N2. Abgeschnittene/falsch platzierte Doc-Kommentare:** `lib/features/logbook/dive_detail_screen.dart:347-349` – der Kommentar „Lead and the pieces used …“ der `_EquipmentSection` steht jetzt über `_ConditionsSection`; `lib/app/providers.dart:300-302` – „Dives of the active diver, newest first. Invalidate after changes.“ steht über `statisticsDivesProvider` statt über `logbookProvider`. Kommentare an die richtigen Klassen verschieben.
+- **N3. `statisticsDivesProvider` lädt das ganze Logbuch doppelt:** `lib/app/providers.dart:303-308` beobachtet `logbookProvider` nur als Auslöser; das lädt zusätzlich alle Sparkline-Profile (`_loadProfiles`), die die Statistik nie braucht. Besser einen eigenen kleinen Zähler/Versions-Provider invalidieren oder dort, wo das Logbuch invalidiert wird, auch die Statistik invalidieren.
+- **N4. Gemerkte Ebenen gehen beim Umschalten verloren:** `profile_chart.dart` `_toggle` baut die neue Liste aus `_layersOn(...)`, das nur Ebenen dieses Tauchgangs enthält. Hat man „Puls“ gewählt und schaltet bei einem Tauchgang ohne Puls „Temperatur“ aus, wird „Puls“ aus der gemerkten Wahl gestrichen. Spec sagt dazu nichts Klares; wenn die Wahl „für alle Tauchgänge“ gilt, sollte `_toggle` nicht verfügbare gemerkte Ebenen mitschleppen.
+- **N5. SAC-Stufen werden bei jedem Zeichnen neu berechnet:** `profile_chart.dart` ruft `SacCalculator().segments(dive)` im Painter bei jedem Frame (Ziehen des Cursors). `depthIn` filtert je Abschnitt alle Samples (O(Samples × Minuten)); bei 3600 Samples und 60 Minuten unkritisch, bei sehr langen Aufzeichnungen (100000 Samples erlaubt) spürbar. Ergebnis einmal beim Laden der Daten (`_loadData`) berechnen und dem Painter übergeben.
+- **N6. Statistik-SAC ohne Samples:** `listWithTanksForDiver` lädt keine Samples; `SacCalculator.average` fällt dann bei fehlendem `avgDepthM` auf `SacMissing.depth` zurück (`sac_calculator.dart:50`). Die Importe setzen `avgDepthM` fast immer, aber ein von Hand erfasster Tauchgang ohne mittlere Tiefe fehlt im Luftverbrauch-Verlauf. Dokumentieren oder die mittlere Tiefe bei Bedarf aus der Maximaltiefe schätzen (nur wenn die Spec es will).
+- **N7. Tote Farbe:** `DiveColors.ndl` (`lib/app/theme.dart:151`) hat keinen Verbraucher mehr; ui-spec §1 behält das Token ausdrücklich, daher nur zur Kenntnis.
+- **N8. Kachel-Semantik im Logbuch:** `logbook_screen.dart:502` legt `Semantics(button: true, label: 'Statistik öffnen')` um beide Kacheln; die Kindtexte werden dazugemischt („Statistik öffnen, 12, Tauchgänge …“). Gewollt laut Spec, aber mit `excludeSemantics` oder `mergeAllDescendants` klarer.
+
+## Korrekturen an bestehenden Tests – gerechtfertigt?
+
+- `equipment_data_test.dart` (T30.1, `user_version` 2 → `AppDatabase.latestSchemaVersion`): gerechtfertigt, der Test prüft „läuft auf die neueste Version hoch“; mit der Konstante bricht er bei v4 nicht wieder.
+- Fenster 2400 px in `equipment_dive_test.dart`: gerechtfertigt, das Formular ist um drei Chipreihen länger.
+- `_site`-Unfocus-Helfer (Bedingungs-Test): gerechtfertigt, die Tastatur-/Vorschlagslogik des Tauchplatzfelds würde sonst die Chips verdecken; ändert keine Aussage.
+- `heart_rate_test.dart`, `welcome_test.dart`, `profile_chart_test.dart`: reine Anpassungen an die in T37/T38 beschlossenen Texte.
+
+## Szenarien ohne Test
+
+Alle Szenarien T7.3, T37.1–3, T38.1–6, T39.1–8, T40.1–8 haben einen Test. Nicht abgedeckt (siehe W1, N1): Vollbild-Wechsel der Ebenen, v2-Sicherung wiederherstellen, v1→v3 mit Daten, Statistik-Fehlerzustand. Keine der Tests ist trivial grün (die Task-Notizen belegen je einen roten Lauf).
+
+## Was gehört ins Repo (Frage 6 der Skill)
+
+Beurteilbar nur aus dem Repo, nicht aus dem Chat: Die Entscheidungen zu T7.6 (zurückgestellt), T37 (NDL entfällt), der Schema-Sprung v3 und die Statistik-Regeln stehen in `tasks.md`/`ui-spec.md`. Es fehlt (a) ein Hinweis in `docs/adr/0004-lokales-datenmodell.md` bzw. `design.md`, dass das Schema auf v3 steht und die Spalten `visibility`, `current_strength`, `kinds` (Namen, `kinds` kommagetrennt) heißen – bisher nur in `tasks.md` und im Code, (b) die Regel „Schemaänderung = Fixture `schema_vN.sql` + Migrationstest“ als Konvention (steht nur im Kopf der Fixture-Datei), (c) die Quelle für die Android-Verifizierungsfrist.
+
+---
+
 # Review: Apple-Health-Import (T6) und Tastatur-Fix (T36)
 
 Datum: 2026-11-26 · Phase 60 (unabhängiges Review durch einen frischen Agenten, der die Implementierung nicht kennt)

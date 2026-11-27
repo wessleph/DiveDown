@@ -152,4 +152,39 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('T39.9 read error: message, „Erneut versuchen“ loads again', (
+    tester,
+  ) async {
+    final db = newTestDatabase();
+    addTearDown(db.close);
+    await seedActiveDiver(db);
+    var fail = true;
+    await pumpTestApp(
+      tester,
+      db: db,
+      size: const Size(400, 2000),
+      location: _statsPath,
+      overrides: [
+        statisticsDivesProvider.overrideWith((ref) async {
+          if (fail) throw StateError('disk I/O error');
+          return const <Dive>[];
+        }),
+      ],
+    );
+
+    expect(
+      find.text('Die Statistik konnte nicht geladen werden.'),
+      findsOneWidget,
+    );
+    expect(find.byIcon(Icons.error_outline), findsOneWidget);
+
+    fail = false;
+    await tester.tap(find.text('Erneut versuchen'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Noch keine Statistik. Sie entsteht mit deinen Tauchgängen.'),
+      findsOneWidget,
+    );
+  });
 }
