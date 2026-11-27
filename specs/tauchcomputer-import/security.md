@@ -35,7 +35,7 @@ Die realistischen Risiken liegen in **vier Bereichen**:
 ### G3: App ↔ Apple Health (iOS)
 | STRIDE | Bedrohung | Gegenmaßnahme |
 |---|---|---|
-| I | Die App liest mehr Gesundheitsdaten als nötig. | Wir fragen **nur Lesezugriff** an, und nur auf Unterwasser-Workouts, Tiefe, Wassertemperatur und Puls. **Kein** Schreibzugriff: `NSHealthUpdateUsageDescription` entfällt. |
+| I | Die App liest mehr Gesundheitsdaten als nötig. | Wir fragen **nur Lesezugriff** an, und nur auf Unterwasser-Workouts, Tiefe, Wassertemperatur und Puls. **Kein** Schreibzugriff (`toShare: nil`); den Text `NSHealthUpdateUsageDescription` verlangt Apple trotzdem, er sagt, dass nichts geschrieben wird (§4, 2026-11-27). |
 | I | Health-Werte landen in Logs oder Exporten. | Health-Werte werden nie geloggt (§3). |
 | R | Apples Prüfung: Health-Daten dürfen nicht für Werbung oder an Dritte gehen. | Die App hat keine Werbung, kein Tracking und keine Übertragung. In der App-Datenschutzangabe tragen wir „Daten werden nicht erfasst“ ein. |
 
@@ -81,7 +81,7 @@ Die realistischen Risiken liegen in **vier Bereichen**:
 **iOS**
 - `NSBluetoothAlwaysUsageDescription` (auf Deutsch, ohne „Submersion“)
 - `NSHealthShareUsageDescription` (nur Lesen)
-- **Kein** Standortzugriff, **kein** `NSHealthUpdateUsageDescription`
+- **Kein** Standortzugriff. **Kein Schreibzugriff auf Apple Health:** Die App fragt nur Lesen an (`toShare: nil`, T6.13). `NSHealthUpdateUsageDescription` steht trotzdem in der `Info.plist`, weil Apple den Text für jede App mit HealthKit-Entitlement verlangt (Upload abgelehnt mit ITMS-90683, 2026-11-27); er sagt, dass nichts geschrieben wird. Geändert am 2026-11-27, vom Nutzer entschieden.
 
 ## 5. Abhängigkeiten und Lizenzen (geprüft am 2026-11-18 über pub.dev)
 | Paket | Version | Lizenz | GPL-3-kompatibel |

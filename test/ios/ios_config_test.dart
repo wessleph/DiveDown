@@ -36,11 +36,13 @@ void main() {
     expect(File(infoPlist).readAsStringSync(), isNot(contains('Submersion')));
   });
 
-  test('T20.2 I2 no location, camera, contacts, microphone, Health write', () {
+  // Health write: Apple requires the purpose string whenever the HealthKit
+  // entitlement is present (ITMS-90683, 2026-11-27); write access is never
+  // requested, which T6.13 checks (`toShare: nil`).
+  test('T20.2 I2 no location, camera, contacts, microphone', () {
     final forbidden = info.keys.where(
       (k) =>
           k.startsWith('NSLocation') ||
-          k == 'NSHealthUpdateUsageDescription' ||
           k == 'NSCameraUsageDescription' ||
           k == 'NSContactsUsageDescription' ||
           k == 'NSMicrophoneUsageDescription',
