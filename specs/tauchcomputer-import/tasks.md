@@ -1017,3 +1017,5 @@ Tests: `test/domain/feedback/feedback_mail_test.dart`, `test/features/settings/f
 
 
 **Umgesetzt (2026-11-27), T41:** `feedbackAddress` = `divedown-app@proton.me`, dazu ui-spec §5.14 und `docs/datenschutz.md` (die Datenschutzerklärung auf GitHub Pages zeigt die Adresse nach dem Merge nach `main`) → T41.1 grün. Die Einträge zu T35 oben bleiben als Verlauf mit der alten Adresse stehen. Gesamt: `flutter test` alle grün, `flutter analyze` ohne Befund.
+
+**Release 2026-11-27:** CI auf `main` grün (Lauf 45999396627, `af79f26`), iOS-Release-Lauf 46006424840 grün: signiert, gebaut und zu TestFlight hochgeladen mit T7.3 und T37–T41 (Schema v3). Noch nicht am Handy angesehen.
