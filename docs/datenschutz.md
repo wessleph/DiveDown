@@ -6,13 +6,13 @@ lang: de
 
 # Datenschutzerklärung für die App DiveDown
 
-**Stand:** 18. November 2026 · **App-Version:** 1.0
+**Stand:** 27. November 2026 · **App-Version:** 1.0
 
 ## 1. Kurz gesagt
 - DiveDown speichert alle Daten **nur auf deinem Gerät**.
 - Die App hat **keinen Server**, **kein Konto**, **keine Werbung**, **kein Tracking** und **keine Analyse-Dienste**.
 - Die Android-Version hat nicht einmal die Berechtigung, ins Internet zu gehen.
-- Daten verlassen dein Gerät nur, wenn **du selbst** eine Sicherung oder ein Diagnose-Protokoll teilst.
+- Daten verlassen dein Gerät nur, wenn **du selbst** eine Sicherung oder ein Diagnose-Protokoll teilst oder mir eine Fehlermeldung bzw. einen Vorschlag per Mail schickst.
 
 ## 2. Verantwortlich
 Philipp Wessler, Schweiz
@@ -23,16 +23,18 @@ DiveDown ist ein privates, nicht kommerzielles Open-Source-Projekt (Lizenz GPL-3
 ## 3. Welche Daten die App auf deinem Gerät verarbeitet
 | Daten | Woher | Wozu | Wo gespeichert |
 |---|---|---|---|
-| Taucherprofile (Name bzw. Spitzname, Farbe) | deine Eingabe | Logbücher mehrerer Taucher auf einem Gerät trennen | nur lokal |
-| Tauchgänge (Zeit, Dauer, Tiefe, Temperatur, Flaschendruck, Gase, Ereignisse, Tauchplatz, Notizen, Bewertung) | Tauchcomputer, FIT-Datei, Apple Health oder deine Eingabe | Logbuch, Diagramme, Luftverbrauch | nur lokal |
+| Dein Name als Taucherin bzw. Taucher (auch ein Spitzname genügt) und die Nummer, mit der deine Zählung beginnt | deine Eingabe | Logbuch und Nummerierung der Tauchgänge | nur lokal |
+| Tauchgänge (Zeit, Dauer, Tiefe, Temperatur, Flaschendruck, Gase, Ereignisse, Tauchplatz mit Position, Blei, Sichtweite, Strömung, Tauchgangsart, Notizen, Bewertung) | Tauchcomputer, FIT-Datei, Apple Health oder deine Eingabe | Logbuch, Diagramme, Luftverbrauch, Statistik | nur lokal. Die Statistik wird jedes Mal neu berechnet und nicht gespeichert. |
+| Ausrüstung (Art, Bezeichnung, Notiz, Standard-Teile) und welche Teile du bei einem Tauchgang dabei hattest | deine Eingabe | Ausrüstung pro Tauchgang anzeigen | nur lokal |
+| Einstellungen (Darstellung, gewählte Werte im Diagramm, Erinnerung an die Sicherung) | deine Auswahl | die App so anzeigen, wie du es eingestellt hast | nur lokal |
 | Daten des Tauchcomputers (Hersteller, Modell, Seriennummer, Firmware, Bluetooth-Kennung, Kopplungscode) | Tauchcomputer per Bluetooth | Gerät wiedererkennen, nur neue Tauchgänge laden | nur lokal; der Kopplungscode im geschützten Schlüsselspeicher des Systems |
-| **Gesundheitsdaten aus Apple Health** (Tiefe, Wassertemperatur, Puls von Unterwasser-Workouts) | Apple Health, **nur mit deiner Erlaubnis**, **nur lesend** | Tauchgänge der Apple Watch übernehmen | nur lokal. DiveDown schreibt nichts in Apple Health. |
+| **Gesundheitsdaten aus Apple Health** (Tiefe, Wassertemperatur, Puls von Unterwasser-Workouts) | Apple Health, **nur mit deiner Erlaubnis**, **nur lesend** | Tauchgänge der Apple Watch übernehmen | nur lokal. DiveDown schreibt nichts in Apple Health. Apple verlangt von jeder App mit Zugriff auf Apple Health einen Hinweistext zum Schreiben; DiveDown fragt diese Erlaubnis trotzdem nie an. |
 | Tauchplatz-Katalog | in der App mitgeliefert | Vorschläge beim Eintragen des Tauchplatzes | nur lokal, enthält keine persönlichen Daten |
 | Diagnose-Protokoll (technische Ereignisse, Fehlercodes, Gerätemodell, Versionsnummern) | die App selbst | Fehlersuche | nur lokal, höchstens 7 Tage bzw. 5 MB. Ohne Orte, Namen, Notizen oder Gesundheitswerte. |
 
 Die Logbuch-Datenbank wird **nicht** in iCloud- bzw. Google-Backups aufgenommen, weil darin Gesundheitsdaten stehen können. Für Sicherungen gibt es die Funktion „Logbuch sichern“ (Abschnitt 4).
 
-**Berechtigungen:** Bluetooth (Verbindung zum Tauchcomputer) und, nur unter iOS, das Lesen aus Apple Health. Auf Android-Versionen bis 11 verlangt das System für Bluetooth-Suchen zusätzlich die Standort-Berechtigung. DiveDown fragt deinen Standort trotzdem nie ab.
+**Berechtigungen:** Bluetooth (Verbindung zum Tauchcomputer) und, nur unter iOS ab Version 17, das Lesen aus Apple Health. Auf Android-Versionen bis 11 verlangt das System für Bluetooth-Suchen zusätzlich die Standort-Berechtigung. DiveDown fragt deinen Standort trotzdem nie ab.
 
 ## 4. Wann Daten dein Gerät verlassen, und nur dann
 1. **Logbuch sichern:** Du erstellst eine Sicherungsdatei und wählst selbst, wohin sie geht, z. B. in „Dateien“, in einen Cloud-Speicher oder per Mail.
@@ -47,15 +49,16 @@ Die Logbuch-Datenbank wird **nicht** in iCloud- bzw. Google-Backups aufgenommen,
 ## 5. Verteilung der App
 - **iPhone (TestFlight):** Die App wird über Apples TestFlight verteilt. Apple verarbeitet dabei Daten nach den eigenen Bedingungen ([Apple-Datenschutzrichtlinie](https://www.apple.com/legal/privacy/)).
   Wenn du in TestFlight Feedback oder Absturzberichte sendest, erhalte ich diese über App Store Connect. Je nach Einladungsart sehe ich dabei auch Name bzw. E-Mail-Adresse, die du bei TestFlight angegeben hast.
-- **Android (APK über GitHub):** Beim Herunterladen verarbeitet GitHub technische Daten wie deine IP-Adresse ([GitHub Privacy Statement](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement)). Ich erhalte davon nichts.
+- **Android (APK):** Lädst du die APK über GitHub herunter, verarbeitet GitHub technische Daten wie deine IP-Adresse ([GitHub Privacy Statement](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement)). Ich erhalte davon nichts.
+  Damit Android die App installiert, ist sie bei Google auf mich als verifizierten Entwickler registriert (Paketname und Signatur, [Android-Entwicklerverifizierung](https://developer.android.com/developer-verification/guides)). Bei der Installation kann dein Gerät das bei Google prüfen; dafür gelten Googles Bedingungen ([Google-Datenschutzerklärung](https://policies.google.com/privacy)). Ich erhalte davon nichts.
 
 ## 6. Deine Rechte
-Da ich außer freiwillig gesendeten Diagnose-Nachrichten und TestFlight-Feedback keine Daten über dich habe, betreffen deine Rechte vor allem diese Nachrichten.
+Da ich außer freiwillig gesendeten Mails (Diagnose-Protokoll, Fehlermeldung, Vorschlag) und TestFlight-Feedback keine Daten über dich habe, betreffen deine Rechte vor allem diese Nachrichten.
 Nach dem Schweizer Datenschutzgesetz (DSG) hast du das Recht auf **Auskunft** (Art. 25 DSG), **Berichtigung** und **Löschung** (Art. 32 DSG) sowie auf **Herausgabe bzw. Übertragung** deiner Daten (Art. 28 DSG). Schreib dafür einfach an die E-Mail-Adresse in Abschnitt 2.
 Du kannst dich außerdem an den Eidgenössischen Datenschutz- und Öffentlichkeitsbeauftragten (EDÖB) wenden: [edoeb.admin.ch](https://www.edoeb.admin.ch).
 Nutzerinnen und Nutzer in der EU haben zusätzlich die Rechte nach der DSGVO (u. a. Einschränkung und Widerspruch) und können sich bei der Aufsichtsbehörde ihres Landes beschweren.
 
-Alle Daten in der App löschst du selbst: einzelne Tauchgänge, ganze Taucherprofile, oder alles durch Deinstallieren der App.
+Alle Daten in der App löschst du selbst: einzelne Tauchgänge und Ausrüstungsteile, oder alles durch Deinstallieren der App.
 
 ## 7. Kinder
 DiveDown richtet sich an Taucherinnen und Taucher jeden Alters in Familie und Freundeskreis. Die App erhebt von niemandem Daten.
