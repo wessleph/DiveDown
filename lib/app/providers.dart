@@ -108,6 +108,24 @@ final themeModeProvider = AsyncNotifierProvider<ThemeModeSetting, AppThemeMode>(
   ThemeModeSetting.new,
 );
 
+/// The profile layers last switched on, null until the diver changes them
+/// (ui-spec §6, T38).
+final profileLayersProvider =
+    AsyncNotifierProvider<ProfileLayersSetting, List<ProfileLayer>?>(
+      ProfileLayersSetting.new,
+    );
+
+class ProfileLayersSetting extends AsyncNotifier<List<ProfileLayer>?> {
+  @override
+  Future<List<ProfileLayer>?> build() =>
+      ref.watch(appSettingsProvider).profileLayers();
+
+  Future<void> set(List<ProfileLayer> layers) async {
+    state = AsyncData(List.unmodifiable(layers));
+    await ref.read(appSettingsProvider).setProfileLayers(layers);
+  }
+}
+
 class ThemeModeSetting extends AsyncNotifier<AppThemeMode> {
   @override
   Future<AppThemeMode> build() => ref.watch(appSettingsProvider).themeMode();
@@ -277,6 +295,15 @@ final activeDiverProvider = FutureProvider<Diver?>((ref) async {
   final id = await ref.watch(appSettingsProvider).activeDiverId();
   if (id == null) return null;
   return ref.watch(diverRepositoryProvider).findById(id);
+});
+
+/// The dives of the active diver with their tanks, for the statistics
+/// (ui-spec §5.15, T39); follows the logbook.
+final statisticsDivesProvider = FutureProvider<List<Dive>>((ref) async {
+  final diver = await ref.watch(activeDiverProvider.future);
+  ref.watch(logbookProvider);
+  if (diver == null) return const [];
+  return ref.watch(diveRepositoryProvider).listWithTanksForDiver(diver.id!);
 });
 
 /// Dives of the active diver, newest first. Invalidate after changes.

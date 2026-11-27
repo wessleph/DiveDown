@@ -40,6 +40,57 @@ String waterTypeLabel(AppLocalizations l10n, WaterType type) => switch (type) {
   WaterType.fresh => l10n.waterFresh,
 };
 
+String visibilityLabel(AppLocalizations l10n, WaterVisibility v) => switch (v) {
+  WaterVisibility.poor => l10n.visibilityPoor,
+  WaterVisibility.moderate => l10n.visibilityModerate,
+  WaterVisibility.good => l10n.visibilityGood,
+  WaterVisibility.excellent => l10n.visibilityExcellent,
+};
+
+/// „Sicht gut“, for „Zuletzt bei …“ (T40).
+String visibilityShort(AppLocalizations l10n, WaterVisibility v) => switch (v) {
+  WaterVisibility.poor => l10n.visibilityShortPoor,
+  WaterVisibility.moderate => l10n.visibilityShortModerate,
+  WaterVisibility.good => l10n.visibilityShortGood,
+  WaterVisibility.excellent => l10n.visibilityShortExcellent,
+};
+
+String currentLabel(AppLocalizations l10n, WaterCurrent c) => switch (c) {
+  WaterCurrent.none => l10n.currentNone,
+  WaterCurrent.light => l10n.currentLight,
+  WaterCurrent.moderate => l10n.currentModerate,
+  WaterCurrent.strong => l10n.currentStrong,
+};
+
+/// „Strömung leicht“, „keine Strömung“ (T40).
+String currentShort(AppLocalizations l10n, WaterCurrent c) => switch (c) {
+  WaterCurrent.none => l10n.currentShortNone,
+  WaterCurrent.light => l10n.currentShortLight,
+  WaterCurrent.moderate => l10n.currentShortModerate,
+  WaterCurrent.strong => l10n.currentShortStrong,
+};
+
+String diveKindLabel(AppLocalizations l10n, DiveKind k) => switch (k) {
+  DiveKind.reef => l10n.diveKindReef,
+  DiveKind.wreck => l10n.diveKindWreck,
+  DiveKind.wall => l10n.diveKindWall,
+  DiveKind.cave => l10n.diveKindCave,
+  DiveKind.night => l10n.diveKindNight,
+  DiveKind.lake => l10n.diveKindLake,
+  DiveKind.training => l10n.diveKindTraining,
+  DiveKind.drift => l10n.diveKindDrift,
+};
+
+/// Kinds in their fixed order, e.g. „Wrack · Nacht“.
+String diveKindsText(
+  AppLocalizations l10n,
+  Set<DiveKind> kinds, {
+  String separator = ' · ',
+}) => [
+  for (final k in DiveKind.values)
+    if (kinds.contains(k)) diveKindLabel(l10n, k),
+].join(separator);
+
 /// libdivecomputer event names (`DiveEvent.type`) in German (ui-spec §5.3).
 String eventLabel(AppLocalizations l10n, String type) => switch (type) {
   'gaschange' || 'gaschange2' => l10n.eventGasChange,

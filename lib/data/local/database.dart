@@ -24,7 +24,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Schema of this app version; backups from a newer one are refused
   /// (T11.4).
-  static const latestSchemaVersion = 2;
+  static const latestSchemaVersion = 3;
 
   @override
   int get schemaVersion => latestSchemaVersion;
@@ -37,6 +37,12 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(dives, dives.weightKg);
         await m.createTable(equipment);
         await m.createTable(diveEquipment);
+      }
+      if (from < 3) {
+        // Visibility, current and kinds of dive (T40).
+        await m.addColumn(dives, dives.visibility);
+        await m.addColumn(dives, dives.currentStrength);
+        await m.addColumn(dives, dives.kinds);
       }
     },
     beforeOpen: (details) async {

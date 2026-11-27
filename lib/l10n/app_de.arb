@@ -129,7 +129,7 @@
   },
 
   "welcomeTitle": "Willkommen bei DiveDown",
-  "welcomeBody": "Wer taucht? Du kannst später weitere Taucher hinzufügen.",
+  "welcomeBody": "Wer taucht? Den Namen kannst du später in den Einstellungen ändern.",
   "welcomeName": "Name",
   "welcomeNameMissing": "Bitte gib einen Namen ein.",
   "welcomeStart": "Los geht’s",
@@ -200,10 +200,9 @@
     "placeholders": { "pressure": { "type": "String" } }
   },
   "chipTemperature": "Temperatur",
-  "chipAir": "Luft",
-  "chipAirEstimated": "Luft (geschätzt)",
-  "chipNdl": "NDL",
-  "chipSac": "SAC",
+  "chipAir": "Flaschendruck",
+  "chipAirEstimated": "Flaschendruck (geschätzt)",
+  "chipSac": "Luftverbrauch",
   "chipLayersSpoken": "Ebenen im Diagramm",
   "profileAxesLimit": "Höchstens zwei Werte mit eigener Achse. „{name}“ ist jetzt aus.",
   "@profileAxesLimit": {
@@ -534,5 +533,72 @@
   },
   "previewSourceHealth": "Aus Apple Health",
   "chipPulse": "Puls",
-  "valuePulse": "Puls"
+  "valuePulse": "Puls",
+  "statsTitle": "Statistik",
+  "statsOpen": "Statistik öffnen",
+  "statsEmpty": "Noch keine Statistik. Sie entsteht mit deinen Tauchgängen.",
+  "statsOverview": "ÜBERBLICK",
+  "statsDives": "Tauchgänge",
+  "statsUnderwater": "Zeit unter Wasser",
+  "statsDeepest": "Tiefster Tauchgang",
+  "statsLongest": "Längster Tauchgang",
+  "statsColdest": "Kältestes Wasser",
+  "statsCountries": "Länder",
+  "statsDiveRef": "#{number} · {site}",
+  "@statsDiveRef": {
+    "placeholders": { "number": { "type": "String" }, "site": { "type": "String" } }
+  },
+  "statsPerYear": "PRO JAHR",
+  "statsYearSpoken": "{year}: {count, plural, =1{1 Tauchgang} other{{count} Tauchgänge}}",
+  "@statsYearSpoken": {
+    "placeholders": { "year": { "type": "String" }, "count": { "type": "int" } }
+  },
+  "statsSites": "TAUCHPLÄTZE",
+  "statsTimes": "{count}×",
+  "@statsTimes": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "statsAir": "LUFTVERBRAUCH",
+  "statsAirLine": "Ø {average} · zuletzt {latest}",
+  "@statsAirLine": {
+    "placeholders": { "average": { "type": "String" }, "latest": { "type": "String" } }
+  },
+  "statsAirNone": "Für den Verlauf braucht es mindestens zwei Tauchgänge mit Flaschendruck und Flaschengröße.",
+  "fieldVisibility": "Sichtweite",
+  "visibilityPoor": "schlecht (< 5 m)",
+  "visibilityModerate": "mittel (5–10 m)",
+  "visibilityGood": "gut (10–20 m)",
+  "visibilityExcellent": "sehr gut (> 20 m)",
+  "visibilityShortPoor": "Sicht schlecht",
+  "visibilityShortModerate": "Sicht mittel",
+  "visibilityShortGood": "Sicht gut",
+  "visibilityShortExcellent": "Sicht sehr gut",
+  "fieldCurrent": "Strömung",
+  "currentNone": "keine",
+  "currentLight": "leicht",
+  "currentModerate": "mittel",
+  "currentStrong": "stark",
+  "currentShortNone": "keine Strömung",
+  "currentShortLight": "Strömung leicht",
+  "currentShortModerate": "Strömung mittel",
+  "currentShortStrong": "Strömung stark",
+  "fieldDiveKinds": "Tauchgangsart",
+  "diveKindReef": "Riff",
+  "diveKindWreck": "Wrack",
+  "diveKindWall": "Steilwand",
+  "diveKindCave": "Höhle",
+  "diveKindNight": "Nacht",
+  "diveKindLake": "See",
+  "diveKindTraining": "Ausbildung",
+  "diveKindDrift": "Drift",
+  "detailConditions": "BEDINGUNGEN",
+  "conditionsLastAt": "Zuletzt bei {site}: {conditions}",
+  "@conditionsLastAt": {
+    "placeholders": { "site": { "type": "String" }, "conditions": { "type": "String" } }
+  },
+  "visibilityDetail": "Sicht {level}",
+  "@visibilityDetail": {
+    "placeholders": { "level": { "type": "String" } }
+  },
+  "statsLoadError": "Die Statistik konnte nicht geladen werden."
 }

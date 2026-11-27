@@ -27,7 +27,9 @@ void main() {
     expect(currentLocation(tester), WelcomeScreen.path);
     expect(find.text('Willkommen bei DiveDown'), findsOneWidget);
     expect(
-      find.text('Wer taucht? Du kannst später weitere Taucher hinzufügen.'),
+      find.text(
+        'Wer taucht? Den Namen kannst du später in den Einstellungen ändern.',
+      ),
       findsOneWidget,
     );
     expect(find.text('Alle Daten bleiben auf diesem Gerät.'), findsOneWidget);

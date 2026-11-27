@@ -5,7 +5,7 @@ import 'dart:typed_data';
 import '../diagnostics/diagnostic_log.dart';
 
 /// Address in the privacy policy (docs/datenschutz.md, section 2).
-const feedbackAddress = 'divedown-app@proton.ch';
+const feedbackAddress = 'divedown-app@proton.me';
 
 enum FeedbackKind { bug, idea }
 

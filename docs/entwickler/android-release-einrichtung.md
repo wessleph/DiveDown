@@ -68,3 +68,15 @@ Ab dann gehen alle weiteren Release-APKs direkt als Update drüber. Dazu muss di
 ## 7. Sichern
 - `divedown-upload.p12` und das Passwort verschlüsselt an **zwei** Orten aufbewahren.
 - `key.properties` braucht kein Backup, sie lässt sich aus den Angaben oben neu schreiben.
+
+## 8. App bei Google registrieren (Android-Entwicklerverifizierung, ab 2026-11-27)
+Seit September 2026 installieren zertifizierte Android-Geräte nur noch Apps, die bei einem **verifizierten Entwickler registriert** sind. Quelle: [Android developer verification](https://developer.android.com/developer-verification/guides) und [Updates to Play Console (PDF)](https://developer.android.com/developer-verification/assets/pdfs/updates-to-play-console-for-android-developer-verification.pdf), abgerufen am 2026-11-27. Das gilt auch für eine APK, die wir direkt an Familie und Freunde geben, nicht nur für den Play Store.
+
+- [x] **Play-Console-Konto** angelegt (2026-11-27) und **Identitätsprüfung abgeschlossen** (2026-11-27, am selben Tag bestätigt). Google nennt etwa 3 Werktage. Den Stand zeigt die Play Console unter „Alle Apps“, zum Schluss kommt eine Mail.
+- [ ] **Release-Schlüssel erzeugt** (Abschnitte 2 und 4). Ohne ihn gibt es keinen Fingerabdruck, den man registrieren kann.
+- [ ] In der Play Console die App registrieren: **Paketname `io.github.wessleph.divedown`** und **SHA-256-Fingerabdruck** des Zertifikats aus Abschnitt 4. Die genauen Menüpunkte und ob Google einen Nachweis verlangt, dass der Schlüssel dir gehört (z. B. eine damit signierte Datei), zeigt die Play Console; sie ändern sich gerade.
+- [ ] Danach eine Release-APK auf einem Gerät **ohne** Entwickleroptionen installieren und prüfen, dass Android sie annimmt.
+
+**Der Fingerabdruck** ist eine Prüfsumme (SHA-256, 64 Zeichen in Zweiergruppen, z. B. `3F:7A:…`) über das öffentliche Zertifikat des Schlüssels. Er verrät nichts über den geheimen Schlüssel und darf öffentlich stehen. Android und Google erkennen daran, dass eine APK wirklich von dir signiert wurde.
+
+**Play Store später:** Neue private Konten müssen eine App vor der öffentlichen Veröffentlichung eine Zeit lang geschlossen testen (Stand der Recherche: 12 Tester über 14 Tage; in der Play Console prüfen, Google ändert das öfter). Für 1.0 brauchen wir das nicht. Der **interne Test** der Play Console (bis 100 Tester per E-Mail-Adresse, ohne Mindestzahl) wäre eine Alternative zur APK, falls die Installation der APK für die Familie zu umständlich ist.

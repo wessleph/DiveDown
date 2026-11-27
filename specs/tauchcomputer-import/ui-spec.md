@@ -83,7 +83,7 @@ Gespeichert wird immer in SI (ADR 0004). Formatierung zentral (`UnitFormatter`),
 
 ### 5.1 Erster Start: Taucher anlegen
 **Ablauf:** Begrüßung → Name (Pflicht) → optional Farbe/Avatar-Initialen → Einheiten (metrisch/imperial) → fertig → leeres Logbuch.
-- Texte: Titel „Willkommen bei DiveDown“ · „Wer taucht? Du kannst später weitere Taucher hinzufügen.“ · Feld „Name“ · Knopf **„Los geht’s“**
+- Texte: Titel „Willkommen bei DiveDown“ · „Wer taucht? Den Namen kannst du später in den Einstellungen ändern.“ *(geändert 2026-11-27, T38: ein Taucher pro App)* · Feld „Name“ · Knopf **„Los geht’s“**
 - Hinweis klein: „Alle Daten bleiben auf diesem Gerät.“
 - Zustände: Name leer → Knopf deaktiviert, mit Hinweis „Bitte gib einen Namen ein.“
 
@@ -116,6 +116,7 @@ Monatsüberschrift fett in `onSurfaceMuted` mit etwas Laufweite, neuester oben. 
 3. **Profil-Diagramm** (§6) mit Chips darüber und dem **Werte-Feld** darunter, Knopf „Vollbild“
 4. **Ereignisse** als kompakte Liste: Zeit · farbiger Punkt (Warnungen `error`, sonst `primary`) · deutscher Text. Gleiche Ereignisse innerhalb von 60 s werden zusammengefasst („Sicherheitsstopp 3×“). Jeder Ereignistyp hat einen deutschen Text (z. B. `deepstop` → „Tiefenstopp“), unbekannte Typen „Ereignis“ plus Code.
 5. **Ausrüstung** *(neu 2026-11-23, T31)*: Abschnitt mit kleiner Überschrift „AUSRÜSTUNG“. Erste Zeile **„Blei 6 kg“** (fehlt der Wert: „Blei —“), darunter die zugeordneten Teile als Chips mit Icon der Art. Gelöschte Teile erscheinen weiter, in `onSurfaceMuted`. Ohne Blei und ohne Teile entfällt der Abschnitt.
+5a. **Bedingungen** *(neu, T40)*: Abschnitt „BEDINGUNGEN“ mit „Sicht gut (10–20 m) · Strömung leicht“ und darunter den Arten „Wrack · Nacht“; ohne Angaben entfällt er.
 6. Flaschen (falls mehrere), Notizen, Bewertung (1–5 Sterne)
 - Aktionen in der App-Leiste: **Bearbeiten**, Menü: „Löschen“
 
@@ -137,6 +138,13 @@ Felder: **Nr.** (vorbelegt mit der nächsten freien Nummer, änderbar), **Tauchp
 - Zahlenfelder mit Ziffern-Tastatur.
 - Speichern: **„Speichern“** (Pflichtfelder fehlen → Fokus springt zum ersten Fehler).
 - Verlassen mit Änderungen: „Änderungen verwerfen?“ · **„Verwerfen“** / „Weiter bearbeiten“
+
+**Bedingungen** *(neu, abgenommen 2026-11-27, T40)*, alle optional, unter dem Wassertyp:
+- **Sichtweite** (Chips, eine Stufe, nochmal Antippen hebt sie auf): „schlecht (< 5 m)“ · „mittel (5–10 m)“ · „gut (10–20 m)“ · „sehr gut (> 20 m)“
+- **Strömung** (Chips, eine Stufe): „keine“ · „leicht“ · „mittel“ · „stark“
+- **Tauchgangsart** (Chips, mehrere möglich): Riff · Wrack · Steilwand · Höhle · Nacht · See · Ausbildung · Drift
+- Vorschlag wie beim Blei: Ist noch keines der drei gewählt und gibt es am selben Platz (Katalog-ID oder Name ohne Groß-/Kleinschreibung) einen früheren Tauchgang mit Bedingungen, steht darunter „Zuletzt bei Elphinstone: Sicht gut · Strömung leicht · Riff“ · **„Übernehmen“** (setzt alle drei).
+- Ersetzt ein Import den Tauchgang, bleiben die Bedingungen (wie Notizen und Blei).
 
 ### 5.5 Importieren (Quelle wählen)
 Drei große Karten (je 88 dp hoch):
@@ -257,12 +265,12 @@ Info: „Hilf bei der Fehlersuche: Schicke das Protokoll an den Entwickler. Es e
 - leer: „Noch keine Einträge im Protokoll.“
 
 ### 5.14 Feedback: Fehler melden, Verbesserung vorschlagen *(neu 2026-11-24, T35)*
-Die App hat keine Internet-Berechtigung (security.md §4): Sie **sendet nichts selbst**, sondern bereitet einen **Mail-Entwurf** an `divedown-app@proton.ch` vor, den die Mail-App des Handys öffnet. Der Nutzer sieht ihn vor dem Senden und kann ihn ändern oder verwerfen.
+Die App hat keine Internet-Berechtigung (security.md §4): Sie **sendet nichts selbst**, sondern bereitet einen **Mail-Entwurf** an `divedown-app@proton.me` vor, den die Mail-App des Handys öffnet. Der Nutzer sieht ihn vor dem Senden und kann ihn ändern oder verwerfen.
 
 **„Fehler melden“** (eigene Seite, Titel „Fehler melden“):
 - Textfeld **„Was ist passiert?“*** (mehrzeilig, Hinweis „z. B. Beim Übertragen vom EON Core bricht die App nach drei Tauchgängen ab.“; leer → „Bitte beschreibe kurz, was passiert ist.“)
 - Schalter **„Diagnose-Protokoll anhängen“** (Standard an), darunter klein „Enthält keine Orte, Namen oder Gesundheitswerte.“ und der Link **„Protokoll ansehen“** (öffnet §5.13)
-- Knopf **„Mail vorbereiten“**. Kleiner Text darunter: „Deine Mail-App öffnet sich mit der Nachricht an divedown-app@proton.ch. Gesendet wird erst, wenn du dort auf Senden tippst.“
+- Knopf **„Mail vorbereiten“**. Kleiner Text darunter: „Deine Mail-App öffnet sich mit der Nachricht an divedown-app@proton.me. Gesendet wird erst, wenn du dort auf Senden tippst.“
 - Mail: Betreff „DiveDown: Fehler“, Text = Beschreibung, darunter eine Trennlinie und die Gerätedaten wie im Kopf des Diagnose-Protokolls (App-Version und Build, Betriebssystem, Modell, libdivecomputer). Mit Protokoll hängt die Datei `DiveDown-Diagnose-<Datum>.txt` an (wie bei „Diagnose-Logs teilen“).
 
 **„Verbesserung vorschlagen“** (eigene Seite, Titel „Verbesserung vorschlagen“):
@@ -271,14 +279,22 @@ Die App hat keine Internet-Berechtigung (security.md §4): Sie **sendet nichts s
 
 | Zustand | Darstellung |
 |---|---|
-| keine Mail-App | Dialog „Keine Mail-App gefunden“ · „Schreib an divedown-app@proton.ch.“ · **„Adresse kopieren“** (Snackbar „Adresse kopiert“) / „Schließen“ |
+| keine Mail-App | Dialog „Keine Mail-App gefunden“ · „Schreib an divedown-app@proton.me.“ · **„Adresse kopieren“** (Snackbar „Adresse kopiert“) / „Schließen“ |
 | Protokoll leer | Schalter ausgeblendet, Mail ohne Anhang |
 | zurück aus der Mail-App | Die Seite bleibt mit dem Text offen (man weiß nicht, ob gesendet wurde) |
+
+### 5.15 Statistik *(neu, abgenommen 2026-11-27, T39)*
+Erreichbar durch Antippen der beiden Kacheln oben im Logbuch (§5.2, vorgelesen „Statistik öffnen“); eigene Seite in der Tab „Logbuch“, Titel **„Statistik“**. Alles wird beim Öffnen aus den Tauchgängen auf dem Gerät berechnet, offline, nichts davon gespeichert.
+1. **ÜBERBLICK:** Tauchgänge · Zeit unter Wasser · **Tiefster Tauchgang** · **Längster Tauchgang** · **Kältestes Wasser** · **Länder** (aus den Katalog-Tauchplätzen). Die drei Rekorde zeigen den Wert groß und darunter „#42 · SS Thistlegorm“; Antippen öffnet den Tauchgang. Gleichstand: der frühere Tauchgang. Kältestes Wasser nur aus Tauchgängen mit Temperatur.
+2. **PRO JAHR:** waagrechte Balken (Länge = Anzahl, `primary`), daneben Jahr und Zahl als Text; vorgelesen „2026: 12 Tauchgänge“.
+3. **TAUCHPLÄTZE:** die 5 meistbesuchten mit „12×“. Gleiche Namen ohne Groß-/Kleinschreibung und Leerzeichen am Rand zählen zusammen; angezeigt wird die Schreibweise des neuesten Tauchgangs. Gleichstand: zuletzt besucht zuerst. Tauchgänge ohne Platz zählen nicht.
+4. **LUFTVERBRAUCH:** Ø-SAC der letzten 10 Tauchgänge mit Flaschendruck und Flaschengröße, als Linie (älteste links, `sac`), darunter „Ø 17,6 l/min · zuletzt 16,9 l/min“. Mit weniger als zwei solchen Tauchgängen statt der Linie: „Für den Verlauf braucht es mindestens zwei Tauchgänge mit Flaschendruck und Flaschengröße.“
+5. **Leer:** „Noch keine Statistik. Sie entsteht mit deinen Tauchgängen.“
 
 ## 6. Profil-Diagramm
 - **X-Achse:** Zeit (min). **Y-Achse:** Tiefe, **nach unten wachsend** (0 m oben), Gitter alle 10 m (bis 15 m max. Tiefe alle 5 m), Beschriftung in `onSurfaceMuted`.
 - Tiefenkurve in `depth` als Fläche mit Verlauf (oben 5 %, unten 42 % Deckkraft) und Linie 2 dp.
-- **Zuschaltbare Ebenen** (Chips über dem Diagramm, Zustand wird gemerkt): **Temperatur** (rechte Achse, `temperature`) · **Luft** (rechte Achse, `pressure`, gestrichelt wenn geschätzt; pro Flasche eine Linie) · **NDL** (Band unten, `ndl`, gestrichelt) · **SAC** (eigene Achse, Stufenlinie über 1-min-Abschnitte, **nur mit gemessenem Druck**; geschätzt wäre sie eine waagrechte Linie ohne Aussage) · **Puls** (nur bei Watch, eigene Achse in `accent`; Watch-Tauchgänge haben keine Luft-Kurve; ist an, wenn es keine Luft gibt; Werte-Feld „Puls 95 /min“, T6.11).
+- **Zuschaltbare Ebenen** (Chips über dem Diagramm, Zustand wird gemerkt) *(geändert 2026-11-27, T37: „NDL“ entfällt, weil die meisten Tauchcomputer keine Nullzeit mitschicken und der Chip dann nichts tut; „Luft“ heißt „Flaschendruck“, „SAC“ heißt „Luftverbrauch“)*: **Temperatur** (rechte Achse, `temperature`) · **Flaschendruck** (rechte Achse, `pressure`, gestrichelt und „Flaschendruck (geschätzt)“ wenn geschätzt; pro Flasche eine Linie) · **Luftverbrauch** (SAC, eigene Achse, Stufenlinie über 1-min-Abschnitte, **nur mit gemessenem Druck**; geschätzt wäre sie eine waagrechte Linie ohne Aussage) · **Puls** (nur bei Watch, eigene Achse in `accent`; Watch-Tauchgänge haben keine Luft-Kurve; ist an, wenn es keine Luft gibt; Werte-Feld „Puls 95 /min“, T6.11).
   Immer höchstens **zwei rechte Achsen** gleichzeitig. Bei einer dritten schaltet die älteste automatisch ab, mit kurzem Hinweis.
 - **Ereignisse** als Punkte auf der Kurve (Warnungen `error`, sonst `primary`). Antippen zeigt den Text.
 - **Antippen/Ziehen (Wunsch vom 2026-11-22):** senkrechte Linie und Punkt auf der Kurve. Das **Werte-Feld unter dem Diagramm** zeigt immer die Werte dieses Moments; vor dem ersten Tippen steht die Linie beim tiefsten Punkt.

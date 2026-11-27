@@ -61,6 +61,14 @@ class _ManualDiveScreenState extends ConsumerState<ManualDiveScreen> {
   WaterType? _waterType;
   int? _rating;
 
+  /// Conditions (T40).
+  WaterVisibility? _visibility;
+  WaterCurrent? _current;
+  Set<DiveKind> _kinds = {};
+
+  /// „Zuletzt bei Elphinstone: Sicht gut · …“ for the current site (T40).
+  LastConditions? _lastConditions;
+
   /// Selected equipment (ADR 0007); null until loaded.
   Set<String>? _equipment;
 
@@ -147,8 +155,21 @@ class _ManualDiveScreenState extends ConsumerState<ManualDiveScreen> {
                 siteCatalogueId: _siteLink.id,
                 excludeDiveId: _original?.id,
               );
+    final conditions = diver == null || (site.isEmpty && _siteLink.id == null)
+        ? null
+        : await ref
+              .read(diveRepositoryProvider)
+              .lastConditionsAt(
+                diver,
+                siteName: site,
+                siteCatalogueId: _siteLink.id,
+                excludeDiveId: _original?.id,
+              );
     if (!mounted || request != _hintRequest) return;
-    setState(() => _lastWeight = last);
+    setState(() {
+      _lastWeight = last;
+      _lastConditions = conditions;
+    });
   }
 
   void _fill(ManualDiveDraft d) {
@@ -173,6 +194,9 @@ class _ManualDiveScreenState extends ConsumerState<ManualDiveScreen> {
     _start = d.start;
     _waterType = d.waterType;
     _rating = d.rating;
+    _visibility = d.visibility;
+    _current = d.current;
+    _kinds = {...d.kinds};
     _equipment = d.equipmentIds == null ? null : {...d.equipmentIds!};
   }
 
@@ -195,6 +219,9 @@ class _ManualDiveScreenState extends ConsumerState<ManualDiveScreen> {
       o2: t(ManualDiveField.o2),
       weight: t(ManualDiveField.weight),
       equipmentIds: _equipment == null ? null : {..._equipment!},
+      visibility: _visibility,
+      current: _current,
+      kinds: {..._kinds},
       waterType: _waterType,
       notes: _notes.text,
       rating: _rating,
@@ -220,6 +247,10 @@ class _ManualDiveScreenState extends ConsumerState<ManualDiveScreen> {
         a.weight != b.weight ||
         !_sameSet(a.equipmentIds, b.equipmentIds) ||
         a.waterType != b.waterType ||
+        a.visibility != b.visibility ||
+        a.current != b.current ||
+        a.kinds.length != b.kinds.length ||
+        !a.kinds.containsAll(b.kinds) ||
         a.notes != b.notes ||
         a.rating != b.rating;
   }
@@ -388,6 +419,111 @@ class _ManualDiveScreenState extends ConsumerState<ManualDiveScreen> {
               _controllers[ManualDiveField.weight]!.text = formatKg(
                 last.weightKg,
               );
+              _changed();
+            },
+            child: Text(l10n.weightApply),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Visibility, current and kinds as chips, with the hint from the last
+  /// dive at the site (ui-spec §5.4, T40).
+  Widget _conditions(AppLocalizations l10n) {
+    final theme = Theme.of(context);
+    Widget title(String text) => Padding(
+      padding: const EdgeInsets.only(top: 12, bottom: 4),
+      child: Text(text, style: theme.textTheme.bodySmall),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        title(l10n.fieldVisibility),
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            for (final v in WaterVisibility.values)
+              ChoiceChip(
+                label: Text(visibilityLabel(l10n, v)),
+                selected: _visibility == v,
+                onSelected: (on) {
+                  _visibility = on ? v : null;
+                  _changed();
+                },
+              ),
+          ],
+        ),
+        title(l10n.fieldCurrent),
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            for (final c in WaterCurrent.values)
+              ChoiceChip(
+                label: Text(currentLabel(l10n, c)),
+                selected: _current == c,
+                onSelected: (on) {
+                  _current = on ? c : null;
+                  _changed();
+                },
+              ),
+          ],
+        ),
+        title(l10n.fieldDiveKinds),
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            for (final k in DiveKind.values)
+              FilterChip(
+                label: Text(diveKindLabel(l10n, k)),
+                selected: _kinds.contains(k),
+                onSelected: (on) {
+                  on ? _kinds.add(k) : _kinds.remove(k);
+                  _changed();
+                },
+              ),
+          ],
+        ),
+        ?_conditionsHint(l10n),
+      ],
+    );
+  }
+
+  /// „Zuletzt bei Elphinstone: Sicht gut · Strömung leicht · Riff“ ·
+  /// „Übernehmen“, while none of the three is chosen (T40).
+  Widget? _conditionsHint(AppLocalizations l10n) {
+    final last = _lastConditions;
+    if (last == null) return null;
+    if (_visibility != null || _current != null || _kinds.isNotEmpty) {
+      return null;
+    }
+    final text = [
+      if (last.visibility case final v?) visibilityShort(l10n, v),
+      if (last.current case final c?) currentShort(l10n, c),
+      if (last.kinds.isNotEmpty)
+        diveKindsText(l10n, last.kinds, separator: ', '),
+    ].join(' · ');
+    final colors = Theme.of(context).extension<DiveColors>()!;
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        children: [
+          Icon(Icons.history, size: 18, color: colors.onSurfaceMuted),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              l10n.conditionsLastAt(last.siteName, text),
+              style: TextStyle(color: colors.onSurfaceMuted),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              _visibility = last.visibility;
+              _current = last.current;
+              _kinds = {...last.kinds};
               _changed();
             },
             child: Text(l10n.weightApply),
@@ -629,6 +765,7 @@ class _ManualDiveScreenState extends ConsumerState<ManualDiveScreen> {
                       _changed();
                     },
                   ),
+                  _conditions(l10n),
                   const SizedBox(height: 12),
                   TextField(
                     controller: _notes,

@@ -54,6 +54,21 @@ class _FailingRepository implements DiveRepository {
   Future<List<Dive>> listForDiver(String diverId) =>
       _inner.listForDiver(diverId);
   @override
+  Future<LastConditions?> lastConditionsAt(
+    String diverId, {
+    String? siteName,
+    String? siteCatalogueId,
+    String? excludeDiveId,
+  }) => _inner.lastConditionsAt(
+    diverId,
+    siteName: siteName,
+    siteCatalogueId: siteCatalogueId,
+    excludeDiveId: excludeDiveId,
+  );
+  @override
+  Future<List<Dive>> listWithTanksForDiver(String diverId) =>
+      _inner.listWithTanksForDiver(diverId);
+  @override
   Future<int> nextNumber(String diverId) => _inner.nextNumber(diverId);
   @override
   Future<void> delete(String id) => _inner.delete(id);

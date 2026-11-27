@@ -247,6 +247,7 @@ class _DiveDetail extends StatelessWidget {
             ),
           ),
         ],
+        _ConditionsSection(dive: dive),
         _EquipmentSection(dive: dive),
         if (dive.notes case final notes?) ...[
           const SizedBox(height: 16),
@@ -341,6 +342,37 @@ String? _pressureText(DiveTank? tank) {
   final end = tank?.endPressureBar;
   if (start == null || end == null) return null;
   return '${start.round()} → ${_units.pressure(end)}';
+}
+
+/// „BEDINGUNGEN“: visibility, current and kinds (ui-spec §5.3, T40); left
+/// out when none is noted.
+class _ConditionsSection extends StatelessWidget {
+  const _ConditionsSection({required this.dive});
+
+  final Dive dive;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final first = [
+      if (dive.visibility case final v?)
+        l10n.visibilityDetail(visibilityLabel(l10n, v)),
+      if (dive.current case final c?) currentShort(l10n, c),
+    ].join(' · ');
+    final kinds = diveKindsText(l10n, dive.kinds);
+    if (first.isEmpty && kinds.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionTitle(l10n.detailConditions),
+          if (first.isNotEmpty) Text(first),
+          if (kinds.isNotEmpty) Text(kinds),
+        ],
+      ),
+    );
+  }
 }
 
 /// Lead and the pieces used (ui-spec §5.3 item 5, T31.5); hidden when the

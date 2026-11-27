@@ -272,7 +272,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get welcomeBody =>
-      'Wer taucht? Du kannst später weitere Taucher hinzufügen.';
+      'Wer taucht? Den Namen kannst du später in den Einstellungen ändern.';
 
   @override
   String get welcomeName => 'Name';
@@ -440,16 +440,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get chipTemperature => 'Temperatur';
 
   @override
-  String get chipAir => 'Luft';
+  String get chipAir => 'Flaschendruck';
 
   @override
-  String get chipAirEstimated => 'Luft (geschätzt)';
+  String get chipAirEstimated => 'Flaschendruck (geschätzt)';
 
   @override
-  String get chipNdl => 'NDL';
-
-  @override
-  String get chipSac => 'SAC';
+  String get chipSac => 'Luftverbrauch';
 
   @override
   String get chipLayersSpoken => 'Ebenen im Diagramm';
@@ -1260,4 +1257,171 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get valuePulse => 'Puls';
+
+  @override
+  String get statsTitle => 'Statistik';
+
+  @override
+  String get statsOpen => 'Statistik öffnen';
+
+  @override
+  String get statsEmpty =>
+      'Noch keine Statistik. Sie entsteht mit deinen Tauchgängen.';
+
+  @override
+  String get statsOverview => 'ÜBERBLICK';
+
+  @override
+  String get statsDives => 'Tauchgänge';
+
+  @override
+  String get statsUnderwater => 'Zeit unter Wasser';
+
+  @override
+  String get statsDeepest => 'Tiefster Tauchgang';
+
+  @override
+  String get statsLongest => 'Längster Tauchgang';
+
+  @override
+  String get statsColdest => 'Kältestes Wasser';
+
+  @override
+  String get statsCountries => 'Länder';
+
+  @override
+  String statsDiveRef(String number, String site) {
+    return '#$number · $site';
+  }
+
+  @override
+  String get statsPerYear => 'PRO JAHR';
+
+  @override
+  String statsYearSpoken(String year, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Tauchgänge',
+      one: '1 Tauchgang',
+    );
+    return '$year: $_temp0';
+  }
+
+  @override
+  String get statsSites => 'TAUCHPLÄTZE';
+
+  @override
+  String statsTimes(int count) {
+    return '$count×';
+  }
+
+  @override
+  String get statsAir => 'LUFTVERBRAUCH';
+
+  @override
+  String statsAirLine(String average, String latest) {
+    return 'Ø $average · zuletzt $latest';
+  }
+
+  @override
+  String get statsAirNone =>
+      'Für den Verlauf braucht es mindestens zwei Tauchgänge mit Flaschendruck und Flaschengröße.';
+
+  @override
+  String get fieldVisibility => 'Sichtweite';
+
+  @override
+  String get visibilityPoor => 'schlecht (< 5 m)';
+
+  @override
+  String get visibilityModerate => 'mittel (5–10 m)';
+
+  @override
+  String get visibilityGood => 'gut (10–20 m)';
+
+  @override
+  String get visibilityExcellent => 'sehr gut (> 20 m)';
+
+  @override
+  String get visibilityShortPoor => 'Sicht schlecht';
+
+  @override
+  String get visibilityShortModerate => 'Sicht mittel';
+
+  @override
+  String get visibilityShortGood => 'Sicht gut';
+
+  @override
+  String get visibilityShortExcellent => 'Sicht sehr gut';
+
+  @override
+  String get fieldCurrent => 'Strömung';
+
+  @override
+  String get currentNone => 'keine';
+
+  @override
+  String get currentLight => 'leicht';
+
+  @override
+  String get currentModerate => 'mittel';
+
+  @override
+  String get currentStrong => 'stark';
+
+  @override
+  String get currentShortNone => 'keine Strömung';
+
+  @override
+  String get currentShortLight => 'Strömung leicht';
+
+  @override
+  String get currentShortModerate => 'Strömung mittel';
+
+  @override
+  String get currentShortStrong => 'Strömung stark';
+
+  @override
+  String get fieldDiveKinds => 'Tauchgangsart';
+
+  @override
+  String get diveKindReef => 'Riff';
+
+  @override
+  String get diveKindWreck => 'Wrack';
+
+  @override
+  String get diveKindWall => 'Steilwand';
+
+  @override
+  String get diveKindCave => 'Höhle';
+
+  @override
+  String get diveKindNight => 'Nacht';
+
+  @override
+  String get diveKindLake => 'See';
+
+  @override
+  String get diveKindTraining => 'Ausbildung';
+
+  @override
+  String get diveKindDrift => 'Drift';
+
+  @override
+  String get detailConditions => 'BEDINGUNGEN';
+
+  @override
+  String conditionsLastAt(String site, String conditions) {
+    return 'Zuletzt bei $site: $conditions';
+  }
+
+  @override
+  String visibilityDetail(String level) {
+    return 'Sicht $level';
+  }
+
+  @override
+  String get statsLoadError => 'Die Statistik konnte nicht geladen werden.';
 }

@@ -3,12 +3,15 @@
 // Contract for the widgets: the drawing area that maps 0 … duration onto
 // its full width has the key `profile-plot`; the value panel under it has
 // the key `profile-values`.
+import 'package:divedown/data/local/drift_app_settings.dart';
 import 'package:divedown/domain/dive/dive.dart';
+import 'package:divedown/domain/settings/app_settings.dart';
 import 'package:divedown/features/logbook/dive_detail_screen.dart';
 import 'package:divedown/features/logbook/manual_dive_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../support/health_fixtures.dart';
 import '../../support/test_app.dart';
 
 final _plot = find.byKey(const ValueKey('profile-plot'));
@@ -123,32 +126,36 @@ void main() {
     );
   });
 
-  testWidgets('T22.10 measured air has no estimate note and offers SAC', (
-    tester,
-  ) async {
-    await _open(tester, _measured);
-    await _tapAt(tester, 1.0);
+  testWidgets(
+    'T22.10 measured air has no estimate note, offers Luftverbrauch',
+    (tester) async {
+      await _open(tester, _measured);
+      await _tapAt(tester, 1.0);
 
-    expect(_inValues(find.text('ca. 50 bar')), findsNothing);
-    expect(_inValues(find.text('50 bar')), findsOneWidget);
-    expect(_inValues(find.textContaining('geschätzt')), findsNothing);
-    expect(find.widgetWithText(FilterChip, 'Luft'), findsOneWidget);
-    expect(find.widgetWithText(FilterChip, 'SAC'), findsOneWidget);
-    expect(
-      find.text('Werte vom Tauchcomputer, nur zur Anzeige.'),
-      findsOneWidget,
-    );
-  });
+      expect(_inValues(find.text('ca. 50 bar')), findsNothing);
+      expect(_inValues(find.text('50 bar')), findsOneWidget);
+      expect(_inValues(find.textContaining('geschätzt')), findsNothing);
+      // Renamed in T37: „Luft“ → „Flaschendruck“, „SAC“ → „Luftverbrauch“.
+      expect(find.widgetWithText(FilterChip, 'Flaschendruck'), findsOneWidget);
+      expect(find.widgetWithText(FilterChip, 'Luftverbrauch'), findsOneWidget);
+      expect(
+        find.text('Werte vom Tauchcomputer, nur zur Anzeige.'),
+        findsOneWidget,
+      );
+    },
+  );
 
-  testWidgets('T22.11 layer chips; no SAC curve for an estimate', (
+  testWidgets('T22.11 layer chips; no Luftverbrauch for an estimate', (
     tester,
   ) async {
     await _open(tester, exampleDive);
 
     expect(find.widgetWithText(FilterChip, 'Temperatur'), findsOneWidget);
-    expect(find.widgetWithText(FilterChip, 'Luft (geschätzt)'), findsOneWidget);
-    expect(find.widgetWithText(FilterChip, 'NDL'), findsOneWidget);
-    expect(find.widgetWithText(FilterChip, 'SAC'), findsNothing);
+    expect(
+      find.widgetWithText(FilterChip, 'Flaschendruck (geschätzt)'),
+      findsOneWidget,
+    );
+    expect(find.widgetWithText(FilterChip, 'Luftverbrauch'), findsNothing);
 
     final temp = find.widgetWithText(FilterChip, 'Temperatur');
     final before = tester.widget<FilterChip>(temp).selected;
@@ -204,5 +211,164 @@ void main() {
     expect(find.text('0:00'), findsWidgets);
     expect(find.text('47:00'), findsWidgets);
     handle.dispose();
+  });
+
+  group('T37 chips: Temperatur, Flaschendruck, Luftverbrauch, Puls', () {
+    List<String> chips(WidgetTester tester) => [
+      for (final c in tester.widgetList<FilterChip>(find.byType(FilterChip)))
+        (c.label as Text).data!,
+    ];
+
+    testWidgets('measured: no NDL, in this order', (tester) async {
+      await _open(
+        tester,
+        (id) => exampleDive(
+          id,
+          samples: [
+            for (var t = 0; t <= 2820; t += 60)
+              DiveSample(
+                timeS: t,
+                depthM: t < 1410 ? t / 1410 * 18.4 : 10,
+                temperatureC: 21,
+                ndlS: 1200,
+                pressures: [
+                  TankPressure(tankIndex: 0, pressureBar: 200 - t / 20),
+                ],
+              ),
+          ],
+        ),
+      );
+
+      expect(chips(tester), ['Temperatur', 'Flaschendruck', 'Luftverbrauch']);
+      // The NDL stays in the value panel when the computer sends it.
+      expect(_inValues(find.text('NDL')), findsOneWidget);
+    });
+
+    testWidgets('a third axis turns the oldest off, with the new names', (
+      tester,
+    ) async {
+      await _open(tester, _measured);
+
+      await tester.tap(find.widgetWithText(FilterChip, 'Luftverbrauch'));
+      await tester.pump();
+
+      expect(
+        find.text(
+          'Höchstens zwei Werte mit eigener Achse. „Temperatur“ ist jetzt aus.',
+        ),
+        findsOneWidget,
+      );
+      final selected = [
+        for (final c in tester.widgetList<FilterChip>(find.byType(FilterChip)))
+          if (c.selected) (c.label as Text).data!,
+      ];
+      expect(selected, ['Flaschendruck', 'Luftverbrauch']);
+    });
+  });
+
+  group('T38 the chosen layers are remembered', () {
+    List<String> selected(WidgetTester tester) => [
+      for (final c in tester.widgetList<FilterChip>(find.byType(FilterChip)))
+        if (c.selected) (c.label as Text).data!,
+    ];
+
+    testWidgets('for the next dive and after a restart', (tester) async {
+      final db = newTestDatabase();
+      addTearDown(db.close);
+      final anna = await seedActiveDiver(db);
+      final a = await seedDive(db, _measured(anna.id!));
+      final b = await seedDive(
+        db,
+        _measured(anna.id!).copyWith(number: 43, sourceId: 'eon-3F7A-43'),
+      );
+      await pumpTestApp(
+        tester,
+        db: db,
+        size: const Size(400, 2000),
+        location: DiveDetailScreen.pathFor(a.id!),
+      );
+      expect(selected(tester), ['Temperatur', 'Flaschendruck']);
+
+      await tester.tap(find.widgetWithText(FilterChip, 'Luftverbrauch'));
+      await tester.pumpAndSettle();
+      router(tester).go(DiveDetailScreen.pathFor(b.id!));
+      await tester.pumpAndSettle();
+      expect(selected(tester), ['Flaschendruck', 'Luftverbrauch']);
+
+      // A fresh app on the same database.
+      await pumpTestApp(
+        tester,
+        db: db,
+        size: const Size(400, 2000),
+        location: DiveDetailScreen.pathFor(a.id!),
+      );
+      expect(selected(tester), ['Flaschendruck', 'Luftverbrauch']);
+    });
+
+    Future<void> openWith(
+      WidgetTester tester,
+      List<ProfileLayer> saved,
+      Dive Function(String) dive,
+    ) async {
+      final db = newTestDatabase();
+      addTearDown(db.close);
+      final anna = await seedActiveDiver(db);
+      await DriftAppSettings(db).setProfileLayers(saved);
+      final d = await seedDive(db, dive(anna.id!));
+      await pumpTestApp(
+        tester,
+        db: db,
+        size: const Size(400, 2000),
+        location: DiveDetailScreen.pathFor(d.id!),
+      );
+    }
+
+    testWidgets('a choice in full screen shows in the detail behind it', (
+      tester,
+    ) async {
+      await _open(tester, _measured);
+      // First a choice in the detail, then another one in full screen.
+      await tester.tap(find.widgetWithText(FilterChip, 'Temperatur'));
+      await tester.pumpAndSettle();
+      expect(selected(tester), ['Flaschendruck']);
+
+      await tester.ensureVisible(find.text('Vollbild'));
+      await tester.tap(find.text('Vollbild'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilterChip, 'Luftverbrauch'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Schließen'));
+      await tester.pumpAndSettle();
+
+      expect(selected(tester), ['Flaschendruck', 'Luftverbrauch']);
+    });
+
+    testWidgets('only what the dive has: estimated air, no consumption', (
+      tester,
+    ) async {
+      await openWith(tester, [
+        ProfileLayer.pressure,
+        ProfileLayer.consumption,
+      ], exampleDive);
+
+      expect(selected(tester), ['Flaschendruck (geschätzt)']);
+    });
+
+    testWidgets('Apple Watch: the pulse takes the place of the pressure', (
+      tester,
+    ) async {
+      await openWith(tester, [
+        ProfileLayer.temperature,
+        ProfileLayer.pressure,
+      ], (id) => elphinstoneImported().toDive(diverId: id));
+
+      expect(selected(tester), ['Temperatur', 'Puls']);
+    });
+
+    testWidgets('everything switched off stays off', (tester) async {
+      await openWith(tester, const [], _measured);
+
+      expect(selected(tester), isEmpty);
+    });
   });
 }

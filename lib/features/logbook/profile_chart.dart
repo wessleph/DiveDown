@@ -1,12 +1,15 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart' show NumberFormat;
 
+import '../../app/providers.dart';
 import '../../app/theme.dart';
 import '../../domain/dive/dive.dart';
 import '../../domain/metrics/air_profile.dart';
 import '../../domain/metrics/sac_calculator.dart';
+import '../../domain/settings/app_settings.dart';
 import '../../domain/units/unit_formatter.dart';
 import '../../l10n/app_localizations.dart';
 import 'time_window.dart';
@@ -18,7 +21,8 @@ final _litres = NumberFormat('#,##0', 'de');
 String clockText(int seconds) =>
     '${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')}';
 
-enum _Layer { temperature, air, ndl, sac, pulse }
+/// Chips over the plot are [ProfileLayer]s (ui-spec §6, T37): no NDL, most
+/// computers send none. The choice is remembered for all dives (T38).
 
 /// Profile with layer chips, a plot that follows taps and drags, and the
 /// value panel for the chosen moment (ui-spec §6).
@@ -26,7 +30,7 @@ enum _Layer { temperature, air, ndl, sac, pulse }
 /// The plot (`ValueKey('profile-plot')`) maps the visible time range (the
 /// whole dive unless zoomed) onto its full width; the panel has
 /// `ValueKey('profile-values')`.
-class ProfileChart extends StatefulWidget {
+class ProfileChart extends ConsumerStatefulWidget {
   const ProfileChart({
     super.key,
     required this.dive,
@@ -48,10 +52,10 @@ class ProfileChart extends StatefulWidget {
   final bool fullscreen;
 
   @override
-  State<ProfileChart> createState() => _ProfileChartState();
+  ConsumerState<ProfileChart> createState() => _ProfileChartState();
 }
 
-class _ProfileChartState extends State<ProfileChart> {
+class _ProfileChartState extends ConsumerState<ProfileChart> {
   static const _plotKey = ValueKey('profile-plot');
   static const _plotHeight = 210.0;
   static const _leftAxis = 34.0;
@@ -69,9 +73,6 @@ class _ProfileChartState extends State<ProfileChart> {
   /// Fingers on the full-screen plot.
   int _pointers = 0;
 
-  /// Right-axis layers in the order they were switched on (max. two).
-  final _rightLayers = <_Layer>[_Layer.temperature, _Layer.air];
-  bool _ndl = false;
   bool _hasPulse = false;
 
   @override
@@ -83,18 +84,13 @@ class _ProfileChartState extends State<ProfileChart> {
   @override
   void didUpdateWidget(ProfileChart old) {
     super.didUpdateWidget(old);
-    if (old.dive != widget.dive) {
-      _prepare(resetLayers: old.dive.id != widget.dive.id);
-    }
+    if (old.dive != widget.dive) _prepare();
   }
 
-  void _prepare({bool resetLayers = true}) {
+  void _prepare() {
     _samples = widget.dive.samples;
     _air = AirProfile(widget.dive);
     _hasPulse = _samples.any((s) => s.heartRate != null);
-    // Apple Watch dives have no air curve; the pulse takes its place (T6.11).
-    // A reload of the same dive keeps the layers the diver chose.
-    if (resetLayers) _setDefaultLayers();
     _index = 0;
     for (var i = 1; i < _samples.length; i++) {
       if (_samples[i].depthM > _samples[_index].depthM) _index = i;
@@ -102,16 +98,35 @@ class _ProfileChartState extends State<ProfileChart> {
     _window = TimeWindow.full(math.max(1, _endS));
   }
 
-  void _setDefaultLayers() {
-    _rightLayers
-      ..clear()
-      ..addAll([
-        _Layer.temperature,
-        if (_air.at(0).missing == null || !_hasPulse)
-          _Layer.air
-        else
-          _Layer.pulse,
-      ]);
+  /// The layers this dive can show.
+  List<ProfileLayer> get _available => [
+    ProfileLayer.temperature,
+    // Without any pressure the chip would switch nothing on.
+    if (_air.at(0).missing == null) ProfileLayer.pressure,
+    if (_measured) ProfileLayer.consumption,
+    if (_hasPulse) ProfileLayer.pulse,
+  ];
+
+  /// The layers that are on: the remembered ones this dive has, else
+  /// temperature and pressure. Apple Watch dives have no pressure; the pulse
+  /// takes its place (T6.11, T38). Only the remembered choice counts, so
+  /// the detail and the full screen always agree (review W1).
+  List<ProfileLayer> _layersOn(List<ProfileLayer>? saved) {
+    final available = _available;
+    final wanted =
+        saved ?? const [ProfileLayer.temperature, ProfileLayer.pressure];
+    final on = <ProfileLayer>[];
+    for (final l in wanted) {
+      final layer =
+          l == ProfileLayer.pressure &&
+              !available.contains(l) &&
+              _hasPulse &&
+              !wanted.contains(ProfileLayer.pulse)
+          ? ProfileLayer.pulse
+          : l;
+      if (available.contains(layer) && !on.contains(layer)) on.add(layer);
+    }
+    return on.take(2).toList();
   }
 
   int get _endS =>
@@ -151,29 +166,25 @@ class _ProfileChartState extends State<ProfileChart> {
     setState(() => _window = next);
   }
 
-  void _toggle(_Layer layer, AppLocalizations l10n) {
-    setState(() {
-      if (layer == _Layer.ndl) {
-        _ndl = !_ndl;
-        return;
-      }
-      if (_rightLayers.remove(layer)) return;
-      _rightLayers.add(layer);
-      if (_rightLayers.length > 2) {
-        final dropped = _rightLayers.removeAt(0);
+  void _toggle(ProfileLayer layer, AppLocalizations l10n) {
+    final on = [..._layersOn(ref.read(profileLayersProvider).value)];
+    if (!on.remove(layer)) {
+      on.add(layer);
+      if (on.length > 2) {
+        final dropped = on.removeAt(0);
         ScaffoldMessenger.maybeOf(context)?.showSnackBar(
           SnackBar(content: Text(l10n.profileAxesLimit(_label(dropped, l10n)))),
         );
       }
-    });
+    }
+    ref.read(profileLayersProvider.notifier).set(on);
   }
 
-  String _label(_Layer layer, AppLocalizations l10n) => switch (layer) {
-    _Layer.temperature => l10n.chipTemperature,
-    _Layer.air => _measured ? l10n.chipAir : l10n.chipAirEstimated,
-    _Layer.ndl => l10n.chipNdl,
-    _Layer.sac => l10n.chipSac,
-    _Layer.pulse => l10n.chipPulse,
+  String _label(ProfileLayer layer, AppLocalizations l10n) => switch (layer) {
+    ProfileLayer.temperature => l10n.chipTemperature,
+    ProfileLayer.pressure => _measured ? l10n.chipAir : l10n.chipAirEstimated,
+    ProfileLayer.consumption => l10n.chipSac,
+    ProfileLayer.pulse => l10n.chipPulse,
   };
 
   @override
@@ -184,14 +195,8 @@ class _ProfileChartState extends State<ProfileChart> {
     final estimatedProfile = _samples.length < 2;
     final air = _samples.isEmpty ? null : _air.at(_samples[_index].timeS);
     final hasAir = air != null && air.missing == null;
-    final layers = [
-      _Layer.temperature,
-      // Without any pressure the chip would switch nothing on.
-      if (_air.at(0).missing == null) _Layer.air,
-      _Layer.ndl,
-      if (_measured) _Layer.sac,
-      if (_hasPulse) _Layer.pulse,
-    ];
+    final layers = _available;
+    final on = _layersOn(ref.watch(profileLayersProvider).value);
     final deepest = _samples.isEmpty ? null : _samples[_deepestIndex()];
 
     final chips = Semantics(
@@ -204,9 +209,7 @@ class _ProfileChartState extends State<ProfileChart> {
           for (final layer in layers)
             FilterChip(
               label: Text(_label(layer, l10n)),
-              selected: layer == _Layer.ndl
-                  ? _ndl
-                  : _rightLayers.contains(layer),
+              selected: on.contains(layer),
               onSelected: (_) => _toggle(layer, l10n),
               showCheckmark: false,
             ),
@@ -243,11 +246,10 @@ class _ProfileChartState extends State<ProfileChart> {
                     from: _window.startS,
                     to: _window.endS,
                     cursor: estimatedProfile ? null : _index,
-                    temperature: _rightLayers.contains(_Layer.temperature),
-                    airLayer: _rightLayers.contains(_Layer.air),
-                    sac: _rightLayers.contains(_Layer.sac),
-                    pulse: _rightLayers.contains(_Layer.pulse),
-                    ndl: _ndl,
+                    temperature: on.contains(ProfileLayer.temperature),
+                    airLayer: on.contains(ProfileLayer.pressure),
+                    sac: on.contains(ProfileLayer.consumption),
+                    pulse: on.contains(ProfileLayer.pulse),
                     cursorColor: theme.colorScheme.onSurface,
                     background: theme.colorScheme.surface,
                   ),
@@ -671,7 +673,6 @@ class _ProfilePainter extends CustomPainter {
     required this.airLayer,
     required this.sac,
     required this.pulse,
-    required this.ndl,
     required this.cursorColor,
     required this.background,
   });
@@ -692,7 +693,6 @@ class _ProfilePainter extends CustomPainter {
   final bool airLayer;
   final bool sac;
   final bool pulse;
-  final bool ndl;
   final Color cursorColor;
   final Color background;
 
@@ -788,28 +788,6 @@ class _ProfilePainter extends CustomPainter {
     }
     canvas.drawPath(line, depthPaint);
 
-    // NDL band at the bottom (up to 99 min fills a third of the height).
-    if (ndl) {
-      final path = Path();
-      var started = false;
-      for (final s in samples) {
-        final n = s.ndlS;
-        if (n == null) continue;
-        final v = math.min(n / 60, 99) / 99;
-        final p = Offset(x(s.timeS), _top + h - v * h / 3);
-        started ? path.lineTo(p.dx, p.dy) : path.moveTo(p.dx, p.dy);
-        started = true;
-      }
-      _dashed(
-        canvas,
-        path,
-        Paint()
-          ..color = colors.ndl
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.5,
-      );
-    }
-
     // Right axes: temperature, air, SAC (at most two are on).
     if (temperature) {
       final temps = [
@@ -871,27 +849,30 @@ class _ProfilePainter extends CustomPainter {
       );
     }
     if (sac && start.source == AirSource.measured) {
-      final rates = [
-        for (final s in samples)
-          (
-            s.timeS,
-            (air.at(s.timeS).litresPerMinuteNow ?? 0) /
-                ambientPressureBar(s.depthM, dive.waterType),
-          ),
-      ];
-      final hi = math.max(1.0, rates.map((e) => e.$2).reduce(math.max));
-      final path = Path();
-      for (final (i, (t, r)) in rates.indexed) {
-        final py = _top + (1 - r / hi) * h * 0.6 + h * 0.4;
-        i == 0 ? path.moveTo(x(t), py) : path.lineTo(x(t), py);
+      // Step line over fixed one-minute segments (ui-spec §6, T7.3).
+      final segments = const SacCalculator().segments(dive);
+      if (segments.isNotEmpty) {
+        final hi = math.max(
+          1.0,
+          segments.map((e) => e.litresPerMinute).reduce(math.max),
+        );
+        double py(double r) => _top + (1 - r / hi) * h * 0.6 + h * 0.4;
+        final path = Path();
+        for (final (i, seg) in segments.indexed) {
+          final y = py(seg.litresPerMinute);
+          i == 0
+              ? path.moveTo(x(seg.startS), y)
+              : path.lineTo(x(seg.startS), y);
+          path.lineTo(x(seg.endS), y);
+        }
+        canvas.drawPath(
+          path,
+          Paint()
+            ..color = colors.sac
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.5,
+        );
       }
-      canvas.drawPath(
-        path,
-        Paint()
-          ..color = colors.sac
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.5,
-      );
     }
 
     // Heart rate in the lower half (Apple Watch, T6.11).
@@ -1009,6 +990,5 @@ class _ProfilePainter extends CustomPainter {
       old.airLayer != airLayer ||
       old.sac != sac ||
       old.pulse != pulse ||
-      old.ndl != ndl ||
       old.colors != colors;
 }

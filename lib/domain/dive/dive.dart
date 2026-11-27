@@ -7,6 +7,16 @@ enum DiveSource { diveComputer, fit, appleHealth, manual }
 
 enum WaterType { salt, fresh }
 
+/// Visibility in four steps (ui-spec §5.4, T40): poor < 5 m, moderate
+/// 5-10 m, good 10-20 m, excellent > 20 m.
+enum WaterVisibility { poor, moderate, good, excellent }
+
+/// Current in four steps (T40).
+enum WaterCurrent { none, light, moderate, strong }
+
+/// Kind of dive; a dive can be several at once, e.g. wreck and night (T40).
+enum DiveKind { reef, wreck, wall, cave, night, lake, training, drift }
+
 /// Breathing gas as fractions, e.g. EAN32 = `GasMix(o2: 0.32)`.
 class GasMix {
   const GasMix({required this.o2, this.he = 0});
@@ -98,6 +108,9 @@ class Dive {
     this.rating,
     this.weightKg,
     this.equipmentIds,
+    this.visibility,
+    this.current,
+    this.kinds = const {},
     this.samples = const [],
     this.tanks = const [],
     this.events = const [],
@@ -140,6 +153,11 @@ class Dive {
   /// standard set, an existing one keeps its links (ADR 0007). Filled by
   /// `findById`; left null by the list queries.
   final List<String>? equipmentIds;
+
+  /// Conditions the diver noted (T40); kept when an import replaces the dive.
+  final WaterVisibility? visibility;
+  final WaterCurrent? current;
+  final Set<DiveKind> kinds;
   final List<DiveSample> samples;
   final List<DiveTank> tanks;
   final List<DiveEvent> events;
@@ -167,6 +185,9 @@ class Dive {
     int? rating,
     double? weightKg,
     List<String>? equipmentIds,
+    WaterVisibility? visibility,
+    WaterCurrent? current,
+    Set<DiveKind>? kinds,
     List<DiveSample>? samples,
     List<DiveTank>? tanks,
     List<DiveEvent>? events,
@@ -193,6 +214,9 @@ class Dive {
     rating: rating ?? this.rating,
     weightKg: weightKg ?? this.weightKg,
     equipmentIds: equipmentIds ?? this.equipmentIds,
+    visibility: visibility ?? this.visibility,
+    current: current ?? this.current,
+    kinds: kinds ?? this.kinds,
     samples: samples ?? this.samples,
     tanks: tanks ?? this.tanks,
     events: events ?? this.events,

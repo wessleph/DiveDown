@@ -187,6 +187,26 @@ void main() {
     expect(listed.map((d) => d.id), [id]);
   });
 
+  test('T39.8 the list for the statistics has the tanks, no samples', () async {
+    final diver = await divers.create(const Diver(name: 'Anna'));
+    final a = await dives.save(_fullDive(diver.id!));
+    final gone = await dives.save(_dive(diver.id!));
+    await dives.delete(gone.dive.id!);
+
+    final listed = await dives.listWithTanksForDiver(diver.id!);
+
+    expect(listed.map((d) => d.id), [a.dive.id]);
+    final original = _fullDive(diver.id!).tanks;
+    final tanks = listed.single.tanks;
+    expect(tanks.map((t) => t.index), original.map((t) => t.index));
+    for (final (i, t) in tanks.indexed) {
+      expect(t.volumeL, original[i].volumeL);
+      expect(t.startPressureBar, original[i].startPressureBar);
+      expect(t.endPressureBar, original[i].endPressureBar);
+    }
+    expect(listed.single.samples, isEmpty);
+  });
+
   test('T8.3 new records get UUID v4 ids, never autoincrement', () async {
     final diver = await divers.create(const Diver(name: 'Anna'));
     final first = await dives.save(_dive(diver.id!));

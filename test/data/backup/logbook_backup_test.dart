@@ -15,6 +15,7 @@ import 'package:divedown/domain/dive/diver.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
+import 'package:sqlite3/sqlite3.dart';
 
 void main() {
   late Directory root;
@@ -165,6 +166,58 @@ void main() {
       expect(await DriftDiverRepository(db).list(), hasLength(1));
     },
   );
+
+  test('T11.2 a backup from schema v2 restores into this app (T40)', () async {
+    // A v2 database file as an app before T40 wrote it.
+    final old = folder('old');
+    final file = File(p.join(old.path, databaseFileName));
+    final raw = sqlite3.open(file.path);
+    raw.execute(File('test/fixtures/db/schema_v2.sql').readAsStringSync());
+    raw.execute('''
+      INSERT INTO divers (id, created_at, updated_at, name, first_dive_number)
+        VALUES ('anna', 0, 0, 'Anna', 1);
+      INSERT INTO dives (id, created_at, updated_at, diver_id, dive_number,
+          site_name, source, start_local, duration_s, max_depth_m, weight_kg)
+        VALUES ('d1', 0, 0, 'anna', 7, 'Elphinstone', 'manual', 1763116920,
+          2820, 18.4, 6);
+      PRAGMA user_version = 2;
+    ''');
+    raw.close();
+    final data = file.readAsBytesSync();
+    final bytes = zip({
+      'manifest.json': utf8.encode(
+        jsonEncode({
+          'format': backupFormat,
+          'appVersion': '1.0.0',
+          'schemaVersion': 2,
+          'createdAt': '2026-11-26T10:00:00.000Z',
+          'sha256': sha256.convert(data).toString(),
+          'diveCount': 1,
+        }),
+      ),
+      'divedown.sqlite': data,
+    });
+
+    final target = folder('target');
+    final empty = open(target);
+    await DriftDiverRepository(empty).list();
+    final result = await backupFor(target)
+        .restore(bytes, closeDatabase: empty.close);
+
+    expect(result, isA<Restored>());
+    final restored = open(target);
+    addTearDown(restored.close);
+    final dive = (await DriftDiveRepository(restored).findById('d1'))!;
+    expect(dive.number, 7);
+    expect(dive.weightKg, 6);
+    expect(dive.kinds, isEmpty);
+    await DriftDiveRepository(restored)
+        .save(dive.copyWith(visibility: WaterVisibility.good));
+    expect(
+      (await DriftDiveRepository(restored).findById('d1'))!.visibility,
+      WaterVisibility.good,
+    );
+  });
 
   test('T11.4 schema newer than the app: newerVersion', () async {
     final dir = folder('a');

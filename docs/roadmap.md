@@ -10,6 +10,7 @@
 | **diese Woche** | Apple-Entwicklerkonto beantragen (Einzelperson, ca. 99 €/Jahr) | Die Prüfung durch Apple dauert oft 1–2 Tage, manchmal länger. |
 | bis **07.12.** | Erster iOS-Build auf TestFlight, intern | GitHub-Actions-Pipeline und Zertifikate einrichten, Testfreund mit iPhone einladen |
 | bis **14.12.** | Erstes „Beta App Review“ einreichen | Externe Tester per Link brauchen eine einmalige Freigabe durch Apple, meist 1–2 Tage. |
+| **ab 27.11.** | **Android:** ~~Identitätsprüfung im Play-Console-Konto~~ ✅ bestätigt am 27.11.; jetzt Release-Schlüssel (T33) und **App registrieren** (Paketname + SHA-256-Fingerabdruck) | Seit September 2026 installieren Android-Geräte auch eine direkt verteilte APK nur, wenn die App bei einem verifizierten Entwickler registriert ist ([Google, Android developer verification](https://developer.android.com/developer-verification/guides)). Anleitung: `docs/entwickler/android-release-einrichtung.md` §8 |
 | bis **19.12.** | Weihnachts-Build auf TestFlight freigegeben | Apple prüft rund um die Feiertage erfahrungsgemäß langsamer oder gar nicht. |
 | bis **19.12.** | Datenschutzerklärung gegen die fertige App 1.0 prüfen (Berechtigungen, TestFlight-Daten) | Phase 60, URL: https://wessleph.github.io/DiveDown/datenschutz/ |
 | **24.12.** | Link verschenken 🎁 | |
@@ -60,3 +61,5 @@
 
 ## Änderungen
 - **2026-11-18:** Das Repo `wessleph/DiveDown` ist **öffentlich** (früher als in research.md 8.3 geplant). Damit gelten ab sofort die CI-Regeln aus security.md G6/A3 für jeden neuen Workflow. Die Datenschutzerklärung erscheint über GitHub Pages aus `/docs`.
+- **2026-11-27:** Für Android ist ein Play-Console-Konto nötig (Android-Entwicklerverifizierung, siehe Termine). Verteilt wird für 1.0 weiter die **APK**; den Play Store selbst lassen wir weg, weil neue private Konten vorher einen geschlossenen Test mit (Stand der Recherche) 12 Testern über 14 Tage brauchen und wir nur zwei Tester haben. Ausweg bei Bedarf: interner Test der Play Console (ohne Mindestzahl).
+

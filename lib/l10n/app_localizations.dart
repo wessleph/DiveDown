@@ -547,7 +547,7 @@ abstract class AppLocalizations {
   /// No description provided for @welcomeBody.
   ///
   /// In de, this message translates to:
-  /// **'Wer taucht? Du kannst später weitere Taucher hinzufügen.'**
+  /// **'Wer taucht? Den Namen kannst du später in den Einstellungen ändern.'**
   String get welcomeBody;
 
   /// No description provided for @welcomeName.
@@ -835,25 +835,19 @@ abstract class AppLocalizations {
   /// No description provided for @chipAir.
   ///
   /// In de, this message translates to:
-  /// **'Luft'**
+  /// **'Flaschendruck'**
   String get chipAir;
 
   /// No description provided for @chipAirEstimated.
   ///
   /// In de, this message translates to:
-  /// **'Luft (geschätzt)'**
+  /// **'Flaschendruck (geschätzt)'**
   String get chipAirEstimated;
-
-  /// No description provided for @chipNdl.
-  ///
-  /// In de, this message translates to:
-  /// **'NDL'**
-  String get chipNdl;
 
   /// No description provided for @chipSac.
   ///
   /// In de, this message translates to:
-  /// **'SAC'**
+  /// **'Luftverbrauch'**
   String get chipSac;
 
   /// No description provided for @chipLayersSpoken.
@@ -2217,6 +2211,300 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Puls'**
   String get valuePulse;
+
+  /// No description provided for @statsTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Statistik'**
+  String get statsTitle;
+
+  /// No description provided for @statsOpen.
+  ///
+  /// In de, this message translates to:
+  /// **'Statistik öffnen'**
+  String get statsOpen;
+
+  /// No description provided for @statsEmpty.
+  ///
+  /// In de, this message translates to:
+  /// **'Noch keine Statistik. Sie entsteht mit deinen Tauchgängen.'**
+  String get statsEmpty;
+
+  /// No description provided for @statsOverview.
+  ///
+  /// In de, this message translates to:
+  /// **'ÜBERBLICK'**
+  String get statsOverview;
+
+  /// No description provided for @statsDives.
+  ///
+  /// In de, this message translates to:
+  /// **'Tauchgänge'**
+  String get statsDives;
+
+  /// No description provided for @statsUnderwater.
+  ///
+  /// In de, this message translates to:
+  /// **'Zeit unter Wasser'**
+  String get statsUnderwater;
+
+  /// No description provided for @statsDeepest.
+  ///
+  /// In de, this message translates to:
+  /// **'Tiefster Tauchgang'**
+  String get statsDeepest;
+
+  /// No description provided for @statsLongest.
+  ///
+  /// In de, this message translates to:
+  /// **'Längster Tauchgang'**
+  String get statsLongest;
+
+  /// No description provided for @statsColdest.
+  ///
+  /// In de, this message translates to:
+  /// **'Kältestes Wasser'**
+  String get statsColdest;
+
+  /// No description provided for @statsCountries.
+  ///
+  /// In de, this message translates to:
+  /// **'Länder'**
+  String get statsCountries;
+
+  /// No description provided for @statsDiveRef.
+  ///
+  /// In de, this message translates to:
+  /// **'#{number} · {site}'**
+  String statsDiveRef(String number, String site);
+
+  /// No description provided for @statsPerYear.
+  ///
+  /// In de, this message translates to:
+  /// **'PRO JAHR'**
+  String get statsPerYear;
+
+  /// No description provided for @statsYearSpoken.
+  ///
+  /// In de, this message translates to:
+  /// **'{year}: {count, plural, =1{1 Tauchgang} other{{count} Tauchgänge}}'**
+  String statsYearSpoken(String year, int count);
+
+  /// No description provided for @statsSites.
+  ///
+  /// In de, this message translates to:
+  /// **'TAUCHPLÄTZE'**
+  String get statsSites;
+
+  /// No description provided for @statsTimes.
+  ///
+  /// In de, this message translates to:
+  /// **'{count}×'**
+  String statsTimes(int count);
+
+  /// No description provided for @statsAir.
+  ///
+  /// In de, this message translates to:
+  /// **'LUFTVERBRAUCH'**
+  String get statsAir;
+
+  /// No description provided for @statsAirLine.
+  ///
+  /// In de, this message translates to:
+  /// **'Ø {average} · zuletzt {latest}'**
+  String statsAirLine(String average, String latest);
+
+  /// No description provided for @statsAirNone.
+  ///
+  /// In de, this message translates to:
+  /// **'Für den Verlauf braucht es mindestens zwei Tauchgänge mit Flaschendruck und Flaschengröße.'**
+  String get statsAirNone;
+
+  /// No description provided for @fieldVisibility.
+  ///
+  /// In de, this message translates to:
+  /// **'Sichtweite'**
+  String get fieldVisibility;
+
+  /// No description provided for @visibilityPoor.
+  ///
+  /// In de, this message translates to:
+  /// **'schlecht (< 5 m)'**
+  String get visibilityPoor;
+
+  /// No description provided for @visibilityModerate.
+  ///
+  /// In de, this message translates to:
+  /// **'mittel (5–10 m)'**
+  String get visibilityModerate;
+
+  /// No description provided for @visibilityGood.
+  ///
+  /// In de, this message translates to:
+  /// **'gut (10–20 m)'**
+  String get visibilityGood;
+
+  /// No description provided for @visibilityExcellent.
+  ///
+  /// In de, this message translates to:
+  /// **'sehr gut (> 20 m)'**
+  String get visibilityExcellent;
+
+  /// No description provided for @visibilityShortPoor.
+  ///
+  /// In de, this message translates to:
+  /// **'Sicht schlecht'**
+  String get visibilityShortPoor;
+
+  /// No description provided for @visibilityShortModerate.
+  ///
+  /// In de, this message translates to:
+  /// **'Sicht mittel'**
+  String get visibilityShortModerate;
+
+  /// No description provided for @visibilityShortGood.
+  ///
+  /// In de, this message translates to:
+  /// **'Sicht gut'**
+  String get visibilityShortGood;
+
+  /// No description provided for @visibilityShortExcellent.
+  ///
+  /// In de, this message translates to:
+  /// **'Sicht sehr gut'**
+  String get visibilityShortExcellent;
+
+  /// No description provided for @fieldCurrent.
+  ///
+  /// In de, this message translates to:
+  /// **'Strömung'**
+  String get fieldCurrent;
+
+  /// No description provided for @currentNone.
+  ///
+  /// In de, this message translates to:
+  /// **'keine'**
+  String get currentNone;
+
+  /// No description provided for @currentLight.
+  ///
+  /// In de, this message translates to:
+  /// **'leicht'**
+  String get currentLight;
+
+  /// No description provided for @currentModerate.
+  ///
+  /// In de, this message translates to:
+  /// **'mittel'**
+  String get currentModerate;
+
+  /// No description provided for @currentStrong.
+  ///
+  /// In de, this message translates to:
+  /// **'stark'**
+  String get currentStrong;
+
+  /// No description provided for @currentShortNone.
+  ///
+  /// In de, this message translates to:
+  /// **'keine Strömung'**
+  String get currentShortNone;
+
+  /// No description provided for @currentShortLight.
+  ///
+  /// In de, this message translates to:
+  /// **'Strömung leicht'**
+  String get currentShortLight;
+
+  /// No description provided for @currentShortModerate.
+  ///
+  /// In de, this message translates to:
+  /// **'Strömung mittel'**
+  String get currentShortModerate;
+
+  /// No description provided for @currentShortStrong.
+  ///
+  /// In de, this message translates to:
+  /// **'Strömung stark'**
+  String get currentShortStrong;
+
+  /// No description provided for @fieldDiveKinds.
+  ///
+  /// In de, this message translates to:
+  /// **'Tauchgangsart'**
+  String get fieldDiveKinds;
+
+  /// No description provided for @diveKindReef.
+  ///
+  /// In de, this message translates to:
+  /// **'Riff'**
+  String get diveKindReef;
+
+  /// No description provided for @diveKindWreck.
+  ///
+  /// In de, this message translates to:
+  /// **'Wrack'**
+  String get diveKindWreck;
+
+  /// No description provided for @diveKindWall.
+  ///
+  /// In de, this message translates to:
+  /// **'Steilwand'**
+  String get diveKindWall;
+
+  /// No description provided for @diveKindCave.
+  ///
+  /// In de, this message translates to:
+  /// **'Höhle'**
+  String get diveKindCave;
+
+  /// No description provided for @diveKindNight.
+  ///
+  /// In de, this message translates to:
+  /// **'Nacht'**
+  String get diveKindNight;
+
+  /// No description provided for @diveKindLake.
+  ///
+  /// In de, this message translates to:
+  /// **'See'**
+  String get diveKindLake;
+
+  /// No description provided for @diveKindTraining.
+  ///
+  /// In de, this message translates to:
+  /// **'Ausbildung'**
+  String get diveKindTraining;
+
+  /// No description provided for @diveKindDrift.
+  ///
+  /// In de, this message translates to:
+  /// **'Drift'**
+  String get diveKindDrift;
+
+  /// No description provided for @detailConditions.
+  ///
+  /// In de, this message translates to:
+  /// **'BEDINGUNGEN'**
+  String get detailConditions;
+
+  /// No description provided for @conditionsLastAt.
+  ///
+  /// In de, this message translates to:
+  /// **'Zuletzt bei {site}: {conditions}'**
+  String conditionsLastAt(String site, String conditions);
+
+  /// No description provided for @visibilityDetail.
+  ///
+  /// In de, this message translates to:
+  /// **'Sicht {level}'**
+  String visibilityDetail(String level);
+
+  /// No description provided for @statsLoadError.
+  ///
+  /// In de, this message translates to:
+  /// **'Die Statistik konnte nicht geladen werden.'**
+  String get statsLoadError;
 }
 
 class _AppLocalizationsDelegate

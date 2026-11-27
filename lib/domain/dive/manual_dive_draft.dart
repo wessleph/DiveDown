@@ -55,6 +55,9 @@ class ManualDiveDraft {
     this.o2 = '',
     this.weight = '',
     this.equipmentIds,
+    this.visibility,
+    this.current,
+    this.kinds = const {},
     this.waterType,
     this.notes = '',
     this.rating,
@@ -82,6 +85,9 @@ class ManualDiveDraft {
       o2: tank?.gas == null ? '' : (tank!.gas!.o2 * 100).round().toString(),
       weight: num(dive.weightKg, 1),
       equipmentIds: dive.equipmentIds?.toSet(),
+      visibility: dive.visibility,
+      current: dive.current,
+      kinds: dive.kinds,
       waterType: dive.waterType,
       notes: dive.notes ?? '',
       rating: dive.rating,
@@ -118,6 +124,11 @@ class ManualDiveDraft {
   /// Selected equipment; null until the form has loaded it (then the
   /// repository applies the standard set to a new dive, ADR 0007).
   final Set<String>? equipmentIds;
+
+  /// Conditions (T40), all optional.
+  final WaterVisibility? visibility;
+  final WaterCurrent? current;
+  final Set<DiveKind> kinds;
   final WaterType? waterType;
   final String notes;
   final int? rating;
@@ -295,6 +306,9 @@ class ManualDiveDraft {
       rating: rating,
       weightKg: value(weight, before?.weight, original?.weightKg),
       equipmentIds: equipmentIds?.toList(),
+      visibility: visibility,
+      current: current,
+      kinds: kinds,
       samples: original?.samples ?? const [],
       events: original?.events ?? const [],
       tanks: [

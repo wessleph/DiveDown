@@ -203,7 +203,7 @@ Neue Abhängigkeiten (Lizenzen am 2026-11-20 an den eingesetzten Versionen gepr�
 | T6.11 | importierter Tauchgang mit Puls; bzw. ohne | Detail | Quelle „Apple Watch“ (ohne Modell, das Gerät wird nicht gespeichert); kein Chip „Luft“; Chip „Puls“ an, eigene Achse in `accent` (Watch-Tauchgänge haben keine Luft-Kurve), im Werte-Feld „Puls 95 /min“; Chip schaltet aus; ohne Puls kein Chip und kein Wert | ✅ 2026-11-26: rot, Chip fehlt; Quelle und „ohne Puls“ schon grün (Absicherung) |
 | T6.12 | Import mit 2 Workouts, eines ohne Tiefe; bzw. Lesefehler | Diagnose-Protokoll | Kategorie `health`: „2 workouts, 1 dives, 1 without depth, … samples“; **keine** Tiefen-, Temperatur- oder Pulswerte und keine UUID (security §3); bei Fehler nur der Fehlercode, nicht die Meldung von HealthKit | ✅ 2026-11-26: rot wegen `UnimplementedError` |
 | T6.13 | `Info.plist`, `Runner.entitlements`, `project.pbxproj`, `HealthDiveChannel.swift` | gelesen | `NSHealthShareUsageDescription` auf Deutsch; `NSHealthUpdateUsageDescription` nur mit dem Hinweis, dass nichts geschrieben wird (Apple verlangt ihn, ITMS-90683); Entitlements nur `com.apple.developer.healthkit` = true (keine Clinical Records, keine Background Delivery); `CODE_SIGN_ENTITLEMENTS` an den drei Konfigurationen von Runner, nicht an den Tests; Swift-Datei im Target, fragt nur Lesen an (`toShare: nil`) | ✅ 2026-11-26: rot, Schlüssel und Dateien fehlen |
-| T6.14 | von Hand am iPhone mit Apple Watch Ultra (Freund) | Import aus Apple Health | Berechtigungsdialog nur mit Lesen von Workouts, Tiefe, Wassertemperatur, Puls; Tauchgänge mit Profil, Zeit stimmt mit der Watch überein | |
+| T6.14 | von Hand am iPhone mit Apple Watch Ultra (Freund) | Import aus Apple Health | Berechtigungsdialog nur mit Lesen von Workouts, Tiefe, Wassertemperatur, Puls; Tauchgänge mit Profil, Zeit stimmt mit der Watch überein || ⏸ vor Weihnachten nicht möglich (2026-11-27): Die App ist für den Freund ein Geschenk. Bis dahin prüfbar nur ohne Tauchdaten (Kachel, Seite, Berechtigungsdialog, „Keine Tauchgänge gefunden“). Nach Weihnachten: Rückmeldung über „Fehler melden“ mit Diagnose-Protokoll (enthält Anzahl Trainings/Samples, keine Werte) |
 
 Tests: `test/data/import/health/health_dive_mapper_test.dart` (T6.1, T6.3–T6.5), `test/data/platform/health_channel_test.dart` (T6.2), `test/data/import/health/store_health_dive_source_test.dart` (T6.6, T6.7, T6.12), `test/features/import/health_import_test.dart` (T6.8–T6.10, Quelle aus T6.11), `test/features/logbook/heart_rate_test.dart` (T6.11), `test/ios/ios_health_config_test.dart` (T6.13).
 Fixtures: `test/support/health_fixtures.dart` baut den Tauchgang „Elphinstone“ als Roh-Workout und, für die UI-Tests unabhängig vom Mapper, als fertigen `ImportedDive`. Sobald der Freund importiert hat, ergänzen wir einen echten (anonymisierten) Tauchgang; der kommt nicht aus dem Diagnose-Protokoll (das enthält keine Health-Werte), sondern über „Logbuch sichern“.
@@ -225,14 +225,21 @@ Testkorrektur vor dem Commit: Die Quelle „Apple Watch“ steht in der Liste nu
 |---|---|---|---|---|
 | T7.1 | Flasche 12 l, 200 → 50 bar, Dauer 50 min, mittlere Tiefe 10 m (Salzwasser) | Ø-SAC berechnet | (150 × 12) / (50 × 2,0) = **18,0 l/min** (±0,1) | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
 | T7.2 | wie T7.1, Süßwasser | berechnet | Umgebungsdruck mit 9,81 kPa/m statt 10,05 kPa/m, Ergebnis entsprechend | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
-| T7.3 | Druckverlauf in Samples | Kurve berechnet | 1-min-Abschnitte. Abschnitt ohne Druckänderung = 0. Kein Abschnitt negativ. | |
+| T7.3 | Druckverlauf in Samples | Kurve berechnet | 1-min-Abschnitte. Abschnitt ohne Druckänderung = 0. Kein Abschnitt negativ. | ✅ 2026-11-27: rot wegen `UnimplementedError` (`SacCalculator.segments`), 6 Tests |
 | T7.4 | kein Druck | berechnet | `null` | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
 | T7.5 | Druck vorhanden, kein Flaschenvolumen | berechnet | `null` mit Grund `missingVolume` | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
-| T7.6 | 2 Flaschen (Gaswechsel) | berechnet | SAC pro Flasche über deren Nutzungszeit | |
+| T7.6 | 2 Flaschen (Gaswechsel) | berechnet | SAC pro Flasche über deren Nutzungszeit | ⏸ zurückgestellt (2026-11-27, Entscheidung des Nutzers): Niemand taucht mit mehreren Flaschen, es ist auch nicht absehbar. Die App rechnet weiter mit Flasche 1. |
 | T7.7 | Dauer 0 | berechnet | `null`, kein Division-durch-0 | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
 | T7.8 | Druck und Volumen da, keine Ø-Tiefe | berechnet | ohne Samples `null` mit Grund `depth`. Mit Samples: zeitgewichtetes Mittel der Samples | ✅ 2026-11-20: rot wegen `UnimplementedError` (`SacCalculator.average` fehlt), Testaufbau ok |
 
 Tests: `test/domain/metrics/sac_calculator_test.dart`. Annahme: Oberflächendruck **1,0 bar** (mit 1,013 bar läge T7.1 bei 17,84 und damit außerhalb ±0,1). Unbekannter Wassertyp zählt als Salzwasser. T7.3 (Kurve) und T7.6 (Gaswechsel) kommen mit dem Profil-Diagramm (KW 49).
+
+**T7.3 ausgestaltet (2026-11-27):** Bisher rechnete das Diagramm für jeden Messpunkt einen gleitenden 60-s-Wert und zeichnete eine glatte Linie; ui-spec §6 verlangt eine Stufenlinie über feste 1-min-Abschnitte. `SacCalculator.segments(dive, tankIndex)` liefert Abschnitte [0, 60), [60, 120) … bis zum letzten Druckwert (der letzte darf kürzer sein); Druck an den Grenzen linear zwischen den Messwerten der Flasche; Umgebungsdruck aus der mittleren Tiefe der Samples im Abschnitt; Δp < 0 zählt als 0. Ohne Druck-Samples oder Flaschengröße leer. Tests: `test/domain/metrics/sac_segments_test.dart` (gleichmäßig 3 bar/min → 50 gleiche Abschnitte; Minute ohne Änderung bzw. mit steigendem Druck → 0; kürzerer letzter Abschnitt; Tiefe je Abschnitt; Messwerte nur alle 30 s; ohne Druck/Volumen leer).
+
+**Umgesetzt (2026-11-27), T7.3:**
+- [x] `SacCalculator.segments` (Abschnitte, Druck linear an den Grenzen, Tiefe je Abschnitt, nie negativ) → 6 Tests grün.
+- [x] Profil: Ebene „SAC“ zeichnet jetzt die Stufenlinie aus diesen Abschnitten statt der glatten Linie je Messpunkt. „Luft jetzt“ im Werte-Feld bleibt beim gleitenden Wert der laufenden Minute (ui-spec §6).
+- Gesamt: `flutter test` 538/538, `flutter analyze` ohne Befund. Am Handy noch nicht angesehen (nur Tauchgänge mit Druck-Samples, z. B. EON Core mit Sender).
 
 ## T8: Datenbank (`data/local/`, ADR 0004/0006)
 | ID | A | W | D | Rot gesehen |
@@ -868,7 +875,7 @@ Ursache: Der Knopf liegt in `Scaffold.bottomNavigationBar`. Flutter verkleinert 
 | T36.3 | dito, „Manuell eintragen“ | „Dauer“ eingeben, Tastatur offen | „Speichern“ über der Tastatur | ✅ 2026-11-26: schon grün (Absicherung, Seite in der Tab-Leiste) |
 | T36.4 | dito, „Ausrüstung hinzufügen“ | „Bezeichnung“ eingeben, Tastatur offen | „Speichern“ über der Tastatur | ✅ 2026-11-26: rot, Knopf endet bei y = 836 |
 | T36.5 | die vier Seiten, Tastatur offen | Seite nach oben wischen | Feld verliert den Fokus, die Tastatur schließt sich | ✅ 2026-11-26: rot, Fokus bleibt |
-| T36.6 | von Hand am iPhone (TestFlight) | „Fehler melden“, Text tippen, „Mail vorbereiten“ | Knopf sichtbar über der Tastatur, Mail-Entwurf öffnet sich; Wischen schließt die Tastatur | offen: Build 100 (Stand `4f77ea7`) am 2026-11-26 auf TestFlight freigegeben, Test am iPhone am 2026-11-27 |
+| T36.6 | von Hand am iPhone (TestFlight) | „Fehler melden“, Text tippen, „Mail vorbereiten“ | Knopf sichtbar über der Tastatur, Mail-Entwurf öffnet sich; Wischen schließt die Tastatur | ✅ 2026-11-27: vom Kollegen am iPhone geprüft („funktioniert soweit“); dabei die falsche Adresse gefunden → T41 |
 
 **Umgesetzt (2026-11-26), T36:**
 - [x] `lib/app/bottom_action.dart`: `BodyWithBottomAction` legt die Hauptaktion im `body` unter den scrollbaren Inhalt, sodass sie mit der Tastatur nach oben wandert; Feedback und Ausrüstung nutzen es → T36.1, T36.2, T36.4 grün.
@@ -896,3 +903,117 @@ Test: `test/features/keyboard_actions_test.dart` (alle mit `TargetPlatform.iOS`,
 - ✅ CI-Lauf 45900422619 (2026-11-26, Commit `0fe2540`): alle Jobs grün, iOS-Gerätebuild und Simulator-Build mit `HealthDiveChannel.swift` (Xcode 27), Integrationstests und Swift-Unit-Tests. Abgenommen zum Mergen (Review ohne kritische Befunde). Offen: T6.14 am Gerät mit der Watch Ultra.
 
 **Release-Lauf 45910791826 (2026-11-27):** Signieren und Bauen grün (das Profil enthält HealthKit), der Upload abgelehnt mit ITMS-90683: Apple verlangt `NSHealthUpdateUsageDescription` für jede App mit HealthKit-Entitlement, auch wenn sie nur liest. Entschieden am 2026-11-27: Text ergänzen („DiveDown schreibt nichts in Apple Health. Apple verlangt diesen Hinweis für alle Apps mit Zugriff auf Apple Health.“), Schreibzugriff wird weiter nie angefragt. T6.13 erwartet jetzt den Text (✅ rot gesehen, dann grün), T20.2 verbietet den Schlüssel nicht mehr; security.md §4 angepasst.
+- ✅ Release-Lauf 45952636586 (2026-11-27, `main` `52a4475`): signiert, gebaut und zu TestFlight hochgeladen, mit Apple-Health-Import und dem Text `NSHealthUpdateUsageDescription`. CI auf `main` grün (Lauf 45947909972, Android im zweiten Versuch wegen Maven Central 429). Offen: T6.14 am Gerät mit der Watch Ultra, T36.6.
+
+## T37: Ebenen im Profil (ui-spec §6, Wunsch vom 2026-11-27)
+
+Rückmeldung: „NDL“ ändert im Diagramm nichts (der EON Core schickt keine Nullzeit), „SAC“ ist nicht verständlich. Entschieden am 2026-11-27: NDL entfällt, „Luft“ → „Flaschendruck“, „SAC“ → „Luftverbrauch“; Temperatur und Puls bleiben (Puls nur mit Pulswerten, also bei der Apple Watch). Die NDL bleibt im Werte-Feld, wenn sie in den Daten steht. Die Kachel „Ø-SAC“ im Detail bleibt unverändert.
+
+| Nr. | Ausgangslage | Aktion | Erwartet | Status |
+|---|---|---|---|---|
+| T37.1 | Tauchgang mit Druck-Samples, Temperatur und NDL | Detail | Chips genau „Temperatur“, „Flaschendruck“, „Luftverbrauch“ (kein „NDL“); NDL weiter im Werte-Feld | ✅ 2026-11-27: rot, Chips „Luft“, „NDL“, „SAC“ |
+| T37.2 | dito, Temperatur und Flaschendruck an | „Luftverbrauch“ antippen | Hinweis „Höchstens zwei Werte mit eigener Achse. „Temperatur“ ist jetzt aus.“, an sind Flaschendruck und Luftverbrauch | ✅ 2026-11-27: rot, Chip „Luftverbrauch“ fehlt |
+| T37.3 | geschätzte Luft (nur Start- und Enddruck) | Detail | „Flaschendruck (geschätzt)“, kein „Luftverbrauch“ (T22.11 angepasst) | ✅ 2026-11-27: rot, Chip heißt noch „Luft (geschätzt)“ |
+
+Tests: `test/features/logbook/profile_chart_test.dart` (Gruppe T37, T22.10 und T22.11 auf die neuen Namen), `heart_rate_test.dart` (kein Flaschendruck bei der Watch).
+
+
+**Umgesetzt (2026-11-27), T37:**
+- [x] `profile_chart.dart`: Ebene und Band „NDL“ entfernt (der Wert bleibt im Werte-Feld), Chips „Flaschendruck“, „Flaschendruck (geschätzt)“, „Luftverbrauch“ (`app_de.arb`, Schlüssel `chipNdl` entfällt) → T37.1–T37.3 grün. Das Farbtoken `ndl` bleibt im Theme (ui-spec §1).
+- Gesamt: `flutter test` 540/540, `flutter analyze` ohne Befund. Noch nicht am Handy angesehen.
+
+## T38: Begrüßung und gemerkte Ebenen (ui-spec §5.1, §6; 2026-11-27)
+
+Gefunden beim Durchsehen: Die Begrüßung verspricht „weitere Taucher“, obwohl es seit 2026-11-22 nur einen gibt; die Ebenen im Profil werden entgegen ui-spec §6 („Zustand wird gemerkt“) nicht gemerkt. Abgenommen vom Nutzer am 2026-11-27.
+
+Regel fürs Merken: Gespeichert werden die eingeschalteten Ebenen (`app_meta` `profile_layers`, z. B. `pressure,consumption`). Beim Öffnen gelten die gespeicherten, soweit der Tauchgang sie hat; fehlt der Flaschendruck und gibt es Puls, tritt der Puls an seine Stelle (wie beim Standard, T6.11). Nichts gespeichert → Standard (Temperatur und Flaschendruck bzw. Puls). Alles aus bleibt aus.
+
+| Nr. | Ausgangslage | Aktion | Erwartet | Status |
+|---|---|---|---|---|
+| T38.1 | erster Start | Begrüßung | „Wer taucht? Den Namen kannst du später in den Einstellungen ändern.“ | ✅ 2026-11-27: rot, alter Text |
+| T38.2 | `DriftAppSettings` | speichern, lesen | ohne Wahl `null`; Liste in Reihenfolge; leer bleibt leer; unbekannte Namen (z. B. `ndl`) werden übersprungen | ✅ 2026-11-27: rot wegen `UnimplementedError` |
+| T38.3 | zwei Tauchgänge mit Sender | bei A „Luftverbrauch“ einschalten, B öffnen, App neu starten | bei B und nach dem Neustart an: Flaschendruck und Luftverbrauch | ✅ 2026-11-27: rot, B zeigt wieder Temperatur und Flaschendruck |
+| T38.4 | gespeichert Flaschendruck + Luftverbrauch; Tauchgang mit geschätzter Luft | Detail | nur „Flaschendruck (geschätzt)“ an | ✅ 2026-11-27: rot wegen `UnimplementedError` |
+| T38.5 | gespeichert Temperatur + Flaschendruck; Watch-Tauchgang | Detail | Temperatur und Puls an | ✅ 2026-11-27: rot wegen `UnimplementedError` |
+| T38.6 | gespeichert: nichts | Detail | kein Chip an | ✅ 2026-11-27: rot wegen `UnimplementedError` |
+
+Tests: `test/features/onboarding/welcome_test.dart` (T38.1), `test/data/local/settings_data_test.dart` (T38.2), `test/features/logbook/profile_chart_test.dart` Gruppe T38 (T38.3–T38.6). Stubs: `ProfileLayer`, `AppSettings.profileLayers`/`setProfileLayers`.
+
+
+**Umgesetzt (2026-11-27), T38:**
+- [x] Begrüßung: „Wer taucht? Den Namen kannst du später in den Einstellungen ändern.“ → T38.1 grün.
+- [x] `ProfileLayer` (domain), `DriftAppSettings.profileLayers`/`setProfileLayers` (`app_meta` `profile_layers`, unbekannte Namen übersprungen), `profileLayersProvider` → T38.2 grün.
+- [x] `ProfileChart` liest die gemerkte Wahl (Regel oben), Antippen speichert sie; gilt auch im Vollbild → T38.3–T38.6 grün, T22.10/T22.11, T37 und T6.11 weiter grün.
+- Gesamt: `flutter test` 546/546, `flutter analyze` ohne Befund.
+
+## T39: Statistik (ui-spec §5.15, Wunsch vom 2026-11-27)
+
+Abgenommen am 2026-11-27 (mit tiefstem Tauchgang; „es fehlt nichts“). Rechnung rein in Dart (`lib/domain/metrics/logbook_stats.dart`), Seite `lib/features/logbook/statistics_screen.dart` unter `/logbook/statistics`.
+
+| Nr. | Ausgangslage | Aktion | Erwartet | Status |
+|---|---|---|---|---|
+| T39.1 | Tauchgänge 2025/2026, mit und ohne Temperatur, Gleichstände | `logbookStats` | Anzahl, Summe der Dauer; tiefster, längster, kältester (Gleichstand: früherer; Kälte nur mit Temperatur); pro Jahr aufsteigend |✅ 2026-11-27: rot wegen `UnimplementedError` |
+| T39.2 | „Elphinstone“ 3×, „ elphinstone “ 1×, 6 weitere Plätze, Tauchgänge ohne Platz | `logbookStats` | höchstens 5 Plätze, Elphinstone mit 4 in der Schreibweise des neuesten; Gleichstand: zuletzt besucht zuerst; ohne Platz zählt nicht |✅ 2026-11-27: rot wegen `UnimplementedError` |
+| T39.3 | 12 Tauchgänge mit Druck und Größe, 2 ohne | `logbookStats` | SAC-Verlauf: die letzten 10 mit Wert, älteste zuerst |✅ 2026-11-27: rot wegen `UnimplementedError` |
+| T39.4 | keine Tauchgänge | `logbookStats`; Seite | leer; Text „Noch keine Statistik. Sie entsteht mit deinen Tauchgängen.“ |✅ 2026-11-27: rot wegen `UnimplementedError` bzw. Seite fehlt (Route unbekannt) |
+| T39.5 | Logbuch mit Tauchgängen | Kachel antippen | Seite „Statistik“, Tab-Leiste bleibt; Überblick mit Werten, „Länder 2“ (aus `visitedCountriesProvider`); „Tiefster Tauchgang“ antippen öffnet ihn |✅ 2026-11-27: rot, Antippen bleibt auf `/logbook`, kein „Statistik öffnen“ |
+| T39.6 | Tauchgänge 2025 und 2026 | Seite | Jahre mit Zahlen; vorgelesen „2026: 3 Tauchgänge“ |✅ 2026-11-27: rot, Seite fehlt |
+| T39.7 | Tauchplätze, SAC | Seite | „TAUCHPLÄTZE“ mit „3×“; Luftverbrauch „Ø … · zuletzt …“; mit weniger als zwei Werten der Hinweistext |✅ 2026-11-27: rot, Seite fehlt |
+| T39.8 | Tauchgang mit zwei Flaschen, ein gelöschter | `listWithTanksForDiver` | nur der nicht gelöschte, mit allen Flaschen, ohne Samples | ✅ 2026-11-27: rot wegen `UnimplementedError` (beim Umsetzen gefunden: die Logbuch-Liste lädt keine Flaschen, der Luftverbrauch blieb leer) |
+
+Tests: `test/domain/metrics/logbook_stats_test.dart` (T39.1–T39.4), `test/features/logbook/statistics_test.dart` (T39.4–T39.7). Stub: `logbookStats`.
+
+**Umgesetzt (2026-11-27), T39:**
+- [x] `logbookStats` (Rekorde mit Gleichstand-Regel, Kälte nur mit Temperatur, Jahre, Top 5 Plätze, SAC-Verlauf der letzten 10) → T39.1–T39.4 grün; dazu der Randfall „keine Temperatur → kein kältester Tauchgang“ (rot gesehen, dann grün).
+- [x] `DriftDiveRepository.listWithTanksForDiver` (Flaschen aller Tauchgänge in einer Abfrage), `statisticsDivesProvider` → T39.8 grün.
+- [x] Seite `/logbook/statistics` (in der Tab „Logbuch“): Überblick, Rekorde öffnen den Tauchgang, Balken pro Jahr (je Zeile ein eigener Eintrag für den Screenreader), Tauchplätze, Luftverbrauch als Linie mit „Ø … · zuletzt …“ bzw. Hinweis; Kacheln im Logbuch öffnen sie („Statistik öffnen“) → T39.5–T39.7 grün.
+- Gesamt: `flutter test` 558/558, `flutter analyze` ohne Befund, Format sauber. Noch nicht am Handy angesehen.
+
+## T40: Sichtweite, Strömung, Tauchgangsart (ui-spec §5.3, §5.4; Wunsch vom 2026-11-27)
+
+Abgenommen am 2026-11-27: Sichtweite in 4 Stufen mit Metern, Strömung in 4 Stufen als Chips, Tauchgangsart mit Mehrfachauswahl (Riff, Wrack, Steilwand, Höhle, Nacht, See, Ausbildung, Drift), Vorschlag „Zuletzt bei …“ für alle drei in einer Zeile. Schema v3: Spalten `dives.visibility`, `dives.current_strength`, `dives.kinds` (Namen, durch Komma getrennt). Fixture `test/fixtures/db/schema_v2.sql` (vor der Änderung aus dem Code erzeugt).
+
+| Nr. | Ausgangslage | Aktion | Erwartet | Status |
+|---|---|---|---|---|
+| T40.1 | Datenbankdatei in Schema v2 mit Tauchgang #7 (6 kg Blei) | öffnen | Migration auf v3: Tauchgang unverändert, Bedingungen leer und speicherbar; `user_version` 3 | ✅ 2026-11-27: rot, Werte werden nicht gespeichert |
+| T40.2 | Tauchgang mit „sehr gut“, „stark“, Wrack + Nacht | speichern, laden, auflisten, ohne Angaben neu speichern | gleich zurück, auch in der Liste die Arten; danach leer | ✅ 2026-11-27: rot, dito |
+| T40.3 | importierter Tauchgang mit Bedingungen | gleiche Kennung, andere Daten, bestätigt | Messwerte ersetzt, Bedingungen bleiben | ✅ 2026-11-27: rot, dito |
+| T40.4 | Tauchgänge an Elphinstone mit/ohne Bedingungen, ein gelöschter | `lastConditionsAt` | neuester mit mindestens einer Angabe (Name ohne Groß-/Kleinschreibung oder Katalog-ID); ausgenommener und gelöschte zählen nicht; sonst null | ✅ 2026-11-27: rot wegen `UnimplementedError` |
+| T40.5 | Formular-Entwurf | `fromDive`, `toDive` | Bedingungen übernommen bzw. gesetzt; ohne Angaben leer | ✅ 2026-11-27: rot, Felder werden nicht übernommen |
+| T40.6 | neues Formular | Chips wählen, speichern | Überschriften und alle 16 Chips; je eine Sichtweite und Strömung (nochmal Antippen hebt auf), mehrere Arten; gespeichert | ✅ 2026-11-27: rot, Felder fehlen |
+| T40.7 | früherer Tauchgang an Elphinstone mit Sicht gut, Strömung leicht, Riff | Tauchplatz „Elphinstone“ | „Zuletzt bei Elphinstone: Sicht gut · Strömung leicht · Riff“, „Übernehmen“ setzt alle drei, dann weg; anderer Platz oder schon etwas gewählt → keine Zeile | ✅ 2026-11-27: rot, Zeile bzw. Chips fehlen |
+| T40.8 | Tauchgang mit „sehr gut“, „keine“, Wrack + Nacht; bzw. ohne | Detail | „BEDINGUNGEN“, „Sicht sehr gut (> 20 m) · keine Strömung“, „Wrack · Nacht“; ohne Angaben kein Abschnitt | ✅ 2026-11-27: rot, Abschnitt fehlt |
+
+Tests: `test/data/local/conditions_data_test.dart` (T40.1–T40.4), `test/domain/dive/conditions_draft_test.dart` (T40.5), `test/features/logbook/conditions_dive_test.dart` (T40.6–T40.8). Stubs: Enums `WaterVisibility`, `WaterCurrent`, `DiveKind`, Felder an `Dive` und `ManualDiveDraft`, `DiveRepository.lastConditionsAt`; Texte schon in `app_de.arb`.
+
+
+**Umgesetzt (2026-11-27), T40:**
+- [x] Schema v3 mit Migration (`onUpgrade` `from < 3`: Spalten `visibility`, `current_strength`, `kinds`), `database.g.dart` mit `build_runner` neu erzeugt → T40.1 grün. Speichern/Laden, Arten in fester Reihenfolge, unbekannte Namen übersprungen → T40.2 grün. Ersetzt ein Import den Tauchgang, bleiben die Bedingungen → T40.3 grün.
+- [x] `lastConditionsAt` über die gemeinsame Abfrage `_newestAtSite` (gleiche Regeln wie beim Blei) → T40.4 grün; Entwurf übernimmt die drei Felder → T40.5 grün.
+- [x] Formular: Abschnitte „Sichtweite“, „Strömung“ (`ChoiceChip`, nochmal Antippen hebt auf), „Tauchgangsart“ (`FilterChip`) unter dem Wassertyp, Vorschlag „Zuletzt bei …“ · „Übernehmen“ solange nichts gewählt ist → T40.6, T40.7 grün. Detail: Abschnitt „BEDINGUNGEN“ vor „AUSRÜSTUNG“ → T40.8 grün.
+- Testkorrekturen: T30.1 erwartet nach der Migration jetzt `latestSchemaVersion` (läuft bis v3) statt fest 2. Das Formular ist länger, deshalb öffnen `equipment_dive_test.dart` und `conditions_dive_test.dart` es mit 2400 px Höhe (Felder außerhalb des Bildes baut die Liste nicht). In `conditions_dive_test.dart` schließt `_site` die Tastatur und `_tap` wartet, bis das Scrollen fertig ist.
+- Gesamt: `flutter test` 568/568, `flutter analyze` ohne Befund, Format sauber. Noch nicht am Handy angesehen. Sicherungen aus v2 werden beim Wiederherstellen auf v3 migriert (Schema ≤ aktuelles, T11.4).
+
+**Review (Phase 60, 2026-11-27, `review.md`, T7.3 und T37–T40):** keine kritischen Befunde; Migration v1/v2 → v3 und Wiederherstellen alter Sicherungen ohne Befund. Tests zu den Befunden:
+- W1 (gemerkte Ebenen, Detail hinter dem Vollbild zeigt alte Auswahl): `profile_chart_test.dart` „a choice in full screen shows in the detail behind it“: ✅ rot, Detail zeigt nur „Flaschendruck“.
+- W2 (Statistik ohne Fehlerzustand, ui-spec §4): `statistics_test.dart` T39.9: ✅ rot, Fehlertext fehlt.
+- N1 (Sicherung aus Schema v2 in der v3-App): `logbook_backup_test.dart` „a backup from schema v2 restores into this app“: sofort grün (Absicherung).
+- [x] W1: `ProfileChart` hat keine eigene Auswahl mehr, nur noch die gemerkte (`profileLayersProvider`); Detail und Vollbild stimmen immer überein → Test grün.
+- [x] W2: Statistik mit Fehlerzustand (Icon, „Die Statistik konnte nicht geladen werden.“, „Erneut versuchen“) → T39.9 grün; beim Laden bleibt die Fläche leer (lokale Abfrage, nichts flackert).
+- [x] W3: Roadmap zeigt die Identitätsprüfung als erledigt; Quelle zur Android-Entwicklerverifizierung in Roadmap und Anleitung §8.
+- [x] N2: Kommentare an die richtigen Klassen. Ins Repo: ADR 0004, Nachtrag mit Schema v1–v3 und der Regel „Schemaänderung = Fixture + Migrationstest + Test für alte Sicherung“.
+- Bewusst offen: N3 (Statistik lädt über `logbookProvider` die Sparkline-Profile mit, bei ~500 Tauchgängen unkritisch), N4 (Umschalten streicht gemerkte Ebenen, die der Tauchgang nicht hat, z. B. Puls), N5 (SAC-Abschnitte im Painter je Frame), N6 (Statistik-SAC fehlt ohne Ø-Tiefe), N7 (`DiveColors.ndl` ungenutzt, Token bleibt), N8 (Semantik der Kacheln).
+- Gesamt: `flutter test` 571/571, `flutter analyze` ohne Befund, Format sauber.
+
+## T41: Richtige Feedback-Adresse (ui-spec §5.14; Test am iPhone vom 2026-11-27)
+
+Fehler: Die App schickt Feedback an `divedown-app@proton.ch`. Richtig ist **`divedown-app@proton.me`**. Betroffen: `feedbackAddress` (Empfänger, Hinweistext, Dialog „Keine Mail-App“, „Adresse kopieren“), ui-spec §5.14, `docs/datenschutz.md`.
+
+| Nr. | Ausgangslage | Aktion | Erwartet | Status |
+|---|---|---|---|---|
+| T41.1 | T35.1 und T35.3–T35.5 mit der neuen Adresse | wie dort | Mail an, Hinweistext, Dialog und kopierte Adresse: `divedown-app@proton.me` | ✅ 2026-11-27: rot, noch `proton.ch` (3 Tests) |
+
+Tests: `test/domain/feedback/feedback_mail_test.dart`, `test/features/settings/feedback_test.dart` (Adresse ersetzt).
+
+
+**Umgesetzt (2026-11-27), T41:** `feedbackAddress` = `divedown-app@proton.me`, dazu ui-spec §5.14 und `docs/datenschutz.md` (die Datenschutzerklärung auf GitHub Pages zeigt die Adresse nach dem Merge nach `main`) → T41.1 grün. Die Einträge zu T35 oben bleiben als Verlauf mit der alten Adresse stehen. Gesamt: `flutter test` alle grün, `flutter analyze` ohne Befund.
