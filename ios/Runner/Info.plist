@@ -47,6 +47,8 @@
 			</array>
 		</dict>
 	</dict>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>DiveDown schreibt nichts in Apple Health. Apple verlangt diesen Hinweis für alle Apps mit Zugriff auf Apple Health.</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>DiveDown liest Tauchgänge deiner Apple Watch aus Apple Health: Tiefe, Wassertemperatur und Puls. DiveDown schreibt nichts in Apple Health.</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>

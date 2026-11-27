@@ -26,7 +26,10 @@ void main() {
     expect(text, contains('Apple Health'));
     expect(text, contains('Tiefe, Wassertemperatur und Puls'));
     expect(text, contains('schreibt nichts'));
-    expect(info.containsKey('NSHealthUpdateUsageDescription'), isFalse);
+    // Apple requires it with the HealthKit entitlement (ITMS-90683); it says
+    // that nothing is written, and no write access is requested (below).
+    final update = info['NSHealthUpdateUsageDescription']?.innerText ?? '';
+    expect(update, contains('schreibt nichts in Apple Health'));
   });
 
   test('T6.13 entitlements: HealthKit only, no clinical records, no '
