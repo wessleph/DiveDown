@@ -875,7 +875,7 @@ Ursache: Der Knopf liegt in `Scaffold.bottomNavigationBar`. Flutter verkleinert 
 | T36.3 | dito, „Manuell eintragen“ | „Dauer“ eingeben, Tastatur offen | „Speichern“ über der Tastatur | ✅ 2026-11-26: schon grün (Absicherung, Seite in der Tab-Leiste) |
 | T36.4 | dito, „Ausrüstung hinzufügen“ | „Bezeichnung“ eingeben, Tastatur offen | „Speichern“ über der Tastatur | ✅ 2026-11-26: rot, Knopf endet bei y = 836 |
 | T36.5 | die vier Seiten, Tastatur offen | Seite nach oben wischen | Feld verliert den Fokus, die Tastatur schließt sich | ✅ 2026-11-26: rot, Fokus bleibt |
-| T36.6 | von Hand am iPhone (TestFlight) | „Fehler melden“, Text tippen, „Mail vorbereiten“ | Knopf sichtbar über der Tastatur, Mail-Entwurf öffnet sich; Wischen schließt die Tastatur | offen: Build 100 (Stand `4f77ea7`) am 2026-11-26 auf TestFlight freigegeben, Test am iPhone am 2026-11-27 |
+| T36.6 | von Hand am iPhone (TestFlight) | „Fehler melden“, Text tippen, „Mail vorbereiten“ | Knopf sichtbar über der Tastatur, Mail-Entwurf öffnet sich; Wischen schließt die Tastatur | ✅ 2026-11-27: vom Kollegen am iPhone geprüft („funktioniert soweit“); dabei die falsche Adresse gefunden → T41 |
 
 **Umgesetzt (2026-11-26), T36:**
 - [x] `lib/app/bottom_action.dart`: `BodyWithBottomAction` legt die Hauptaktion im `body` unter den scrollbaren Inhalt, sodass sie mit der Tastatur nach oben wandert; Feedback und Ausrüstung nutzen es → T36.1, T36.2, T36.4 grün.
@@ -1004,4 +1004,14 @@ Tests: `test/data/local/conditions_data_test.dart` (T40.1–T40.4), `test/domain
 - [x] N2: Kommentare an die richtigen Klassen. Ins Repo: ADR 0004, Nachtrag mit Schema v1–v3 und der Regel „Schemaänderung = Fixture + Migrationstest + Test für alte Sicherung“.
 - Bewusst offen: N3 (Statistik lädt über `logbookProvider` die Sparkline-Profile mit, bei ~500 Tauchgängen unkritisch), N4 (Umschalten streicht gemerkte Ebenen, die der Tauchgang nicht hat, z. B. Puls), N5 (SAC-Abschnitte im Painter je Frame), N6 (Statistik-SAC fehlt ohne Ø-Tiefe), N7 (`DiveColors.ndl` ungenutzt, Token bleibt), N8 (Semantik der Kacheln).
 - Gesamt: `flutter test` 571/571, `flutter analyze` ohne Befund, Format sauber.
+
+## T41: Richtige Feedback-Adresse (ui-spec §5.14; Test am iPhone vom 2026-11-27)
+
+Fehler: Die App schickt Feedback an `divedown-app@proton.ch`. Richtig ist **`divedown-app@proton.me`**. Betroffen: `feedbackAddress` (Empfänger, Hinweistext, Dialog „Keine Mail-App“, „Adresse kopieren“), ui-spec §5.14, `docs/datenschutz.md`.
+
+| Nr. | Ausgangslage | Aktion | Erwartet | Status |
+|---|---|---|---|---|
+| T41.1 | T35.1 und T35.3–T35.5 mit der neuen Adresse | wie dort | Mail an, Hinweistext, Dialog und kopierte Adresse: `divedown-app@proton.me` | ✅ 2026-11-27: rot, noch `proton.ch` (3 Tests) |
+
+Tests: `test/domain/feedback/feedback_mail_test.dart`, `test/features/settings/feedback_test.dart` (Adresse ersetzt).
 

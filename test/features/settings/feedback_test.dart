@@ -103,7 +103,7 @@ void main() {
       expect(
         find.text(
           'Deine Mail-App öffnet sich mit der Nachricht an '
-          'divedown-app@proton.ch. Gesendet wird erst, wenn du dort auf '
+          'divedown-app@proton.me. Gesendet wird erst, wenn du dort auf '
           'Senden tippst.',
         ),
         findsOneWidget,
@@ -113,7 +113,7 @@ void main() {
       await _tap(tester, find.text('Mail vorbereiten'));
 
       final mail = mailer.mails.single;
-      expect(mail.to, 'divedown-app@proton.ch');
+      expect(mail.to, 'divedown-app@proton.me');
       expect(mail.subject, 'DiveDown: Fehler');
       expect(mail.body, startsWith('App stürzt ab.\n\n--\n'));
       expect(mail.body, contains('DiveDown 1.0.0 (Build 1)'));
@@ -203,10 +203,10 @@ void main() {
     await _tap(tester, find.text('Mail vorbereiten'));
 
     expect(find.text('Keine Mail-App gefunden'), findsOneWidget);
-    expect(find.text('Schreib an divedown-app@proton.ch.'), findsOneWidget);
+    expect(find.text('Schreib an divedown-app@proton.me.'), findsOneWidget);
     await _tap(tester, find.text('Adresse kopieren'));
 
-    expect(copied, 'divedown-app@proton.ch');
+    expect(copied, 'divedown-app@proton.me');
     expect(find.text('Adresse kopiert'), findsOneWidget);
   });
 }

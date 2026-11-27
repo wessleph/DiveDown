@@ -20,7 +20,7 @@ void main() {
       'Übertragung bricht nach drei Tauchgängen ab.',
       _header,
     );
-    expect(mail.to, 'divedown-app@proton.ch');
+    expect(mail.to, 'divedown-app@proton.me');
     expect(mail.subject, 'DiveDown: Fehler');
     expect(
       mail.body,
