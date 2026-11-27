@@ -1421,4 +1421,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String visibilityDetail(String level) {
     return 'Sicht $level';
   }
+
+  @override
+  String get statsLoadError => 'Die Statistik konnte nicht geladen werden.';
 }

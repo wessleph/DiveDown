@@ -2499,6 +2499,12 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Sicht {level}'**
   String visibilityDetail(String level);
+
+  /// No description provided for @statsLoadError.
+  ///
+  /// In de, this message translates to:
+  /// **'Die Statistik konnte nicht geladen werden.'**
+  String get statsLoadError;
 }
 
 class _AppLocalizationsDelegate

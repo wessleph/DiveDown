@@ -344,8 +344,6 @@ String? _pressureText(DiveTank? tank) {
   return '${start.round()} → ${_units.pressure(end)}';
 }
 
-/// Lead and the pieces used (ui-spec §5.3 item 5, T31.5); hidden when the
-/// dive has neither.
 /// „BEDINGUNGEN“: visibility, current and kinds (ui-spec §5.3, T40); left
 /// out when none is noted.
 class _ConditionsSection extends StatelessWidget {
@@ -377,6 +375,8 @@ class _ConditionsSection extends StatelessWidget {
   }
 }
 
+/// Lead and the pieces used (ui-spec §5.3 item 5, T31.5); hidden when the
+/// dive has neither.
 class _EquipmentSection extends ConsumerWidget {
   const _EquipmentSection({required this.dive});
 

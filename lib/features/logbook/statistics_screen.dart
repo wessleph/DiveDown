@@ -24,13 +24,18 @@ class StatisticsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final dives = ref.watch(statisticsDivesProvider).value;
+    final dives = ref.watch(statisticsDivesProvider);
     final countries = ref.watch(visitedCountriesProvider).value;
-    final stats = dives == null ? null : logbookStats(dives);
+    final stats = dives.value == null ? null : logbookStats(dives.value!);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.statsTitle)),
       body: switch (stats) {
+        // A read error (ui-spec §4, review W2); while loading nothing, the
+        // local query is quick and nothing should flicker.
+        null when dives.hasError => _LoadError(
+          onRetry: () => ref.invalidate(statisticsDivesProvider),
+        ),
         null => const SizedBox.shrink(),
         LogbookStats(isEmpty: true) => Center(
           child: Padding(
@@ -82,6 +87,36 @@ class StatisticsScreen extends ConsumerWidget {
           ],
         ),
       },
+    );
+  }
+}
+
+class _LoadError extends StatelessWidget {
+  const _LoadError({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return Center(
+      child: Card(
+        margin: const EdgeInsets.all(24),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.error_outline, color: theme.colorScheme.error),
+              const SizedBox(height: 8),
+              Text(l10n.statsLoadError, textAlign: TextAlign.center),
+              const SizedBox(height: 16),
+              FilledButton(onPressed: onRetry, child: Text(l10n.retry)),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

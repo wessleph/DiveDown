@@ -50,3 +50,8 @@ So bleibt die Berechnung austauschbar und testbar.
 - `(diver_id, source, source_id)` ist **kein** Unique-Index in der Datenbank. Sonst ließe sich ein soft-gelöschter Tauchgang nicht erneut importieren (T2.7). Die Duplikaterkennung übernimmt der `ImportService`.
 - Zusätzliche Tabelle `app_meta` (Schlüssel/Wert), z. B. für die geladene Katalog-Version. Wie `catalogue_sites` gehört sie nicht zur Sicherung.
 - Drift-Zeilenklassen enden auf `Row` (`DiveRow`, `DiverRow` …), damit sie nicht mit dem Domänenmodell (`Dive`, `Diver`) kollidieren.
+
+## Nachtrag 2026-11-27: Schema-Versionen und Regel für Änderungen
+- **v1** (2026-11-20): Grundschema. **v2** (2026-11-23, ADR 0007): `dives.weight_kg`, Tabellen `equipment`, `dive_equipment`. **v3** (2026-11-27, T40): `dives.visibility`, `dives.current_strength`, `dives.kinds` (Enum-Namen; Arten durch Komma getrennt, unbekannte Namen werden beim Lesen übersprungen).
+- Migrationen fügen nur hinzu (nullbare Spalten, neue Tabellen) und laufen schrittweise in `AppDatabase.migration` (`from < 2`, `from < 3`, …).
+- **Regel für jede Schemaänderung:** vorher das bisherige Schema als `test/fixtures/db/schema_vN.sql` aus dem Code erzeugen, dazu ein Migrationstest (Datei im alten Schema öffnen, Daten unverändert, neue Felder speicherbar, `user_version`) und ein Test, der eine Sicherung im alten Schema wiederherstellt (`logbook_backup_test.dart`). Sicherungen aus einem neueren Schema lehnt die App ab (T11.4).

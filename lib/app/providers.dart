@@ -297,7 +297,6 @@ final activeDiverProvider = FutureProvider<Diver?>((ref) async {
   return ref.watch(diverRepositoryProvider).findById(id);
 });
 
-/// Dives of the active diver, newest first. Invalidate after changes.
 /// The dives of the active diver with their tanks, for the statistics
 /// (ui-spec §5.15, T39); follows the logbook.
 final statisticsDivesProvider = FutureProvider<List<Dive>>((ref) async {
@@ -307,6 +306,7 @@ final statisticsDivesProvider = FutureProvider<List<Dive>>((ref) async {
   return ref.watch(diveRepositoryProvider).listWithTanksForDiver(diver.id!);
 });
 
+/// Dives of the active diver, newest first. Invalidate after changes.
 final logbookProvider = FutureProvider<List<Dive>>((ref) async {
   final diver = await ref.watch(activeDiverProvider.future);
   if (diver == null) return const [];

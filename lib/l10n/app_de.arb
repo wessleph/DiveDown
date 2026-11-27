@@ -599,5 +599,6 @@
   "visibilityDetail": "Sicht {level}",
   "@visibilityDetail": {
     "placeholders": { "level": { "type": "String" } }
-  }
+  },
+  "statsLoadError": "Die Statistik konnte nicht geladen werden."
 }

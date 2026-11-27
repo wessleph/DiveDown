@@ -70,7 +70,7 @@ Ab dann gehen alle weiteren Release-APKs direkt als Update drüber. Dazu muss di
 - `key.properties` braucht kein Backup, sie lässt sich aus den Angaben oben neu schreiben.
 
 ## 8. App bei Google registrieren (Android-Entwicklerverifizierung, ab 2026-11-27)
-Seit September 2026 installieren zertifizierte Android-Geräte nur noch Apps, die bei einem **verifizierten Entwickler registriert** sind. Das gilt auch für eine APK, die wir direkt an Familie und Freunde geben, nicht nur für den Play Store.
+Seit September 2026 installieren zertifizierte Android-Geräte nur noch Apps, die bei einem **verifizierten Entwickler registriert** sind. Quelle: [Android developer verification](https://developer.android.com/developer-verification/guides) und [Updates to Play Console (PDF)](https://developer.android.com/developer-verification/assets/pdfs/updates-to-play-console-for-android-developer-verification.pdf), abgerufen am 2026-11-27. Das gilt auch für eine APK, die wir direkt an Familie und Freunde geben, nicht nur für den Play Store.
 
 - [x] **Play-Console-Konto** angelegt (2026-11-27) und **Identitätsprüfung abgeschlossen** (2026-11-27, am selben Tag bestätigt). Google nennt etwa 3 Werktage. Den Stand zeigt die Play Console unter „Alle Apps“, zum Schluss kommt eine Mail.
 - [ ] **Release-Schlüssel erzeugt** (Abschnitte 2 und 4). Ohne ihn gibt es keinen Fingerabdruck, den man registrieren kann.

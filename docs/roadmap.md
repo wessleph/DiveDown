@@ -10,7 +10,7 @@
 | **diese Woche** | Apple-Entwicklerkonto beantragen (Einzelperson, ca. 99 €/Jahr) | Die Prüfung durch Apple dauert oft 1–2 Tage, manchmal länger. |
 | bis **07.12.** | Erster iOS-Build auf TestFlight, intern | GitHub-Actions-Pipeline und Zertifikate einrichten, Testfreund mit iPhone einladen |
 | bis **14.12.** | Erstes „Beta App Review“ einreichen | Externe Tester per Link brauchen eine einmalige Freigabe durch Apple, meist 1–2 Tage. |
-| **ab 27.11.** | **Android:** Identitätsprüfung im Play-Console-Konto (ca. 3 Werktage), dann Release-Schlüssel (T33) und **App registrieren** (Paketname + SHA-256-Fingerabdruck) | Seit September 2026 installieren Android-Geräte auch eine direkt verteilte APK nur, wenn die App bei einem verifizierten Entwickler registriert ist. Anleitung: `docs/entwickler/android-release-einrichtung.md` §8 |
+| **ab 27.11.** | **Android:** ~~Identitätsprüfung im Play-Console-Konto~~ ✅ bestätigt am 27.11.; jetzt Release-Schlüssel (T33) und **App registrieren** (Paketname + SHA-256-Fingerabdruck) | Seit September 2026 installieren Android-Geräte auch eine direkt verteilte APK nur, wenn die App bei einem verifizierten Entwickler registriert ist ([Google, Android developer verification](https://developer.android.com/developer-verification/guides)). Anleitung: `docs/entwickler/android-release-einrichtung.md` §8 |
 | bis **19.12.** | Weihnachts-Build auf TestFlight freigegeben | Apple prüft rund um die Feiertage erfahrungsgemäß langsamer oder gar nicht. |
 | bis **19.12.** | Datenschutzerklärung gegen die fertige App 1.0 prüfen (Berechtigungen, TestFlight-Daten) | Phase 60, URL: https://wessleph.github.io/DiveDown/datenschutz/ |
 | **24.12.** | Link verschenken 🎁 | |

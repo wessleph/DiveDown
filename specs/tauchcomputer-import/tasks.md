@@ -998,3 +998,10 @@ Tests: `test/data/local/conditions_data_test.dart` (T40.1–T40.4), `test/domain
 - W1 (gemerkte Ebenen, Detail hinter dem Vollbild zeigt alte Auswahl): `profile_chart_test.dart` „a choice in full screen shows in the detail behind it“: ✅ rot, Detail zeigt nur „Flaschendruck“.
 - W2 (Statistik ohne Fehlerzustand, ui-spec §4): `statistics_test.dart` T39.9: ✅ rot, Fehlertext fehlt.
 - N1 (Sicherung aus Schema v2 in der v3-App): `logbook_backup_test.dart` „a backup from schema v2 restores into this app“: sofort grün (Absicherung).
+- [x] W1: `ProfileChart` hat keine eigene Auswahl mehr, nur noch die gemerkte (`profileLayersProvider`); Detail und Vollbild stimmen immer überein → Test grün.
+- [x] W2: Statistik mit Fehlerzustand (Icon, „Die Statistik konnte nicht geladen werden.“, „Erneut versuchen“) → T39.9 grün; beim Laden bleibt die Fläche leer (lokale Abfrage, nichts flackert).
+- [x] W3: Roadmap zeigt die Identitätsprüfung als erledigt; Quelle zur Android-Entwicklerverifizierung in Roadmap und Anleitung §8.
+- [x] N2: Kommentare an die richtigen Klassen. Ins Repo: ADR 0004, Nachtrag mit Schema v1–v3 und der Regel „Schemaänderung = Fixture + Migrationstest + Test für alte Sicherung“.
+- Bewusst offen: N3 (Statistik lädt über `logbookProvider` die Sparkline-Profile mit, bei ~500 Tauchgängen unkritisch), N4 (Umschalten streicht gemerkte Ebenen, die der Tauchgang nicht hat, z. B. Puls), N5 (SAC-Abschnitte im Painter je Frame), N6 (Statistik-SAC fehlt ohne Ø-Tiefe), N7 (`DiveColors.ndl` ungenutzt, Token bleibt), N8 (Semantik der Kacheln).
+- Gesamt: `flutter test` 571/571, `flutter analyze` ohne Befund, Format sauber.
+

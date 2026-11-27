@@ -73,9 +73,6 @@ class _ProfileChartState extends ConsumerState<ProfileChart> {
   /// Fingers on the full-screen plot.
   int _pointers = 0;
 
-  /// Right-axis layers switched on here, in order (max. two); null follows
-  /// the remembered choice (T38).
-  List<ProfileLayer>? _chosen;
   bool _hasPulse = false;
 
   @override
@@ -87,17 +84,13 @@ class _ProfileChartState extends ConsumerState<ProfileChart> {
   @override
   void didUpdateWidget(ProfileChart old) {
     super.didUpdateWidget(old);
-    if (old.dive != widget.dive) {
-      _prepare(resetLayers: old.dive.id != widget.dive.id);
-    }
+    if (old.dive != widget.dive) _prepare();
   }
 
-  void _prepare({bool resetLayers = true}) {
+  void _prepare() {
     _samples = widget.dive.samples;
     _air = AirProfile(widget.dive);
     _hasPulse = _samples.any((s) => s.heartRate != null);
-    // A reload of the same dive keeps the layers the diver chose.
-    if (resetLayers) _chosen = null;
     _index = 0;
     for (var i = 1; i < _samples.length; i++) {
       if (_samples[i].depthM > _samples[_index].depthM) _index = i;
@@ -114,11 +107,11 @@ class _ProfileChartState extends ConsumerState<ProfileChart> {
     if (_hasPulse) ProfileLayer.pulse,
   ];
 
-  /// The layers that are on: chosen here, else the remembered ones this dive
-  /// has, else temperature and pressure. Apple Watch dives have no pressure;
-  /// the pulse takes its place (T6.11, T38).
+  /// The layers that are on: the remembered ones this dive has, else
+  /// temperature and pressure. Apple Watch dives have no pressure; the pulse
+  /// takes its place (T6.11, T38). Only the remembered choice counts, so
+  /// the detail and the full screen always agree (review W1).
   List<ProfileLayer> _layersOn(List<ProfileLayer>? saved) {
-    if (_chosen case final chosen?) return chosen;
     final available = _available;
     final wanted =
         saved ?? const [ProfileLayer.temperature, ProfileLayer.pressure];
@@ -184,7 +177,6 @@ class _ProfileChartState extends ConsumerState<ProfileChart> {
         );
       }
     }
-    setState(() => _chosen = on);
     ref.read(profileLayersProvider.notifier).set(on);
   }
 
